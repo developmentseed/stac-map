@@ -14,6 +14,7 @@ export type AppAction =
   | { type: "set-picked-layer"; layer: Layer | null }
   | { type: "set-collections"; collections: StacCollection[] }
   | { type: "select-collection"; id: string }
+  | { type: "set-selected-collection-ids"; collectionIds: Set<string> }
   | { type: "deselect-collection"; id: string }
   | { type: "deselect-all-collections" };
 
@@ -38,6 +39,8 @@ export function appReducer(state: AppState, action: AppAction) {
           action.id,
         ]),
       };
+    case "set-selected-collection-ids":
+      return { ...state, selectedCollectionIds: action.collectionIds };
     case "deselect-collection":
       state.selectedCollectionIds.delete(action.id);
       return {

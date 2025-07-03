@@ -11,10 +11,10 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { LuSearch } from "react-icons/lu";
-import { useAppDispatch, useAppState, useFitBbox } from "../../hooks";
-import { toaster } from "../ui/toaster";
-import { useNaturalLanguageCollectionSearch } from "./hooks";
-import { getCollectionsExtent } from "./utils";
+import { useAppDispatch, useAppState, useFitBbox } from "../../../hooks";
+import { toaster } from "../../ui/toaster";
+import { useNaturalLanguageCollectionSearch } from "../hooks";
+import { getCollectionsExtent } from "../utils";
 
 export function NaturalLanguageCollectionSearch({ href }: { href: string }) {
   const [query, setQuery] = useState<string | undefined>();

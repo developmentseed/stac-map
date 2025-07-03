@@ -1,9 +1,11 @@
 import {
+  Accordion,
   ActionBar,
   Alert,
   Button,
   IconButton,
   Portal,
+  Span,
   Tabs,
   type UseFileUploadReturn,
 } from "@chakra-ui/react";
@@ -20,7 +22,8 @@ import { LuFocus, LuInfo, LuSearch, LuUpload, LuX } from "react-icons/lu";
 import Loading from "./components/loading";
 import { useStacValue } from "./components/stac/hooks";
 import { getCollectionsLayer } from "./components/stac/layers";
-import Search from "./components/stac/search";
+import { ItemSearch } from "./components/stac/search/item";
+import { NaturalLanguageCollectionSearch } from "./components/stac/search/natural-language";
 import type { StacValue } from "./components/stac/types";
 import { getCollectionsExtent, getValue } from "./components/stac/utils";
 import { toaster } from "./components/ui/toaster";
@@ -51,12 +54,18 @@ export default function Panel({
     collections: [],
     selectedCollectionIds: new Set<string>(),
   });
+  const [search, setSearch] = useState<ReactNode | undefined>();
+
+  useEffect(() => {
+    dispatch({ type: "deselect-all-collections" });
+  }, [value, dispatch]);
 
   useEffect(() => {
     if (value) {
       setTabValue("value");
+      setSearch(getSearch(value));
     }
-  }, [value, setTabValue]);
+  }, [value, setTabValue, setSearch]);
 
   useEffect(() => {
     if (error) {
@@ -71,7 +80,6 @@ export default function Panel({
   useEffect(() => {
     const layers = [];
     if (state.pickedLayer) {
-      console.log("layer");
       layers.push(state.pickedLayer.clone({ id: "picked" }));
     }
     const selectedCollections = state.collections.filter((collection) =>
@@ -102,10 +110,10 @@ export default function Panel({
         rounded={4}
       >
         <Tabs.List>
-          <Tabs.Trigger value="value">
+          <Tabs.Trigger value="value" disabled={!value}>
             <LuInfo></LuInfo>
           </Tabs.Trigger>
-          <Tabs.Trigger value="search" disabled={!value}>
+          <Tabs.Trigger value="search" disabled={!search}>
             <LuSearch></LuSearch>
           </Tabs.Trigger>
           <Tabs.Trigger value="upload">
@@ -123,9 +131,7 @@ export default function Panel({
                   ></InvalidStacValue>
                 )))}
           </Tabs.Content>
-          <Tabs.Content value="search">
-            {value && <Search href={href} value={value}></Search>}
-          </Tabs.Content>
+          <Tabs.Content value="search">{search}</Tabs.Content>
           <Tabs.Content value="upload">
             <Upload fileUpload={fileUpload}></Upload>
           </Tabs.Content>
@@ -199,5 +205,73 @@ function SelectedCollectionsActionBar() {
         </ActionBar.Positioner>
       </Portal>
     </ActionBar.Root>
+  );
+}
+
+function getSearch(value: StacValue) {
+  const searchLinks = value.links?.filter((link) => link.rel == "search") ?? [];
+  const selfLink = value.links?.find((link) => link.rel == "self");
+
+  const itemSearch =
+    (searchLinks.length > 0 && <ItemSearch links={searchLinks}></ItemSearch>) ||
+    undefined;
+  const naturalLanguageCollectionSearch =
+    (value.type == "Catalog" && selfLink && (
+      <NaturalLanguageCollectionSearch
+        href={selfLink.href}
+      ></NaturalLanguageCollectionSearch>
+    )) ||
+    undefined;
+
+  if (itemSearch || naturalLanguageCollectionSearch) {
+    return (
+      <Search
+        item={itemSearch}
+        naturalLanguageCollection={naturalLanguageCollectionSearch}
+      ></Search>
+    );
+  } else {
+    return null;
+  }
+}
+
+function Search({
+  item,
+  naturalLanguageCollection,
+}: {
+  item: ReactNode | undefined;
+  naturalLanguageCollection: ReactNode | undefined;
+}) {
+  return (
+    <Accordion.Root
+      collapsible
+      defaultValue={[
+        (item && "item") ||
+          (naturalLanguageCollection && "natural-language-collection") ||
+          "",
+      ]}
+      variant={"enclosed"}
+    >
+      {item && (
+        <Accordion.Item value="item">
+          <Accordion.ItemTrigger>
+            <Span flex="1">Item search</Span>
+            <Accordion.ItemIndicator></Accordion.ItemIndicator>
+          </Accordion.ItemTrigger>
+          <Accordion.ItemContent py={4}>{item}</Accordion.ItemContent>
+        </Accordion.Item>
+      )}
+      {naturalLanguageCollection && (
+        <Accordion.Item value="natural-language-collection">
+          <Accordion.ItemTrigger>
+            <Span flex="1">Natural language collection search</Span>
+            <Accordion.ItemIndicator></Accordion.ItemIndicator>
+          </Accordion.ItemTrigger>
+          <Accordion.ItemContent py={4}>
+            {naturalLanguageCollection}
+          </Accordion.ItemContent>
+        </Accordion.Item>
+      )}
+    </Accordion.Root>
   );
 }
