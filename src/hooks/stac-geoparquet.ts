@@ -14,22 +14,21 @@ import { useEffect, useState } from "react";
 import * as stacWasm from "../stac-wasm";
 import type { StacGeoparquetMetadata } from "../types/stac";
 
-export default function useStacGeoparquet({
-  path,
-  id,
-}: {
-  path: string | undefined;
-  id: string | undefined;
-}) {
+export default function useStacGeoparquet(
+  path: string | undefined,
+  temporalFilter: { start: Date; end: Date } | undefined,
+) {
+  const [id, setId] = useState<string>();
   const { db } = useDuckDb();
   const [connection, setConnection] = useState<AsyncDuckDBConnection>();
   const { data: table } = useQuery({
-    queryKey: ["stac-geoparquet-table", path],
+    queryKey: ["stac-geoparquet-table", path, temporalFilter],
     queryFn: async () => {
       if (path && connection) {
-        return await getTable(path, connection);
+        return await getTable(path, connection, temporalFilter);
       }
     },
+    placeholderData: (previousData) => previousData,
     enabled: !!(connection && path),
   });
   const { data: metadata } = useQuery({
@@ -61,13 +60,33 @@ export default function useStacGeoparquet({
     })();
   }, [db]);
 
-  return { table, metadata, item };
+  return { table, metadata, item, setId };
 }
 
-async function getTable(path: string, connection: AsyncDuckDBConnection) {
-  const result = await connection.query(
-    `SELECT ST_AsWKB(geometry) as geometry, id FROM read_parquet('${path}')`,
-  );
+async function getTable(
+  path: string,
+  connection: AsyncDuckDBConnection,
+  temporalFilter: { start: Date; end: Date } | undefined,
+) {
+  let query = `SELECT ST_AsWKB(geometry) as geometry, id FROM read_parquet('${path}')`;
+  if (temporalFilter) {
+    const describeResult = await connection.query(
+      `DESCRIBE SELECT * FROM read_parquet('${path}')`,
+    );
+    const columnNames = describeResult
+      .toArray()
+      .map((row) => row.toJSON().column_name);
+    const startDatetimeColumnName = columnNames.includes("start_datetime")
+      ? "start_datetime"
+      : "datetime";
+    const endDatetimeColumnName = columnNames.includes("end_datetime")
+      ? "start_datetime"
+      : "datetime";
+
+    query += ` WHERE ${startDatetimeColumnName} >= DATETIME '${temporalFilter.start.toISOString()}'  AND ${endDatetimeColumnName} <= DATETIME '${temporalFilter.end.toISOString()}'`;
+  }
+
+  const result = await connection.query(query);
   const geometry: Uint8Array[] = result.getChildAt(0)?.toArray();
   const wkb = new Uint8Array(geometry?.flatMap((array) => [...array]));
   const valueOffsets = new Int32Array(geometry.length + 1);
@@ -97,8 +116,21 @@ async function getMetadata(
   path: string,
   connection: AsyncDuckDBConnection,
 ): Promise<StacGeoparquetMetadata> {
+  const describeResult = await connection.query(
+    `DESCRIBE SELECT * FROM read_parquet('${path}')`,
+  );
+  const columnNames = describeResult
+    .toArray()
+    .map((row) => row.toJSON().column_name);
+  const startDatetimeColumnName = columnNames.includes("start_datetime")
+    ? "start_datetime"
+    : "datetime";
+  const endDatetimeColumnName = columnNames.includes("end_datetime")
+    ? "start_datetime"
+    : "datetime";
+
   const summaryResult = await connection.query(
-    `SELECT COUNT(*) as count, MIN(bbox.xmin) as xmin, MIN(bbox.ymin) as ymin, MAX(bbox.xmax) as xmax, MAX(bbox.ymax) as ymax FROM read_parquet('${path}')`,
+    `SELECT COUNT(*) as count, MIN(bbox.xmin) as xmin, MIN(bbox.ymin) as ymin, MAX(bbox.xmax) as xmax, MAX(bbox.ymax) as ymax, MIN(${startDatetimeColumnName}) as start_datetime, MAX(${endDatetimeColumnName}) as end_datetime FROM read_parquet('${path}')`,
   );
   const summaryRow = summaryResult.toArray().map((row) => row.toJSON())[0];
 
@@ -125,6 +157,12 @@ async function getMetadata(
     count: summaryRow.count,
     bbox: [summaryRow.xmin, summaryRow.ymin, summaryRow.xmax, summaryRow.ymax],
     keyValue: kvMetadata,
+    startDatetime: summaryRow.start_datetime
+      ? new Date(summaryRow.start_datetime)
+      : null,
+    endDatetime: summaryRow.end_datetime
+      ? new Date(summaryRow.end_datetime)
+      : null,
   };
 }
 

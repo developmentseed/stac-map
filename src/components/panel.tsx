@@ -1,6 +1,7 @@
 import { SkeletonText, Tabs } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import {
+  LuFilter,
   LuInfo,
   LuMousePointerClick,
   LuSearch,
@@ -9,23 +10,26 @@ import {
 import type { StacLink } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
 import useStacValue from "../hooks/stac-value";
+import Filter from "./filter";
 import ItemSearch from "./search/item";
+import { NaturalLanguageCollectionSearch } from "./search/natural-language";
 import Upload from "./upload";
 import Value from "./value";
 
 export default function Panel() {
-  const { value, picked } = useStacMap();
+  const { href, value, picked, collections, temporalExtents } = useStacMap();
   const [tab, setTab] = useState<string>("upload");
-  const [itemSearchLinks, setItemSearchLinks] = useState<StacLink[]>([]);
-  const { value: root } = useStacValue(
-    value?.links?.find((link) => link.rel == "root")?.href,
-  );
+  const [search, setSearch] = useState(false);
+  const [catalogHref, setCatalogHref] = useState<string>();
+  const [rootHref, setRootHref] = useState<string>();
+  const { value: root } = useStacValue(rootHref);
+  const [searchLinks, setSearchLinks] = useState<StacLink[]>();
 
   useEffect(() => {
-    if (value) {
+    if (href) {
       setTab("value");
     }
-  }, [value]);
+  }, [href]);
 
   useEffect(() => {
     if (picked) {
@@ -34,16 +38,30 @@ export default function Panel() {
   }, [picked]);
 
   useEffect(() => {
-    const links = [];
-    if (root?.links) {
-      links.push(...root.links.filter((link) => link.rel == "search"));
-      if (links.length > 0) {
-        setItemSearchLinks(links);
-        return;
-      }
+    if (value?.type == "Catalog") {
+      setCatalogHref(value.links.find((link) => link.rel == "self")?.href);
+    } else {
+      setCatalogHref(undefined);
     }
-    setItemSearchLinks([]);
-  }, [value, root]);
+
+    if (value?.type == "Collection") {
+      setRootHref(value.links.find((link) => link.rel == "root")?.href);
+    } else {
+      setRootHref(undefined);
+    }
+  }, [value]);
+
+  useEffect(() => {
+    if (root) {
+      setSearchLinks(root.links?.filter((link) => link.rel == "search"));
+    } else {
+      setSearchLinks(undefined);
+    }
+  }, [root]);
+
+  useEffect(() => {
+    setSearch(!!catalogHref || !!(searchLinks && searchLinks.length > 0));
+  }, [catalogHref, searchLinks]);
 
   return (
     <Tabs.Root
@@ -51,16 +69,17 @@ export default function Panel() {
       rounded={4}
       value={tab}
       onValueChange={(e) => setTab(e.value)}
+      pointerEvents={"auto"}
     >
       <Tabs.List>
-        <Tabs.Trigger value="value" disabled={!value}>
+        <Tabs.Trigger value="value" disabled={!href}>
           <LuInfo></LuInfo>
         </Tabs.Trigger>
-        <Tabs.Trigger
-          value="search"
-          disabled={itemSearchLinks.length == 0 || value?.type !== "Collection"}
-        >
+        <Tabs.Trigger value="search" disabled={!search}>
           <LuSearch></LuSearch>
+        </Tabs.Trigger>
+        <Tabs.Trigger value="filter" disabled={!temporalExtents}>
+          <LuFilter></LuFilter>
         </Tabs.Trigger>
         <Tabs.Trigger value="picked" disabled={!picked}>
           <LuMousePointerClick></LuMousePointerClick>
@@ -81,12 +100,19 @@ export default function Panel() {
           )}
         </Tabs.Content>
         <Tabs.Content value="search">
-          {value && itemSearchLinks.length > 0 && (
-            <ItemSearch
-              value={value}
-              links={itemSearchLinks}
-              defaultLink={itemSearchLinks[0]}
-            ></ItemSearch>
+          {catalogHref && collections && (
+            <NaturalLanguageCollectionSearch
+              collections={collections}
+              href={catalogHref}
+            ></NaturalLanguageCollectionSearch>
+          )}
+          {searchLinks && value && value.type == "Collection" && (
+            <ItemSearch collection={value} links={searchLinks}></ItemSearch>
+          )}
+        </Tabs.Content>
+        <Tabs.Content value="filter">
+          {temporalExtents && (
+            <Filter temporalExtents={temporalExtents}></Filter>
           )}
         </Tabs.Content>
         <Tabs.Content value="picked">

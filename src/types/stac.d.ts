@@ -25,6 +25,7 @@ export interface StacCollections {
 
 export interface StacSearch {
   collections?: string[];
+  datetime?: string;
   bbox?: number[];
   limit?: number;
 }
@@ -38,6 +39,8 @@ export interface StacGeoparquetMetadata {
   count: number;
   bbox: BBox;
   keyValue: KeyValueMetadata[];
+  startDatetime: Date | null;
+  endDatetime: Date | null;
 }
 
 export interface KeyValueMetadata {

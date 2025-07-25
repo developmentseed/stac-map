@@ -5,23 +5,28 @@ import { StacMapContext } from "./context";
 import { useStacCollections } from "./hooks/stac-collections";
 import useStacGeoparquet from "./hooks/stac-geoparquet";
 import useStacValue from "./hooks/stac-value";
-import type { StacValue } from "./types/stac";
 
 export function StacMapProvider({ children }: { children: ReactNode }) {
   const [href, setHref] = useState<string | undefined>(getInitialHref());
   const fileUpload = useFileUpload({ maxFiles: 1 });
   const { value, parquetPath } = useStacValue(href, fileUpload);
-  const collections = useStacCollections(
-    value?.links?.find((link) => link.rel == "data")?.href,
-  );
-  const [stacGeoparquetItemId, setStacGeoparquetItemId] = useState<string>();
+  const collections = useStacCollections(value);
+  const [items, setItems] = useState<StacItem[]>();
+  const [temporalFilter, setTemporalFilter] = useState<{
+    start: Date;
+    end: Date;
+  }>();
   const {
     table: stacGeoparquetTable,
     metadata: stacGeoparquetMetadata,
+    setId: setStacGeoparquetItemId,
     item: stacGeoparquetItem,
-  } = useStacGeoparquet({ path: parquetPath, id: stacGeoparquetItemId });
-  const [picked, setPicked] = useState<StacValue>();
-  const [searchItems, setSearchItems] = useState<StacItem[][]>([]);
+  } = useStacGeoparquet(parquetPath, temporalFilter);
+  const [picked, setPicked] = useState<StacItem>();
+  const [temporalExtents, setTemporalExtents] = useState<{
+    start: Date;
+    end: Date;
+  }>();
 
   useEffect(() => {
     function handlePopState() {
@@ -40,7 +45,6 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
         history.pushState(null, "", "?href=" + href);
       }
     }
-    setSearchItems([]);
   }, [href]);
 
   useEffect(() => {
@@ -51,29 +55,76 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
   }, [fileUpload.acceptedFiles]);
 
   useEffect(() => {
+    setItems(undefined);
+    setPicked(undefined);
+    setStacGeoparquetItemId(undefined);
+    setTemporalExtents(undefined);
+    setTemporalFilter(undefined);
+  }, [value, setStacGeoparquetItemId]);
+
+  useEffect(() => {
+    if (items) {
+      let start: Date | null = null;
+      let end: Date | null = null;
+      items.forEach((item) => {
+        const itemStartStr =
+          item.properties.start_datetime || item.properties.datetime;
+        const itemStart = itemStartStr ? new Date(itemStartStr) : null;
+        if (!start || (itemStart && itemStart < start)) {
+          start = itemStart;
+        }
+        const itemEndStr =
+          item.properties.end_datetime || item.properties.datetime;
+        const itemEnd = itemEndStr ? new Date(itemEndStr) : null;
+        if (!end || (itemEnd && itemEnd > end)) {
+          end = itemEnd;
+        }
+      });
+      if (start && end) {
+        setTemporalExtents({ start, end });
+      }
+    }
+  }, [items]);
+
+  useEffect(() => {
+    if (
+      stacGeoparquetMetadata?.startDatetime &&
+      stacGeoparquetMetadata?.endDatetime
+    ) {
+      setTemporalExtents({
+        start: stacGeoparquetMetadata.startDatetime,
+        end: stacGeoparquetMetadata.endDatetime,
+      });
+    }
+  }, [
+    stacGeoparquetMetadata?.startDatetime,
+    stacGeoparquetMetadata?.endDatetime,
+  ]);
+
+  useEffect(() => {
     setPicked(stacGeoparquetItem);
   }, [stacGeoparquetItem]);
 
-  const contextValue = {
-    href,
-    setHref,
-    fileUpload,
-    value,
-    collections,
-    picked,
-    setPicked,
-
-    stacGeoparquetTable,
-    stacGeoparquetMetadata,
-    setStacGeoparquetItemId,
-    stacGeoparquetItem,
-
-    searchItems,
-    setSearchItems,
-  };
-
   return (
-    <StacMapContext.Provider value={contextValue}>
+    <StacMapContext.Provider
+      value={{
+        href,
+        setHref,
+        fileUpload,
+        value,
+        collections,
+        items,
+        setItems,
+        picked,
+        setPicked,
+        stacGeoparquetTable,
+        stacGeoparquetMetadata,
+        setStacGeoparquetItemId,
+        temporalExtents,
+        temporalFilter,
+        setTemporalFilter,
+      }}
+    >
       {children}
     </StacMapContext.Provider>
   );
