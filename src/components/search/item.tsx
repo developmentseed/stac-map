@@ -132,7 +132,14 @@ export default function ItemSearch({
               datetime,
               bbox:
                 useViewportBounds && map
-                  ? map.getBounds().toArray().flat()
+                  ? fixAntimeridian(
+                      map.getBounds().toArray().flat() as [
+                        number,
+                        number,
+                        number,
+                        number,
+                      ],
+                    )
                   : undefined,
             })
           }
@@ -273,13 +280,14 @@ function Datetime({
       ></DatetimeInput>
       <HStack>
         <Button
+          size={"xs"}
           variant={"outline"}
           onClick={() => {
             setStartDatetime(interval?.[0] ? new Date(interval[0]) : undefined);
             setEndDatetime(interval?.[1] ? new Date(interval[1]) : undefined);
           }}
         >
-          Set to collection extents
+          Set to collection temporal extents
         </Button>
       </HStack>
     </Stack>
@@ -355,4 +363,18 @@ function DatetimeInput({
       <Field.ErrorText>{error}</Field.ErrorText>
     </Field.Root>
   );
+}
+
+function fixAntimeridian(bounds: [number, number, number, number]) {
+  if (bounds[2] > 180) {
+    toaster.create({
+      type: "info",
+      title: "Bounding box crosses the antimeridian",
+      description:
+        "Many servers do not support searching across the antimeridian by bbox. Try narrowing your viewport to not cross +/- 180° longitude",
+    });
+    return [bounds[0], bounds[1], bounds[2] - 360, bounds[3]];
+  } else {
+    return bounds;
+  }
 }
