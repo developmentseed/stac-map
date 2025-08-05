@@ -1,6 +1,7 @@
 import { SkeletonText, Tabs } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import {
+  LuFilter,
   LuInfo,
   LuMousePointerClick,
   LuSearch,
@@ -9,13 +10,14 @@ import {
 import type { StacLink } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
 import useStacValue from "../hooks/stac-value";
+import Filter from "./filter";
 import ItemSearch from "./search/item";
 import { NaturalLanguageCollectionSearch } from "./search/natural-language";
 import Upload from "./upload";
 import Value from "./value";
 
 export default function Panel() {
-  const { href, value, picked, collections } = useStacMap();
+  const { href, value, picked, collections, temporalExtents } = useStacMap();
   const [tab, setTab] = useState<string>("upload");
   const [search, setSearch] = useState(false);
   const [catalogHref, setCatalogHref] = useState<string>();
@@ -76,6 +78,9 @@ export default function Panel() {
         <Tabs.Trigger value="search" disabled={!search}>
           <LuSearch></LuSearch>
         </Tabs.Trigger>
+        <Tabs.Trigger value="filter" disabled={!temporalExtents}>
+          <LuFilter></LuFilter>
+        </Tabs.Trigger>
         <Tabs.Trigger value="picked" disabled={!picked}>
           <LuMousePointerClick></LuMousePointerClick>
         </Tabs.Trigger>
@@ -103,6 +108,11 @@ export default function Panel() {
           )}
           {searchLinks && value && value.type == "Collection" && (
             <ItemSearch collection={value} links={searchLinks}></ItemSearch>
+          )}
+        </Tabs.Content>
+        <Tabs.Content value="filter">
+          {temporalExtents && (
+            <Filter temporalExtents={temporalExtents}></Filter>
           )}
         </Tabs.Content>
         <Tabs.Content value="picked">

@@ -50,4 +50,15 @@ interface StacMapContextType {
   /// Set the id of a stac-geoparquet item that should be fetched from the
   /// parquet table and loaded into the picked item.
   setStacGeoparquetItemId: (id: string | undefined) => void;
+
+  /// The temporal extents of the loaded data.
+  temporalExtents: { start: Date; end: Date } | undefined;
+
+  /// The start and end datetimes of the temporal filter.
+  temporalFilter: { start: Date; end: Date } | undefined;
+
+  /// Sets the temporal filter.
+  setTemporalFilter: (
+    temporalFilter: { start: Date; end: Date } | undefined,
+  ) => void;
 }
