@@ -121,9 +121,8 @@ async function getMetadata(
   const describeResult = await connection.query(
     `DESCRIBE SELECT * FROM read_parquet('${path}')`,
   );
-  const columnNames = describeResult
-    .toArray()
-    .map((row) => row.toJSON().column_name);
+  const describe = describeResult.toArray().map((row) => row.toJSON());
+  const columnNames = describe.map((row) => row.column_name);
   const startDatetimeColumnName = columnNames.includes("start_datetime")
     ? "start_datetime"
     : "datetime";
@@ -165,6 +164,7 @@ async function getMetadata(
     endDatetime: summaryRow.end_datetime
       ? new Date(summaryRow.end_datetime)
       : null,
+    describe,
   };
 }
 

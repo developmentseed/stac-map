@@ -1,8 +1,10 @@
 import {
+  Accordion,
   createTreeCollection,
-  DataList,
   FormatNumber,
+  Span,
   Stack,
+  Table,
   Text,
   TreeView,
 } from "@chakra-ui/react";
@@ -51,37 +53,71 @@ function StacGeoparquetInfo({
 
   return (
     <Stack gap={4}>
-      <DataList.Root orientation={"horizontal"}>
-        <DataList.Item>
-          <DataList.ItemLabel>Count</DataList.ItemLabel>
-          <DataList.ItemValue>
-            <FormatNumber value={metadata.count}></FormatNumber>
-          </DataList.ItemValue>
-        </DataList.Item>
-      </DataList.Root>
-      <TreeView.Root collection={collection} variant={"subtle"}>
-        <TreeView.Label fontWeight={"light"}>Key-value metadata</TreeView.Label>
-        <TreeView.Tree>
-          <TreeView.Node
-            indentGuide={
-              <TreeView.BranchIndentGuide></TreeView.BranchIndentGuide>
-            }
-            render={({ node, nodeState }) =>
-              nodeState.isBranch ? (
-                <TreeView.BranchControl>
-                  <LuCircleDot></LuCircleDot>
-                  <TreeView.BranchText>{node.value}</TreeView.BranchText>
-                </TreeView.BranchControl>
-              ) : (
-                <TreeView.Item>
-                  <LuCircle></LuCircle>
-                  <TreeView.ItemText>{node.value}</TreeView.ItemText>
-                </TreeView.Item>
-              )
-            }
-          ></TreeView.Node>
-        </TreeView.Tree>
-      </TreeView.Root>
+      <Text fontSize={"sm"}>
+        Number of items: <FormatNumber value={metadata.count}></FormatNumber>
+      </Text>
+      <Accordion.Root collapsible defaultValue={["schema"]}>
+        <Accordion.Item value="schema">
+          <Accordion.ItemTrigger>
+            <Span flex={1}>Schema</Span>
+            <Accordion.ItemIndicator></Accordion.ItemIndicator>
+          </Accordion.ItemTrigger>
+          <Accordion.ItemContent>
+            <Accordion.ItemBody>
+              <Table.Root size={"sm"}>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader>Name</Table.ColumnHeader>
+                    <Table.ColumnHeader>Type</Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {metadata.describe.map((row) => (
+                    <Table.Row key={row.column_name}>
+                      <Table.Cell>{row.column_name}</Table.Cell>
+                      <Table.Cell>{row.column_type}</Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            </Accordion.ItemBody>
+          </Accordion.ItemContent>
+        </Accordion.Item>
+        <Accordion.Item value="metadata">
+          <Accordion.ItemTrigger>
+            <Span flex={1}>Key-value metadata</Span>
+            <Accordion.ItemIndicator></Accordion.ItemIndicator>
+          </Accordion.ItemTrigger>
+          <Accordion.ItemContent>
+            <Accordion.ItemBody>
+              <TreeView.Root collection={collection} variant={"subtle"}>
+                <TreeView.Tree>
+                  <TreeView.Node
+                    indentGuide={
+                      <TreeView.BranchIndentGuide></TreeView.BranchIndentGuide>
+                    }
+                    render={({ node, nodeState }) =>
+                      nodeState.isBranch ? (
+                        <TreeView.BranchControl>
+                          <LuCircleDot></LuCircleDot>
+                          <TreeView.BranchText>
+                            {node.value}
+                          </TreeView.BranchText>
+                        </TreeView.BranchControl>
+                      ) : (
+                        <TreeView.Item>
+                          <LuCircle></LuCircle>
+                          <TreeView.ItemText>{node.value}</TreeView.ItemText>
+                        </TreeView.Item>
+                      )
+                    }
+                  ></TreeView.Node>
+                </TreeView.Tree>
+              </TreeView.Root>
+            </Accordion.ItemBody>
+          </Accordion.ItemContent>
+        </Accordion.Item>
+      </Accordion.Root>
     </Stack>
   );
 }

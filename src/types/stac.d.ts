@@ -41,6 +41,10 @@ export interface StacGeoparquetMetadata {
   keyValue: KeyValueMetadata[];
   startDatetime: Date | null;
   endDatetime: Date | null;
+  describe: {
+    column_name: string;
+    column_type: string;
+  }[];
 }
 
 export interface KeyValueMetadata {
