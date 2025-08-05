@@ -173,7 +173,12 @@ function Results({
   const { items, setItems } = useStacMap();
   const { data, isFetchingNextPage, hasNextPage, fetchNextPage, error } =
     useStacSearch(search, link);
+  const [numberMatched, setNumberMatched] = useState<number>();
   const [pause, setPause] = useState(false);
+
+  useEffect(() => {
+    setNumberMatched(data?.pages[0]?.numberMatched);
+  }, [data]);
 
   useEffect(() => {
     setItems(data?.pages.flatMap((page) => page.features));
@@ -198,8 +203,8 @@ function Results({
 
   return (
     <Progress.Root
-      value={items ? items.length : null}
-      max={data?.pages[0]?.numberMatched}
+      value={numberMatched && items ? items.length : null}
+      max={numberMatched}
       maxW={"md"}
     >
       <HStack>
