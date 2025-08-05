@@ -5320,6 +5320,11 @@ stac-ts@^1.0.4:
   resolved "https://registry.yarnpkg.com/stac-ts/-/stac-ts-1.0.4.tgz#32c27431c60ca3de6f16260301ddf7baafb718ff"
   integrity sha512-5n09H4bmBfrjIkjcDs60joV9zEX55GU29WTCNB++YzRawUZ1cCDG7a/M7bDDyR7VcQz9nguRUnRCz/JWdsFuBQ==
 
+stac-wasm@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/stac-wasm/-/stac-wasm-0.0.3.tgz#0a23df4a1e62e678c9a0da0925eba83dd958d2f4"
+  integrity sha512-9yYNTGpMW+xMWugVfzBfoYUxbJqjJIdJsZvIMn8GgxWASYn7BJgDj4Rln0E9TwSSGYSqflT0+zR5reSsrPgyJA==
+
 stackback@0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/stackback/-/stackback-0.0.2.tgz#1ac8a0d9483848d1695e418b6d031a3c3ce68e3b"

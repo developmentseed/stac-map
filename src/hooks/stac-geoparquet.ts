@@ -11,7 +11,7 @@ import {
 } from "apache-arrow";
 import { useDuckDb } from "duckdb-wasm-kit";
 import { useEffect, useState } from "react";
-import * as stacWasm from "../stac-wasm";
+import * as stacWasm from "stac-wasm";
 import type { StacGeoparquetMetadata } from "../types/stac";
 
 export default function useStacGeoparquet(
@@ -26,10 +26,12 @@ export default function useStacGeoparquet(
     queryFn: async () => {
       if (path && connection) {
         return await getTable(path, connection, temporalFilter);
+      } else {
+        return null;
       }
     },
     placeholderData: (previousData) => previousData,
-    enabled: !!(connection && path),
+    enabled: !!connection,
   });
   const { data: metadata } = useQuery({
     queryKey: ["stac-geoparquet-metadata", path],
