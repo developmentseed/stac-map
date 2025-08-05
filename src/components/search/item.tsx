@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Collapsible,
   createListCollection,
   Field,
   Group,
@@ -10,6 +11,7 @@ import {
   HStack,
   IconButton,
   Input,
+  NumberInput,
   Portal,
   Progress,
   Select,
@@ -39,6 +41,7 @@ export default function ItemSearch({
   const [link, setLink] = useState<StacLink | undefined>(links[0]);
   const [datetime, setDatetime] = useState<string>();
   const [useViewportBounds, setUseViewportBounds] = useState(true);
+  const [maxItems, setMaxItems] = useState("500");
   const { map } = useMap();
 
   useEffect(() => {
@@ -88,6 +91,23 @@ export default function ItemSearch({
         interval={collection.extent?.temporal?.interval[0]}
         setDatetime={setDatetime}
       ></Datetime>
+
+      <Collapsible.Root>
+        <Collapsible.Trigger py={4}>Advanced</Collapsible.Trigger>
+        <Collapsible.Content>
+          <Field.Root>
+            <Field.Label>Max pages</Field.Label>
+            <NumberInput.Root
+              size={"sm"}
+              value={maxItems}
+              onValueChange={(e) => setMaxItems(e.value)}
+            >
+              <NumberInput.Control></NumberInput.Control>
+              <NumberInput.Input></NumberInput.Input>
+            </NumberInput.Root>
+          </Field.Root>
+        </Collapsible.Content>
+      </Collapsible.Root>
 
       <HStack>
         <Box flex={1}></Box>
@@ -154,6 +174,7 @@ export default function ItemSearch({
         <Results
           search={search}
           link={link}
+          maxItems={Number(maxItems)}
           doClear={() => setSearch(undefined)}
         ></Results>
       )}
@@ -164,31 +185,42 @@ export default function ItemSearch({
 function Results({
   search,
   link,
+  maxItems,
   doClear,
 }: {
   search: StacSearch;
   link: StacLink;
+  maxItems: number;
   doClear: () => void;
 }) {
   const { items, setItems } = useStacMap();
-  const { data, isFetchingNextPage, hasNextPage, fetchNextPage, error } =
+  const { data, hasNextPage, isFetchingNextPage, fetchNextPage, error } =
     useStacSearch(search, link);
   const [numberMatched, setNumberMatched] = useState<number>();
   const [pause, setPause] = useState(false);
+  const [done, setDone] = useState(false);
+
+  console.log(search);
 
   useEffect(() => {
     setNumberMatched(data?.pages[0]?.numberMatched);
   }, [data]);
 
   useEffect(() => {
-    setItems(data?.pages.flatMap((page) => page.features));
-  }, [data, setItems]);
+    if (!done) {
+      setItems(data?.pages.flatMap((page) => page.features));
+    }
+  }, [data, setItems, done]);
 
   useEffect(() => {
-    if (!isFetchingNextPage && !pause && hasNextPage) {
+    setDone(!hasNextPage || !!(items && items.length >= maxItems));
+  }, [hasNextPage, items, maxItems]);
+
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage && !done) {
       fetchNextPage();
     }
-  }, [isFetchingNextPage, pause, hasNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, done]);
 
   useEffect(() => {
     if (error) {
@@ -202,48 +234,66 @@ function Results({
   }, [error, doClear]);
 
   return (
-    <Progress.Root
-      value={numberMatched && items ? items.length : null}
-      max={numberMatched}
-      maxW={"md"}
-    >
-      <HStack>
-        <Progress.Track flex={1}>
-          <Progress.Range></Progress.Range>
-        </Progress.Track>
-        <Progress.ValueText>
-          <HStack gap={2}>
-            {items?.length || "0"}
+    <Stack>
+      <Progress.Root
+        value={
+          (done && items?.length) ||
+          (numberMatched && items ? items.length : null)
+        }
+        max={numberMatched}
+        maxW={"md"}
+      >
+        <HStack>
+          <Progress.Track flex={1}>
+            <Progress.Range></Progress.Range>
+          </Progress.Track>
+          <Progress.ValueText>
+            <HStack gap={2}>
+              {items?.length || "0"}
 
-            <ButtonGroup size={"xs"} variant={"subtle"} attached>
-              {(pause && (
-                <IconButton onClick={() => setPause(false)}>
-                  <LuPlay></LuPlay>
+              <ButtonGroup size={"xs"} variant={"subtle"} attached>
+                {(pause && (
+                  <IconButton onClick={() => setPause(false)}>
+                    <LuPlay></LuPlay>
+                  </IconButton>
+                )) || (
+                  <IconButton
+                    disabled={!hasNextPage}
+                    onClick={() => setPause(true)}
+                  >
+                    <LuPause></LuPause>
+                  </IconButton>
+                )}
+                <IconButton onClick={doClear}>
+                  <LuX></LuX>
                 </IconButton>
-              )) || (
-                <IconButton
-                  disabled={!hasNextPage}
-                  onClick={() => setPause(true)}
-                >
-                  <LuPause></LuPause>
-                </IconButton>
-              )}
-              <IconButton onClick={doClear}>
-                <LuX></LuX>
-              </IconButton>
-            </ButtonGroup>
-          </HStack>
-        </Progress.ValueText>
-      </HStack>
+              </ButtonGroup>
+            </HStack>
+          </Progress.ValueText>
+        </HStack>
+      </Progress.Root>
       {items && items.length > 0 && (
         <HStack>
           <DownloadButtons
             items={items}
-            disabled={!pause && hasNextPage}
+            disabled={!(pause || done)}
           ></DownloadButtons>
         </HStack>
       )}
-    </Progress.Root>
+      {done && items && items.length >= maxItems && (
+        <Alert.Root>
+          <Alert.Indicator></Alert.Indicator>
+          <Alert.Content>
+            <Alert.Title>Max items reached</Alert.Title>
+            <Alert.Description>
+              Max items was set to {maxItems}, and we fetched {items.length}{" "}
+              item{items.length == 1 ? "" : "s"}. Try increasing "Max items" in
+              the "Advanced" collapsible menu.
+            </Alert.Description>
+          </Alert.Content>
+        </Alert.Root>
+      )}
+    </Stack>
   );
 }
 
