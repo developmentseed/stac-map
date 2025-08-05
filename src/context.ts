@@ -42,7 +42,7 @@ interface StacMapContextType {
   setPicked: (value: StacItem | undefined) => void;
 
   /// The stac-geoparquet table that's currently loaded.
-  stacGeoparquetTable: Table | undefined;
+  stacGeoparquetTable: Table | undefined | null;
 
   /// The stac-geoparquet metadata that are currently loaded.
   stacGeoparquetMetadata: StacGeoparquetMetadata | undefined;
@@ -54,11 +54,11 @@ interface StacMapContextType {
   /// The temporal extents of the loaded data.
   temporalExtents: { start: Date; end: Date } | undefined;
 
-  /// The start and end datetimes of the temporal filter.
-  temporalFilter: { start: Date; end: Date } | undefined;
-
   /// Sets the temporal filter.
   setTemporalFilter: (
     temporalFilter: { start: Date; end: Date } | undefined,
   ) => void;
+
+  /// Items that have been filtered by the temporal filter
+  filteredItems: StacItem[] | undefined;
 }

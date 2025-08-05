@@ -2,12 +2,14 @@ import {
   Center,
   DataList,
   Heading,
+  HStack,
   Slider,
   Stack,
   Text,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import useStacMap from "../hooks/stac-map";
+import DownloadButtons from "./download";
 
 export default function Filter({
   temporalExtents,
@@ -16,7 +18,7 @@ export default function Filter({
 }) {
   const [start, setStart] = useState<number>();
   const [end, setEnd] = useState<number>();
-  const { setTemporalFilter } = useStacMap();
+  const { setTemporalFilter, filteredItems } = useStacMap();
 
   useEffect(() => {
     if (start !== undefined && end !== undefined) {
@@ -83,6 +85,11 @@ export default function Filter({
           </Text>
         </Center>
       )}
+      <HStack>
+        {filteredItems && filteredItems.length > 0 && (
+          <DownloadButtons items={filteredItems}></DownloadButtons>
+        )}
+      </HStack>
     </Stack>
   );
 }

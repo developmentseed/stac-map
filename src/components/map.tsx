@@ -19,7 +19,7 @@ import {
   useControl,
   type MapRef,
 } from "react-map-gl/maplibre";
-import type { StacCollection, StacItem } from "stac-ts";
+import type { StacCollection } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
 import type { StacValue } from "../types/stac";
 import { useColorModeValue } from "./ui/color-mode";
@@ -55,7 +55,7 @@ export default function Map() {
     stacGeoparquetTable,
     stacGeoparquetMetadata,
     setStacGeoparquetItemId,
-    temporalFilter,
+    filteredItems,
   } = useStacMap();
   const {
     geojson,
@@ -64,7 +64,6 @@ export default function Map() {
   } = useStacValueLayerProperties(value, collections);
   const [bbox, setBbox] = useState<BBox>();
   const small = useBreakpointValue({ base: true, md: false });
-  const [filteredItems, setFilteredItems] = useState<StacItem[]>();
 
   useEffect(() => {
     if (valueBbox) {
@@ -77,31 +76,6 @@ export default function Map() {
       setBbox(stacGeoparquetMetadata.bbox);
     }
   }, [stacGeoparquetMetadata]);
-
-  useEffect(() => {
-    if (items) {
-      if (temporalFilter) {
-        setFilteredItems(
-          items.filter((item) => {
-            const startStr =
-              item.properties.start_datetime || item.properties.datetime;
-            const start = startStr ? new Date(startStr) : null;
-            const endStr =
-              item.properties.end_datetime || item.properties.datetime;
-            const end = endStr ? new Date(endStr) : null;
-            return (
-              (!start || start >= temporalFilter.start) &&
-              (!end || end <= temporalFilter.end)
-            );
-          }),
-        );
-      } else {
-        setFilteredItems(items);
-      }
-    } else {
-      setFilteredItems(undefined);
-    }
-  }, [items, temporalFilter]);
 
   useEffect(() => {
     if (bbox && mapRef.current) {

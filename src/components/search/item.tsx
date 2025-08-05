@@ -24,6 +24,7 @@ import type { StacCollection, StacLink, TemporalExtent } from "stac-ts";
 import useStacMap from "../../hooks/stac-map";
 import useStacSearch from "../../hooks/stac-search";
 import type { StacSearch } from "../../types/stac";
+import DownloadButtons from "../download";
 import { toaster } from "../ui/toaster";
 
 export default function ItemSearch({
@@ -222,6 +223,14 @@ function Results({
           </HStack>
         </Progress.ValueText>
       </HStack>
+      {items && items.length > 0 && (
+        <HStack>
+          <DownloadButtons
+            items={items}
+            disabled={!pause && hasNextPage}
+          ></DownloadButtons>
+        </HStack>
+      )}
     </Progress.Root>
   );
 }
