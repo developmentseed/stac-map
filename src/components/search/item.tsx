@@ -34,7 +34,7 @@ export default function ItemSearch({
   collection: StacCollection;
   links: StacLink[];
 }) {
-  const { setItems, setPicked } = useStacMap();
+  const { setItems } = useStacMap();
   const [search, setSearch] = useState<StacSearch>();
   const [link, setLink] = useState<StacLink | undefined>(links[0]);
   const [datetime, setDatetime] = useState<string>();
@@ -44,9 +44,8 @@ export default function ItemSearch({
   useEffect(() => {
     if (!search) {
       setItems(undefined);
-      setPicked(undefined);
     }
-  }, [search, setItems, setPicked]);
+  }, [search, setItems]);
 
   const methods = createListCollection({
     items: links.map((link) => {

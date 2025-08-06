@@ -64,6 +64,10 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
   }, [value, setStacGeoparquetItemId]);
 
   useEffect(() => {
+    setPicked(undefined);
+  }, [items]);
+
+  useEffect(() => {
     if (items) {
       let start: Date | null = null;
       let end: Date | null = null;
