@@ -128,7 +128,14 @@ export default function ItemSearch({
               datetime,
               bbox:
                 useViewportBounds && map
-                  ? normalizeBbox(map.getBounds().toArray().flat())
+                  ? normalizeBbox(
+                      map.getBounds().toArray().flat() as [
+                        number,
+                        number,
+                        number,
+                        number,
+                      ],
+                    )
                   : undefined,
             })
           }
