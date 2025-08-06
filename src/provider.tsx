@@ -72,15 +72,10 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
       let start: Date | null = null;
       let end: Date | null = null;
       items.forEach((item) => {
-        const itemStartStr =
-          item.properties.start_datetime || item.properties.datetime;
-        const itemStart = itemStartStr ? new Date(itemStartStr) : null;
+        const { start: itemStart, end: itemEnd } = getStartAndEndDatetime(item);
         if (!start || (itemStart && itemStart < start)) {
           start = itemStart;
         }
-        const itemEndStr =
-          item.properties.end_datetime || item.properties.datetime;
-        const itemEnd = itemEndStr ? new Date(itemEndStr) : null;
         if (!end || (itemEnd && itemEnd > end)) {
           end = itemEnd;
         }
@@ -96,12 +91,7 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
       if (temporalFilter) {
         setFilteredItems(
           items.filter((item) => {
-            const startStr =
-              item.properties.start_datetime || item.properties.datetime;
-            const start = startStr ? new Date(startStr) : null;
-            const endStr =
-              item.properties.end_datetime || item.properties.datetime;
-            const end = endStr ? new Date(endStr) : null;
+            const { start, end } = getStartAndEndDatetime(item);
             return (
               (!start || start >= temporalFilter.start) &&
               (!end || end <= temporalFilter.end)
@@ -168,4 +158,12 @@ function getInitialHref() {
     return undefined;
   }
   return href;
+}
+
+function getStartAndEndDatetime(item: StacItem) {
+  const startStr = item.properties.start_datetime || item.properties.datetime;
+  const start = startStr ? new Date(startStr) : null;
+  const endStr = item.properties.end_datetime || item.properties.datetime;
+  const end = endStr ? new Date(endStr) : null;
+  return { start, end };
 }
