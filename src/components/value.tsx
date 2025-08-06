@@ -110,7 +110,7 @@ export function ValueInfo({
           <>
             <Button asChild>
               <a href={selfHref} target="_blank">
-                <LuExternalLink></LuExternalLink> Open
+                <LuExternalLink></LuExternalLink> Source
               </a>
             </Button>
             <Button asChild>
