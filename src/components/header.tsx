@@ -2,6 +2,7 @@ import {
   Badge,
   Box,
   Button,
+  ButtonGroup,
   HStack,
   Input,
   Menu,
@@ -11,6 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import useStacMap from "../hooks/stac-map";
 import { ColorModeButton } from "./ui/color-mode";
+import Upload from "./upload";
 
 const EXAMPLES = [
   { title: "eoAPI DevSeed", badge: "API", href: "https://stac.eoapi.dev/" },
@@ -45,8 +47,11 @@ export default function Header() {
   return (
     <HStack pointerEvents={"auto"}>
       <HrefInput></HrefInput>
-      <Examples></Examples>
-      <ColorModeButton></ColorModeButton>
+      <ButtonGroup variant={"subtle"}>
+        <Upload></Upload>
+        <Examples></Examples>
+        <ColorModeButton></ColorModeButton>
+      </ButtonGroup>
     </HStack>
   );
 }
@@ -86,9 +91,7 @@ function Examples() {
   return (
     <Menu.Root onSelect={(details) => setHref(details.value)}>
       <Menu.Trigger asChild>
-        <Button variant={"surface"} bg={"bg.muted/60"}>
-          Examples
-        </Button>
+        <Button>Examples</Button>
       </Menu.Trigger>
       <Portal>
         <Menu.Positioner>

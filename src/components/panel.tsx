@@ -1,11 +1,19 @@
-import { SkeletonText, Tabs } from "@chakra-ui/react";
+import {
+  Center,
+  IconButton,
+  Link,
+  SkeletonText,
+  Stack,
+  Tabs,
+  Text,
+} from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import {
   LuFilter,
+  LuGithub,
   LuInfo,
   LuMousePointerClick,
   LuSearch,
-  LuUpload,
 } from "react-icons/lu";
 import type { StacLink } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
@@ -13,12 +21,11 @@ import useStacValue from "../hooks/stac-value";
 import Filter from "./filter";
 import ItemSearch from "./search/item";
 import { NaturalLanguageCollectionSearch } from "./search/natural-language";
-import Upload from "./upload";
 import Value from "./value";
 
 export default function Panel() {
   const { href, value, picked, collections, temporalExtents } = useStacMap();
-  const [tab, setTab] = useState<string>("upload");
+  const [tab, setTab] = useState<string>("value");
   const [search, setSearch] = useState(false);
   const [catalogHref, setCatalogHref] = useState<string>();
   const [rootHref, setRootHref] = useState<string>();
@@ -84,9 +91,6 @@ export default function Panel() {
         <Tabs.Trigger value="picked" disabled={!picked}>
           <LuMousePointerClick></LuMousePointerClick>
         </Tabs.Trigger>
-        <Tabs.Trigger value="upload">
-          <LuUpload></LuUpload>
-        </Tabs.Trigger>
       </Tabs.List>
       <Tabs.ContentGroup
         overflow={"scroll"}
@@ -95,9 +99,10 @@ export default function Panel() {
         pb={4}
       >
         <Tabs.Content value="value">
-          {(value && <Value value={value}></Value>) || (
-            <SkeletonText noOfLines={3}></SkeletonText>
-          )}
+          {(value && <Value value={value}></Value>) ||
+            (href && <SkeletonText noOfLines={3}></SkeletonText>) || (
+              <Introduction></Introduction>
+            )}
         </Tabs.Content>
         <Tabs.Content value="search">
           {catalogHref && collections && (
@@ -118,10 +123,29 @@ export default function Panel() {
         <Tabs.Content value="picked">
           {picked && <Value value={picked}></Value>}
         </Tabs.Content>
-        <Tabs.Content value="upload">
-          <Upload></Upload>
-        </Tabs.Content>
       </Tabs.ContentGroup>
     </Tabs.Root>
+  );
+}
+
+function Introduction() {
+  return (
+    <Stack>
+      <Text fontSize={"sm"} fontWeight={"lighter"}>
+        stac-map is a map-first, statically-served, single-page visualization
+        tool for{" "}
+        <Link variant={"underline"} href="https://stacspec.org">
+          STAC
+        </Link>{" "}
+        catalogs, collections, and items.
+      </Text>
+      <Center>
+        <IconButton variant={"ghost"} size={"sm"} asChild>
+          <a href="https://github.com/developmentseed/stac-map" target="_blank">
+            <LuGithub></LuGithub>
+          </a>
+        </IconButton>
+      </Center>
+    </Stack>
   );
 }
