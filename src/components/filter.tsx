@@ -16,9 +16,9 @@ export default function Filter({
 }: {
   temporalExtents: { start: Date; end: Date };
 }) {
+  const { setTemporalFilter, filteredItems } = useStacMap();
   const [start, setStart] = useState<number>();
   const [end, setEnd] = useState<number>();
-  const { setTemporalFilter, filteredItems } = useStacMap();
 
   return (
     <Stack gap={4}>
