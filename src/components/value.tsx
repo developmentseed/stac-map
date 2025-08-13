@@ -4,12 +4,19 @@ import {
   DataList,
   Heading,
   HStack,
+  Icon,
   Image,
   Link,
   Stack,
 } from "@chakra-ui/react";
 import type { ReactNode } from "react";
-import { LuExternalLink } from "react-icons/lu";
+import {
+  LuExternalLink,
+  LuFile,
+  LuFiles,
+  LuFolder,
+  LuFolderPlus,
+} from "react-icons/lu";
 import { MarkdownHooks } from "react-markdown";
 import type { StacAsset } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
@@ -22,28 +29,30 @@ import ItemCollection from "./item-collection";
 import { Prose } from "./ui/prose";
 
 export default function Value({ value }: { value: StacValue }) {
+  let detail;
   switch (value.type) {
     case "Catalog":
-      return <Catalog catalog={value}></Catalog>;
+      detail = <Catalog></Catalog>;
+      break;
     case "Collection":
-      return <Collection collection={value}></Collection>;
+      detail = <Collection collection={value}></Collection>;
+      break;
     case "Feature":
-      return <Item item={value}></Item>;
+      detail = <Item item={value}></Item>;
+      break;
     case "FeatureCollection":
-      return <ItemCollection itemCollection={value}></ItemCollection>;
+      detail = <ItemCollection></ItemCollection>;
+      break;
   }
+  return <Overview value={value}>{detail}</Overview>;
 }
 
-export function ValueInfo({
+function Overview({
   value,
-  icon,
-  type,
   children,
 }: {
   value: StacValue;
-  icon: ReactNode;
-  type?: string;
-  children?: ReactNode;
+  children: ReactNode;
 }) {
   const { setHref } = useStacMap();
   const thumbnailAsset =
@@ -56,11 +65,16 @@ export function ValueInfo({
   const parentHref = value.links?.find((link) => link.rel == "parent")?.href;
   const { value: root } = useStacValue(rootHref);
   const { value: parent } = useStacValue(parentHref);
+  const ValueIcon = getValueIcon(value);
+  const type = getValueType(value);
 
   return (
     <Stack>
       <HStack fontSize={"xs"} fontWeight={"light"}>
-        {icon} {type || value.type}
+        <Icon>
+          <ValueIcon></ValueIcon>
+        </Icon>
+        {type}
       </HStack>
       <Stack gap={4}>
         <Heading fontSize={(value.title && "larger") || "small"}>
@@ -127,6 +141,34 @@ export function ValueInfo({
           </>
         )}
       </ButtonGroup>
+
+      {children}
     </Stack>
   );
+}
+
+function getValueIcon(value: StacValue) {
+  switch (value.type) {
+    case "Catalog":
+      return LuFolder;
+    case "Collection":
+      return LuFolderPlus;
+    case "Feature":
+      return LuFile;
+    case "FeatureCollection":
+      return LuFiles;
+  }
+}
+
+function getValueType(value: StacValue) {
+  switch (value.type) {
+    case "Catalog":
+      return "Catalog";
+    case "Collection":
+      return "Collection";
+    case "Feature":
+      return "Item";
+    case "FeatureCollection":
+      return "ItemCollection";
+  }
 }

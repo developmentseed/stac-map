@@ -7,7 +7,6 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { LuFolderPlus } from "react-icons/lu";
 import { MarkdownHooks } from "react-markdown";
 import type {
   StacCollection,
@@ -15,21 +14,12 @@ import type {
   TemporalExtent as StacTemporalExtent,
 } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
-import { ValueInfo } from "./value";
 
 export default function Collection({
   collection,
 }: {
   collection: StacCollection;
 }) {
-  return (
-    <ValueInfo value={collection} icon={<LuFolderPlus></LuFolderPlus>}>
-      <CollectionInfo collection={collection}></CollectionInfo>
-    </ValueInfo>
-  );
-}
-
-function CollectionInfo({ collection }: { collection: StacCollection }) {
   return (
     <DataList.Root orientation={"horizontal"} size={"sm"} py={4}>
       {collection.extent?.spatial?.bbox?.[0] && (

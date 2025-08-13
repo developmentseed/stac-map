@@ -9,27 +9,20 @@ import {
   TreeView,
 } from "@chakra-ui/react";
 import type { ReactNode } from "react";
-import { LuCircle, LuCircleDot, LuFiles } from "react-icons/lu";
+import { LuCircle, LuCircleDot } from "react-icons/lu";
 import useStacMap from "../hooks/stac-map";
-import type { StacGeoparquetMetadata, StacItemCollection } from "../types/stac";
-import { ValueInfo } from "./value";
+import type { StacGeoparquetMetadata } from "../types/stac";
 
-export default function ItemCollection({
-  itemCollection,
-}: {
-  itemCollection: StacItemCollection;
-}) {
+export default function ItemCollection() {
   const { stacGeoparquetMetadata } = useStacMap();
 
-  return (
-    <ValueInfo value={itemCollection} type="Item collection" icon={<LuFiles />}>
-      {stacGeoparquetMetadata && (
-        <StacGeoparquetInfo
-          metadata={stacGeoparquetMetadata}
-        ></StacGeoparquetInfo>
-      )}
-    </ValueInfo>
-  );
+  if (stacGeoparquetMetadata) {
+    return (
+      <StacGeoparquetInfo
+        metadata={stacGeoparquetMetadata}
+      ></StacGeoparquetInfo>
+    );
+  }
 }
 
 interface Node {
