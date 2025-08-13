@@ -28,7 +28,10 @@ export function Collections({
   return (
     <Children heading="Collections">
       {collections.map((collection) => (
-        <CollectionCard key={"collection-" + collection.id}></CollectionCard>
+        <CollectionCard
+          collection={collection}
+          key={"collection-" + collection.id}
+        ></CollectionCard>
       ))}
     </Children>
   );

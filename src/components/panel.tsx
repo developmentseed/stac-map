@@ -34,7 +34,9 @@ export default function Panel() {
     value?.type == "Catalog" &&
     value.links.find((link) => link.rel == "self")?.href;
   const searchLinks = root?.links?.filter((link) => link.rel == "search");
-  const search = !!catalogHref || !!(searchLinks && searchLinks.length > 0);
+  const search =
+    (catalogHref && collections && collections.length > 0) ||
+    !!(searchLinks && searchLinks.length > 0);
 
   useEffect(() => {
     if (href) {

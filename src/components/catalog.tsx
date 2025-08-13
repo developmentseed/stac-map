@@ -3,7 +3,7 @@ import { LuFolder } from "react-icons/lu";
 import type { StacCatalog } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
 import { ChildCard, Children } from "./children";
-import Collections from "./collections";
+import { Collections } from "./collection";
 import { ValueInfo } from "./value";
 
 export default function Catalog({ catalog }: { catalog: StacCatalog }) {

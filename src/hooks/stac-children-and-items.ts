@@ -4,6 +4,8 @@ import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
 import { fetchStac, fetchStacLink } from "../http";
 import type { StacCollections, StacValue } from "../types/stac";
 
+import { booleanValid } from "@turf/boolean-valid";
+
 export default function useStacChildrenAndItems(
   value: StacValue | undefined,
   href: string | undefined,
@@ -14,6 +16,7 @@ export default function useStacChildrenAndItems(
     catalogs,
     collections: childCollections,
     items,
+    warnings,
   } = useStacLinks(value, href);
 
   return {
@@ -21,6 +24,7 @@ export default function useStacChildrenAndItems(
     collections: collections || childCollections,
     isFetchingCollections,
     items,
+    warnings,
   };
 }
 
@@ -70,6 +74,7 @@ function useStacLinks(value: StacValue | undefined, href: string | undefined) {
   const catalogs: StacCatalog[] = [];
   const collections: StacCollection[] = [];
   const items: StacItem[] = [];
+  const warnings: string[] = [];
 
   results.forEach((result) => {
     if (result.data) {
@@ -81,11 +86,15 @@ function useStacLinks(value: StacValue | undefined, href: string | undefined) {
           collections.push(result.data);
           break;
         case "Feature":
-          items.push(result.data);
+          if (booleanValid(result.data)) {
+            items.push(result.data);
+          } else {
+            warnings.push(`Invalid item: ${result.data.id}`);
+          }
           break;
       }
     }
   });
 
-  return { catalogs, collections, items };
+  return { catalogs, collections, items, warnings };
 }

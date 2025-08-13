@@ -64,10 +64,6 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
   }, [value, setStacGeoparquetItemId]);
 
   useEffect(() => {
-    setPicked(undefined);
-  }, [items]);
-
-  useEffect(() => {
     setPicked(stacGeoparquetItem);
   }, [stacGeoparquetItem]);
 
@@ -84,7 +80,8 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
           end = itemEnd;
         }
       });
-      if (start && end) {
+      // @ts-expect-error Don't know why start and end are never.
+      if (start && end && start.getTime() != end.getTime()) {
         return { start, end };
       }
     } else if (
@@ -103,17 +100,19 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
   ]);
 
   const filteredItems = useMemo(() => {
-    return items?.filter((item) => {
-      if (temporalFilter) {
-        const { start, end } = getStartAndEndDatetime(item);
-        return (
-          (!start || start >= temporalFilter.start) &&
-          (!end || end <= temporalFilter.end)
-        );
-      } else {
-        return true;
-      }
-    });
+    return (
+      items?.filter((item) => {
+        if (temporalFilter) {
+          const { start, end } = getStartAndEndDatetime(item);
+          return (
+            (!start || start >= temporalFilter.start) &&
+            (!end || end <= temporalFilter.end)
+          );
+        } else {
+          return true;
+        }
+      }) || []
+    );
   }, [items, temporalFilter]);
 
   return (
