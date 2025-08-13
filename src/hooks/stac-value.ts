@@ -1,6 +1,7 @@
 import type { UseFileUploadReturn } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { AsyncDuckDB, isParquetFile, useDuckDb } from "duckdb-wasm-kit";
+import { fetchStac } from "../http";
 import type { StacItemCollection, StacValue } from "../types/stac";
 
 export default function useStacValue(
@@ -39,17 +40,8 @@ async function getStacValue(
         parquetPath: href,
       };
     } else {
-      const data = await fetch(href).then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error(
-            `Error while fetching the STAC value at ${href}: ${response.statusText}`,
-          );
-        }
-      });
       return {
-        value: data,
+        value: await fetchStac(href),
         parquetPath: undefined,
       };
     }

@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { fetchStac } from "../http";
 import type { StacCollections, StacValue } from "../types/stac";
 
 export function useStacCollections(value: StacValue | undefined) {
@@ -11,7 +12,7 @@ export function useStacCollections(value: StacValue | undefined) {
       queryFn: async ({ pageParam }) => {
         if (pageParam) {
           // @ts-expect-error Not worth templating stuff
-          return await getCollections(pageParam);
+          return await fetchStac(pageParam);
         } else {
           return null;
         }
@@ -28,19 +29,4 @@ export function useStacCollections(value: StacValue | undefined) {
   }, [isFetching, hasNextPage, fetchNextPage]);
 
   return data?.pages.flatMap((page) => page?.collections || []);
-}
-
-async function getCollections(href: string): Promise<StacCollections> {
-  return await fetch(href, {
-    method: "GET",
-    headers: { Accept: "application/json" },
-  }).then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw new Error(
-        `Could not GET collections at ${href}: ${response.statusText}`,
-      );
-    }
-  });
 }

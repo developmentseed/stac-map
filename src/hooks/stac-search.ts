@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { StacLink } from "stac-ts";
+import { fetchStac } from "../http";
 import type { StacItemCollection, StacSearch } from "../types/stac";
 
 export default function useStacSearch(search: StacSearch, link: StacLink) {
@@ -13,23 +14,11 @@ export default function useStacSearch(search: StacSearch, link: StacLink) {
 }
 
 async function fetchSearch({ pageParam }: { pageParam: StacLink }) {
-  return await fetch(pageParam.href, {
-    method: (pageParam.method as string) || "GET",
-    headers: {
-      Accept: "application/json",
-      "Content-type": "application/json",
-    },
-    body: (pageParam.body as StacSearch) && JSON.stringify(pageParam.body),
-  }).then(async (response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      const text = await response.text();
-      throw new Error(
-        `Could not ${pageParam.method || "GET"} ${pageParam.href}: ${response.statusText}: ${text}`,
-      );
-    }
-  });
+  return await fetchStac(
+    pageParam.href,
+    pageParam.method as "GET" | "POST" | undefined,
+    (pageParam.body as StacSearch) && JSON.stringify(pageParam.body),
+  );
 }
 
 function updateLink(link: StacLink, search: StacSearch) {
