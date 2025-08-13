@@ -5,12 +5,9 @@ import type {
   TemporalExtent as StacTemporalExtent,
 } from "stac-ts";
 import { ChildCard, Children } from "./children";
+import { CollectionCombobox } from "./search/collection";
 
-export default function Collection({
-  collection,
-}: {
-  collection: StacCollection;
-}) {
+export function Collection({ collection }: { collection: StacCollection }) {
   return (
     <DataList.Root orientation={"horizontal"} size={"sm"} py={4}>
       {collection.extent?.spatial?.bbox?.[0] && (
@@ -44,6 +41,7 @@ export function Collections({
 }) {
   return (
     <Children heading="Collections">
+      <CollectionCombobox collections={collections}></CollectionCombobox>
       {collections.map((collection) => (
         <CollectionCard
           collection={collection}

@@ -1,4 +1,4 @@
-import { Card, Heading, Link, Text } from "@chakra-ui/react";
+import { Card, Heading, Link, Stack, Text } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 import { MarkdownHooks } from "react-markdown";
 import type { StacCatalog, StacCollection } from "stac-ts";
@@ -12,10 +12,10 @@ export function Children({
   children: ReactNode;
 }) {
   return (
-    <>
+    <Stack>
       <Heading size={"md"}>{heading}</Heading>
       {children}
-    </>
+    </Stack>
   );
 }
 
