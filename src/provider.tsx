@@ -2,7 +2,7 @@ import { useFileUpload } from "@chakra-ui/react";
 import { useEffect, useState, type ReactNode } from "react";
 import type { StacItem } from "stac-ts";
 import { StacMapContext } from "./context";
-import { useStacCollections } from "./hooks/stac-collections";
+import useStacChildrenAndItems from "./hooks/stac-children-and-items";
 import useStacGeoparquet from "./hooks/stac-geoparquet";
 import useStacValue from "./hooks/stac-value";
 
@@ -10,8 +10,10 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
   const [href, setHref] = useState<string | undefined>(getInitialHref());
   const fileUpload = useFileUpload({ maxFiles: 1 });
   const { value, parquetPath } = useStacValue(href, fileUpload);
-  const { collections, isFetching: isFetchingCollections } =
-    useStacCollections(value);
+  const { collections, isFetchingCollections } = useStacChildrenAndItems(
+    value,
+    href,
+  );
   const [items, setItems] = useState<StacItem[]>();
   const [temporalFilter, setTemporalFilter] = useState<{
     start: Date;
