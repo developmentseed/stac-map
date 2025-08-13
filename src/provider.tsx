@@ -27,7 +27,6 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
     start: Date;
     end: Date;
   }>();
-  const [filteredItems, setFilteredItems] = useState<StacItem[]>();
 
   useEffect(() => {
     function handlePopState() {
@@ -87,26 +86,6 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
   }, [items]);
 
   useEffect(() => {
-    if (items) {
-      if (temporalFilter) {
-        setFilteredItems(
-          items.filter((item) => {
-            const { start, end } = getStartAndEndDatetime(item);
-            return (
-              (!start || start >= temporalFilter.start) &&
-              (!end || end <= temporalFilter.end)
-            );
-          }),
-        );
-      } else {
-        setFilteredItems(items);
-      }
-    } else {
-      setFilteredItems(undefined);
-    }
-  }, [items, temporalFilter]);
-
-  useEffect(() => {
     if (
       stacGeoparquetMetadata?.startDatetime &&
       stacGeoparquetMetadata?.endDatetime
@@ -124,6 +103,18 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setPicked(stacGeoparquetItem);
   }, [stacGeoparquetItem]);
+
+  const filteredItems = items?.filter((item) => {
+    if (temporalFilter) {
+      const { start, end } = getStartAndEndDatetime(item);
+      return (
+        (!start || start >= temporalFilter.start) &&
+        (!end || end <= temporalFilter.end)
+      );
+    } else {
+      return true;
+    }
+  });
 
   return (
     <StacMapContext.Provider
