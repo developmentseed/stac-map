@@ -32,6 +32,11 @@ const EXAMPLES = [
     href: "https://openveda.cloud/api/stac",
   },
   {
+    title: "Maxar Open Data",
+    badge: "static",
+    href: "https://maxar-opendata.s3.dualstack.us-west-2.amazonaws.com/events/catalog.json",
+  },
+  {
     title: "Colorado NAIP",
     badge: "stac-geoparquet",
     href: "https://raw.githubusercontent.com/developmentseed/labs-375-stac-geoparquet-backend/refs/heads/main/data/naip.parquet",
