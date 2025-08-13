@@ -1,17 +1,14 @@
-import { SkeletonText, Stack } from "@chakra-ui/react";
-import { LuFolder } from "react-icons/lu";
+import { SkeletonText } from "@chakra-ui/react";
 import type { StacCatalog } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
 import { ChildCard, Children } from "./children";
 import { Collections } from "./collection";
-import { ValueInfo } from "./value";
 
-export default function Catalog({ catalog }: { catalog: StacCatalog }) {
+export default function Catalog() {
   const { catalogs, collections, isFetchingCollections } = useStacMap();
 
   return (
-    <Stack gap={6}>
-      <ValueInfo value={catalog} icon={<LuFolder></LuFolder>}></ValueInfo>
+    <>
       {catalogs && catalogs.length > 0 && (
         <Catalogs catalogs={catalogs}></Catalogs>
       )}
@@ -19,7 +16,7 @@ export default function Catalog({ catalog }: { catalog: StacCatalog }) {
         <Collections collections={collections}></Collections>
       )) ||
         (isFetchingCollections && <SkeletonText noOfLines={3}></SkeletonText>)}
-    </Stack>
+    </>
   );
 }
 

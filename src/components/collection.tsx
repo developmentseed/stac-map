@@ -1,43 +1,16 @@
 import { Box, DataList, HStack, Stack, Text } from "@chakra-ui/react";
-import { LuFolderPlus } from "react-icons/lu";
 import type {
   StacCollection,
   SpatialExtent as StacSpatialExtent,
   TemporalExtent as StacTemporalExtent,
 } from "stac-ts";
 import { ChildCard, Children } from "./children";
-import { ValueInfo } from "./value";
 
 export default function Collection({
   collection,
 }: {
   collection: StacCollection;
 }) {
-  return (
-    <ValueInfo value={collection} icon={<LuFolderPlus></LuFolderPlus>}>
-      <CollectionInfo collection={collection}></CollectionInfo>
-    </ValueInfo>
-  );
-}
-
-export function Collections({
-  collections,
-}: {
-  collections: StacCollection[];
-}) {
-  return (
-    <Children heading="Collections">
-      {collections.map((collection) => (
-        <CollectionCard
-          collection={collection}
-          key={"collection-" + collection.id}
-        ></CollectionCard>
-      ))}
-    </Children>
-  );
-}
-
-function CollectionInfo({ collection }: { collection: StacCollection }) {
   return (
     <DataList.Root orientation={"horizontal"} size={"sm"} py={4}>
       {collection.extent?.spatial?.bbox?.[0] && (
@@ -61,6 +34,23 @@ function CollectionInfo({ collection }: { collection: StacCollection }) {
         </DataList.Item>
       )}
     </DataList.Root>
+  );
+}
+
+export function Collections({
+  collections,
+}: {
+  collections: StacCollection[];
+}) {
+  return (
+    <Children heading="Collections">
+      {collections.map((collection) => (
+        <CollectionCard
+          collection={collection}
+          key={"collection-" + collection.id}
+        ></CollectionCard>
+      ))}
+    </Children>
   );
 }
 
