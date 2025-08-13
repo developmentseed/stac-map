@@ -15,7 +15,6 @@ import {
   LuMousePointerClick,
   LuSearch,
 } from "react-icons/lu";
-import type { StacLink } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
 import useStacValue from "../hooks/stac-value";
 import Filter from "./filter";
@@ -25,12 +24,17 @@ import Value from "./value";
 
 export default function Panel() {
   const { href, value, picked, collections, temporalExtents } = useStacMap();
-  const [tab, setTab] = useState<string>("value");
-  const [search, setSearch] = useState(false);
-  const [catalogHref, setCatalogHref] = useState<string>();
-  const [rootHref, setRootHref] = useState<string>();
+  const rootHref =
+    value?.type == "Collection"
+      ? value.links.find((link) => link.rel == "root")?.href
+      : undefined;
   const { value: root } = useStacValue(rootHref);
-  const [searchLinks, setSearchLinks] = useState<StacLink[]>();
+  const [tab, setTab] = useState<string>("value");
+  const catalogHref =
+    value?.type == "Catalog" &&
+    value.links.find((link) => link.rel == "self")?.href;
+  const searchLinks = root?.links?.filter((link) => link.rel == "search");
+  const search = !!catalogHref || !!(searchLinks && searchLinks.length > 0);
 
   useEffect(() => {
     if (href) {
@@ -43,32 +47,6 @@ export default function Panel() {
       setTab("picked");
     }
   }, [picked]);
-
-  useEffect(() => {
-    if (value?.type == "Catalog") {
-      setCatalogHref(value.links.find((link) => link.rel == "self")?.href);
-    } else {
-      setCatalogHref(undefined);
-    }
-
-    if (value?.type == "Collection") {
-      setRootHref(value.links.find((link) => link.rel == "root")?.href);
-    } else {
-      setRootHref(undefined);
-    }
-  }, [value]);
-
-  useEffect(() => {
-    if (root) {
-      setSearchLinks(root.links?.filter((link) => link.rel == "search"));
-    } else {
-      setSearchLinks(undefined);
-    }
-  }, [root]);
-
-  useEffect(() => {
-    setSearch(!!catalogHref || !!(searchLinks && searchLinks.length > 0));
-  }, [catalogHref, searchLinks]);
 
   return (
     <Tabs.Root
