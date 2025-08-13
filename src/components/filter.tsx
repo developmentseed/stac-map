@@ -7,7 +7,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useStacMap from "../hooks/stac-map";
 import DownloadButtons from "./download";
 
@@ -19,15 +19,6 @@ export default function Filter({
   const [start, setStart] = useState<number>();
   const [end, setEnd] = useState<number>();
   const { setTemporalFilter, filteredItems } = useStacMap();
-
-  useEffect(() => {
-    if (start !== undefined && end !== undefined) {
-      setTemporalFilter({
-        start: new Date(temporalExtents.start.getTime() + start * 1000),
-        end: new Date(temporalExtents.start.getTime() + end * 1000),
-      });
-    }
-  }, [temporalExtents, setTemporalFilter, start, end]);
 
   return (
     <Stack gap={4}>
@@ -60,8 +51,14 @@ export default function Filter({
               1000,
         ]}
         onValueChange={(e) => {
-          setStart(e.value[0]);
-          setEnd(e.value[1]);
+          const start = e.value[0];
+          const end = e.value[1];
+          setStart(start);
+          setEnd(end);
+          setTemporalFilter({
+            start: new Date(temporalExtents.start.getTime() + start * 1000),
+            end: new Date(temporalExtents.start.getTime() + end * 1000),
+          });
         }}
       >
         <Slider.Label>Temporal filter</Slider.Label>

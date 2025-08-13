@@ -23,10 +23,6 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
     item: stacGeoparquetItem,
   } = useStacGeoparquet(parquetPath, temporalFilter);
   const [picked, setPicked] = useState<StacItem>();
-  const [temporalExtents, setTemporalExtents] = useState<{
-    start: Date;
-    end: Date;
-  }>();
 
   useEffect(() => {
     function handlePopState() {
@@ -58,7 +54,6 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
     setItems(undefined);
     setPicked(undefined);
     setStacGeoparquetItemId(undefined);
-    setTemporalExtents(undefined);
     setTemporalFilter(undefined);
   }, [value, setStacGeoparquetItemId]);
 
@@ -67,42 +62,34 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
   }, [items]);
 
   useEffect(() => {
-    if (items) {
-      let start: Date | null = null;
-      let end: Date | null = null;
-      items.forEach((item) => {
-        const { start: itemStart, end: itemEnd } = getStartAndEndDatetime(item);
-        if (!start || (itemStart && itemStart < start)) {
-          start = itemStart;
-        }
-        if (!end || (itemEnd && itemEnd > end)) {
-          end = itemEnd;
-        }
-      });
-      if (start && end) {
-        setTemporalExtents({ start, end });
-      }
-    }
-  }, [items]);
-
-  useEffect(() => {
-    if (
-      stacGeoparquetMetadata?.startDatetime &&
-      stacGeoparquetMetadata?.endDatetime
-    ) {
-      setTemporalExtents({
-        start: stacGeoparquetMetadata.startDatetime,
-        end: stacGeoparquetMetadata.endDatetime,
-      });
-    }
-  }, [
-    stacGeoparquetMetadata?.startDatetime,
-    stacGeoparquetMetadata?.endDatetime,
-  ]);
-
-  useEffect(() => {
     setPicked(stacGeoparquetItem);
   }, [stacGeoparquetItem]);
+
+  let temporalExtents = undefined;
+  if (items) {
+    let start: Date | null = null;
+    let end: Date | null = null;
+    items.forEach((item) => {
+      const { start: itemStart, end: itemEnd } = getStartAndEndDatetime(item);
+      if (!start || (itemStart && itemStart < start)) {
+        start = itemStart;
+      }
+      if (!end || (itemEnd && itemEnd > end)) {
+        end = itemEnd;
+      }
+    });
+    if (start && end) {
+      temporalExtents = { start, end };
+    }
+  } else if (
+    stacGeoparquetMetadata?.startDatetime &&
+    stacGeoparquetMetadata?.endDatetime
+  ) {
+    temporalExtents = {
+      start: stacGeoparquetMetadata.startDatetime,
+      end: stacGeoparquetMetadata.endDatetime,
+    };
+  }
 
   const filteredItems = items?.filter((item) => {
     if (temporalFilter) {
