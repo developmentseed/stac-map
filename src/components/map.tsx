@@ -7,7 +7,7 @@ import bboxPolygon from "@turf/bbox-polygon";
 import { featureCollection } from "@turf/helpers";
 import type { BBox, Feature, GeoJSON } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import {
   Map as MaplibreMap,
   useControl,
@@ -57,20 +57,8 @@ export default function Map() {
     bbox: valueBbox,
     filled,
   } = useStacValueLayerProperties(value, collections);
-  const [bbox, setBbox] = useState<BBox>();
   const small = useBreakpointValue({ base: true, md: false });
-
-  useEffect(() => {
-    if (valueBbox) {
-      setBbox(valueBbox);
-    }
-  }, [valueBbox]);
-
-  useEffect(() => {
-    if (stacGeoparquetMetadata) {
-      setBbox(stacGeoparquetMetadata.bbox);
-    }
-  }, [stacGeoparquetMetadata]);
+  const bbox = valueBbox || stacGeoparquetMetadata?.bbox;
 
   useEffect(() => {
     if (bbox && mapRef.current) {
