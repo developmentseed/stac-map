@@ -5,13 +5,7 @@ import { MapboxOverlay } from "@deck.gl/mapbox";
 import { GeoArrowPolygonLayer } from "@geoarrow/deck.gl-layers";
 import bboxPolygon from "@turf/bbox-polygon";
 import { featureCollection } from "@turf/helpers";
-import type {
-  BBox,
-  Feature,
-  FeatureCollection,
-  GeoJSON,
-  Polygon,
-} from "geojson";
+import type { BBox, Feature, GeoJSON } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import {
@@ -222,92 +216,74 @@ function useStacValueLayerProperties(
   value: StacValue | undefined,
   collections: StacCollection[] | undefined,
 ) {
-  const [geojson, setGeojson] = useState<GeoJSON>();
-  const [bbox, setBbox] = useState<BBox>();
-  const [filled, setFilled] = useState(false);
   const { geojson: collectionsGeojson, bbox: collectionsBbox } =
     useCollectionsLayerProperties(collections);
 
-  useEffect(() => {
-    if (value) {
-      switch (value.type) {
-        case "Catalog":
-          setGeojson(collectionsGeojson);
-          setBbox(collectionsBbox);
-          setFilled(false);
-          break;
-        case "Collection":
-          setGeojson(
+  if (value) {
+    switch (value.type) {
+      case "Catalog":
+        return {
+          geojson: collectionsGeojson,
+          bbox: collectionsBbox,
+          filled: false,
+        };
+      case "Collection":
+        return {
+          geojson:
             value.extent?.spatial?.bbox &&
-              bboxPolygon(sanitizeBbox(value.extent.spatial.bbox[0])),
-          );
-          setBbox(value.extent?.spatial?.bbox?.[0] as BBox);
-          setFilled(true);
-          break;
-        case "Feature":
-          setGeojson(value as GeoJSON);
-          setBbox(value.bbox as BBox | undefined);
-          setFilled(true);
-          break;
-        case "FeatureCollection":
-          setGeojson(undefined);
-          setBbox(undefined);
-          setFilled(false);
-          break;
-      }
+            bboxPolygon(sanitizeBbox(value.extent.spatial.bbox[0])),
+          bbox: value.extent?.spatial?.bbox?.[0] as BBox,
+          filled: true,
+        };
+      case "Feature":
+        return {
+          geojson: value as GeoJSON,
+          bbox: value.bbox as BBox | undefined,
+          filled: true,
+        };
+      case "FeatureCollection":
+        return { geojson: undefined, bbox: undefined, filled: undefined };
     }
-  }, [value, collectionsGeojson, bbox, collectionsBbox]);
-
-  return { geojson, bbox, filled };
+  } else {
+    return { geojson: undefined, bbox: undefined, filled: undefined };
+  }
 }
 
 function useCollectionsLayerProperties(
   collections: StacCollection[] | undefined,
 ) {
-  const [geojson, setGeojson] = useState<FeatureCollection<Polygon>>();
-  const [bbox, setBbox] = useState<[number, number, number, number]>();
-
-  useEffect(() => {
-    if (collections) {
-      const bbox: [number, number, number, number] = [180, 90, -180, -90];
-      const polygons = collections
-        .map((collection) => {
-          if (collection.extent?.spatial?.bbox) {
-            const sanitizedBbox = sanitizeBbox(
-              collection.extent.spatial.bbox[0],
-            );
-            if (sanitizedBbox[0] < bbox[0]) {
-              bbox[0] = sanitizedBbox[0];
-            }
-            if (sanitizedBbox[1] < bbox[1]) {
-              bbox[1] = sanitizedBbox[1];
-            }
-            if (sanitizedBbox[2] > bbox[2]) {
-              bbox[2] = sanitizedBbox[2];
-            }
-            if (sanitizedBbox[3] > bbox[3]) {
-              bbox[3] = sanitizedBbox[3];
-            }
-            return bboxPolygon(sanitizedBbox);
-          } else {
-            return undefined;
+  if (collections) {
+    const bbox: [number, number, number, number] = [180, 90, -180, -90];
+    const polygons = collections
+      .map((collection) => {
+        if (collection.extent?.spatial?.bbox) {
+          const sanitizedBbox = sanitizeBbox(collection.extent.spatial.bbox[0]);
+          if (sanitizedBbox[0] < bbox[0]) {
+            bbox[0] = sanitizedBbox[0];
           }
-        })
-        .filter((bbox) => !!bbox);
-      if (polygons.length > 0) {
-        setGeojson(featureCollection(polygons));
-        setBbox(bbox);
-      } else {
-        setGeojson(undefined);
-        setBbox(undefined);
-      }
+          if (sanitizedBbox[1] < bbox[1]) {
+            bbox[1] = sanitizedBbox[1];
+          }
+          if (sanitizedBbox[2] > bbox[2]) {
+            bbox[2] = sanitizedBbox[2];
+          }
+          if (sanitizedBbox[3] > bbox[3]) {
+            bbox[3] = sanitizedBbox[3];
+          }
+          return bboxPolygon(sanitizedBbox);
+        } else {
+          return undefined;
+        }
+      })
+      .filter((bbox) => !!bbox);
+    if (polygons.length > 0) {
+      return { geojson: featureCollection(polygons), bbox };
     } else {
-      setGeojson(undefined);
-      setBbox(undefined);
+      return { geojson: undefined, bbox: undefined };
     }
-  }, [collections]);
-
-  return { geojson, bbox };
+  } else {
+    return { geojson: undefined, bbox: undefined };
+  }
 }
 
 function sanitizeBbox(bbox: number[]) {
