@@ -28,5 +28,8 @@ export function useStacCollections(value: StacValue | undefined) {
     }
   }, [isFetching, hasNextPage, fetchNextPage]);
 
-  return data?.pages.flatMap((page) => page?.collections || []);
+  return {
+    collections: data?.pages.flatMap((page) => page?.collections || []),
+    isFetching,
+  };
 }

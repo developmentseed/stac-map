@@ -10,7 +10,8 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
   const [href, setHref] = useState<string | undefined>(getInitialHref());
   const fileUpload = useFileUpload({ maxFiles: 1 });
   const { value, parquetPath } = useStacValue(href, fileUpload);
-  const collections = useStacCollections(value);
+  const { collections, isFetching: isFetchingCollections } =
+    useStacCollections(value);
   const [items, setItems] = useState<StacItem[]>();
   const [temporalFilter, setTemporalFilter] = useState<{
     start: Date;
@@ -111,6 +112,7 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
         fileUpload,
         value,
         collections,
+        isFetchingCollections,
         items,
         setItems,
         picked,

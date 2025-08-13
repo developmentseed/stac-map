@@ -27,6 +27,9 @@ interface StacMapContextType {
   /// This is usually populated only if the value is a Catalog.
   collections: StacCollection[] | undefined;
 
+  /// Are we fetching pages of collections?
+  isFetchingCollections: boolean;
+
   /// The GeoJSON items, usually returned from a search.
   items: StacItem[] | undefined;
 
