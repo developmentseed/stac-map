@@ -1,7 +1,7 @@
 import type { UseFileUploadReturn } from "@chakra-ui/react";
 import type { Table } from "apache-arrow";
 import { createContext } from "react";
-import type { StacCollection, StacItem } from "stac-ts";
+import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
 import type { StacGeoparquetMetadata, StacValue } from "./types/stac";
 
 export const StacMapContext = createContext<StacMapContextType | null>(null);
@@ -22,6 +22,9 @@ interface StacMapContextType {
   /// The root STAC value.
   value: StacValue | undefined;
 
+  /// Any catalogs that belong to the `value`.
+  catalogs: StacCatalog[] | undefined;
+
   /// Any collections that belong to the `value`.
   ///
   /// This is usually populated only if the value is a Catalog.
@@ -30,7 +33,7 @@ interface StacMapContextType {
   /// Are we fetching pages of collections?
   isFetchingCollections: boolean;
 
-  /// The GeoJSON items, usually returned from a search.
+  /// STAC items that belong to the value.
   items: StacItem[] | undefined;
 
   /// A function to set the items.

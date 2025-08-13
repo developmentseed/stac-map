@@ -1,20 +1,11 @@
-import {
-  Box,
-  Card,
-  DataList,
-  HStack,
-  Link,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Box, DataList, HStack, Stack, Text } from "@chakra-ui/react";
 import { LuFolderPlus } from "react-icons/lu";
-import { MarkdownHooks } from "react-markdown";
 import type {
   StacCollection,
   SpatialExtent as StacSpatialExtent,
   TemporalExtent as StacTemporalExtent,
 } from "stac-ts";
-import useStacMap from "../hooks/stac-map";
+import { ChildCard, Children } from "./children";
 import { ValueInfo } from "./value";
 
 export default function Collection({
@@ -26,6 +17,20 @@ export default function Collection({
     <ValueInfo value={collection} icon={<LuFolderPlus></LuFolderPlus>}>
       <CollectionInfo collection={collection}></CollectionInfo>
     </ValueInfo>
+  );
+}
+
+export function Collections({
+  collections,
+}: {
+  collections: StacCollection[];
+}) {
+  return (
+    <Children heading="Collections">
+      {collections.map((collection) => (
+        <CollectionCard key={"collection-" + collection.id}></CollectionCard>
+      ))}
+    </Children>
   );
 }
 
@@ -63,24 +68,10 @@ export function CollectionCard({
   collection: StacCollection;
   explanation?: string;
 }) {
-  const { setHref } = useStacMap();
-  const selfHref = collection.links.find((link) => link.rel === "self")?.href;
-
   return (
-    <Card.Root size={"sm"}>
-      <Card.Body>
-        <Card.Title>
-          <Link onClick={() => selfHref && setHref(selfHref)}>
-            {collection.title || collection.id}
-          </Link>
-        </Card.Title>
-        <Card.Description as={"div"}>
-          <Text lineClamp={2} as={"div"}>
-            <MarkdownHooks>{collection.description}</MarkdownHooks>
-          </Text>
-        </Card.Description>
-      </Card.Body>
-      <Card.Footer fontSize={"xs"} fontWeight={"lighter"}>
+    <ChildCard
+      child={collection}
+      footer={
         <Stack>
           <HStack>
             <SpatialExtent
@@ -95,8 +86,8 @@ export function CollectionCard({
             <Text>Natural language search explanation: {explanation}</Text>
           )}
         </Stack>
-      </Card.Footer>
-    </Card.Root>
+      }
+    ></ChildCard>
   );
 }
 

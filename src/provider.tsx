@@ -1,5 +1,5 @@
 import { useFileUpload } from "@chakra-ui/react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { StacItem } from "stac-ts";
 import { StacMapContext } from "./context";
 import useStacChildrenAndItems from "./hooks/stac-children-and-items";
@@ -10,11 +10,13 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
   const [href, setHref] = useState<string | undefined>(getInitialHref());
   const fileUpload = useFileUpload({ maxFiles: 1 });
   const { value, parquetPath } = useStacValue(href, fileUpload);
-  const { collections, isFetchingCollections } = useStacChildrenAndItems(
-    value,
-    href,
-  );
-  const [items, setItems] = useState<StacItem[]>();
+  const {
+    catalogs,
+    collections,
+    isFetchingCollections,
+    items: linkedItems,
+  } = useStacChildrenAndItems(value, href);
+  const [searchItems, setSearchItems] = useState<StacItem[]>();
   const [temporalFilter, setTemporalFilter] = useState<{
     start: Date;
     end: Date;
@@ -26,6 +28,7 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
     item: stacGeoparquetItem,
   } = useStacGeoparquet(parquetPath, temporalFilter);
   const [picked, setPicked] = useState<StacItem>();
+  const items = searchItems || linkedItems;
 
   useEffect(() => {
     function handlePopState() {
@@ -54,7 +57,7 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
   }, [fileUpload.acceptedFiles]);
 
   useEffect(() => {
-    setItems(undefined);
+    setSearchItems(undefined);
     setPicked(undefined);
     setStacGeoparquetItemId(undefined);
     setTemporalFilter(undefined);
@@ -68,43 +71,50 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
     setPicked(stacGeoparquetItem);
   }, [stacGeoparquetItem]);
 
-  let temporalExtents = undefined;
-  if (items) {
-    let start: Date | null = null;
-    let end: Date | null = null;
-    items.forEach((item) => {
-      const { start: itemStart, end: itemEnd } = getStartAndEndDatetime(item);
-      if (!start || (itemStart && itemStart < start)) {
-        start = itemStart;
+  const temporalExtents = useMemo(() => {
+    if (items) {
+      let start: Date | null = null;
+      let end: Date | null = null;
+      items.forEach((item) => {
+        const { start: itemStart, end: itemEnd } = getStartAndEndDatetime(item);
+        if (!start || (itemStart && itemStart < start)) {
+          start = itemStart;
+        }
+        if (!end || (itemEnd && itemEnd > end)) {
+          end = itemEnd;
+        }
+      });
+      if (start && end) {
+        return { start, end };
       }
-      if (!end || (itemEnd && itemEnd > end)) {
-        end = itemEnd;
+    } else if (
+      stacGeoparquetMetadata?.startDatetime &&
+      stacGeoparquetMetadata?.endDatetime
+    ) {
+      return {
+        start: stacGeoparquetMetadata.startDatetime,
+        end: stacGeoparquetMetadata.endDatetime,
+      };
+    }
+  }, [
+    items,
+    stacGeoparquetMetadata?.startDatetime,
+    stacGeoparquetMetadata?.endDatetime,
+  ]);
+
+  const filteredItems = useMemo(() => {
+    return items?.filter((item) => {
+      if (temporalFilter) {
+        const { start, end } = getStartAndEndDatetime(item);
+        return (
+          (!start || start >= temporalFilter.start) &&
+          (!end || end <= temporalFilter.end)
+        );
+      } else {
+        return true;
       }
     });
-    if (start && end) {
-      temporalExtents = { start, end };
-    }
-  } else if (
-    stacGeoparquetMetadata?.startDatetime &&
-    stacGeoparquetMetadata?.endDatetime
-  ) {
-    temporalExtents = {
-      start: stacGeoparquetMetadata.startDatetime,
-      end: stacGeoparquetMetadata.endDatetime,
-    };
-  }
-
-  const filteredItems = items?.filter((item) => {
-    if (temporalFilter) {
-      const { start, end } = getStartAndEndDatetime(item);
-      return (
-        (!start || start >= temporalFilter.start) &&
-        (!end || end <= temporalFilter.end)
-      );
-    } else {
-      return true;
-    }
-  });
+  }, [items, temporalFilter]);
 
   return (
     <StacMapContext.Provider
@@ -113,10 +123,11 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
         setHref,
         fileUpload,
         value,
+        catalogs,
         collections,
         isFetchingCollections,
         items,
-        setItems,
+        setItems: setSearchItems,
         picked,
         setPicked,
         stacGeoparquetTable,

@@ -1,5 +1,6 @@
 import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
 import { useEffect } from "react";
+import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
 import { fetchStac, fetchStacLink } from "../http";
 import type { StacCollections, StacValue } from "../types/stac";
 
@@ -16,8 +17,10 @@ export default function useStacChildrenAndItems(
   } = useStacLinks(value, href);
 
   return {
+    catalogs,
     collections: collections || childCollections,
     isFetchingCollections,
+    items,
   };
 }
 
@@ -64,6 +67,25 @@ function useStacLinks(value: StacValue | undefined, href: string | undefined) {
           };
         }) || [],
   });
-  console.log(results);
-  return null;
+  const catalogs: StacCatalog[] = [];
+  const collections: StacCollection[] = [];
+  const items: StacItem[] = [];
+
+  results.forEach((result) => {
+    if (result.data) {
+      switch (result.data.type) {
+        case "Catalog":
+          catalogs.push(result.data);
+          break;
+        case "Collection":
+          collections.push(result.data);
+          break;
+        case "Feature":
+          items.push(result.data);
+          break;
+      }
+    }
+  });
+
+  return { catalogs, collections, items };
 }
