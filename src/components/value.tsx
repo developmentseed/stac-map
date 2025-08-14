@@ -1,6 +1,5 @@
 import {
   Box,
-  Breadcrumb,
   Button,
   ButtonGroup,
   HStack,
@@ -55,10 +54,11 @@ function Overview({
 }) {
   const { catalogs, collections, isFetchingCollections } = useStacMap();
   const thumbnailAsset =
-    typeof value.assets === "object" &&
     value.assets &&
-    "thumbnail" in value.assets &&
-    (value.assets.thumbnail as StacAsset);
+    typeof value.assets === "object" &&
+    "thumbnail" in value.assets
+      ? (value.assets.thumbnail as StacAsset)
+      : undefined;
   const selfHref = value.links?.find((link) => link.rel == "self")?.href;
   const ValueIcon = getValueIcon(value);
   const type = getValueType(value);
@@ -72,8 +72,6 @@ function Overview({
           </Icon>
           {type}
         </HStack>
-
-        <Breadcrumbs value={value}></Breadcrumbs>
 
         {thumbnailAsset && (
           <Image
@@ -123,83 +121,6 @@ function Overview({
       )) ||
         (isFetchingCollections && <SkeletonText noOfLines={3}></SkeletonText>)}
     </Stack>
-  );
-}
-
-function Breadcrumbs({ value }: { value: StacValue }) {
-  const { href, setHref } = useStacMap();
-  const selfHref = value.links?.find((link) => link.rel == "self")?.href;
-  const parentHref = value.links?.find((link) => link.rel == "parent")?.href;
-  const rootHref = value.links?.find((link) => link.rel == "root")?.href;
-  let rootUrl;
-  let parentUrl;
-  if (rootHref) {
-    try {
-      rootUrl = new URL(rootHref, selfHref);
-    } catch {
-      // pass
-    }
-    if (rootUrl?.toString() == selfHref) {
-      rootUrl = undefined;
-    }
-  }
-  if (parentHref) {
-    try {
-      parentUrl = new URL(parentHref, selfHref);
-    } catch {
-      // pass
-    }
-    if (
-      parentUrl?.toString() == href ||
-      parentUrl?.toString() == rootUrl?.toString()
-    ) {
-      parentUrl = undefined;
-    }
-  }
-  return (
-    <Breadcrumb.Root>
-      <Breadcrumb.List>
-        {rootUrl && (
-          <>
-            <Breadcrumb.Item>
-              <Breadcrumb.Link
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setHref(rootUrl.toString());
-                }}
-                whiteSpace={"nowrap"}
-              >
-                Root
-              </Breadcrumb.Link>
-            </Breadcrumb.Item>
-            <Breadcrumb.Separator></Breadcrumb.Separator>
-          </>
-        )}
-        {parentUrl && (
-          <>
-            <Breadcrumb.Item>
-              <Breadcrumb.Link
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setHref(parentUrl.toString());
-                }}
-                whiteSpace={"nowrap"}
-              >
-                Parent
-              </Breadcrumb.Link>
-            </Breadcrumb.Item>
-            <Breadcrumb.Separator></Breadcrumb.Separator>
-          </>
-        )}
-        <Breadcrumb.Item>
-          <Breadcrumb.CurrentLink fontWeight={"bolder"} fontSize={"large"}>
-            {(value.title as string) ?? value.id ?? ""}
-          </Breadcrumb.CurrentLink>
-        </Breadcrumb.Item>
-      </Breadcrumb.List>
-    </Breadcrumb.Root>
   );
 }
 

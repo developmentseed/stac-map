@@ -1,110 +1,168 @@
 import {
+  Accordion,
+  Box,
   Center,
+  HStack,
+  Icon,
   IconButton,
   Link,
   SkeletonText,
   Stack,
-  Tabs,
   Text,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import {
+  LuChevronDown,
   LuFilter,
   LuGithub,
-  LuInfo,
-  LuMousePointerClick,
-  LuSearch,
 } from "react-icons/lu";
 import useStacMap from "../hooks/stac-map";
 import useStacValue from "../hooks/stac-value";
 import Filter from "./filter";
 import ItemSearch from "./search/item";
 import { NaturalLanguageCollectionSearch } from "./search/natural-language";
+import { NavigationBreadcrumbs } from "./navigation-breadcrumbs";
 import Value from "./value";
 
 export default function Panel() {
-  const { href, value, picked, collections, temporalExtents } = useStacMap();
-  const rootHref =
-    value?.type == "Collection"
-      ? value.links.find((link) => link.rel == "root")?.href
+  const { href, value, picked, collections, temporalExtents, setHref } = useStacMap();
+  const [view, setView] = useState<"intro" | "catalog" | "collection" | "item" | "picked">("intro");
+  
+  const selfHref = value?.links?.find((link) => link.rel == "self")?.href;
+  const rootHref = value?.links?.find((link) => link.rel == "root")?.href;
+  const parentHref = value?.links?.find((link) => link.rel == "parent")?.href;
+  const collectionHref = 
+    value?.type == "Feature" 
+      ? value?.links?.find((link) => link.rel == "collection")?.href
       : undefined;
+  
   const { value: root } = useStacValue(rootHref);
-  const [tab, setTab] = useState<string>("value");
+  const { value: parent } = useStacValue(parentHref);
+  const { value: collection } = useStacValue(collectionHref);
+  
   const catalogHref =
     value?.type == "Catalog" &&
     value.links.find((link) => link.rel == "self")?.href;
-  const searchLinks = root?.links?.filter((link) => link.rel == "search");
-  const search =
-    (catalogHref && collections && collections.length > 0) ||
-    !!(searchLinks && searchLinks.length > 0);
-
+  const searchLinks = root?.links?.filter((link) => link.rel == "search") || 
+                      value?.links?.filter((link) => link.rel == "search");
+  
   useEffect(() => {
-    if (href) {
-      setTab("value");
+    if (!href && !value) {
+      setView("intro");
+    } else if (picked) {
+      setView("picked");
+    } else if (value) {
+      switch (value.type) {
+        case "Catalog":
+          setView("catalog");
+          break;
+        case "Collection":
+          setView("collection");
+          break;
+        case "Feature":
+          setView("item");
+          break;
+        case "FeatureCollection":
+          setView("collection");
+          break;
+      }
     }
-  }, [href]);
-
-  useEffect(() => {
-    if (picked) {
-      setTab("picked");
-    }
-  }, [picked]);
+  }, [href, value, picked]);
 
   return (
-    <Tabs.Root
+    <Box
       bg={"bg.muted"}
       rounded={4}
-      value={tab}
-      onValueChange={(e) => setTab(e.value)}
       pointerEvents={"auto"}
+      overflow={"hidden"}
     >
-      <Tabs.List>
-        <Tabs.Trigger value="value" disabled={!href}>
-          <LuInfo></LuInfo>
-        </Tabs.Trigger>
-        <Tabs.Trigger value="search" disabled={!search}>
-          <LuSearch></LuSearch>
-        </Tabs.Trigger>
-        <Tabs.Trigger value="filter" disabled={!temporalExtents}>
-          <LuFilter></LuFilter>
-        </Tabs.Trigger>
-        <Tabs.Trigger value="picked" disabled={!picked}>
-          <LuMousePointerClick></LuMousePointerClick>
-        </Tabs.Trigger>
-      </Tabs.List>
-      <Tabs.ContentGroup
+      {/* Navigation Breadcrumbs */}
+      {value && (
+        <Box px={4} pt={3} pb={2} borderBottomWidth={1} borderColor={"border.subtle"}>
+          <NavigationBreadcrumbs 
+            value={value}
+            view={view}
+            setHref={setHref}
+            picked={picked}
+            root={root}
+            parent={parent}
+            collection={collection}
+            selfHref={selfHref}
+            rootHref={rootHref}
+            parentHref={parentHref}
+            collectionHref={collectionHref}
+          />
+        </Box>
+      )}
+      
+      <Box
         overflow={"scroll"}
         maxH={{ base: "40dvh", md: "80dvh" }}
         px={4}
         pb={4}
+        pt={value ? 3 : 4}
       >
-        <Tabs.Content value="value">
-          {(value && <Value value={value}></Value>) ||
-            (href && <SkeletonText noOfLines={3}></SkeletonText>) || (
-              <Introduction></Introduction>
+        {view === "intro" && <Introduction />}
+        
+        {view === "catalog" && value && (
+          <Stack gap={4}>
+            <Value value={value} />
+            {catalogHref && collections && collections.length > 0 && (
+              <Box>
+                <Text fontSize="sm" fontWeight="semibold" mb={2}>Collection Search</Text>
+                <NaturalLanguageCollectionSearch
+                  collections={collections}
+                  href={catalogHref}
+                />
+              </Box>
             )}
-        </Tabs.Content>
-        <Tabs.Content value="search">
-          {catalogHref && collections && (
-            <NaturalLanguageCollectionSearch
-              collections={collections}
-              href={catalogHref}
-            ></NaturalLanguageCollectionSearch>
-          )}
-          {searchLinks && value && value.type == "Collection" && (
-            <ItemSearch collection={value} links={searchLinks}></ItemSearch>
-          )}
-        </Tabs.Content>
-        <Tabs.Content value="filter">
-          {temporalExtents && (
-            <Filter temporalExtents={temporalExtents}></Filter>
-          )}
-        </Tabs.Content>
-        <Tabs.Content value="picked">
-          {picked && <Value value={picked}></Value>}
-        </Tabs.Content>
-      </Tabs.ContentGroup>
-    </Tabs.Root>
+          </Stack>
+        )}
+        
+        {view === "collection" && value && (
+          <Stack gap={4}>
+            <Value value={value} />
+            
+            {searchLinks && value.type === "Collection" && (
+              <Stack gap={3}>
+                <Box>
+                  <Text fontSize="sm" fontWeight="semibold" mb={2}>Item Search</Text>
+                  <ItemSearch collection={value} links={searchLinks} />
+                </Box>
+                
+                {temporalExtents && (
+                  <Accordion.Root variant="subtle" collapsible>
+                    <Accordion.Item value="filter">
+                      <Accordion.ItemTrigger>
+                        <HStack gap={2}>
+                          <Icon>
+                            <LuFilter />
+                          </Icon>
+                          <Text fontSize="sm" fontWeight="semibold">Temporal Filter</Text>
+                        </HStack>
+                        <Accordion.ItemIndicator>
+                          <LuChevronDown />
+                        </Accordion.ItemIndicator>
+                      </Accordion.ItemTrigger>
+                      <Accordion.ItemContent>
+                        <Box pt={2}>
+                          <Filter temporalExtents={temporalExtents} />
+                        </Box>
+                      </Accordion.ItemContent>
+                    </Accordion.Item>
+                  </Accordion.Root>
+                )}
+              </Stack>
+            )}
+          </Stack>
+        )}
+        
+        {view === "item" && value && <Value value={value} />}
+        {view === "picked" && picked && <Value value={picked} />}
+        
+        {href && !value && <SkeletonText noOfLines={3} />}
+      </Box>
+    </Box>
   );
 }
 
@@ -129,3 +187,5 @@ function Introduction() {
     </Stack>
   );
 }
+
+
