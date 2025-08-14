@@ -4,11 +4,12 @@ import { LuFile, LuFiles, LuFolder, LuFolderPlus } from "react-icons/lu";
 import type { StacItem } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
 import type { StacValue } from "../types/stac";
+import type { IconType } from "react-icons/lib";
 
 interface BreadcrumbItem {
   label: string;
   href: string | null;
-  icon: any;
+  icon: IconType;
   active: boolean;
 }
 
@@ -25,13 +26,13 @@ export function NavigationBreadcrumbs({
   parentHref,
   collectionHref,
 }: {
-  value: StacValue;
+  value: StacValue | undefined;
   view: string;
   setHref: (href: string) => void;
   picked: StacItem | undefined;
-  root: any; // TODO: type these correctly
-  parent: any;
-  collection: any;
+  root: StacValue | undefined;
+  parent: StacValue | undefined;
+  collection: StacValue | undefined;
   selfHref?: string;
   rootHref?: string;
   parentHref?: string;
@@ -81,24 +82,24 @@ export function NavigationBreadcrumbs({
     }
   }
 
-  if (value.type === "Catalog") {
+  if (value?.type === "Catalog") {
     items.push({
       label: value.title || value.id || "Catalog",
       href: selfHref || null,
       icon: LuFolder,
       active: view === "catalog",
     });
-  } else if (value.type === "Collection") {
+  } else if (value?.type === "Collection") {
     if (rootUrl && root) {
       items.push({
-        label: root.title || root.id || "Catalog",
+        label: root.title as string || root.id || "Catalog",
         href: rootUrl.toString(),
         icon: LuFolder,
         active: false,
       });
     } else if (parentUrl && parent && parent.type === "Catalog") {
       items.push({
-        label: parent.title || parent.id || "Catalog",
+        label: parent.title as string || parent.id || "Catalog",
         href: parentUrl.toString(),
         icon: LuFolder,
         active: false,
@@ -111,10 +112,10 @@ export function NavigationBreadcrumbs({
       icon: LuFolderPlus,
       active: view === "collection",
     });
-  } else if (value.type === "Feature") {
+  } else if (value?.type === "Feature") {
     if (rootUrl && root) {
       items.push({
-        label: root.title || root.id || "Catalog",
+        label: root.title as string || root.id || "Catalog",
         href: rootUrl.toString(),
         icon: LuFolder,
         active: false,
@@ -126,7 +127,7 @@ export function NavigationBreadcrumbs({
         (link: { rel: string; href?: string }) => link.rel === "self",
       )?.href;
       items.push({
-        label: collection.title || collection.id || "Collection",
+        label: collection.title as string || collection.id || "Collection",
         href: collectionSelfHref || collectionUrl.toString(),
         icon: LuFolderPlus,
         active: false,
@@ -146,7 +147,7 @@ export function NavigationBreadcrumbs({
       icon: LuFile,
       active: view === "item",
     });
-  } else if (value.type === "FeatureCollection") {
+  } else if (value?.type === "FeatureCollection") {
     items.push({
       label: "Search Results",
       href: selfHref || null,
