@@ -92,14 +92,14 @@ export function NavigationBreadcrumbs({
   } else if (value?.type === "Collection") {
     if (rootUrl && root) {
       items.push({
-        label: root.title as string || root.id || "Catalog",
+        label: (root.title as string) || root.id || "Catalog",
         href: rootUrl.toString(),
         icon: LuFolder,
         active: false,
       });
     } else if (parentUrl && parent && parent.type === "Catalog") {
       items.push({
-        label: parent.title as string || parent.id || "Catalog",
+        label: (parent.title as string) || parent.id || "Catalog",
         href: parentUrl.toString(),
         icon: LuFolder,
         active: false,
@@ -115,7 +115,7 @@ export function NavigationBreadcrumbs({
   } else if (value?.type === "Feature") {
     if (rootUrl && root) {
       items.push({
-        label: root.title as string || root.id || "Catalog",
+        label: (root.title as string) || root.id || "Catalog",
         href: rootUrl.toString(),
         icon: LuFolder,
         active: false,
@@ -127,7 +127,7 @@ export function NavigationBreadcrumbs({
         (link: { rel: string; href?: string }) => link.rel === "self",
       )?.href;
       items.push({
-        label: collection.title as string || collection.id || "Collection",
+        label: (collection.title as string) || collection.id || "Collection",
         href: collectionSelfHref || collectionUrl.toString(),
         icon: LuFolderPlus,
         active: false,
