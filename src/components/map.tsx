@@ -106,7 +106,9 @@ export default function Map() {
       pickable: true,
       onClick: (info) => {
         setPicked(info.object);
-        const selfLink = info.object?.links?.find((link: { rel: string; href?: string }) => link.rel === "self");
+        const selfLink = info.object?.links?.find(
+          (link: { rel: string; href?: string }) => link.rel === "self",
+        );
         if (selfLink?.href) {
           setHref(selfLink.href);
         }

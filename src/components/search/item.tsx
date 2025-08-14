@@ -40,7 +40,6 @@ export default function ItemSearch({
   const [useViewportBounds, setUseViewportBounds] = useState(true);
   const { map } = useMap();
 
-
   const methods = createListCollection({
     items: links.map((link) => {
       return {

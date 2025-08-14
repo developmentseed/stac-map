@@ -58,12 +58,13 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // controls when to clear search items
-    const shouldClearSearch = 
-      value?.type === 'Catalog' || 
-      (value?.type === 'Collection' && searchItems && 
-       searchItems.length > 0 && 
-       searchItems[0].collection !== value.id);
-    
+    const shouldClearSearch =
+      value?.type === "Catalog" ||
+      (value?.type === "Collection" &&
+        searchItems &&
+        searchItems.length > 0 &&
+        searchItems[0].collection !== value.id);
+
     if (shouldClearSearch) {
       setSearchItems(undefined);
     }

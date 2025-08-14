@@ -1,17 +1,6 @@
-import {
-  Box,
-  Breadcrumb,
-  HStack,
-  Icon,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Breadcrumb, HStack, Icon, Text } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
-import {
-  LuFile,
-  LuFiles,
-  LuFolder,
-  LuFolderPlus,
-} from "react-icons/lu";
+import { LuFile, LuFiles, LuFolder, LuFolderPlus } from "react-icons/lu";
 import type { StacItem } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
 import type { StacValue } from "../types/stac";
@@ -23,10 +12,10 @@ interface BreadcrumbItem {
   active: boolean;
 }
 
-export function NavigationBreadcrumbs({ 
-  value, 
-  view, 
-  setHref, 
+export function NavigationBreadcrumbs({
+  value,
+  view,
+  setHref,
   picked,
   root,
   parent,
@@ -34,7 +23,7 @@ export function NavigationBreadcrumbs({
   selfHref,
   rootHref,
   parentHref,
-  collectionHref
+  collectionHref,
 }: {
   value: StacValue;
   view: string;
@@ -52,13 +41,13 @@ export function NavigationBreadcrumbs({
   const containerRef = useRef<HTMLDivElement>(null);
   const [showEllipsis, setShowEllipsis] = useState(false);
   const [visibleStartIndex, setVisibleStartIndex] = useState(0);
-  
+
   const items: BreadcrumbItem[] = [];
-  
+
   let rootUrl: URL | undefined;
   let parentUrl: URL | undefined;
   let collectionUrl: URL | undefined;
-  
+
   if (rootHref) {
     try {
       rootUrl = new URL(rootHref, selfHref);
@@ -69,19 +58,21 @@ export function NavigationBreadcrumbs({
       rootUrl = { toString: () => rootHref } as URL;
     }
   }
-  
+
   if (parentHref) {
     try {
       parentUrl = new URL(parentHref, selfHref);
-      if (parentUrl.toString() === href || 
-          (rootUrl && parentUrl.toString() === rootUrl.toString())) {
+      if (
+        parentUrl.toString() === href ||
+        (rootUrl && parentUrl.toString() === rootUrl.toString())
+      ) {
         parentUrl = undefined;
       }
     } catch {
       parentUrl = { toString: () => parentHref } as URL;
     }
   }
-  
+
   if (collectionHref) {
     try {
       collectionUrl = new URL(collectionHref, selfHref);
@@ -89,98 +80,100 @@ export function NavigationBreadcrumbs({
       collectionUrl = { toString: () => collectionHref } as URL;
     }
   }
-  
+
   if (value.type === "Catalog") {
-    items.push({ 
-      label: value.title || value.id || "Catalog", 
+    items.push({
+      label: value.title || value.id || "Catalog",
       href: selfHref || null,
       icon: LuFolder,
-      active: view === "catalog"
+      active: view === "catalog",
     });
   } else if (value.type === "Collection") {
     if (rootUrl && root) {
-      items.push({ 
-        label: root.title || root.id || "Catalog", 
+      items.push({
+        label: root.title || root.id || "Catalog",
         href: rootUrl.toString(),
         icon: LuFolder,
-        active: false
+        active: false,
       });
     } else if (parentUrl && parent && parent.type === "Catalog") {
-      items.push({ 
-        label: parent.title || parent.id || "Catalog", 
+      items.push({
+        label: parent.title || parent.id || "Catalog",
         href: parentUrl.toString(),
         icon: LuFolder,
-        active: false
+        active: false,
       });
     }
-    
-    items.push({ 
-      label: value.title || value.id || "Collection", 
+
+    items.push({
+      label: value.title || value.id || "Collection",
       href: selfHref || null,
       icon: LuFolderPlus,
-      active: view === "collection"
+      active: view === "collection",
     });
   } else if (value.type === "Feature") {
     if (rootUrl && root) {
-      items.push({ 
-        label: root.title || root.id || "Catalog", 
+      items.push({
+        label: root.title || root.id || "Catalog",
         href: rootUrl.toString(),
         icon: LuFolder,
-        active: false
+        active: false,
       });
     }
-    
+
     if (collectionUrl && collection) {
-      const collectionSelfHref = collection.links?.find((link: { rel: string; href?: string }) => link.rel === "self")?.href;
-      items.push({ 
-        label: collection.title || collection.id || "Collection", 
+      const collectionSelfHref = collection.links?.find(
+        (link: { rel: string; href?: string }) => link.rel === "self",
+      )?.href;
+      items.push({
+        label: collection.title || collection.id || "Collection",
         href: collectionSelfHref || collectionUrl.toString(),
         icon: LuFolderPlus,
-        active: false
+        active: false,
       });
     } else if (parentUrl && parent && parent.type === "Collection") {
-      items.push({ 
-        label: parent.title || parent.id || "Collection", 
+      items.push({
+        label: parent.title || parent.id || "Collection",
         href: parentUrl.toString(),
         icon: LuFolderPlus,
-        active: false
+        active: false,
       });
     }
-    
-    items.push({ 
-      label: value.properties?.title || value.id || "Item", 
+
+    items.push({
+      label: value.properties?.title || value.id || "Item",
       href: selfHref || null,
       icon: LuFile,
-      active: view === "item"
+      active: view === "item",
     });
   } else if (value.type === "FeatureCollection") {
-    items.push({ 
-      label: "Search Results", 
+    items.push({
+      label: "Search Results",
       href: selfHref || null,
       icon: LuFiles,
-      active: view === "collection"
+      active: view === "collection",
     });
   }
-  
+
   if (view === "picked" && picked) {
     if (items.length > 0) {
-      items.forEach(item => item.active = false);
+      items.forEach((item) => (item.active = false));
     }
-    items.push({ 
-      label: picked.properties?.title || picked.id || "Selected Item", 
+    items.push({
+      label: picked.properties?.title || picked.id || "Selected Item",
       href: null,
       icon: LuFile,
-      active: true
+      active: true,
     });
   }
 
   useEffect(() => {
     const checkWidth = () => {
       if (!containerRef.current) return;
-      
+
       const containerWidth = containerRef.current.offsetWidth;
       const MAX_WIDTH = 500;
-      
+
       if (containerWidth > MAX_WIDTH && items.length > 2) {
         setShowEllipsis(true);
         // show ellipses instead of text from the beginning
@@ -192,12 +185,12 @@ export function NavigationBreadcrumbs({
     };
 
     checkWidth();
-    
+
     const resizeObserver = new ResizeObserver(checkWidth);
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
-    
+
     return () => {
       resizeObserver.disconnect();
     };
@@ -205,7 +198,7 @@ export function NavigationBreadcrumbs({
 
   const visibleItems = showEllipsis ? items.slice(visibleStartIndex) : items;
   const hiddenItems = showEllipsis ? items.slice(0, visibleStartIndex) : [];
-  
+
   return (
     <Box ref={containerRef}>
       <Breadcrumb.Root>
@@ -218,9 +211,11 @@ export function NavigationBreadcrumbs({
               <Breadcrumb.Separator />
             </>
           )}
-          
+
           {visibleItems.map((item, index) => {
-            const actualIndex = showEllipsis ? index + visibleStartIndex : index;
+            const actualIndex = showEllipsis
+              ? index + visibleStartIndex
+              : index;
             return (
               <Box key={actualIndex} display="contents">
                 <Breadcrumb.Item>
@@ -229,7 +224,10 @@ export function NavigationBreadcrumbs({
                       <Icon size="xs" color="fg.muted">
                         <item.icon />
                       </Icon>
-                      <Breadcrumb.CurrentLink fontWeight="bolder" fontSize="large">
+                      <Breadcrumb.CurrentLink
+                        fontWeight="bolder"
+                        fontSize="large"
+                      >
                         {item.label}
                       </Breadcrumb.CurrentLink>
                     </HStack>

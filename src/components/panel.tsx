@@ -11,11 +11,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import {
-  LuChevronDown,
-  LuFilter,
-  LuGithub,
-} from "react-icons/lu";
+import { LuChevronDown, LuFilter, LuGithub } from "react-icons/lu";
 import useStacMap from "../hooks/stac-map";
 import useStacValue from "../hooks/stac-value";
 import Filter from "./filter";
@@ -25,27 +21,31 @@ import { NavigationBreadcrumbs } from "./navigation-breadcrumbs";
 import Value from "./value";
 
 export default function Panel() {
-  const { href, value, picked, collections, temporalExtents, setHref } = useStacMap();
-  const [view, setView] = useState<"intro" | "catalog" | "collection" | "item" | "picked">("intro");
-  
+  const { href, value, picked, collections, temporalExtents, setHref } =
+    useStacMap();
+  const [view, setView] = useState<
+    "intro" | "catalog" | "collection" | "item" | "picked"
+  >("intro");
+
   const selfHref = value?.links?.find((link) => link.rel == "self")?.href;
   const rootHref = value?.links?.find((link) => link.rel == "root")?.href;
   const parentHref = value?.links?.find((link) => link.rel == "parent")?.href;
-  const collectionHref = 
-    value?.type == "Feature" 
+  const collectionHref =
+    value?.type == "Feature"
       ? value?.links?.find((link) => link.rel == "collection")?.href
       : undefined;
-  
+
   const { value: root } = useStacValue(rootHref);
   const { value: parent } = useStacValue(parentHref);
   const { value: collection } = useStacValue(collectionHref);
-  
+
   const catalogHref =
     value?.type == "Catalog" &&
     value.links.find((link) => link.rel == "self")?.href;
-  const searchLinks = root?.links?.filter((link) => link.rel == "search") || 
-                      value?.links?.filter((link) => link.rel == "search");
-  
+  const searchLinks =
+    root?.links?.filter((link) => link.rel == "search") ||
+    value?.links?.filter((link) => link.rel == "search");
+
   useEffect(() => {
     if (!href && !value) {
       setView("intro");
@@ -70,16 +70,17 @@ export default function Panel() {
   }, [href, value, picked]);
 
   return (
-    <Box
-      bg={"bg.muted"}
-      rounded={4}
-      pointerEvents={"auto"}
-      overflow={"hidden"}
-    >
+    <Box bg={"bg.muted"} rounded={4} pointerEvents={"auto"} overflow={"hidden"}>
       {/* Navigation Breadcrumbs */}
       {value && (
-        <Box px={4} pt={3} pb={2} borderBottomWidth={1} borderColor={"border.subtle"}>
-          <NavigationBreadcrumbs 
+        <Box
+          px={4}
+          pt={3}
+          pb={2}
+          borderBottomWidth={1}
+          borderColor={"border.subtle"}
+        >
+          <NavigationBreadcrumbs
             value={value}
             view={view}
             setHref={setHref}
@@ -94,7 +95,7 @@ export default function Panel() {
           />
         </Box>
       )}
-      
+
       <Box
         overflow={"scroll"}
         maxH={{ base: "40dvh", md: "80dvh" }}
@@ -103,13 +104,15 @@ export default function Panel() {
         pt={value ? 3 : 4}
       >
         {view === "intro" && <Introduction />}
-        
+
         {view === "catalog" && value && (
           <Stack gap={4}>
             <Value value={value} />
             {catalogHref && collections && collections.length > 0 && (
               <Box>
-                <Text fontSize="sm" fontWeight="semibold" mb={2}>Collection Search</Text>
+                <Text fontSize="sm" fontWeight="semibold" mb={2}>
+                  Collection Search
+                </Text>
                 <NaturalLanguageCollectionSearch
                   collections={collections}
                   href={catalogHref}
@@ -118,18 +121,20 @@ export default function Panel() {
             )}
           </Stack>
         )}
-        
+
         {view === "collection" && value && (
           <Stack gap={4}>
             <Value value={value} />
-            
+
             {searchLinks && value.type === "Collection" && (
               <Stack gap={3}>
                 <Box>
-                  <Text fontSize="sm" fontWeight="semibold" mb={2}>Item Search</Text>
+                  <Text fontSize="sm" fontWeight="semibold" mb={2}>
+                    Item Search
+                  </Text>
                   <ItemSearch collection={value} links={searchLinks} />
                 </Box>
-                
+
                 {temporalExtents && (
                   <Accordion.Root variant="subtle" collapsible>
                     <Accordion.Item value="filter">
@@ -138,7 +143,9 @@ export default function Panel() {
                           <Icon>
                             <LuFilter />
                           </Icon>
-                          <Text fontSize="sm" fontWeight="semibold">Temporal Filter</Text>
+                          <Text fontSize="sm" fontWeight="semibold">
+                            Temporal Filter
+                          </Text>
                         </HStack>
                         <Accordion.ItemIndicator>
                           <LuChevronDown />
@@ -156,10 +163,10 @@ export default function Panel() {
             )}
           </Stack>
         )}
-        
+
         {view === "item" && value && <Value value={value} />}
         {view === "picked" && picked && <Value value={picked} />}
-        
+
         {href && !value && <SkeletonText noOfLines={3} />}
       </Box>
     </Box>
@@ -187,5 +194,3 @@ function Introduction() {
     </Stack>
   );
 }
-
-
