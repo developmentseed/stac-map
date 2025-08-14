@@ -5,13 +5,23 @@ import {
   Icon,
   Text,
 } from "@chakra-ui/react";
+import { useEffect, useRef, useState } from "react";
 import {
   LuFile,
   LuFiles,
   LuFolder,
   LuFolderPlus,
 } from "react-icons/lu";
+import type { StacItem } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
+import type { StacValue } from "../types/stac";
+
+interface BreadcrumbItem {
+  label: string;
+  href: string | null;
+  icon: any;
+  active: boolean;
+}
 
 export function NavigationBreadcrumbs({ 
   value, 
@@ -26,11 +36,11 @@ export function NavigationBreadcrumbs({
   parentHref,
   collectionHref
 }: {
-  value: any;
+  value: StacValue;
   view: string;
   setHref: (href: string) => void;
-  picked: any;
-  root: any;
+  picked: StacItem | undefined;
+  root: any; // TODO: type these correctly
   parent: any;
   collection: any;
   selfHref?: string;
@@ -39,7 +49,11 @@ export function NavigationBreadcrumbs({
   collectionHref?: string;
 }) {
   const { href } = useStacMap();
-  const items = [];
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showEllipsis, setShowEllipsis] = useState(false);
+  const [visibleStartIndex, setVisibleStartIndex] = useState(0);
+  
+  const items: BreadcrumbItem[] = [];
   
   let rootUrl: URL | undefined;
   let parentUrl: URL | undefined;
@@ -79,7 +93,7 @@ export function NavigationBreadcrumbs({
   if (value.type === "Catalog") {
     items.push({ 
       label: value.title || value.id || "Catalog", 
-      href: selfHref,
+      href: selfHref || null,
       icon: LuFolder,
       active: view === "catalog"
     });
@@ -102,7 +116,7 @@ export function NavigationBreadcrumbs({
     
     items.push({ 
       label: value.title || value.id || "Collection", 
-      href: selfHref,
+      href: selfHref || null,
       icon: LuFolderPlus,
       active: view === "collection"
     });
@@ -135,14 +149,14 @@ export function NavigationBreadcrumbs({
     
     items.push({ 
       label: value.properties?.title || value.id || "Item", 
-      href: selfHref,
+      href: selfHref || null,
       icon: LuFile,
       active: view === "item"
     });
   } else if (value.type === "FeatureCollection") {
     items.push({ 
       label: "Search Results", 
-      href: selfHref,
+      href: selfHref || null,
       icon: LuFiles,
       active: view === "collection"
     });
@@ -159,45 +173,91 @@ export function NavigationBreadcrumbs({
       active: true
     });
   }
+
+  useEffect(() => {
+    const checkWidth = () => {
+      if (!containerRef.current) return;
+      
+      const containerWidth = containerRef.current.offsetWidth;
+      const MAX_WIDTH = 500;
+      
+      if (containerWidth > MAX_WIDTH && items.length > 2) {
+        setShowEllipsis(true);
+        // show ellipses instead of text from the beginning
+        setVisibleStartIndex(Math.max(0, items.length - 2));
+      } else {
+        setShowEllipsis(false);
+        setVisibleStartIndex(0);
+      }
+    };
+
+    checkWidth();
+    
+    const resizeObserver = new ResizeObserver(checkWidth);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [items.length]);
+
+  const visibleItems = showEllipsis ? items.slice(visibleStartIndex) : items;
+  const hiddenItems = showEllipsis ? items.slice(0, visibleStartIndex) : [];
   
   return (
-    <Breadcrumb.Root>
-      <Breadcrumb.List>
-        {items.map((item, index) => (
-          <Box key={index} display="contents">
-            <Breadcrumb.Item>
-              {item.active ? (
-                <HStack gap={1}>
-                  <Icon size="xs" color="fg.muted">
-                    <item.icon />
-                  </Icon>
-                  <Breadcrumb.CurrentLink fontWeight="bolder" fontSize="large">
-                    {item.label as string}
-                  </Breadcrumb.CurrentLink>
-                </HStack>
-              ) : (
-                <Breadcrumb.Link
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (item.href) {
-                      setHref(item.href);
-                    }
-                  }}
-                >
-                  <HStack gap={1}>
-                    <Icon size="xs" color="fg.muted">
-                      <item.icon />
-                    </Icon>
-                    <Text>{item.label as string}</Text>
-                  </HStack>
-                </Breadcrumb.Link>
-              )}
-            </Breadcrumb.Item>
-            {index < items.length - 1 && <Breadcrumb.Separator />}
-          </Box>
-        ))}
-      </Breadcrumb.List>
-    </Breadcrumb.Root>
+    <Box ref={containerRef}>
+      <Breadcrumb.Root>
+        <Breadcrumb.List>
+          {showEllipsis && hiddenItems.length > 0 && (
+            <>
+              <Breadcrumb.Item>
+                <Breadcrumb.Ellipsis />
+              </Breadcrumb.Item>
+              <Breadcrumb.Separator />
+            </>
+          )}
+          
+          {visibleItems.map((item, index) => {
+            const actualIndex = showEllipsis ? index + visibleStartIndex : index;
+            return (
+              <Box key={actualIndex} display="contents">
+                <Breadcrumb.Item>
+                  {item.active ? (
+                    <HStack gap={1}>
+                      <Icon size="xs" color="fg.muted">
+                        <item.icon />
+                      </Icon>
+                      <Breadcrumb.CurrentLink fontWeight="bolder" fontSize="large">
+                        {item.label}
+                      </Breadcrumb.CurrentLink>
+                    </HStack>
+                  ) : (
+                    <Breadcrumb.Link
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (item.href) {
+                          setHref(item.href);
+                        }
+                      }}
+                    >
+                      <HStack gap={1}>
+                        <Icon size="xs" color="fg.muted">
+                          <item.icon />
+                        </Icon>
+                        <Text>{item.label}</Text>
+                      </HStack>
+                    </Breadcrumb.Link>
+                  )}
+                </Breadcrumb.Item>
+                {index < visibleItems.length - 1 && <Breadcrumb.Separator />}
+              </Box>
+            );
+          })}
+        </Breadcrumb.List>
+      </Breadcrumb.Root>
+    </Box>
   );
 }
