@@ -15,14 +15,12 @@ import { LuChevronDown, LuFilter, LuGithub } from "react-icons/lu";
 import useStacMap from "../hooks/stac-map";
 import useStacValue from "../hooks/stac-value";
 import Filter from "./filter";
-import ItemSearch from "./search/item";
-import { NaturalLanguageCollectionSearch } from "./search/natural-language";
 import { NavigationBreadcrumbs } from "./navigation-breadcrumbs";
+import ItemSearch from "./search/item";
 import Value from "./value";
 
 export default function Panel() {
-  const { href, value, picked, collections, temporalExtents, setHref } =
-    useStacMap();
+  const { href, value, picked, temporalExtents, setHref } = useStacMap();
   const [view, setView] = useState<
     "intro" | "catalog" | "collection" | "item" | "picked"
   >("intro");
@@ -39,9 +37,6 @@ export default function Panel() {
   const { value: parent } = useStacValue(parentHref);
   const { value: collection } = useStacValue(collectionHref);
 
-  const catalogHref =
-    value?.type == "Catalog" &&
-    value.links.find((link) => link.rel == "self")?.href;
   const searchLinks =
     root?.links?.filter((link) => link.rel == "search") ||
     value?.links?.filter((link) => link.rel == "search");
@@ -71,7 +66,6 @@ export default function Panel() {
 
   return (
     <Box bg={"bg.muted"} rounded={4} pointerEvents={"auto"} overflow={"hidden"}>
-      {/* Navigation Breadcrumbs */}
       {value && (
         <Box
           px={4}
@@ -105,22 +99,7 @@ export default function Panel() {
       >
         {view === "intro" && <Introduction />}
 
-        {view === "catalog" && value && (
-          <Stack gap={4}>
-            <Value value={value} />
-            {catalogHref && collections && collections.length > 0 && (
-              <Box>
-                <Text fontSize="sm" fontWeight="semibold" mb={2}>
-                  Collection Search
-                </Text>
-                <NaturalLanguageCollectionSearch
-                  collections={collections}
-                  href={catalogHref}
-                />
-              </Box>
-            )}
-          </Stack>
-        )}
+        {view === "catalog" && value && <Value value={value} />}
 
         {view === "collection" && value && (
           <Stack gap={4}>

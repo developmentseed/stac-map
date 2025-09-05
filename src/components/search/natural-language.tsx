@@ -1,6 +1,8 @@
 import {
+  Card,
   CloseButton,
   Field,
+  Heading,
   Input,
   InputGroup,
   SkeletonText,
@@ -133,19 +135,28 @@ function Results({
   }, [data, collections]);
 
   if (results) {
-    return results.map((result) => {
-      if (result.collection) {
-        return (
-          <CollectionCard
-            collection={result.collection}
-            key={result.collection.id}
-            explanation={result.result.explanation}
-          ></CollectionCard>
-        );
-      } else {
-        return null;
-      }
-    });
+    return (
+      <Card.Root variant={"subtle"}>
+        <Card.Header>
+          <Heading size={"md"}>Natural language search results</Heading>
+        </Card.Header>
+        <Card.Body>
+          {results.map((result) => {
+            if (result.collection) {
+              return (
+                <CollectionCard
+                  collection={result.collection}
+                  key={result.collection.id}
+                  explanation={result.result.explanation}
+                ></CollectionCard>
+              );
+            } else {
+              return null;
+            }
+          })}
+        </Card.Body>
+      </Card.Root>
+    );
   } else {
     return <SkeletonText></SkeletonText>;
   }

@@ -1,11 +1,21 @@
-import { Box, DataList, HStack, Stack, Text } from "@chakra-ui/react";
+import {
+  Accordion,
+  Box,
+  DataList,
+  HStack,
+  Span,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import type {
   StacCollection,
   SpatialExtent as StacSpatialExtent,
   TemporalExtent as StacTemporalExtent,
 } from "stac-ts";
+import useStacMap from "../hooks/stac-map";
 import { ChildCard, Children } from "./children";
 import { CollectionCombobox } from "./search/collection";
+import { NaturalLanguageCollectionSearch } from "./search/natural-language";
 
 export function Collection({ collection }: { collection: StacCollection }) {
   return (
@@ -39,9 +49,38 @@ export function Collections({
 }: {
   collections: StacCollection[];
 }) {
+  const { value } = useStacMap();
+  const catalogHref =
+    value?.type == "Catalog" &&
+    value.links.find((link) => link.rel == "self")?.href;
+
   return (
     <Children heading="Collections">
-      <CollectionCombobox collections={collections}></CollectionCombobox>
+      <Accordion.Root collapsible defaultValue={["simple"]}>
+        <Accordion.Item value="simple">
+          <Accordion.ItemTrigger>
+            <Span flex={1}>Simple search</Span>
+            <Accordion.ItemIndicator></Accordion.ItemIndicator>
+          </Accordion.ItemTrigger>
+          <Accordion.ItemContent>
+            <CollectionCombobox collections={collections}></CollectionCombobox>
+          </Accordion.ItemContent>
+        </Accordion.Item>
+        {catalogHref && (
+          <Accordion.Item value="natural-language">
+            <Accordion.ItemTrigger>
+              <Span flex={1}>Natural language search</Span>
+              <Accordion.ItemIndicator></Accordion.ItemIndicator>
+            </Accordion.ItemTrigger>
+            <Accordion.ItemContent>
+              <NaturalLanguageCollectionSearch
+                collections={collections}
+                href={catalogHref}
+              />
+            </Accordion.ItemContent>
+          </Accordion.Item>
+        )}
+      </Accordion.Root>
       {collections.map((collection) => (
         <CollectionCard
           collection={collection}
