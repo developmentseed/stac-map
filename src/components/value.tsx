@@ -41,28 +41,26 @@ export default function Value({
 
       {children}
 
-      <ButtonGroup size={"xs"} variant={"outline"} py={4}>
-        {selfHref && (
-          <>
-            <Button asChild>
-              <a href={selfHref} target="_blank">
-                <LuExternalLink></LuExternalLink> Source
-              </a>
-            </Button>
-            <Button asChild>
-              <a
-                href={
-                  "https://radiantearth.github.io/stac-browser/#/external/" +
-                  selfHref.replace(/^(https?:\/\/)/, "")
-                }
-                target="_blank"
-              >
-                <LuExternalLink></LuExternalLink> STAC Browser
-              </a>
-            </Button>
-          </>
-        )}
-      </ButtonGroup>
+      {selfHref && (
+        <ButtonGroup size={"xs"} variant={"outline"} py={4}>
+          <Button asChild>
+            <a href={selfHref} target="_blank">
+              <LuExternalLink></LuExternalLink> Source
+            </a>
+          </Button>
+          <Button asChild>
+            <a
+              href={
+                "https://radiantearth.github.io/stac-browser/#/external/" +
+                selfHref.replace(/^(https?:\/\/)/, "")
+              }
+              target="_blank"
+            >
+              <LuExternalLink></LuExternalLink> STAC Browser
+            </a>
+          </Button>
+        </ButtonGroup>
+      )}
     </Stack>
   );
 }
