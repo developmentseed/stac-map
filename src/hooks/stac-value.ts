@@ -7,6 +7,7 @@ import type { StacItemCollection, StacValue } from "../types/stac";
 export default function useStacValue(
   href: string | undefined,
   fileUpload?: UseFileUploadReturn | undefined,
+  types?: ("Catalog" | "Collection" | "FeatureCollection" | "Feature")[],
 ) {
   const { db } = useDuckDb();
   const { data } = useQuery<{
@@ -24,7 +25,14 @@ export default function useStacValue(
     enabled: !!(href && db),
   });
 
-  return { value: data?.value, parquetPath: data?.parquetPath };
+  let value = data?.value;
+  if (value && types) {
+    if (!types.includes(value.type)) {
+      value = undefined;
+    }
+  }
+
+  return { value, parquetPath: data?.parquetPath };
 }
 
 async function getStacValue(

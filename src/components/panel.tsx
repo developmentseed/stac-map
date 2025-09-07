@@ -1,155 +1,65 @@
 import {
-  Accordion,
+  Alert,
   Box,
   Center,
-  HStack,
-  Icon,
   IconButton,
   Link,
   SkeletonText,
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import { LuChevronDown, LuFilter, LuGithub } from "react-icons/lu";
+import { LuGithub } from "react-icons/lu";
 import useStacMap from "../hooks/stac-map";
-import useStacValue from "../hooks/stac-value";
-import Filter from "./filter";
+import type { StacValue } from "../types/stac";
+import { Catalog } from "./catalog";
+import { Collection } from "./collection";
+import Item from "./item";
+import ItemCollection from "./item-collection";
 import { NavigationBreadcrumbs } from "./navigation-breadcrumbs";
-import ItemSearch from "./search/item";
-import Value from "./value";
 
 export default function Panel() {
-  const { href, value, picked, temporalExtents, setHref } = useStacMap();
-  const [view, setView] = useState<
-    "intro" | "catalog" | "collection" | "item" | "picked"
-  >("intro");
+  const { href, value, picked } = useStacMap();
 
-  const selfHref = value?.links?.find((link) => link.rel == "self")?.href;
-  const rootHref = value?.links?.find((link) => link.rel == "root")?.href;
-  const parentHref = value?.links?.find((link) => link.rel == "parent")?.href;
-  const collectionHref =
-    value?.type == "Feature"
-      ? value?.links?.find((link) => link.rel == "collection")?.href
-      : undefined;
+  let content;
 
-  const { value: root } = useStacValue(rootHref);
-  const { value: parent } = useStacValue(parentHref);
-  const { value: collection } = useStacValue(collectionHref);
-
-  const searchLinks =
-    root?.links?.filter((link) => link.rel == "search") ||
-    value?.links?.filter((link) => link.rel == "search");
-
-  useEffect(() => {
-    if (!href && !value) {
-      setView("intro");
-    } else if (picked) {
-      setView("picked");
-    } else if (value) {
-      switch (value.type) {
-        case "Catalog":
-          setView("catalog");
-          break;
-        case "Collection":
-          setView("collection");
-          break;
-        case "Feature":
-          setView("item");
-          break;
-        case "FeatureCollection":
-          setView("collection");
-          break;
-      }
-    }
-  }, [href, value, picked]);
+  if (!href) {
+    content = <Introduction></Introduction>;
+  } else if (!value) {
+    content = <SkeletonText noOfLines={3} />;
+  } else if (picked) {
+    content = <ValueContent value={picked}></ValueContent>;
+  } else {
+    content = <ValueContent value={value}></ValueContent>;
+  }
 
   return (
     <Box bg={"bg.muted"} rounded={4} pointerEvents={"auto"} overflow={"hidden"}>
-      {value && (
-        <Box
-          px={4}
-          pt={3}
-          pb={2}
-          borderBottomWidth={1}
-          borderColor={"border.subtle"}
-        >
-          <NavigationBreadcrumbs
-            value={value}
-            view={view}
-            setHref={setHref}
-            picked={picked}
-            root={root}
-            parent={parent}
-            collection={collection}
-            selfHref={selfHref}
-            rootHref={rootHref}
-            parentHref={parentHref}
-            collectionHref={collectionHref}
-          />
-        </Box>
-      )}
-
-      <Box
-        overflow={"scroll"}
-        maxH={{ base: "40dvh", md: "80dvh" }}
-        px={4}
-        pb={4}
-        pt={value ? 3 : 4}
-      >
-        {view === "intro" && <Introduction />}
-
-        {view === "catalog" && value && <Value value={value} />}
-
-        {view === "collection" && value && (
-          <Stack gap={4}>
-            <Value value={value} />
-
-            {searchLinks && value.type === "Collection" && (
-              <Stack gap={3}>
-                <Box>
-                  <Text fontSize="sm" fontWeight="semibold" mb={2}>
-                    Item Search
-                  </Text>
-                  <ItemSearch collection={value} links={searchLinks} />
-                </Box>
-
-                {temporalExtents && (
-                  <Accordion.Root variant="subtle" collapsible>
-                    <Accordion.Item value="filter">
-                      <Accordion.ItemTrigger>
-                        <HStack gap={2}>
-                          <Icon>
-                            <LuFilter />
-                          </Icon>
-                          <Text fontSize="sm" fontWeight="semibold">
-                            Temporal Filter
-                          </Text>
-                        </HStack>
-                        <Accordion.ItemIndicator>
-                          <LuChevronDown />
-                        </Accordion.ItemIndicator>
-                      </Accordion.ItemTrigger>
-                      <Accordion.ItemContent>
-                        <Box pt={2}>
-                          <Filter temporalExtents={temporalExtents} />
-                        </Box>
-                      </Accordion.ItemContent>
-                    </Accordion.Item>
-                  </Accordion.Root>
-                )}
-              </Stack>
-            )}
-          </Stack>
-        )}
-
-        {view === "item" && value && <Value value={value} />}
-        {view === "picked" && picked && <Value value={picked} />}
-
-        {href && !value && <SkeletonText noOfLines={3} />}
+      <Box px={4} py={3} borderBottomWidth={1} borderColor={"border.subtle"}>
+        <NavigationBreadcrumbs></NavigationBreadcrumbs>
+      </Box>
+      <Box overflow={"scroll"} maxH={{ base: "40dvh", md: "80dvh" }} p={4}>
+        {content}
       </Box>
     </Box>
   );
+}
+
+function ValueContent({ value }: { value: StacValue }) {
+  switch (value.type) {
+    case "Catalog":
+      return <Catalog catalog={value}></Catalog>;
+    case "Collection":
+      return <Collection collection={value}></Collection>;
+    case "Feature":
+      return <Item item={value}></Item>;
+    case "FeatureCollection":
+      return <ItemCollection itemCollection={value}></ItemCollection>;
+    default:
+      return (
+        // @ts-expect-error Fallback for unknown types
+        <Alert.Root status="error">Unknown STAC type: {value.type}</Alert.Root>
+      );
+  }
 }
 
 function Introduction() {

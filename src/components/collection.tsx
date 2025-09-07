@@ -15,32 +15,45 @@ import type {
 import useStacMap from "../hooks/stac-map";
 import { ChildCard, Children } from "./children";
 import { CollectionCombobox } from "./search/collection";
+import ItemSearch from "./search/item";
 import { NaturalLanguageCollectionSearch } from "./search/natural-language";
+import Value from "./value";
 
 export function Collection({ collection }: { collection: StacCollection }) {
+  const { root } = useStacMap();
+  const searchLinks =
+    (root && root.links?.filter((link) => link.rel == "search")) || [];
+  console.log(searchLinks);
   return (
-    <DataList.Root orientation={"horizontal"} size={"sm"} py={4}>
-      {collection.extent?.spatial?.bbox?.[0] && (
-        <DataList.Item>
-          <DataList.ItemLabel>Spatial extent</DataList.ItemLabel>
-          <DataList.ItemValue>
-            <SpatialExtent
-              bbox={collection.extent.spatial.bbox[0]}
-            ></SpatialExtent>
-          </DataList.ItemValue>
-        </DataList.Item>
+    <Stack>
+      <Value value={collection}>
+        <DataList.Root orientation={"horizontal"}>
+          {collection.extent?.spatial?.bbox?.[0] && (
+            <DataList.Item>
+              <DataList.ItemLabel>Spatial extent</DataList.ItemLabel>
+              <DataList.ItemValue>
+                <SpatialExtent
+                  bbox={collection.extent.spatial.bbox[0]}
+                ></SpatialExtent>
+              </DataList.ItemValue>
+            </DataList.Item>
+          )}
+          {collection.extent?.temporal?.interval?.[0] && (
+            <DataList.Item>
+              <DataList.ItemLabel>Temporal extent</DataList.ItemLabel>
+              <DataList.ItemValue>
+                <TemporalExtent
+                  interval={collection.extent.temporal.interval[0]}
+                ></TemporalExtent>
+              </DataList.ItemValue>
+            </DataList.Item>
+          )}
+        </DataList.Root>
+      </Value>
+      {searchLinks.length > 0 && (
+        <ItemSearch collection={collection} links={searchLinks}></ItemSearch>
       )}
-      {collection.extent?.temporal?.interval?.[0] && (
-        <DataList.Item>
-          <DataList.ItemLabel>Temporal extent</DataList.ItemLabel>
-          <DataList.ItemValue>
-            <TemporalExtent
-              interval={collection.extent.temporal.interval[0]}
-            ></TemporalExtent>
-          </DataList.ItemValue>
-        </DataList.Item>
-      )}
-    </DataList.Root>
+    </Stack>
   );
 }
 

@@ -1,6 +1,6 @@
 import { useFileUpload } from "@chakra-ui/react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import type { StacItem } from "stac-ts";
+import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
 import { StacMapContext } from "./context";
 import useStacChildrenAndItems from "./hooks/stac-children-and-items";
 import useStacGeoparquet from "./hooks/stac-geoparquet";
@@ -10,6 +10,16 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
   const [href, setHref] = useState<string | undefined>(getInitialHref());
   const fileUpload = useFileUpload({ maxFiles: 1 });
   const { value, parquetPath } = useStacValue(href, fileUpload);
+  const { value: root } = useStacValue(
+    value && value.links?.find((l) => l.rel === "root")?.href,
+    undefined,
+    ["Catalog", "Collection"],
+  );
+  const { value: parent } = useStacValue(
+    value && value.links?.find((l) => l.rel === "parent")?.href,
+    undefined,
+    ["Catalog", "Collection"],
+  );
   const {
     catalogs,
     collections,
@@ -130,8 +140,11 @@ export function StacMapProvider({ children }: { children: ReactNode }) {
       value={{
         href,
         setHref,
+        isStacGeoparquet: !!parquetPath,
         fileUpload,
         value,
+        parent: parent as StacCatalog | StacCollection | undefined,
+        root: root as StacCatalog | StacCollection | undefined,
         catalogs,
         collections,
         isFetchingCollections,

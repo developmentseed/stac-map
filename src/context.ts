@@ -15,12 +15,21 @@ interface StacMapContextType {
   /// A function to set the href.
   setHref: (href: string | undefined) => void;
 
+  /// Is the current value a stac-geoparquet?
+  isStacGeoparquet: boolean;
+
   /// A shared fileUpload structure that is the source of JSON or
   /// stac-geoparquet bytes.
   fileUpload: UseFileUploadReturn;
 
   /// The root STAC value.
   value: StacValue | undefined;
+
+  /// The root of the STAC value.
+  root: StacCatalog | StacCollection | undefined;
+
+  /// The parent of the STAC value.
+  parent: StacCatalog | StacCollection | undefined;
 
   /// Any catalogs that belong to the `value`.
   catalogs: StacCatalog[] | undefined;

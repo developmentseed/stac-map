@@ -2,6 +2,7 @@ import {
   Accordion,
   createTreeCollection,
   FormatNumber,
+  SkeletonText,
   Span,
   Stack,
   Table,
@@ -11,18 +12,27 @@ import {
 import type { ReactNode } from "react";
 import { LuCircle, LuCircleDot } from "react-icons/lu";
 import useStacMap from "../hooks/stac-map";
-import type { StacGeoparquetMetadata } from "../types/stac";
+import type { StacGeoparquetMetadata, StacItemCollection } from "../types/stac";
+import Value from "./value";
 
-export default function ItemCollection() {
-  const { stacGeoparquetMetadata } = useStacMap();
+export default function ItemCollection({
+  itemCollection,
+}: {
+  itemCollection: StacItemCollection;
+}) {
+  const { isStacGeoparquet, stacGeoparquetMetadata } = useStacMap();
 
-  if (stacGeoparquetMetadata) {
-    return (
-      <StacGeoparquetInfo
-        metadata={stacGeoparquetMetadata}
-      ></StacGeoparquetInfo>
-    );
-  }
+  return (
+    <Stack>
+      <Value value={itemCollection}></Value>
+      {isStacGeoparquet &&
+        ((stacGeoparquetMetadata && (
+          <StacGeoparquetInfo
+            metadata={stacGeoparquetMetadata}
+          ></StacGeoparquetInfo>
+        )) || <SkeletonText noOfLines={3}></SkeletonText>)}
+    </Stack>
+  );
 }
 
 interface Node {
