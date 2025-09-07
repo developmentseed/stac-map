@@ -23,7 +23,6 @@ export function Collection({ collection }: { collection: StacCollection }) {
   const { root } = useStacMap();
   const searchLinks =
     (root && root.links?.filter((link) => link.rel == "search")) || [];
-  console.log(searchLinks);
   return (
     <Stack>
       <Value value={collection}>

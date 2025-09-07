@@ -1,9 +1,10 @@
-import { Button, ButtonGroup, Heading, Image, Stack } from "@chakra-ui/react";
+import { Button, ButtonGroup, Heading, Stack } from "@chakra-ui/react";
 import { type ReactNode } from "react";
 import { LuExternalLink } from "react-icons/lu";
 import { MarkdownHooks } from "react-markdown";
 import type { StacAsset } from "stac-ts";
 import type { StacValue } from "../types/stac";
+import Thumbnail from "./thumbnail";
 import { Prose } from "./ui/prose";
 
 export default function Value({
@@ -25,13 +26,7 @@ export default function Value({
     <Stack>
       <Heading>{(value.title as string) || value.id || value.type}</Heading>
 
-      {thumbnailAsset && (
-        <Image
-          maxH={"200px"}
-          fit={"scale-down"}
-          src={thumbnailAsset.href}
-        ></Image>
-      )}
+      {thumbnailAsset && <Thumbnail asset={thumbnailAsset}></Thumbnail>}
 
       {!!value.description && (
         <Prose>
