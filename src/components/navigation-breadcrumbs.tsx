@@ -1,11 +1,11 @@
-import { Breadcrumb, HStack } from "@chakra-ui/react";
+import { Breadcrumb, HStack, Spinner } from "@chakra-ui/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { LuFile, LuFiles, LuFolder, LuFolderPlus } from "react-icons/lu";
 import useStacMap from "../hooks/stac-map";
 import type { StacValue } from "../types/stac";
 
 export function NavigationBreadcrumbs() {
-  const { value, parent, root, picked, setHref } = useStacMap()!;
+  const { href, value, parent, root, picked, setHref } = useStacMap()!;
   const [breadcrumbs, setBreadcrumbs] = useState<ReactNode>();
 
   useEffect(() => {
@@ -56,6 +56,20 @@ export function NavigationBreadcrumbs() {
           />,
         );
       }
+    } else if (href) {
+      breadcrumbs.push(
+        <Breadcrumb.Item key={"breadcrumb-loading"}>
+          <Breadcrumb.CurrentLink>
+            <Spinner size={"sm"}></Spinner>
+          </Breadcrumb.CurrentLink>
+        </Breadcrumb.Item>,
+      );
+    } else {
+      breadcrumbs.push(
+        <Breadcrumb.Item key={"breadcrumb-default"}>
+          <Breadcrumb.CurrentLink>stac-map</Breadcrumb.CurrentLink>
+        </Breadcrumb.Item>,
+      );
     }
     setBreadcrumbs(
       breadcrumbs.flatMap((value, i) => [
@@ -65,7 +79,7 @@ export function NavigationBreadcrumbs() {
         ),
       ]),
     );
-  }, [value, parent, root, picked, setHref]);
+  }, [href, value, parent, root, picked, setHref]);
 
   return (
     <Breadcrumb.Root>
