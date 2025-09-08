@@ -1,22 +1,14 @@
-import {
-  Accordion,
-  Box,
-  DataList,
-  HStack,
-  Span,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Box, DataList, HStack, Icon, Stack, Text } from "@chakra-ui/react";
+import { LuFileSearch } from "react-icons/lu";
 import type {
   StacCollection,
   SpatialExtent as StacSpatialExtent,
   TemporalExtent as StacTemporalExtent,
 } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
-import { ChildCard, Children } from "./children";
-import { CollectionCombobox } from "./search/collection";
+import { ChildCard } from "./children";
 import ItemSearch from "./search/item";
-import { NaturalLanguageCollectionSearch } from "./search/natural-language";
+import Section from "./section";
 import Value from "./value";
 
 export function Collection({ collection }: { collection: StacCollection }) {
@@ -26,80 +18,24 @@ export function Collection({ collection }: { collection: StacCollection }) {
   return (
     <Stack>
       <Value value={collection}>
-        <DataList.Root orientation={"horizontal"}>
-          {collection.extent?.spatial?.bbox?.[0] && (
-            <DataList.Item>
-              <DataList.ItemLabel>Spatial extent</DataList.ItemLabel>
-              <DataList.ItemValue>
-                <SpatialExtent
-                  bbox={collection.extent.spatial.bbox[0]}
-                ></SpatialExtent>
-              </DataList.ItemValue>
-            </DataList.Item>
-          )}
-          {collection.extent?.temporal?.interval?.[0] && (
-            <DataList.Item>
-              <DataList.ItemLabel>Temporal extent</DataList.ItemLabel>
-              <DataList.ItemValue>
-                <TemporalExtent
-                  interval={collection.extent.temporal.interval[0]}
-                ></TemporalExtent>
-              </DataList.ItemValue>
-            </DataList.Item>
-          )}
-        </DataList.Root>
+        <Extents collection={collection}></Extents>
       </Value>
+
       {searchLinks.length > 0 && (
-        <ItemSearch collection={collection} links={searchLinks}></ItemSearch>
+        <Section
+          title={
+            <HStack>
+              <Icon>
+                <LuFileSearch></LuFileSearch>
+              </Icon>{" "}
+              Item search
+            </HStack>
+          }
+        >
+          <ItemSearch collection={collection} links={searchLinks}></ItemSearch>
+        </Section>
       )}
     </Stack>
-  );
-}
-
-export function Collections({
-  collections,
-}: {
-  collections: StacCollection[];
-}) {
-  const { value } = useStacMap();
-  const catalogHref =
-    value?.type == "Catalog" &&
-    value.links.find((link) => link.rel == "self")?.href;
-
-  return (
-    <Children heading="Collections">
-      <Accordion.Root collapsible defaultValue={["simple"]}>
-        <Accordion.Item value="simple">
-          <Accordion.ItemTrigger>
-            <Span flex={1}>Simple search</Span>
-            <Accordion.ItemIndicator></Accordion.ItemIndicator>
-          </Accordion.ItemTrigger>
-          <Accordion.ItemContent>
-            <CollectionCombobox collections={collections}></CollectionCombobox>
-          </Accordion.ItemContent>
-        </Accordion.Item>
-        {catalogHref && (
-          <Accordion.Item value="natural-language">
-            <Accordion.ItemTrigger>
-              <Span flex={1}>Natural language search</Span>
-              <Accordion.ItemIndicator></Accordion.ItemIndicator>
-            </Accordion.ItemTrigger>
-            <Accordion.ItemContent>
-              <NaturalLanguageCollectionSearch
-                collections={collections}
-                href={catalogHref}
-              />
-            </Accordion.ItemContent>
-          </Accordion.Item>
-        )}
-      </Accordion.Root>
-      {collections.map((collection) => (
-        <CollectionCard
-          collection={collection}
-          key={"collection-" + collection.id}
-        ></CollectionCard>
-      ))}
-    </Children>
   );
 }
 
@@ -128,9 +64,7 @@ export function CollectionCard({
               ></TemporalExtent>
             )}
           </HStack>
-          {explanation && (
-            <Text>Natural language search explanation: {explanation}</Text>
-          )}
+          {explanation && <Text>{explanation}</Text>}
         </Stack>
       }
     ></ChildCard>
@@ -156,4 +90,31 @@ function DateString({ datetime }: { datetime: string | null }) {
   } else {
     return "unbounded";
   }
+}
+
+function Extents({ collection }: { collection: StacCollection }) {
+  return (
+    <DataList.Root orientation={"horizontal"}>
+      {collection.extent?.spatial?.bbox?.[0] && (
+        <DataList.Item>
+          <DataList.ItemLabel>Spatial extent</DataList.ItemLabel>
+          <DataList.ItemValue>
+            <SpatialExtent
+              bbox={collection.extent.spatial.bbox[0]}
+            ></SpatialExtent>
+          </DataList.ItemValue>
+        </DataList.Item>
+      )}
+      {collection.extent?.temporal?.interval?.[0] && (
+        <DataList.Item>
+          <DataList.ItemLabel>Temporal extent</DataList.ItemLabel>
+          <DataList.ItemValue>
+            <TemporalExtent
+              interval={collection.extent.temporal.interval[0]}
+            ></TemporalExtent>
+          </DataList.ItemValue>
+        </DataList.Item>
+      )}
+    </DataList.Root>
+  );
 }

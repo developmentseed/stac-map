@@ -3,7 +3,6 @@ import {
   ButtonGroup,
   Card,
   HStack,
-  Heading,
   IconButton,
   Stack,
   Text,
@@ -18,7 +17,6 @@ export default function Assets({
 }) {
   return (
     <Stack>
-      <Heading size={"sm"}>Assets</Heading>
       {Object.entries(assets).map(([key, asset]) => (
         <Card.Root key={asset.href} size={"sm"}>
           <Card.Body>

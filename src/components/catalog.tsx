@@ -1,32 +1,68 @@
-import { SkeletonText, Stack } from "@chakra-ui/react";
+import { HStack, Icon, Stack } from "@chakra-ui/react";
+import { LuFolderPlus, LuFolderSearch } from "react-icons/lu";
 import type { StacCatalog } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
-import { ChildCard, Children } from "./children";
-import { Collections } from "./collection";
+import { ChildCard } from "./children";
+import { CollectionSearch } from "./search/collection";
+import Section from "./section";
 import Value from "./value";
 
 export function Catalog({ catalog }: { catalog: StacCatalog }) {
-  const { catalogs, collections, isFetchingCollections } = useStacMap();
+  const { catalogs, collections } = useStacMap();
+  const selfHref = catalog.links?.find((link) => link.rel === "self")?.href;
   return (
     <Stack>
       <Value value={catalog}></Value>
-      {catalogs && catalogs.length > 0 && (
-        <Catalogs catalogs={catalogs}></Catalogs>
+      {collections && collections?.length > 0 && (
+        <Section
+          title={
+            <HStack>
+              <Icon>
+                <LuFolderSearch></LuFolderSearch>
+              </Icon>{" "}
+              Collection search
+            </HStack>
+          }
+        >
+          <CollectionSearch
+            href={selfHref}
+            collections={collections}
+          ></CollectionSearch>
+        </Section>
       )}
-      {(collections && collections.length > 0 && (
-        <Collections collections={collections}></Collections>
-      )) ||
-        (isFetchingCollections && <SkeletonText noOfLines={3}></SkeletonText>)}
+      {catalogs && catalogs.length > 0 && (
+        <Section title="Catalogs">
+          <Stack>
+            {catalogs.map((catalog) => (
+              <ChildCard
+                child={catalog}
+                key={"catalog-" + catalog.id}
+              ></ChildCard>
+            ))}
+          </Stack>
+        </Section>
+      )}
+      {collections && collections.length > 0 && (
+        <Section
+          title={
+            <HStack>
+              <Icon>
+                <LuFolderPlus></LuFolderPlus>
+              </Icon>{" "}
+              Collections ({collections.length})
+            </HStack>
+          }
+        >
+          <Stack>
+            {collections.map((collection) => (
+              <ChildCard
+                child={collection}
+                key={"collection-" + collection.id}
+              ></ChildCard>
+            ))}
+          </Stack>
+        </Section>
+      )}
     </Stack>
-  );
-}
-
-export function Catalogs({ catalogs }: { catalogs: StacCatalog[] }) {
-  return (
-    <Children heading="Catalogs">
-      {catalogs.map((catalog) => (
-        <ChildCard child={catalog} key={"catalog-" + catalog.id}></ChildCard>
-      ))}
-    </Children>
   );
 }

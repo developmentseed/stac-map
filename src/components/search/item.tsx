@@ -6,7 +6,6 @@ import {
   createListCollection,
   Field,
   Group,
-  Heading,
   HStack,
   IconButton,
   Input,
@@ -51,15 +50,13 @@ export default function ItemSearch({
 
   return (
     <Stack gap={4}>
-      <Heading>Item search</Heading>
-
       <Alert.Root status={"warning"} size={"sm"}>
         <Alert.Indicator></Alert.Indicator>
         <Alert.Content>
           <Alert.Title>Under construction</Alert.Title>
           <Alert.Description>
             Item search is under active development and is relatively
-            under-powered at the moment.
+            under-powered.
           </Alert.Description>
         </Alert.Content>
       </Alert.Root>

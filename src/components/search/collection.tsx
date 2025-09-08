@@ -1,7 +1,59 @@
-import { Combobox, createListCollection, Portal } from "@chakra-ui/react";
+import {
+  Combobox,
+  createListCollection,
+  HStack,
+  Portal,
+  SegmentGroup,
+  Stack,
+} from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import type { StacCollection } from "stac-ts";
 import useStacMap from "../../hooks/stac-map";
+import { NaturalLanguageCollectionSearch } from "./natural-language";
+
+export function CollectionSearch({
+  href,
+  collections,
+}: {
+  href?: string;
+  collections: StacCollection[];
+}) {
+  const [value, setValue] = useState<"Text" | "Natural language">("Text");
+  return (
+    <Stack>
+      <HStack justify={"space-between"}>
+        <SegmentGroup.Root
+          size={"xs"}
+          value={value}
+          onValueChange={(e) =>
+            setValue(e.value as "Text" | "Natural language")
+          }
+        >
+          <SegmentGroup.Indicator></SegmentGroup.Indicator>
+          <SegmentGroup.Items
+            items={[
+              { label: "Text", value: "Text" },
+              {
+                label: "Natural language",
+                value: "Natural language",
+                disabled: !href,
+              },
+            ]}
+          />
+        </SegmentGroup.Root>
+      </HStack>
+      {value === "Text" && (
+        <CollectionCombobox collections={collections}></CollectionCombobox>
+      )}
+      {value === "Natural language" && href && (
+        <NaturalLanguageCollectionSearch
+          href={href}
+          collections={collections}
+        ></NaturalLanguageCollectionSearch>
+      )}
+    </Stack>
+  );
+}
 
 export function CollectionCombobox({
   collections,

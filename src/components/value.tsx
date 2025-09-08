@@ -1,9 +1,10 @@
-import { Button, ButtonGroup, Heading, Stack } from "@chakra-ui/react";
+import { Button, ButtonGroup } from "@chakra-ui/react";
 import { type ReactNode } from "react";
 import { LuExternalLink } from "react-icons/lu";
 import { MarkdownHooks } from "react-markdown";
 import type { StacAsset } from "stac-ts";
 import type { StacValue } from "../types/stac";
+import Section from "./section";
 import Thumbnail from "./thumbnail";
 import { Prose } from "./ui/prose";
 
@@ -23,9 +24,10 @@ export default function Value({
   const selfHref = value.links?.find((link) => link.rel == "self")?.href;
 
   return (
-    <Stack>
-      <Heading>{(value.title as string) || value.id || value.type}</Heading>
-
+    <Section
+      title={(value.title as string) || value.id || value.type}
+      titleSize="xl"
+    >
       {thumbnailAsset && <Thumbnail asset={thumbnailAsset}></Thumbnail>}
 
       {!!value.description && (
@@ -37,7 +39,7 @@ export default function Value({
       {children}
 
       {selfHref && <SelfHrefButtons href={selfHref}></SelfHrefButtons>}
-    </Stack>
+    </Section>
   );
 }
 
