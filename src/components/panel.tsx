@@ -109,7 +109,7 @@ function Introduction() {
       </Box>
       <Box>
         Questions, issues, or feature requests? Get in touch on{" "}
-        <Link>
+        <Link asChild>
           <a href="https://github.com/developmentseed/stac-map" target="_blank">
             GitHub
           </a>
