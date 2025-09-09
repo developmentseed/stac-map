@@ -13,9 +13,9 @@ test("should preserve UTF8 characters while making URLS absolute", async () => {
     toAbsoluteUrl("../../../🦄.tiff", new URL("s3://some-bucket/🌈/path/a/b/")),
   ).equals("s3://some-bucket/🌈/🦄.tiff");
 
-    expect(
-    toAbsoluteUrl('a+🦄.tiff', new URL("s3://some-bucket/🌈/")),
-  ).equals("s3://some-bucket/🌈/a+🦄.tiff");
+  expect(toAbsoluteUrl("a+🦄.tiff", new URL("s3://some-bucket/🌈/"))).equals(
+    "s3://some-bucket/🌈/a+🦄.tiff",
+  );
 
   expect(
     toAbsoluteUrl("../../../🦄.tiff", new URL("https://some-url/🌈/path/a/b/")),
