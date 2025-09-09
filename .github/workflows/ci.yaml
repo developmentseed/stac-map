@@ -10,7 +10,7 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install
         run: |
           yarn install
@@ -23,3 +23,26 @@ jobs:
         run: yarn test
       - name: Build
         run: yarn build
+  release:
+    # Note that this will auto-skip if we're not on main, thanks to our release configuration
+    name: Release
+    runs-on: ubuntu-latest
+    needs:
+      - ci
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Install
+        run: yarn install
+      - name: Build
+        run: yarn build
+      - name: Release
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

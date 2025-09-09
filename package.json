@@ -1,6 +1,6 @@
 {
   "name": "stac-map",
-  "description": "A map-first, static-site STAC visualizer",
+  "description": "A map-first, single-page, statically-hosted STAC search and visualization tool, with stac-geoparquet support",
   "author": {
     "name": "Pete Gadomski",
     "email": "pete.gadomski@gmail.com"
@@ -12,12 +12,15 @@
     }
   ],
   "homepage": "https://github.com/developmentseed/stac-map/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/developmentseed/stac-map.git"
+  },
   "bugs": {
     "url": "https://github.com/developmentseed/stac-map/issues"
   },
   "license": "MIT",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
