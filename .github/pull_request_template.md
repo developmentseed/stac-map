@@ -1,5 +1,5 @@
 <!--
-Please describe what your pull request does in plain language. 
+Please describe what your pull request does in plain language.
 Include any screenshots that are instructive to a reviewer.
 Link in any issues that are closed by this PR with "closing keywords", e.g. `Closes #42`.
 -->
