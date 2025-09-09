@@ -60,8 +60,9 @@ export function makeStacUrlAbsolute<T extends StacValue>(
 
   if (value.assets != null) {
     for (const asset of Object.values(value.assets)) {
-      if (asset.href == null) continue;
-      asset.href = toAbsoluteUrl(asset.href, baseUrlObj);
+      if (!!asset.href) {
+          asset.href = toAbsoluteUrl(asset.href, baseUrlObj);
+      }
     }
   }
   return value;
