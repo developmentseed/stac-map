@@ -49,6 +49,8 @@ jobs:
         run: yarn install
       - name: Build
         run: yarn build
+      - name: Dry run
+        run: npx semantic-release --dry-run
       - name: Release
         run: npx semantic-release
         env:
