@@ -1,14 +1,12 @@
 import {
   Alert,
   Box,
-  Center,
-  IconButton,
+  FileUpload,
   Link,
   SkeletonText,
   Stack,
-  Text,
 } from "@chakra-ui/react";
-import { LuGithub } from "react-icons/lu";
+import { Examples } from "../examples";
 import useStacMap from "../hooks/stac-map";
 import type { StacValue } from "../types/stac";
 import { Catalog } from "./catalog";
@@ -83,23 +81,41 @@ function ValueContent({ value }: { value: StacValue }) {
 }
 
 function Introduction() {
+  const { fileUpload } = useStacMap();
+
   return (
-    <Stack>
-      <Text fontSize={"sm"} fontWeight={"lighter"}>
+    <Stack fontSize={"sm"} fontWeight={"lighter"}>
+      <Box>
         stac-map is a map-first, statically-served, single-page visualization
         tool for{" "}
         <Link variant={"underline"} href="https://stacspec.org">
           STAC
         </Link>{" "}
-        catalogs, collections, and items.
-      </Text>
-      <Center>
-        <IconButton variant={"ghost"} size={"sm"} asChild>
+        catalogs, collections, and items. To get started, use the text input,{" "}
+        <FileUpload.RootProvider
+          value={fileUpload}
+          as={"span"}
+          display={"inline"}
+        >
+          <FileUpload.Trigger asChild>
+            <Link>upload a file</Link>
+          </FileUpload.Trigger>
+        </FileUpload.RootProvider>
+        , or load an{" "}
+        <Examples>
+          <Link>example</Link>
+        </Examples>
+        .
+      </Box>
+      <Box>
+        Questions, issues, or feature requests? Get in touch on{" "}
+        <Link>
           <a href="https://github.com/developmentseed/stac-map" target="_blank">
-            <LuGithub></LuGithub>
+            GitHub
           </a>
-        </IconButton>
-      </Center>
+        </Link>
+        .
+      </Box>
     </Stack>
   );
 }
