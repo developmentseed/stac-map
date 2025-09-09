@@ -54,10 +54,30 @@ function ValueContent({ value }: { value: StacValue }) {
       return <Item item={value}></Item>;
     case "FeatureCollection":
       return <ItemCollection itemCollection={value}></ItemCollection>;
+    case undefined:
+      return (
+        <Alert.Root status="error">
+          <Alert.Indicator />
+          <Alert.Content>
+            <Alert.Title>Value does not have a "type" field</Alert.Title>
+          </Alert.Content>
+        </Alert.Root>
+      );
     default:
       return (
-        // @ts-expect-error Fallback for unknown types
-        <Alert.Root status="error">Unknown STAC type: {value.type}</Alert.Root>
+        <Alert.Root status="error">
+          <Alert.Indicator />
+          <Alert.Content>
+            <Alert.Title>Unknown "type" field</Alert.Title>
+            <Alert.Description>
+              {
+                // @ts-expect-error Fallback for unknown types
+                value.type
+              }{" "}
+              is not a valid STAC type
+            </Alert.Description>
+          </Alert.Content>
+        </Alert.Root>
       );
   }
 }

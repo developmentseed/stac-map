@@ -49,6 +49,7 @@
     "next-themes": "^0.4.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-error-boundary": "^6.0.0",
     "react-icons": "^5.5.0",
     "react-map-gl": "^7.1.7",
     "react-markdown": "^10.1.0",
