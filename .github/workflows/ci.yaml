@@ -19,7 +19,7 @@ jobs:
       - name: Install
         run: |
           yarn install
-          npx playwright install
+          yarn playwright install
       - name: Lint
         run: yarn lint
       - name: Check formatting
@@ -50,6 +50,6 @@ jobs:
       - name: Build
         run: yarn build
       - name: Release
-        run: npx semantic-release
+        run: yarn run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
