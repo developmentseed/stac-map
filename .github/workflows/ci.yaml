@@ -26,12 +26,13 @@ jobs:
         run: yarn run prettier . --check
       - name: Test
         run: yarn test
+      - name: Build
+        run: yarn build
   release:
-    # Note that this will auto-skip if we're not on main, thanks to our release configuration
+    # Note that the actual release will auto-skip if we're not on main, thanks to our release configuration
     name: Release
     runs-on: ubuntu-latest
-    needs:
-      - ci
+    needs: ci
     permissions:
       contents: write
       issues: write
@@ -47,9 +48,49 @@ jobs:
           cache: "yarn"
       - name: Install
         run: yarn install
-      - name: Build
-        run: yarn build
       - name: Release
         run: yarn run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  build:
+    name: Build
+    needs: release
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install
+        run: yarn install
+      - id: setup_pages
+        uses: actions/configure-pages@v5
+      - name: Get app version
+        run: echo "VITE_APP_VERSION=$(git describe --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
+      - name: Get current datetime
+        run: echo "VITE_APP_DEPLOY_DATETIME=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
+      - name: Build
+        run: yarn build
+        env:
+          VITE_APP_VERSION: ${{ env.VITE_APP_VERSION }}
+          VITE_APP_DEPLOY_DATETIME: ${{ env.VITE_APP_DEPLOY_DATETIME }}
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+  deploy:
+    name: Deploy
+    needs: build
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
