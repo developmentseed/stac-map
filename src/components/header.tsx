@@ -2,6 +2,7 @@ import { Box, Button, ButtonGroup, HStack, Input } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { Examples } from "../examples";
 import useStacMap from "../hooks/stac-map";
+import About from "./about";
 import { ColorModeButton } from "./ui/color-mode";
 import Upload from "./upload";
 
@@ -14,6 +15,7 @@ export default function Header() {
         <Examples>
           <Button>Examples</Button>
         </Examples>
+        <About></About>
         <ColorModeButton></ColorModeButton>
       </ButtonGroup>
     </HStack>
