@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { makeStacUrlAbsolute, toAbsoluteUrl } from "../src/http";
+import { makeStacHrefsAbsolute, toAbsoluteUrl } from "../src/http";
 import { StacItem } from "stac-ts";
 
 test("should preserve UTF8 characters while making URLS absolute", async () => {
@@ -32,7 +32,7 @@ test("should preserve UTF8 characters while making URLS absolute", async () => {
 
 test("should convert relative links to absolute", () => {
   expect(
-    makeStacUrlAbsolute(
+    makeStacHrefsAbsolute(
       {
         links: [
           { href: "a/b/c", rel: "child" },
@@ -50,7 +50,7 @@ test("should convert relative links to absolute", () => {
 
 test("should convert relative assets to absolute", () => {
   expect(
-    makeStacUrlAbsolute(
+    makeStacHrefsAbsolute(
       {
         assets: {
           tiff: { href: "./foo.tiff" },

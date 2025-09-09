@@ -16,7 +16,7 @@ export async function fetchStac(
     if (response.ok) {
       return response
         .json()
-        .then((json) => makeStacUrlAbsolute(json, href.toString()));
+        .then((json) => makeStacHrefsAbsolute(json, href.toString()));
     } else {
       throw new Error(`${method} ${href}: ${response.statusText}`);
     }
@@ -38,7 +38,7 @@ export async function fetchStacLink(link: StacLink, href?: string | undefined) {
  * @param value Source stac item, collection, or catalog
  * @param baseUrl base location of the STAC document
  */
-export function makeStacUrlAbsolute<T extends StacValue>(
+export function makeStacHrefsAbsolute<T extends StacValue>(
   value: T,
   baseUrl: string,
 ): T {
