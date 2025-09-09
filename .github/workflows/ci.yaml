@@ -50,7 +50,7 @@ jobs:
       - name: Build
         run: yarn build
       - name: Dry run
-        run: npx semantic-release --dry-run --no-ci --branch ${GITHUB_REF}
+        run: npx semantic-release --dry-run --no-ci --branches ${GITHUB_REF}
       - name: Release
         run: npx semantic-release
         env:
