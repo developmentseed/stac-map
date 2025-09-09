@@ -32,18 +32,6 @@ export async function fetchStacLink(link: StacLink, href?: string | undefined) {
   );
 }
 
-function maybeAddSelfLink(value: StacValue, href: string) {
-  if (!value?.links?.find((link) => link.rel == "self")) {
-    const link = { href, rel: "self" };
-    if (Array.isArray(value.links)) {
-      value.links.push(link);
-    } else {
-      value.links = [link];
-    }
-  }
-  return value;
-}
-
 /**
  * Attempt to convert links and asset URLS to absolute URLs while ensuring a self link exists.
  *
@@ -54,14 +42,20 @@ export function makeStacUrlAbsolute<T extends StacValue>(
   value: T,
   baseUrl: string,
 ): T {
-  maybeAddSelfLink(value, baseUrl);
   const baseUrlObj = new URL(baseUrl);
 
   if (value.links != null) {
+    let hasSelf = false;
     for (const link of value.links) {
+      if (link.rel === "self") hasSelf = true;
       if (link.href == null) continue;
       link.href = toAbsoluteUrl(link.href, baseUrlObj);
     }
+    if (hasSelf === false) {
+      value.links.push({ href: baseUrl, rel: "self" });
+    }
+  } else {
+    value.links = [{ href: baseUrl, rel: "self" }];
   }
 
   if (value.assets != null) {
