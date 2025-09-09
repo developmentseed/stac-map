@@ -16,7 +16,7 @@ export async function fetchStac(
     if (response.ok) {
       return response
         .json()
-        .then((json) => maybeAddSelfLink(json, href.toString()));
+        .then((json) => makeStacUrlAbsolute(json, href.toString()));
     } else {
       throw new Error(`${method} ${href}: ${response.statusText}`);
     }
@@ -32,9 +32,8 @@ export async function fetchStacLink(link: StacLink, href?: string | undefined) {
   );
 }
 
-// eslint-disable-next-line
-function maybeAddSelfLink(value: any, href: string) {
-  if (!(value as StacValue)?.links?.find((link) => link.rel == "self")) {
+function maybeAddSelfLink(value: StacValue, href: string) {
+  if (!value?.links?.find((link) => link.rel == "self")) {
     const link = { href, rel: "self" };
     if (Array.isArray(value.links)) {
       value.links.push(link);
@@ -43,4 +42,72 @@ function maybeAddSelfLink(value: any, href: string) {
     }
   }
   return value;
+}
+
+/**
+ * Attempt to convert links and asset URLS to absolute URLs while ensuring a self link exists.
+ *
+ * @param value Source stac item, collection, or catalog
+ * @param baseUrl base location of the STAC document
+ */
+export function makeStacUrlAbsolute<T extends StacValue>(
+  value: T,
+  baseUrl: string,
+): T {
+  maybeAddSelfLink(value, baseUrl);
+  const baseUrlObj = new URL(baseUrl);
+
+  if (value.links != null) {
+    for (const link of value.links) {
+      if (link.href == null) continue;
+      link.href = toAbsoluteUrl(link.href, baseUrlObj);
+    }
+  }
+
+  if (value.assets != null) {
+    for (const asset of Object.values(value.assets)) {
+      if (asset.href == null) continue;
+      asset.href = toAbsoluteUrl(asset.href, baseUrlObj);
+    }
+  }
+  return value;
+}
+
+/**
+ * Determine if the URL is absolute
+ * @returns true if absolute, false otherwise
+ */
+function isAbsolute(url: string) {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Attempt to convert a possibly relative URL to an absolute URL
+ *
+ * If the URL is already absolute, it is returned unchanged.
+ *
+ * **WARNING**: if the URL is http it will be returned as URL encoded
+ *
+ * @param href
+ * @param baseUrl
+ * @returns absolute URL
+ */
+export function toAbsoluteUrl(href: string, baseUrl: URL): string {
+  if (isAbsolute(href)) return href;
+
+  const targetUrl = new URL(href, baseUrl);
+
+  if (targetUrl.protocol === "http:" || targetUrl.protocol === "https:") {
+    return targetUrl.toString();
+  }
+
+  // S3 links should not be encoded
+  if (targetUrl.protocol === "s3:") return decodeURI(targetUrl.toString());
+
+  return targetUrl.toString();
 }
