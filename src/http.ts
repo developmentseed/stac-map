@@ -50,7 +50,7 @@ export function makeStacHrefsAbsolute<T extends StacValue>(
     for (const link of value.links) {
       if (link.rel === "self") hasSelf = true;
       if (link.href) {
-          link.href = toAbsoluteUrl(link.href, baseUrlObj);
+        link.href = toAbsoluteUrl(link.href, baseUrlObj);
       }
     }
     if (hasSelf === false) {
@@ -63,7 +63,7 @@ export function makeStacHrefsAbsolute<T extends StacValue>(
   if (value.assets != null) {
     for (const asset of Object.values(value.assets)) {
       if (asset.href) {
-          asset.href = toAbsoluteUrl(asset.href, baseUrlObj);
+        asset.href = toAbsoluteUrl(asset.href, baseUrlObj);
       }
     }
   }
@@ -107,6 +107,7 @@ export function toAbsoluteUrl(href: string, baseUrl: URL): string {
   if (targetUrl.protocol === "s3:") return decodeURI(targetUrl.toString());
 
   return targetUrl.toString();
+}
 
 // eslint-disable-next-line
 function maybeAddTypeField(value: any) {
