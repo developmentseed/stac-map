@@ -1,5 +1,6 @@
 import {
   CloseButton,
+  DataList,
   Dialog,
   IconButton,
   Link,
@@ -23,24 +24,40 @@ export default function About() {
           <Dialog.Content>
             <Dialog.Header>About</Dialog.Header>
             <Dialog.Body>
-              <Stack>
+              <Stack gap={8}>
                 <Text>
                   <strong>stac-map</strong> was created and is maintained by{" "}
-                  <Link href="https://developmentseed.org">
+                  <Link href="https://developmentseed.org" target="_blank">
                     Development Seed <LuExternalLink></LuExternalLink>
                   </Link>
-                  . It is public and free for modification and re-use under the{" "}
-                  <Link href="https://opensource.org/license/mit">
+                  , and it is public and free for modification and re-use under
+                  the{" "}
+                  <Link
+                    href="https://opensource.org/license/mit"
+                    target="_blank"
+                  >
                     MIT license <LuExternalLink></LuExternalLink>
                   </Link>
                   .
                 </Text>
-                <Text>
-                  This is version{" "}
-                  <code>{import.meta.env.VITE_APP_VERSION}</code> of{" "}
-                  <strong>stac-map</strong>. It was deployed on{" "}
-                  {import.meta.env.VITE_APP_DEPLOY_DATETIME}.
-                </Text>
+                <DataList.Root>
+                  {import.meta.env.VITE_APP_VERSION && (
+                    <DataList.Item>
+                      <DataList.ItemLabel>App version</DataList.ItemLabel>
+                      <DataList.ItemValue>
+                        {import.meta.env.VITE_APP_VERSION}
+                      </DataList.ItemValue>
+                    </DataList.Item>
+                  )}
+                  {import.meta.env.VITE_APP_DEPLOY_DATETIME && (
+                    <DataList.Item>
+                      <DataList.ItemLabel>Deployed at</DataList.ItemLabel>
+                      <DataList.ItemValue>
+                        {import.meta.env.VITE_APP_DEPLOY_DATETIME}
+                      </DataList.ItemValue>
+                    </DataList.Item>
+                  )}
+                </DataList.Root>
               </Stack>
             </Dialog.Body>
             <Dialog.CloseTrigger asChild>
