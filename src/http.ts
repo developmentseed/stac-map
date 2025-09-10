@@ -48,7 +48,7 @@ export function makeStacHrefsAbsolute<T extends StacValue>(
     let hasSelf = false;
     for (const link of value.links) {
       if (link.rel === "self") hasSelf = true;
-      if (!!link.href) {
+      if (link.href) {
           link.href = toAbsoluteUrl(link.href, baseUrlObj);
       }
     }
@@ -61,7 +61,7 @@ export function makeStacHrefsAbsolute<T extends StacValue>(
 
   if (value.assets != null) {
     for (const asset of Object.values(value.assets)) {
-      if (!!asset.href) {
+      if (asset.href) {
           asset.href = toAbsoluteUrl(asset.href, baseUrlObj);
       }
     }
