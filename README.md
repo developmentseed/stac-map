@@ -1,7 +1,8 @@
 # stac-map
 
 [![CI status](https://img.shields.io/github/actions/workflow/status/developmentseed/stac-map/ci.yaml?style=for-the-badge&label=CI)](https://github.com/developmentseed/stac-map/actions/workflows/ci.yaml)
-[![Deploy status](https://img.shields.io/github/actions/workflow/status/developmentseed/stac-map/deploy.yaml?style=for-the-badge&label=Deploy)](https://github.com/developmentseed/stac-map/actions/workflows/deploy.yaml)
+[![GitHub deployments](https://img.shields.io/github/deployments/developmentseed/stac-map/github-pages?style=for-the-badge&label=Deploy)](https://github.com/developmentseed/stac-map/deployments/github-pages)
+[![GitHub Release](https://img.shields.io/github/v/release/developmentseed/stac-map?style=for-the-badge)](https://github.com/developmentseed/stac-map/releases)
 
 The map-first, single-page, statically-hosted STAC visualizer at <https://developmentseed.org/stac-map>.
 
@@ -40,10 +41,25 @@ yarn lint
 yarn format
 ```
 
+And some simple tests:
+
+```shell
+yarn playwright install
+yarn test
+```
+
 ## Contributing
 
 We use Github [Pull Requests](https://github.com/developmentseed/stac-map/pulls) to propose changes, and [Issues](https://github.com/developmentseed/stac-map/issues) to report bugs and request features.
 
+We use [semantic-release](https://github.com/semantic-release/semantic-release?tab=readme-ov-file) to create [releases](https://github.com/developmentseed/stac-map/releases).
+This requires our commit messages to conform to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+
 ## Deploying
 
 See [deploy.yaml](./.github/workflows/deploy.yaml) for a (drop-dead simple) example of deploying this application as a static site via Github Pages.
+
+## Versioning
+
+For now, we use a form of [Sentimental Versioning](https://github.com/dominictarr/sentimental-versioning#readme), where we use MAJOR, MINOR, and PATCH versions to communicate the "weight" of changes.
+We may formalize our releases into a stricter form of [Semantic Versioning](https://semver.org/) at some point in the future.

@@ -108,7 +108,7 @@ function BreadcrumbItem({
       {(current && (
         <Breadcrumb.CurrentLink>
           <HStack>
-            {getValueIcon(value)({})}
+            {getValueIcon(value)}
             {text}
           </HStack>
         </Breadcrumb.CurrentLink>
@@ -124,7 +124,7 @@ function BreadcrumbItem({
             }
           }}
         >
-          {getValueIcon(value)({})}
+          {getValueIcon(value)}
           {text}
         </Breadcrumb.Link>
       )}
@@ -135,13 +135,13 @@ function BreadcrumbItem({
 function getValueIcon(value: StacValue) {
   switch (value.type) {
     case "Catalog":
-      return LuFolder;
+      return <LuFolder></LuFolder>;
     case "Collection":
-      return LuFolderPlus;
+      return <LuFolderPlus></LuFolderPlus>;
     case "Feature":
-      return LuFile;
+      return <LuFile></LuFile>;
     case "FeatureCollection":
-      return LuFiles;
+      return <LuFiles></LuFiles>;
   }
 }
 
