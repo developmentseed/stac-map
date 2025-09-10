@@ -6,7 +6,7 @@ import type {
   TemporalExtent as StacTemporalExtent,
 } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
-import { ChildCard } from "./children";
+import { ChildCard, Children } from "./children";
 import ItemSearch from "./search/item";
 import Section from "./section";
 import Value from "./value";
@@ -15,6 +15,7 @@ export function Collection({ collection }: { collection: StacCollection }) {
   const { root } = useStacMap();
   const searchLinks =
     (root && root.links?.filter((link) => link.rel == "search")) || [];
+
   return (
     <Stack>
       <Value value={collection}>
@@ -35,6 +36,8 @@ export function Collection({ collection }: { collection: StacCollection }) {
           <ItemSearch collection={collection} links={searchLinks}></ItemSearch>
         </Section>
       )}
+
+      <Children value={collection}></Children>
     </Stack>
   );
 }
