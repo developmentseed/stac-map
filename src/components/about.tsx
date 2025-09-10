@@ -11,7 +11,7 @@ import { LuExternalLink, LuInfo } from "react-icons/lu";
 
 export default function About() {
   return (
-    <Dialog.Root>
+    <Dialog.Root trapFocus={false}>
       <Dialog.Trigger asChild>
         <IconButton>
           <LuInfo></LuInfo>
