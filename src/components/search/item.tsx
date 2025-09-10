@@ -1,20 +1,24 @@
 import {
+  Accordion,
   Alert,
-  Box,
   Button,
   ButtonGroup,
   createListCollection,
   Field,
   Group,
+  Heading,
   HStack,
   IconButton,
   Input,
+  Link,
   Portal,
   Progress,
   Select,
   Stack,
   Switch,
+  Text,
 } from "@chakra-ui/react";
+import type { BBox } from "geojson";
 import { useEffect, useState } from "react";
 import { LuPause, LuPlay, LuSearch, LuX } from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
@@ -23,7 +27,13 @@ import useStacMap from "../../hooks/stac-map";
 import useStacSearch from "../../hooks/stac-search";
 import type { StacSearch } from "../../types/stac";
 import DownloadButtons from "../download";
+import { SpatialExtent } from "../extents";
 import { toaster } from "../ui/toaster";
+
+interface NormalizedBbox {
+  bbox: BBox;
+  isCrossingAntimeridian: boolean;
+}
 
 export default function ItemSearch({
   collection,
@@ -35,6 +45,7 @@ export default function ItemSearch({
   const { setItems } = useStacMap();
   const [search, setSearch] = useState<StacSearch>();
   const [link, setLink] = useState<StacLink | undefined>(links[0]);
+  const [normalizedBbox, setNormalizedBbox] = useState<NormalizedBbox>();
   const [datetime, setDatetime] = useState<string>();
   const [useViewportBounds, setUseViewportBounds] = useState(true);
   const { map } = useMap();
@@ -48,36 +59,111 @@ export default function ItemSearch({
     }),
   });
 
+  useEffect(() => {
+    function getNormalizedMapBounds() {
+      return normalizeBbox(map?.getBounds().toArray().flat() as BBox);
+    }
+
+    const listener = () => {
+      setNormalizedBbox(getNormalizedMapBounds());
+    };
+
+    if (useViewportBounds && map) {
+      map.on("moveend", listener);
+      setNormalizedBbox(getNormalizedMapBounds());
+    } else {
+      map?.off("moveend", listener);
+      setNormalizedBbox(undefined);
+    }
+  }, [map, useViewportBounds]);
+
   return (
-    <Stack gap={4}>
-      <Alert.Root status={"warning"} size={"sm"}>
-        <Alert.Indicator></Alert.Indicator>
-        <Alert.Content>
-          <Alert.Title>Under construction</Alert.Title>
-          <Alert.Description>
-            Item search is under active development and is relatively
-            under-powered.
-          </Alert.Description>
-        </Alert.Content>
-      </Alert.Root>
-
-      <Switch.Root
-        disabled={!map}
-        checked={!!map && useViewportBounds}
-        onCheckedChange={(e) => setUseViewportBounds(e.checked)}
+    <Stack>
+      <Accordion.Root
+        defaultValue={["spatial", "temporal"]}
+        multiple
+        variant={"enclosed"}
       >
-        <Switch.HiddenInput></Switch.HiddenInput>
-        <Switch.Label>Use viewport bounds</Switch.Label>
-        <Switch.Control></Switch.Control>
-      </Switch.Root>
+        <Accordion.Item value="spatial">
+          <Accordion.ItemTrigger>
+            <Heading flex="1" size={"lg"}>
+              Spatial
+            </Heading>
+            <Accordion.ItemIndicator />
+          </Accordion.ItemTrigger>
+          <Accordion.ItemContent pb={4}>
+            <Stack>
+              <Switch.Root
+                disabled={!map}
+                checked={!!map && useViewportBounds}
+                onCheckedChange={(e) => setUseViewportBounds(e.checked)}
+                size={"sm"}
+              >
+                <Switch.HiddenInput></Switch.HiddenInput>
+                <Switch.Label>Use viewport bounds</Switch.Label>
+                <Switch.Control></Switch.Control>
+              </Switch.Root>
+              {normalizedBbox && (
+                <Text fontSize={"sm"} fontWeight={"lighter"}>
+                  <SpatialExtent bbox={normalizedBbox?.bbox}></SpatialExtent>
+                </Text>
+              )}
+              {normalizedBbox?.isCrossingAntimeridian && (
+                <Alert.Root status={"warning"} size={"sm"}>
+                  <Alert.Indicator></Alert.Indicator>
+                  <Alert.Content>
+                    <Alert.Title>Antimeridian-crossing viewport</Alert.Title>
+                    <Alert.Description>
+                      The viewport bounds cross the{" "}
+                      <Link
+                        href="https://en.wikipedia.org/wiki/180th_meridian"
+                        target="_blank"
+                      >
+                        antimeridian
+                      </Link>
+                      , and may servers do not support antimeridian-crossing
+                      bounding boxes. The search bounding box has been reduced
+                      to only one side of the antimeridian.
+                    </Alert.Description>
+                  </Alert.Content>
+                </Alert.Root>
+              )}
+            </Stack>
+          </Accordion.ItemContent>
+        </Accordion.Item>
 
-      <Datetime
-        interval={collection.extent?.temporal?.interval[0]}
-        setDatetime={setDatetime}
-      ></Datetime>
+        <Accordion.Item value="temporal">
+          <Accordion.ItemTrigger>
+            <Heading flex="1" size={"lg"}>
+              Temporal
+            </Heading>
+            <Accordion.ItemIndicator />
+          </Accordion.ItemTrigger>
+          <Accordion.ItemContent pb={4}>
+            <Datetime
+              interval={collection.extent?.temporal?.interval[0]}
+              setDatetime={setDatetime}
+            ></Datetime>
+          </Accordion.ItemContent>
+        </Accordion.Item>
+      </Accordion.Root>
 
       <HStack>
-        <Box flex={1}></Box>
+        <Button
+          variant={"solid"}
+          size={"md"}
+          onClick={() =>
+            setSearch({
+              collections: [collection.id],
+              datetime,
+              bbox: normalizedBbox?.bbox,
+            })
+          }
+          disabled={!!search}
+        >
+          <LuSearch></LuSearch>
+          Search
+        </Button>
 
         <Select.Root
           collection={methods}
@@ -110,31 +196,6 @@ export default function ItemSearch({
             </Select.Positioner>
           </Portal>
         </Select.Root>
-
-        <Button
-          variant={"surface"}
-          onClick={() =>
-            setSearch({
-              collections: [collection.id],
-              datetime,
-              bbox:
-                useViewportBounds && map
-                  ? normalizeBbox(
-                      map.getBounds().toArray().flat() as [
-                        number,
-                        number,
-                        number,
-                        number,
-                      ],
-                    )
-                  : undefined,
-            })
-          }
-          disabled={!!search}
-        >
-          <LuSearch></LuSearch>
-          Search
-        </Button>
       </HStack>
 
       {search && link && (
@@ -257,7 +318,7 @@ function Datetime({
   }, [startDatetime, endDatetime, setDatetime]);
 
   return (
-    <Stack>
+    <Stack gap={4}>
       <DatetimeInput
         label="Start datetime"
         datetime={startDatetime}
@@ -268,17 +329,16 @@ function Datetime({
         datetime={endDatetime}
         setDatetime={setEndDatetime}
       ></DatetimeInput>
-      <HStack>
-        <Button
-          variant={"outline"}
-          onClick={() => {
-            setStartDatetime(interval?.[0] ? new Date(interval[0]) : undefined);
-            setEndDatetime(interval?.[1] ? new Date(interval[1]) : undefined);
-          }}
-        >
-          Set to collection extents
-        </Button>
-      </HStack>
+      <Button
+        size={"sm"}
+        variant={"outline"}
+        onClick={() => {
+          setStartDatetime(interval?.[0] ? new Date(interval[0]) : undefined);
+          setEndDatetime(interval?.[1] ? new Date(interval[1]) : undefined);
+        }}
+      >
+        Set to collection extents
+      </Button>
     </Stack>
   );
 }
@@ -354,25 +414,29 @@ function DatetimeInput({
   );
 }
 
-function normalizeBbox(bbox: [number, number, number, number]) {
+function normalizeBbox(bbox: BBox): NormalizedBbox {
   if (bbox[2] - bbox[0] >= 360) {
-    return [-180, bbox[1], 180, bbox[3]];
+    return {
+      bbox: [-180, bbox[1], 180, bbox[3]],
+      isCrossingAntimeridian: false,
+    };
   } else if (bbox[0] < -180) {
     return normalizeBbox([bbox[0] + 360, bbox[1], bbox[2] + 360, bbox[3]]);
   } else if (bbox[0] > 180) {
     return normalizeBbox([bbox[0] - 360, bbox[1], bbox[2] - 360, bbox[3]]);
   } else if (bbox[2] > 180) {
-    // Antimeridian-crossing
-    toaster.create({
-      type: "info",
-      title: "Viewport crosses the antimeridian",
-      description:
-        "The viewport crosses the antimeridian, and many STAC API servers do not support bounding boxes that cross +/- 180° longitude. We're narrowing the viewport to only search to only one side.",
-    });
     if ((bbox[0] + bbox[2]) / 2 > 180) {
-      return [-180, bbox[1], bbox[2] - 360, bbox[3]];
+      return {
+        bbox: [-180, bbox[1], bbox[2] - 360, bbox[3]],
+        isCrossingAntimeridian: true,
+      };
     } else {
-      return [bbox[0], bbox[1], 180, bbox[3]];
+      return {
+        bbox: [bbox[0], bbox[1], 180, bbox[3]],
+        isCrossingAntimeridian: true,
+      };
     }
+  } else {
+    return { bbox: bbox, isCrossingAntimeridian: false };
   }
 }

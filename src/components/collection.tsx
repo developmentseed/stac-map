@@ -1,12 +1,17 @@
-import { Box, DataList, HStack, Icon, Stack, Text } from "@chakra-ui/react";
+import {
+  Badge,
+  Box,
+  DataList,
+  HStack,
+  Icon,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import { LuFileSearch } from "react-icons/lu";
-import type {
-  StacCollection,
-  SpatialExtent as StacSpatialExtent,
-  TemporalExtent as StacTemporalExtent,
-} from "stac-ts";
+import type { StacCollection } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
 import { ChildCard, Children } from "./children";
+import { SpatialExtent, TemporalExtent } from "./extents";
 import ItemSearch from "./search/item";
 import Section from "./section";
 import Value from "./value";
@@ -30,6 +35,7 @@ export function Collection({ collection }: { collection: StacCollection }) {
                 <LuFileSearch></LuFileSearch>
               </Icon>{" "}
               Item search
+              <Badge colorPalette={"orange"}>Under development</Badge>
             </HStack>
           }
         >
@@ -74,28 +80,7 @@ export function CollectionCard({
   );
 }
 
-function SpatialExtent({ bbox }: { bbox: StacSpatialExtent }) {
-  return <Text>[{bbox.map((n) => Number(n.toFixed(4))).join(", ")}]</Text>;
-}
-
-function TemporalExtent({ interval }: { interval: StacTemporalExtent }) {
-  return (
-    <Text>
-      <DateString datetime={interval[0]}></DateString> —{" "}
-      <DateString datetime={interval[1]}></DateString>
-    </Text>
-  );
-}
-
-function DateString({ datetime }: { datetime: string | null }) {
-  if (datetime) {
-    return new Date(datetime).toLocaleDateString();
-  } else {
-    return "unbounded";
-  }
-}
-
-function Extents({ collection }: { collection: StacCollection }) {
+export function Extents({ collection }: { collection: StacCollection }) {
   return (
     <DataList.Root orientation={"horizontal"}>
       {collection.extent?.spatial?.bbox?.[0] && (
