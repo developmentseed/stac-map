@@ -86,8 +86,8 @@ function Introduction() {
   return (
     <Stack fontSize={"sm"} fontWeight={"lighter"}>
       <Box>
-        stac-map is a map-first, statically-served, single-page visualization
-        tool for{" "}
+        <strong>stac-map</strong> is a map-first, statically-served, single-page
+        visualization tool for{" "}
         <Link variant={"underline"} href="https://stacspec.org">
           STAC
         </Link>{" "}
