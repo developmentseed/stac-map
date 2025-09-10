@@ -22,9 +22,22 @@ test("renders example button", async () => {
     .toBeVisible();
 });
 
-test("loads STAC API from eoapi.dev", async () => {
+test("loads stac.eoapi.dev", async () => {
   window.history.pushState({}, "", "?href=https://stac.eoapi.dev/");
   const app = await renderApp();
   await expect.element(app.getByText(/eoAPI-stac/i)).toBeVisible();
   await expect.element(app.getByText(/collections/i)).toBeVisible();
+});
+
+test("loads CSDA Planet", async () => {
+  // https://github.com/developmentseed/stac-map/issues/96
+  window.history.pushState(
+    {},
+    "",
+    "?href=https://csdap.earthdata.nasa.gov/stac/collections/planet",
+  );
+  const app = await renderApp();
+  await expect
+    .element(app.getByRole("heading", { hasText: "Planet" }))
+    .toBeVisible();
 });

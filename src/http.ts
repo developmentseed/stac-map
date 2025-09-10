@@ -16,7 +16,8 @@ export async function fetchStac(
     if (response.ok) {
       return response
         .json()
-        .then((json) => maybeAddSelfLink(json, href.toString()));
+        .then((json) => maybeAddSelfLink(json, href.toString()))
+        .then((json) => maybeAddTypeField(json));
     } else {
       throw new Error(`${method} ${href}: ${response.statusText}`);
     }
@@ -40,6 +41,22 @@ function maybeAddSelfLink(value: any, href: string) {
       value.links.push(link);
     } else {
       value.links = [link];
+    }
+  }
+  return value;
+}
+
+// eslint-disable-next-line
+function maybeAddTypeField(value: any) {
+  if (!value.type) {
+    if (value.features && Array.isArray(value.features)) {
+      value.type = "FeatureCollection";
+    } else if (value.extent) {
+      value.type = "Collection";
+    } else if (value.geometry && value.properties) {
+      value.type = "Feature";
+    } else if (value.stac_version) {
+      value.type = "Catalog";
     }
   }
   return value;
