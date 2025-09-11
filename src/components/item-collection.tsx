@@ -24,7 +24,12 @@ export default function ItemCollection({
 
   return (
     <Stack>
-      <Value value={itemCollection}></Value>
+      <Value value={itemCollection}>
+        {itemCollection.features.length > 0 &&
+          itemCollection.features.length +
+            " item" +
+            (itemCollection.features.length > 1 ? "s" : "")}
+      </Value>
       {isStacGeoparquet &&
         ((stacGeoparquetMetadata && (
           <StacGeoparquetInfo

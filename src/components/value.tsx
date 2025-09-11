@@ -1,4 +1,4 @@
-import { Button, ButtonGroup } from "@chakra-ui/react";
+import { Button, ButtonGroup, Stack } from "@chakra-ui/react";
 import { type ReactNode } from "react";
 import { LuExternalLink } from "react-icons/lu";
 import { MarkdownHooks } from "react-markdown";
@@ -28,17 +28,19 @@ export default function Value({
       title={(value.title as string) || value.id || value.type}
       titleSize="xl"
     >
-      {thumbnailAsset && <Thumbnail asset={thumbnailAsset}></Thumbnail>}
+      <Stack>
+        {thumbnailAsset && <Thumbnail asset={thumbnailAsset}></Thumbnail>}
 
-      {!!value.description && (
-        <Prose>
-          <MarkdownHooks>{value.description as string}</MarkdownHooks>
-        </Prose>
-      )}
+        {!!value.description && (
+          <Prose>
+            <MarkdownHooks>{value.description as string}</MarkdownHooks>
+          </Prose>
+        )}
 
-      {children}
+        {children}
 
-      {selfHref && <SelfHrefButtons href={selfHref}></SelfHrefButtons>}
+        {selfHref && <SelfHrefButtons href={selfHref}></SelfHrefButtons>}
+      </Stack>
     </Section>
   );
 }

@@ -3,9 +3,10 @@ import { Layer, type DeckProps } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { GeoArrowPolygonLayer } from "@geoarrow/deck.gl-layers";
+import { bbox as turfBbox } from "@turf/bbox";
 import bboxPolygon from "@turf/bbox-polygon";
 import { featureCollection } from "@turf/helpers";
-import type { BBox, Feature, GeoJSON } from "geojson";
+import type { BBox, Feature, FeatureCollection, GeoJSON } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, type RefObject } from "react";
 import {
@@ -118,6 +119,7 @@ export default function Map() {
       updateTriggers: [picked, items],
     }),
   ];
+  console.log(geojson);
 
   if (stacGeoparquetTable) {
     layers.push(
@@ -229,7 +231,11 @@ function useStacValueLayerProperties(
           filled: true,
         };
       case "FeatureCollection":
-        return { geojson: undefined, bbox: undefined, filled: undefined };
+        return {
+          geojson: value.features as Feature[],
+          bbox: turfBbox(value as FeatureCollection),
+          filled: true,
+        };
     }
   } else {
     return { geojson: undefined, bbox: undefined, filled: undefined };
