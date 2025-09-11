@@ -3,6 +3,7 @@ import {
   Alert,
   Button,
   ButtonGroup,
+  Checkbox,
   createListCollection,
   Field,
   Group,
@@ -14,21 +15,25 @@ import {
   Portal,
   Progress,
   Select,
+  Spinner,
   Stack,
   Switch,
   Text,
 } from "@chakra-ui/react";
 import type { BBox } from "geojson";
 import { useEffect, useState } from "react";
-import { LuPause, LuPlay, LuSearch, LuX } from "react-icons/lu";
+import { LuPause, LuPlay, LuSearch, LuStepForward, LuX } from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
-import type { StacCollection, StacLink, TemporalExtent } from "stac-ts";
+import type {
+  StacCollection,
+  StacItem,
+  StacLink,
+  TemporalExtent,
+} from "stac-ts";
 import useStacMap from "../../hooks/stac-map";
 import useStacSearch from "../../hooks/stac-search";
 import type { StacSearch } from "../../types/stac";
-import DownloadButtons from "../download";
 import { SpatialExtent } from "../extents";
-import { toaster } from "../ui/toaster";
 
 interface NormalizedBbox {
   bbox: BBox;
@@ -42,12 +47,12 @@ export default function ItemSearch({
   collection: StacCollection;
   links: StacLink[];
 }) {
-  const { setItems } = useStacMap();
-  const [search, setSearch] = useState<StacSearch>();
   const [link, setLink] = useState<StacLink | undefined>(links[0]);
   const [normalizedBbox, setNormalizedBbox] = useState<NormalizedBbox>();
   const [datetime, setDatetime] = useState<string>();
   const [useViewportBounds, setUseViewportBounds] = useState(true);
+  const { search, setSearch } = useStacMap();
+  const [autoLoad, setAutoLoad] = useState(false);
   const { map } = useMap();
 
   const methods = createListCollection({
@@ -78,7 +83,7 @@ export default function ItemSearch({
   }, [map, useViewportBounds]);
 
   return (
-    <Stack>
+    <Stack gap={4}>
       <Accordion.Root
         defaultValue={["spatial", "temporal"]}
         multiple
@@ -86,12 +91,12 @@ export default function ItemSearch({
       >
         <Accordion.Item value="spatial">
           <Accordion.ItemTrigger>
-            <Heading flex="1" size={"lg"}>
+            <Heading flex="1" size={"md"}>
               Spatial
             </Heading>
             <Accordion.ItemIndicator />
           </Accordion.ItemTrigger>
-          <Accordion.ItemContent pb={4}>
+          <Accordion.ItemContent py={4}>
             <Stack>
               <Switch.Root
                 disabled={!map}
@@ -134,12 +139,12 @@ export default function ItemSearch({
 
         <Accordion.Item value="temporal">
           <Accordion.ItemTrigger>
-            <Heading flex="1" size={"lg"}>
+            <Heading flex="1" size={"md"}>
               Temporal
             </Heading>
             <Accordion.ItemIndicator />
           </Accordion.ItemTrigger>
-          <Accordion.ItemContent pb={4}>
+          <Accordion.ItemContent py={4}>
             <Datetime
               interval={collection.extent?.temporal?.interval[0]}
               setDatetime={setDatetime}
@@ -159,7 +164,6 @@ export default function ItemSearch({
               bbox: normalizedBbox?.bbox,
             })
           }
-          disabled={!!search}
         >
           <LuSearch></LuSearch>
           Search
@@ -171,7 +175,6 @@ export default function ItemSearch({
           onValueChange={(e) =>
             setLink(links.find((link) => (link.method || "GET") == e.value))
           }
-          disabled={!!search}
           maxW={100}
         >
           <Select.HiddenSelect></Select.HiddenSelect>
@@ -196,16 +199,24 @@ export default function ItemSearch({
             </Select.Positioner>
           </Portal>
         </Select.Root>
+        <Checkbox.Root
+          checked={autoLoad}
+          onCheckedChange={(e) => setAutoLoad(!!e.checked)}
+        >
+          <Checkbox.HiddenInput></Checkbox.HiddenInput>
+          <Checkbox.Control>
+            <Checkbox.Indicator></Checkbox.Indicator>
+          </Checkbox.Control>
+          <Checkbox.Label>Auto-load?</Checkbox.Label>
+        </Checkbox.Root>
       </HStack>
 
       {search && link && (
         <Results
           search={search}
           link={link}
-          doClear={() => {
-            setSearch(undefined);
-            setItems(undefined);
-          }}
+          autoLoad={autoLoad}
+          setAutoLoad={setAutoLoad}
         ></Results>
       )}
     </Stack>
@@ -215,81 +226,87 @@ export default function ItemSearch({
 function Results({
   search,
   link,
-  doClear,
+  autoLoad,
+  setAutoLoad,
 }: {
   search: StacSearch;
   link: StacLink;
-  doClear: () => void;
+  autoLoad: boolean;
+  setAutoLoad: (autoLoad: boolean) => void;
 }) {
-  const { items, setItems } = useStacMap();
-  const { data, isFetchingNextPage, hasNextPage, fetchNextPage, error } =
-    useStacSearch(search, link);
-  const [pause, setPause] = useState(false);
+  const results = useStacSearch(search, link);
+  const [items, setItems] = useState<StacItem[]>();
+  const { setSearch, setSearchItems } = useStacMap();
 
   useEffect(() => {
-    setItems(data?.pages.flatMap((page) => page.features));
-  }, [data, setItems]);
+    setItems(results.data?.pages.flatMap((page) => page.features));
+  }, [results.data]);
 
   useEffect(() => {
-    if (!isFetchingNextPage && !pause && hasNextPage) {
-      fetchNextPage();
+    if (autoLoad && !results.isFetching && results.hasNextPage) {
+      results.fetchNextPage();
     }
-  }, [isFetchingNextPage, pause, hasNextPage, fetchNextPage]);
+  }, [results, autoLoad]);
 
   useEffect(() => {
-    if (error) {
-      toaster.create({
-        type: "error",
-        title: "Search error",
-        description: error.toString(),
-      });
-      doClear();
-    }
-  }, [error, doClear]);
+    setSearchItems(items);
+  }, [items, setSearchItems]);
+
+  const numberMatched = results.data?.pages[0].numberMatched;
+  const value = items?.length || 0;
 
   return (
-    <Progress.Root
-      value={items ? items.length : null}
-      max={data?.pages[0]?.numberMatched}
-      maxW={"md"}
-    >
-      <HStack>
-        <Progress.Track flex={1}>
-          <Progress.Range></Progress.Range>
-        </Progress.Track>
-        <Progress.ValueText>
-          <HStack gap={2}>
-            {items?.length || "0"}
-
-            <ButtonGroup size={"xs"} variant={"subtle"} attached>
-              {(pause && (
-                <IconButton onClick={() => setPause(false)}>
-                  <LuPlay></LuPlay>
-                </IconButton>
-              )) || (
-                <IconButton
-                  disabled={!hasNextPage}
-                  onClick={() => setPause(true)}
-                >
-                  <LuPause></LuPause>
-                </IconButton>
-              )}
-              <IconButton onClick={doClear}>
-                <LuX></LuX>
-              </IconButton>
-            </ButtonGroup>
-          </HStack>
-        </Progress.ValueText>
-      </HStack>
-      {items && items.length > 0 && (
+    <Stack>
+      <Progress.Root
+        value={results.isFetching && !numberMatched ? null : value}
+        max={numberMatched}
+        striped={!numberMatched}
+      >
         <HStack>
-          <DownloadButtons
-            items={items}
-            disabled={!pause && hasNextPage}
-          ></DownloadButtons>
+          <Progress.Track flex={"1"}>
+            <Progress.Range></Progress.Range>
+          </Progress.Track>
+          <Progress.ValueText>
+            {items?.length || 0} / {numberMatched || "?"}
+          </Progress.ValueText>
         </HStack>
+      </Progress.Root>
+      <HStack>
+        <ButtonGroup size={"xs"} attached variant={"subtle"}>
+          <IconButton
+            disabled={results.isFetching || !results.hasNextPage}
+            onClick={() => results.fetchNextPage()}
+          >
+            <LuStepForward></LuStepForward>
+          </IconButton>
+          <IconButton
+            onClick={() => setAutoLoad(!autoLoad)}
+            disabled={!results.hasNextPage}
+          >
+            {(autoLoad && <LuPause></LuPause>) || <LuPlay></LuPlay>}
+          </IconButton>
+          <IconButton
+            onClick={() => {
+              setSearch(undefined);
+            }}
+          >
+            <LuX></LuX>
+          </IconButton>
+        </ButtonGroup>
+        {((autoLoad && results.hasNextPage) || results.isFetching) && (
+          <Spinner size={"xs"}></Spinner>
+        )}
+      </HStack>
+      {results.error && (
+        <Alert.Root status={"error"}>
+          <Alert.Indicator></Alert.Indicator>
+          <Alert.Content>
+            <Alert.Title>Error while searching</Alert.Title>
+            <Alert.Description>{results.error.toString()}</Alert.Description>
+          </Alert.Content>
+        </Alert.Root>
       )}
-    </Progress.Root>
+    </Stack>
   );
 }
 

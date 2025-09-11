@@ -7,6 +7,8 @@ export type StacValue =
   | StacItem
   | StacItemCollection;
 
+export type StacContainer = StacCatalog | StacCollection;
+
 export interface StacItemCollection {
   type: "FeatureCollection";
   features: StacItem[];

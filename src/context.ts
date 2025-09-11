@@ -2,59 +2,66 @@ import type { UseFileUploadReturn } from "@chakra-ui/react";
 import type { Table } from "apache-arrow";
 import { createContext } from "react";
 import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
-import type { StacGeoparquetMetadata, StacValue } from "./types/stac";
+import type {
+  StacContainer,
+  StacGeoparquetMetadata,
+  StacSearch,
+  StacValue,
+} from "./types/stac";
 
 export const StacMapContext = createContext<StacMapContextType | null>(null);
 
 interface StacMapContextType {
-  /// The root href for the app, used to load `value`.
-  ///
-  /// This is sync'd with a url parameter.
-  href: string | undefined;
-
   /// A function to set the href.
   setHref: (href: string | undefined) => void;
-
-  /// Is the current value a stac-geoparquet?
-  isStacGeoparquet: boolean;
 
   /// A shared fileUpload structure that is the source of JSON or
   /// stac-geoparquet bytes.
   fileUpload: UseFileUploadReturn;
 
+  /// Set the STAC search.
+  setSearch: (search: StacSearch | undefined) => void;
+
+  /// Set the picked item.
+  setPicked: (value: StacItem | undefined) => void;
+
+  /// Set the id of a stac-geoparquet item that should be fetched from the
+  /// parquet table and loaded into the picked item.
+  setStacGeoparquetItemId: (id: string | undefined) => void;
+
+  /// Set the searched items.
+  setSearchItems: (items: StacItem[] | undefined) => void;
+
+  /// Sets the temporal filter.
+  setTemporalFilter: (
+    temporalFilter: { start: Date; end: Date } | undefined,
+  ) => void;
+
+  /// The root href for the app, used to load `value`.
+  ///
+  /// This is sync'd with a url parameter.
+  href: string | undefined;
+
+  /// Is the current value stac-geoparquet?
+  isStacGeoparquet: boolean;
+
   /// The root STAC value.
   value: StacValue | undefined;
 
   /// The root of the STAC value.
-  root: StacCatalog | StacCollection | undefined;
+  root: StacContainer | undefined;
 
   /// The parent of the STAC value.
-  parent: StacCatalog | StacCollection | undefined;
+  parent: StacContainer | undefined;
 
-  /// Any catalogs that belong to the `value`.
-  catalogs: StacCatalog[] | undefined;
+  /// Any catalogs linked from the value.
+  catalogs: StacCatalog[];
 
-  /// Any collections that belong to the `value`.
-  ///
-  /// This is usually populated only if the value is a Catalog.
-  collections: StacCollection[] | undefined;
+  /// Collections either loaded from the collections endpoint or linked from the value.
+  collections: StacCollection[];
 
-  /// Are we fetching pages of collections?
-  isFetchingCollections: boolean;
-
-  /// STAC items that belong to the value.
+  /// STAC items for visualization.
   items: StacItem[] | undefined;
-
-  /// A function to set the items.
-  setItems: (items: StacItem[] | undefined) => void;
-
-  /// A picked item.
-  ///
-  /// "picking" usually involves clicking on the map.
-  picked: StacItem | undefined;
-
-  /// Set the picked item.
-  setPicked: (value: StacItem | undefined) => void;
 
   /// The stac-geoparquet table that's currently loaded.
   stacGeoparquetTable: Table | undefined | null;
@@ -62,18 +69,11 @@ interface StacMapContextType {
   /// The stac-geoparquet metadata that are currently loaded.
   stacGeoparquetMetadata: StacGeoparquetMetadata | undefined;
 
-  /// Set the id of a stac-geoparquet item that should be fetched from the
-  /// parquet table and loaded into the picked item.
-  setStacGeoparquetItemId: (id: string | undefined) => void;
+  /// A picked item.
+  ///
+  /// "picking" usually involves clicking on the map.
+  picked: StacItem | undefined;
 
-  /// The temporal extents of the loaded data.
-  temporalExtents: { start: Date; end: Date } | undefined;
-
-  /// Sets the temporal filter.
-  setTemporalFilter: (
-    temporalFilter: { start: Date; end: Date } | undefined,
-  ) => void;
-
-  /// Items that have been filtered by the temporal filter
-  filteredItems: StacItem[] | undefined;
+  /// The active STAC search.
+  search: StacSearch | undefined;
 }

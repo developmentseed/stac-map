@@ -49,7 +49,6 @@ export default function Map() {
     stacGeoparquetTable,
     stacGeoparquetMetadata,
     setStacGeoparquetItemId,
-    filteredItems,
     fileUpload,
   } = useStacMap();
   const {
@@ -95,11 +94,11 @@ export default function Map() {
     }),
     new GeoJsonLayer({
       id: "items",
-      data: filteredItems as Feature[] | undefined,
+      data: items as Feature[] | undefined,
       filled: true,
       stroked: true,
       getFillColor: fillColor,
-      getLineColor: fillColor,
+      getLineColor: lineColor,
       lineWidthUnits: "pixels",
       getLineWidth: 2,
       pickable: true,
@@ -110,7 +109,7 @@ export default function Map() {
     new GeoJsonLayer({
       id: "value",
       data: geojson,
-      filled: filled && !picked && !items,
+      filled: filled && !picked && (!items || items.length == 0),
       stroked: true,
       getFillColor: fillColor,
       getLineColor: lineColor,
