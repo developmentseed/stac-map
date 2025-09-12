@@ -8,15 +8,17 @@ import {
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import type { StacCollection } from "stac-ts";
-import useStacMap from "../../hooks/stac-map";
+import type { SetHref } from "../../types/app";
 import { NaturalLanguageCollectionSearch } from "./natural-language";
 
 export function CollectionSearch({
   href,
   collections,
+  setHref,
 }: {
   href?: string;
   collections: StacCollection[];
+  setHref: SetHref;
 }) {
   const [value, setValue] = useState<"Text" | "Natural language">("Text");
   return (
@@ -43,11 +45,15 @@ export function CollectionSearch({
         </SegmentGroup.Root>
       </HStack>
       {value === "Text" && (
-        <CollectionCombobox collections={collections}></CollectionCombobox>
+        <CollectionCombobox
+          collections={collections}
+          setHref={setHref}
+        ></CollectionCombobox>
       )}
       {value === "Natural language" && href && (
         <NaturalLanguageCollectionSearch
           href={href}
+          setHref={setHref}
           collections={collections}
         ></NaturalLanguageCollectionSearch>
       )}
@@ -57,11 +63,12 @@ export function CollectionSearch({
 
 export function CollectionCombobox({
   collections,
+  setHref,
 }: {
   collections: StacCollection[];
+  setHref: SetHref;
 }) {
   const [searchValue, setSearchValue] = useState("");
-  const { setHref } = useStacMap();
 
   const filteredCollections = useMemo(() => {
     return collections.filter(

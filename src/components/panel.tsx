@@ -1,53 +1,126 @@
 import {
   Alert,
   Box,
-  FileUpload,
-  Link,
   SkeletonText,
   Stack,
+  type UseFileUploadReturn,
 } from "@chakra-ui/react";
-import { Examples } from "../examples";
+import { useState } from "react";
+import type { StacLink } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
-import type { StacValue } from "../types/stac";
+import type { SetHref } from "../types/app";
+import type { StacSearch, StacValue } from "../types/stac";
 import { Catalog } from "./catalog";
 import { Collection } from "./collection";
+import Introduction from "./introduction";
 import Item from "./item";
 import ItemCollection from "./item-collection";
 import { NavigationBreadcrumbs } from "./navigation-breadcrumbs";
+import { ItemSearchResults } from "./search/item";
 
-export default function Panel() {
-  const { href, value, picked } = useStacMap();
+export default function Panel({
+  href,
+  setHref,
+  fileUpload,
+}: {
+  href: string | undefined;
+  setHref: SetHref;
+  fileUpload: UseFileUploadReturn;
+}) {
+  const { value, picked } = useStacMap();
+  const [search, setSearch] = useState<StacSearch>();
+  const [searchLink, setSearchLink] = useState<StacLink>();
+  const [autoLoad, setAutoLoad] = useState(false);
 
   let content;
-
   if (!href) {
-    content = <Introduction></Introduction>;
+    content = (
+      <Introduction fileUpload={fileUpload} setHref={setHref}></Introduction>
+    );
   } else if (!value) {
     content = <SkeletonText noOfLines={3} />;
   } else if (picked) {
-    content = <ValueContent value={picked}></ValueContent>;
+    content = (
+      <ValueContent
+        value={picked}
+        setHref={setHref}
+        search={search}
+        setSearch={setSearch}
+        setSearchLink={setSearchLink}
+        autoLoad={autoLoad}
+        setAutoLoad={setAutoLoad}
+      ></ValueContent>
+    );
   } else {
-    content = <ValueContent value={value}></ValueContent>;
+    content = (
+      <ValueContent
+        value={value}
+        setHref={setHref}
+        search={search}
+        setSearch={setSearch}
+        setSearchLink={setSearchLink}
+        autoLoad={autoLoad}
+        setAutoLoad={setAutoLoad}
+      ></ValueContent>
+    );
   }
 
   return (
     <Box bg={"bg.muted"} rounded={4} pointerEvents={"auto"} overflow={"hidden"}>
       <Box px={4} py={3} borderBottomWidth={1} borderColor={"border.subtle"}>
-        <NavigationBreadcrumbs></NavigationBreadcrumbs>
+        <NavigationBreadcrumbs
+          href={href}
+          setHref={setHref}
+        ></NavigationBreadcrumbs>
       </Box>
-      <Box overflow={"scroll"} maxH={{ base: "40dvh", md: "80dvh" }} p={4}>
+      <Stack overflow={"scroll"} maxH={{ base: "40dvh", md: "80dvh" }} p={4}>
         {content}
-      </Box>
+        {search && searchLink && (
+          <ItemSearchResults
+            search={search}
+            setSearch={setSearch}
+            link={searchLink}
+            autoLoad={autoLoad}
+            setAutoLoad={setAutoLoad}
+          ></ItemSearchResults>
+        )}
+      </Stack>
     </Box>
   );
 }
 
-function ValueContent({ value }: { value: StacValue }) {
+function ValueContent({
+  value,
+  setHref,
+  search,
+  setSearch,
+  setSearchLink,
+  autoLoad,
+  setAutoLoad,
+}: {
+  value: StacValue;
+  setHref: SetHref;
+  search: StacSearch | undefined;
+  setSearch: (search: StacSearch | undefined) => void;
+  setSearchLink: (link: StacLink | undefined) => void;
+  autoLoad: boolean;
+  setAutoLoad: (autoLoad: boolean) => void;
+}) {
   switch (value.type) {
     case "Catalog":
-      return <Catalog catalog={value}></Catalog>;
+      return <Catalog catalog={value} setHref={setHref}></Catalog>;
     case "Collection":
-      return <Collection collection={value}></Collection>;
+      return (
+        <Collection
+          collection={value}
+          setHref={setHref}
+          search={search}
+          setSearch={setSearch}
+          setSearchLink={setSearchLink}
+          autoLoad={autoLoad}
+          setAutoLoad={setAutoLoad}
+        ></Collection>
+      );
     case "Feature":
       return <Item item={value}></Item>;
     case "FeatureCollection":
@@ -78,44 +151,4 @@ function ValueContent({ value }: { value: StacValue }) {
         </Alert.Root>
       );
   }
-}
-
-function Introduction() {
-  const { fileUpload } = useStacMap();
-
-  return (
-    <Stack fontSize={"sm"} fontWeight={"lighter"}>
-      <Box>
-        <strong>stac-map</strong> is a map-first, statically-served, single-page
-        visualization tool for{" "}
-        <Link variant={"underline"} href="https://stacspec.org">
-          STAC
-        </Link>{" "}
-        catalogs, collections, and items. To get started, use the text input,{" "}
-        <FileUpload.RootProvider
-          value={fileUpload}
-          as={"span"}
-          display={"inline"}
-        >
-          <FileUpload.Trigger asChild>
-            <Link>upload a file</Link>
-          </FileUpload.Trigger>
-        </FileUpload.RootProvider>
-        , or load an{" "}
-        <Examples>
-          <Link>example</Link>
-        </Examples>
-        .
-      </Box>
-      <Box>
-        Questions, issues, or feature requests? Get in touch on{" "}
-        <Link asChild>
-          <a href="https://github.com/developmentseed/stac-map" target="_blank">
-            GitHub
-          </a>
-        </Link>
-        .
-      </Box>
-    </Stack>
-  );
 }

@@ -7,12 +7,11 @@ import { fetchStac, fetchStacLink } from "../http";
 import type { TemporalFilter } from "../types/datetime";
 import type {
   StacCollections,
-  StacContainer,
   StacItemCollection,
   StacValue,
 } from "../types/stac";
 
-export default function useStacValue({
+export function useStacValue({
   href,
   fileUpload,
 }: {
@@ -22,25 +21,11 @@ export default function useStacValue({
 }): {
   value?: StacValue;
   parquetPath?: string;
-  root?: StacContainer;
-  parent?: StacContainer;
-  catalogs: StacCatalog[];
-  collections: StacCollection[];
+  collections: StacCollection[] | undefined;
   items: StacItem[];
 } {
   const { db } = useDuckDb();
   const { data } = useStacValueQuery({ href, fileUpload, db });
-  const { data: rootData } = useStacValueQuery({
-    href: data?.value.links?.find((link) => link.rel == "root")?.href,
-  });
-  const { data: parentData } = useStacValueQuery({
-    href: data?.value.links?.find((link) => link.rel == "parent")?.href,
-  });
-  const { values: children } = useStacValues(
-    !data?.value.links?.find((link) => link.rel == "data")
-      ? data?.value.links?.filter((link) => link.rel == "child")
-      : undefined,
-  );
   const { values: items } = useStacValues(
     data?.value.links?.filter((link) => link.rel == "item"),
   );
@@ -49,21 +34,39 @@ export default function useStacValue({
   return {
     value: data?.value,
     parquetPath: data?.parquetPath,
-    root:
-      rootData?.value?.type == "Catalog" ||
-      rootData?.value?.type == "Collection"
-        ? rootData.value
-        : undefined,
-    parent:
-      parentData?.value?.type == "Catalog" ||
-      parentData?.value?.type == "Collection"
-        ? parentData.value
-        : undefined,
-    catalogs: children.filter((child) => child.type == "Catalog"),
-    collections:
-      collections || children.filter((child) => child.type == "Collection"),
+    collections,
     items: items.filter((item) => item.type == "Feature"),
   };
+}
+
+export function useStacLinkContainer(
+  value: StacValue | undefined,
+  rel: string,
+) {
+  const result = useStacValueQuery({
+    href: value?.links?.find((link) => link.rel == rel)?.href,
+  });
+  if (
+    result.data?.value.type == "Catalog" ||
+    result.data?.value.type == "Collection"
+  ) {
+    return result.data?.value;
+  } else {
+    return undefined;
+  }
+}
+
+export function useChildren(
+  value: StacValue | undefined,
+  includeCollections: boolean,
+) {
+  return useStacValues(
+    value?.links?.filter((link) => link.rel == "child"),
+  ).values.filter(
+    (value) =>
+      value.type == "Catalog" ||
+      (includeCollections && value.type == "Collection"),
+  ) as (StacCatalog | StacCollection)[];
 }
 
 function useStacValueQuery({
@@ -102,7 +105,9 @@ function useStacValues(links: StacLink[] | undefined) {
       }) || [],
   });
   return {
-    values: results.map((value) => value.data).filter((value) => !!value),
+    values: results
+      .map((value) => value.data)
+      .filter((value) => !!value) as StacValue[],
   };
 }
 

@@ -2,7 +2,6 @@ import {
   Accordion,
   createTreeCollection,
   FormatNumber,
-  SkeletonText,
   Span,
   Stack,
   Table,
@@ -20,7 +19,7 @@ export default function ItemCollection({
 }: {
   itemCollection: StacItemCollection;
 }) {
-  const { isStacGeoparquet, stacGeoparquetMetadata } = useStacMap();
+  const { stacGeoparquetMetadata } = useStacMap();
 
   return (
     <Stack>
@@ -30,12 +29,11 @@ export default function ItemCollection({
             " item" +
             (itemCollection.features.length > 1 ? "s" : "")}
       </Value>
-      {isStacGeoparquet &&
-        ((stacGeoparquetMetadata && (
-          <StacGeoparquetInfo
-            metadata={stacGeoparquetMetadata}
-          ></StacGeoparquetInfo>
-        )) || <SkeletonText noOfLines={3}></SkeletonText>)}
+      {stacGeoparquetMetadata && (
+        <StacGeoparquetInfo
+          metadata={stacGeoparquetMetadata}
+        ></StacGeoparquetInfo>
+      )}
     </Stack>
   );
 }

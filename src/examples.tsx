@@ -1,6 +1,6 @@
 import { Badge, Menu, Portal, Span } from "@chakra-ui/react";
 import { type ReactNode } from "react";
-import useStacMap from "./hooks/stac-map";
+import type { SetHref } from "./types/app";
 
 const EXAMPLES = [
   { title: "eoAPI DevSeed", badge: "API", href: "https://stac.eoapi.dev/" },
@@ -36,9 +36,13 @@ const EXAMPLES = [
   },
 ];
 
-export function Examples({ children }: { children: ReactNode }) {
-  const { setHref } = useStacMap();
-
+export function Examples({
+  setHref,
+  children,
+}: {
+  setHref: SetHref;
+  children: ReactNode;
+}) {
   return (
     <Menu.Root onSelect={(details) => setHref(details.value)}>
       <Menu.Trigger asChild>{children}</Menu.Trigger>

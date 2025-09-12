@@ -27,6 +27,11 @@ test("loads stac.eoapi.dev", async () => {
   const app = await renderApp();
   await expect.element(app.getByText(/eoAPI-stac/i)).toBeVisible();
   await expect.element(app.getByText(/collections/i)).toBeVisible();
+
+  await app.getByRole("heading", { name: "Afghanistan Earthquake" }).click();
+  expect(new URL(window.location.href).search).toBe(
+    "?href=https://stac.eoapi.dev/collections/MAXAR_afghanistan_earthquake22",
+  );
 });
 
 test("loads CSDA Planet", async () => {
@@ -38,7 +43,7 @@ test("loads CSDA Planet", async () => {
   );
   const app = await renderApp();
   await expect
-    .element(app.getByRole("heading", { hasText: "Planet" }))
+    .element(app.getByRole("heading", { name: "Planet" }))
     .toBeVisible();
 });
 

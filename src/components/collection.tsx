@@ -8,16 +8,34 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { LuFileSearch } from "react-icons/lu";
-import type { StacCollection } from "stac-ts";
-import useStacMap from "../hooks/stac-map";
+import type { StacCollection, StacLink } from "stac-ts";
+import { useStacLinkContainer } from "../hooks/stac-value";
+import type { SetHref } from "../types/app";
+import type { StacSearch } from "../types/stac";
 import { ChildCard, Children } from "./children";
 import { SpatialExtent, TemporalExtent } from "./extents";
 import ItemSearch from "./search/item";
 import Section from "./section";
 import Value from "./value";
 
-export function Collection({ collection }: { collection: StacCollection }) {
-  const { root } = useStacMap();
+export function Collection({
+  collection,
+  setHref,
+  search,
+  setSearch,
+  setSearchLink,
+  autoLoad,
+  setAutoLoad,
+}: {
+  collection: StacCollection;
+  setHref: SetHref;
+  search: StacSearch | undefined;
+  setSearch: (search: StacSearch | undefined) => void;
+  setSearchLink: (link: StacLink | undefined) => void;
+  autoLoad: boolean;
+  setAutoLoad: (autoLoad: boolean) => void;
+}) {
+  const root = useStacLinkContainer(collection, "root");
   const searchLinks =
     (root && root.links?.filter((link) => link.rel == "search")) || [];
 
@@ -39,25 +57,36 @@ export function Collection({ collection }: { collection: StacCollection }) {
             </HStack>
           }
         >
-          <ItemSearch collection={collection} links={searchLinks}></ItemSearch>
+          <ItemSearch
+            collection={collection}
+            links={searchLinks}
+            search={search}
+            setSearch={setSearch}
+            setSearchLink={setSearchLink}
+            autoLoad={autoLoad}
+            setAutoLoad={setAutoLoad}
+          ></ItemSearch>
         </Section>
       )}
 
-      <Children value={collection}></Children>
+      <Children value={collection} setHref={setHref}></Children>
     </Stack>
   );
 }
 
 export function CollectionCard({
   collection,
+  setHref,
   explanation,
 }: {
   collection: StacCollection;
+  setHref: SetHref;
   explanation?: string;
 }) {
   return (
     <ChildCard
       child={collection}
+      setHref={setHref}
       footer={
         <Stack>
           <HStack>

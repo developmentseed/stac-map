@@ -9,6 +9,7 @@ import {
   Group,
   Heading,
   HStack,
+  Icon,
   IconButton,
   Input,
   Link,
@@ -22,18 +23,21 @@ import {
 } from "@chakra-ui/react";
 import type { BBox } from "geojson";
 import { useEffect, useState } from "react";
-import { LuPause, LuPlay, LuSearch, LuStepForward, LuX } from "react-icons/lu";
+import {
+  LuFiles,
+  LuPause,
+  LuPlay,
+  LuSearch,
+  LuStepForward,
+  LuX,
+} from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
-import type {
-  StacCollection,
-  StacItem,
-  StacLink,
-  TemporalExtent,
-} from "stac-ts";
+import type { StacCollection, StacLink, TemporalExtent } from "stac-ts";
 import useStacMap from "../../hooks/stac-map";
 import useStacSearch from "../../hooks/stac-search";
 import type { StacSearch } from "../../types/stac";
 import { SpatialExtent } from "../extents";
+import Section from "../section";
 
 interface NormalizedBbox {
   bbox: BBox;
@@ -43,16 +47,26 @@ interface NormalizedBbox {
 export default function ItemSearch({
   collection,
   links,
+  search,
+  setSearch,
+  setSearchLink,
+  autoLoad,
+  setAutoLoad,
 }: {
   collection: StacCollection;
   links: StacLink[];
+  search: StacSearch | undefined;
+  setSearch: (search: StacSearch | undefined) => void;
+  setSearchLink: (link: StacLink | undefined) => void;
+  autoLoad: boolean;
+  setAutoLoad: (autoLoad: boolean) => void;
 }) {
   const [link, setLink] = useState<StacLink | undefined>(links[0]);
   const [normalizedBbox, setNormalizedBbox] = useState<NormalizedBbox>();
-  const [datetime, setDatetime] = useState<string>();
+  const [datetime, setDatetime] = useState<string | undefined>(
+    search?.datetime,
+  );
   const [useViewportBounds, setUseViewportBounds] = useState(true);
-  const { search, setSearch } = useStacMap();
-  const [autoLoad, setAutoLoad] = useState(false);
   const { map } = useMap();
 
   const methods = createListCollection({
@@ -157,13 +171,14 @@ export default function ItemSearch({
         <Button
           variant={"solid"}
           size={"md"}
-          onClick={() =>
+          onClick={() => {
+            setSearchLink(link);
             setSearch({
               collections: [collection.id],
               datetime,
               bbox: normalizedBbox?.bbox,
-            })
-          }
+            });
+          }}
         >
           <LuSearch></LuSearch>
           Search
@@ -210,37 +225,29 @@ export default function ItemSearch({
           <Checkbox.Label>Auto-load?</Checkbox.Label>
         </Checkbox.Root>
       </HStack>
-
-      {search && link && (
-        <Results
-          search={search}
-          link={link}
-          autoLoad={autoLoad}
-          setAutoLoad={setAutoLoad}
-        ></Results>
-      )}
     </Stack>
   );
 }
 
-function Results({
+export function ItemSearchResults({
   search,
   link,
   autoLoad,
   setAutoLoad,
+  setSearch,
 }: {
   search: StacSearch;
   link: StacLink;
   autoLoad: boolean;
   setAutoLoad: (autoLoad: boolean) => void;
+  setSearch: (search: StacSearch | undefined) => void;
 }) {
   const results = useStacSearch(search, link);
-  const [items, setItems] = useState<StacItem[]>();
-  const { setSearch, setSearchItems } = useStacMap();
+  const { items, setItems } = useStacMap();
 
   useEffect(() => {
     setItems(results.data?.pages.flatMap((page) => page.features));
-  }, [results.data]);
+  }, [results.data, setItems]);
 
   useEffect(() => {
     if (autoLoad && !results.isFetching && results.hasNextPage) {
@@ -248,65 +255,72 @@ function Results({
     }
   }, [results, autoLoad]);
 
-  useEffect(() => {
-    setSearchItems(items);
-  }, [items, setSearchItems]);
-
   const numberMatched = results.data?.pages[0].numberMatched;
   const value = items?.length || 0;
 
   return (
-    <Stack>
-      <Progress.Root
-        value={results.isFetching && !numberMatched ? null : value}
-        max={numberMatched}
-        striped={!numberMatched}
-      >
+    <Section
+      title={
         <HStack>
-          <Progress.Track flex={"1"}>
-            <Progress.Range></Progress.Range>
-          </Progress.Track>
-          <Progress.ValueText>
-            {items?.length || 0} / {numberMatched || "?"}
-          </Progress.ValueText>
+          <Icon>
+            <LuFiles></LuFiles>
+          </Icon>
+          Item search results
         </HStack>
-      </Progress.Root>
-      <HStack>
-        <ButtonGroup size={"xs"} attached variant={"subtle"}>
-          <IconButton
-            disabled={results.isFetching || !results.hasNextPage}
-            onClick={() => results.fetchNextPage()}
-          >
-            <LuStepForward></LuStepForward>
-          </IconButton>
-          <IconButton
-            onClick={() => setAutoLoad(!autoLoad)}
-            disabled={!results.hasNextPage}
-          >
-            {(autoLoad && <LuPause></LuPause>) || <LuPlay></LuPlay>}
-          </IconButton>
-          <IconButton
-            onClick={() => {
-              setSearch(undefined);
-            }}
-          >
-            <LuX></LuX>
-          </IconButton>
-        </ButtonGroup>
-        {((autoLoad && results.hasNextPage) || results.isFetching) && (
-          <Spinner size={"xs"}></Spinner>
+      }
+    >
+      <Stack>
+        <Progress.Root
+          value={results.isFetching && !numberMatched ? null : value}
+          max={numberMatched}
+          striped={!numberMatched}
+        >
+          <HStack>
+            <Progress.Track flex={"1"}>
+              <Progress.Range></Progress.Range>
+            </Progress.Track>
+            <Progress.ValueText>
+              {items?.length || 0} / {numberMatched || "?"}
+            </Progress.ValueText>
+          </HStack>
+        </Progress.Root>
+        <HStack>
+          <ButtonGroup size={"xs"} attached variant={"subtle"}>
+            <IconButton
+              disabled={results.isFetching || !results.hasNextPage}
+              onClick={() => results.fetchNextPage()}
+            >
+              <LuStepForward></LuStepForward>
+            </IconButton>
+            <IconButton
+              onClick={() => setAutoLoad(!autoLoad)}
+              disabled={!results.hasNextPage}
+            >
+              {(autoLoad && <LuPause></LuPause>) || <LuPlay></LuPlay>}
+            </IconButton>
+            <IconButton
+              onClick={() => {
+                setSearch(undefined);
+              }}
+            >
+              <LuX></LuX>
+            </IconButton>
+          </ButtonGroup>
+          {((autoLoad && results.hasNextPage) || results.isFetching) && (
+            <Spinner size={"xs"}></Spinner>
+          )}
+        </HStack>
+        {results.error && (
+          <Alert.Root status={"error"}>
+            <Alert.Indicator></Alert.Indicator>
+            <Alert.Content>
+              <Alert.Title>Error while searching</Alert.Title>
+              <Alert.Description>{results.error.toString()}</Alert.Description>
+            </Alert.Content>
+          </Alert.Root>
         )}
-      </HStack>
-      {results.error && (
-        <Alert.Root status={"error"}>
-          <Alert.Indicator></Alert.Indicator>
-          <Alert.Content>
-            <Alert.Title>Error while searching</Alert.Title>
-            <Alert.Description>{results.error.toString()}</Alert.Description>
-          </Alert.Content>
-        </Alert.Root>
-      )}
-    </Stack>
+      </Stack>
+    </Section>
   );
 }
 

@@ -1,4 +1,4 @@
-import { FileUpload, useBreakpointValue } from "@chakra-ui/react";
+import { useBreakpointValue } from "@chakra-ui/react";
 import { Layer, type DeckProps } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
@@ -50,7 +50,6 @@ export default function Map() {
     stacGeoparquetTable,
     stacGeoparquetMetadata,
     setStacGeoparquetItemId,
-    fileUpload,
   } = useStacMap();
   const {
     geojson,
@@ -144,31 +143,21 @@ export default function Map() {
   }
 
   return (
-    <FileUpload.RootProvider value={fileUpload} unstyled={true}>
-      <FileUpload.Dropzone
-        disableClick={true}
-        style={{
-          height: "100dvh",
-          width: "100dvw",
-        }}
-      >
-        <MaplibreMap
-          id="map"
-          ref={mapRef}
-          initialViewState={{
-            longitude: 0,
-            latitude: 0,
-            zoom: 1,
-          }}
-          mapStyle={`https://basemaps.cartocdn.com/gl/${mapStyle}/style.json`}
-        >
-          <DeckGLOverlay
-            layers={layers}
-            getCursor={(props) => getCursor(mapRef, props)}
-          ></DeckGLOverlay>
-        </MaplibreMap>
-      </FileUpload.Dropzone>
-    </FileUpload.RootProvider>
+    <MaplibreMap
+      id="map"
+      ref={mapRef}
+      initialViewState={{
+        longitude: 0,
+        latitude: 0,
+        zoom: 1,
+      }}
+      mapStyle={`https://basemaps.cartocdn.com/gl/${mapStyle}/style.json`}
+    >
+      <DeckGLOverlay
+        layers={layers}
+        getCursor={(props) => getCursor(mapRef, props)}
+      ></DeckGLOverlay>
+    </MaplibreMap>
   );
 }
 

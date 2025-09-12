@@ -2,10 +2,20 @@ import { Breadcrumb, HStack, Spinner } from "@chakra-ui/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { LuFile, LuFiles, LuFolder, LuFolderPlus } from "react-icons/lu";
 import useStacMap from "../hooks/stac-map";
+import { useStacLinkContainer } from "../hooks/stac-value";
+import type { SetHref } from "../types/app";
 import type { StacValue } from "../types/stac";
 
-export function NavigationBreadcrumbs() {
-  const { href, value, parent, root, picked, setHref } = useStacMap()!;
+export function NavigationBreadcrumbs({
+  href,
+  setHref,
+}: {
+  href: string | undefined;
+  setHref: SetHref;
+}) {
+  const { value, picked } = useStacMap()!;
+  const root = useStacLinkContainer(value, "root");
+  const parent = useStacLinkContainer(value, "parent");
   const [breadcrumbs, setBreadcrumbs] = useState<ReactNode>();
 
   useEffect(() => {

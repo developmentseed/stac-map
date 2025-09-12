@@ -10,14 +10,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import type { StacCollection } from "stac-ts";
+import type { SetHref } from "../../types/app";
 import type { NaturalLanguageCollectionSearchResult } from "../../types/stac";
 import { CollectionCard } from "../collection";
 
 export function NaturalLanguageCollectionSearch({
   href,
+  setHref,
   collections,
 }: {
   href: string;
+  setHref: SetHref;
   collections: StacCollection[];
 }) {
   const [query, setQuery] = useState<string | undefined>();
@@ -63,7 +66,12 @@ export function NaturalLanguageCollectionSearch({
         </Field.Root>
       </form>
       {query && (
-        <Results query={query} href={href} collections={collections}></Results>
+        <Results
+          query={query}
+          href={href}
+          setHref={setHref}
+          collections={collections}
+        ></Results>
       )}
     </Stack>
   );
@@ -72,10 +80,12 @@ export function NaturalLanguageCollectionSearch({
 function Results({
   query,
   href,
+  setHref,
   collections,
 }: {
   query: string;
   href: string;
+  setHref: SetHref;
   collections: StacCollection[];
 }) {
   const [results, setResults] = useState<
@@ -142,6 +152,7 @@ function Results({
                 collection={result.collection}
                 key={result.collection.id}
                 explanation={result.result.explanation}
+                setHref={setHref}
               ></CollectionCard>
             );
           } else {
