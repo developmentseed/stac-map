@@ -41,3 +41,13 @@ test("loads CSDA Planet", async () => {
     .element(app.getByRole("heading", { hasText: "Planet" }))
     .toBeVisible();
 });
+
+test("loads NAIP stac-geoparquet", async () => {
+  window.history.pushState(
+    {},
+    "",
+    "?href=https://raw.githubusercontent.com/developmentseed/labs-375-stac-geoparquet-backend/refs/heads/main/data/naip.parquet",
+  );
+  const app = await renderApp();
+  await expect.element(app.getByText(/stac-geoparquet/i)).toBeVisible();
+});

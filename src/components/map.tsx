@@ -119,7 +119,6 @@ export default function Map() {
       updateTriggers: [picked, items],
     }),
   ];
-  console.log(geojson);
 
   if (stacGeoparquetTable) {
     layers.push(
@@ -233,7 +232,10 @@ function useStacValueLayerProperties(
       case "FeatureCollection":
         return {
           geojson: value.features as Feature[],
-          bbox: turfBbox(value as FeatureCollection),
+          bbox:
+            (value.features.length > 0 &&
+              turfBbox(value as FeatureCollection)) ||
+            undefined,
           filled: true,
         };
     }
