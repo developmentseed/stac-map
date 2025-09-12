@@ -36,6 +36,7 @@ import type { StacCollection, StacLink, TemporalExtent } from "stac-ts";
 import useStacMap from "../../hooks/stac-map";
 import useStacSearch from "../../hooks/stac-search";
 import type { StacSearch } from "../../types/stac";
+import DownloadButtons from "../download";
 import { SpatialExtent } from "../extents";
 import Section from "../section";
 
@@ -318,6 +319,12 @@ export function ItemSearchResults({
               <Alert.Description>{results.error.toString()}</Alert.Description>
             </Alert.Content>
           </Alert.Root>
+        )}
+        {items && (
+          <DownloadButtons
+            items={items}
+            disabled={(autoLoad && results.hasNextPage) || results.isFetching}
+          ></DownloadButtons>
         )}
       </Stack>
     </Section>
