@@ -18,6 +18,7 @@ import type { StacCollection } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
 import type { StacValue } from "../types/stac";
 import { useColorModeValue } from "./ui/color-mode";
+import { useChildren } from "../hooks/stac-value";
 
 const fillColor: [number, number, number, number] = [207, 63, 2, 50];
 const lineColor: [number, number, number, number] = [207, 63, 2, 100];
@@ -51,11 +52,15 @@ export default function Map() {
     stacGeoparquetMetadata,
     setStacGeoparquetItemId,
   } = useStacMap();
+  const children = useChildren(value, !collections);
   const {
     geojson,
     bbox: valueBbox,
     filled,
-  } = useStacValueLayerProperties(value, collections);
+  } = useStacValueLayerProperties(
+    value,
+    collections || children.filter((child) => child.type === "Collection"),
+  );
   const small = useBreakpointValue({ base: true, md: false });
   const bbox = valueBbox || stacGeoparquetMetadata?.bbox;
 
