@@ -27,7 +27,7 @@ export function Children({
   setHref: SetHref;
 }) {
   const { collections } = useStacMap();
-  const children = useChildren(value, !!collections);
+  const children = useChildren(value, !collections);
   const { map } = useMap();
   const selfHref = value?.links?.find((link) => link.rel === "self")?.href;
   const [mapBbox, setMapBbox] = useState<BBox>();
