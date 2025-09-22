@@ -56,3 +56,12 @@ test("loads NAIP stac-geoparquet", async () => {
   const app = await renderApp();
   await expect.element(app.getByText(/stac-geoparquet/i)).toBeVisible();
 });
+
+test("navigates through a static catalog", async () => {
+  const app = await renderApp();
+  await app.getByRole("button", { name: "Examples" }).click();
+  await app.getByRole("menuitem", { name: "Maxar Open Data static" }).click();
+  await app.getByText("Bay of Bengal Cyclone Mocha").click();
+  await app.getByText("10300100E6747500", { exact: true }).click();
+  // TODO test map clicking, oof
+});
