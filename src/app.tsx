@@ -20,10 +20,10 @@ import { Toaster } from "./components/ui/toaster";
 import { StacMapProvider } from "./provider";
 
 export default function App() {
+  const queryClient = new QueryClient({});
   const [href, setHref] = useState<string | undefined>(getInitialHref());
   const fileUpload = useFileUpload({ maxFiles: 1 });
-  const queryClient = new QueryClient({});
-  const isHeaderAboveMap = useBreakpointValue({ base: true, md: false });
+  const isHeaderAbovePanel = useBreakpointValue({ base: true, md: false });
 
   useEffect(() => {
     function handlePopState() {
@@ -78,7 +78,7 @@ export default function App() {
           </Box>
           <Container zIndex={1} fluid h={"dvh"} py={4} pointerEvents={"none"}>
             <SimpleGrid columns={{ base: 1, md: 3 }} gap={4}>
-              {isHeaderAboveMap && <GridItem colSpan={1}>{header}</GridItem>}
+              {isHeaderAbovePanel && <GridItem colSpan={1}>{header}</GridItem>}
               <GridItem colSpan={1}>
                 <Panel
                   href={href}
@@ -86,7 +86,7 @@ export default function App() {
                   fileUpload={fileUpload}
                 ></Panel>
               </GridItem>
-              {!isHeaderAboveMap && (
+              {!isHeaderAbovePanel && (
                 <GridItem colSpan={2} hideBelow={"md"}>
                   {header}
                 </GridItem>
