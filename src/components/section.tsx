@@ -1,13 +1,16 @@
 import { Collapsible, HStack, Heading, Icon } from "@chakra-ui/react";
 import { type ReactNode, useState } from "react";
+import type { IconType } from "react-icons/lib";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 
 export default function Section({
   title,
+  TitleIcon,
   titleSize = "lg",
   children,
 }: {
   title: ReactNode;
+  TitleIcon?: IconType;
   titleSize?:
     | "sm"
     | "md"
@@ -32,7 +35,14 @@ export default function Section({
       <Collapsible.Trigger>
         <HStack pb={4}>
           <Heading size={titleSize} textAlign="left">
-            {title}
+            <HStack>
+              {TitleIcon && (
+                <Icon>
+                  <TitleIcon></TitleIcon>
+                </Icon>
+              )}
+              {title}
+            </HStack>
           </Heading>
           <Icon size={"sm"}>
             {(open && <LuChevronDown></LuChevronDown>) || (

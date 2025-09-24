@@ -1,12 +1,4 @@
-import {
-  Card,
-  Checkbox,
-  HStack,
-  Icon,
-  Link,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Card, Checkbox, Link, Stack, Text } from "@chakra-ui/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { LuFolderPlus, LuFolderSearch } from "react-icons/lu";
 import { MarkdownHooks } from "react-markdown";
@@ -62,16 +54,7 @@ export function Children({
         filteredCollections &&
         filteredCollections?.length > 0 && (
           <>
-            <Section
-              title={
-                <HStack>
-                  <Icon>
-                    <LuFolderSearch></LuFolderSearch>
-                  </Icon>{" "}
-                  Collection search
-                </HStack>
-              }
-            >
+            <Section TitleIcon={LuFolderSearch} title={"Collection search"}>
               <CollectionSearch
                 href={selfHref}
                 setHref={setHref}
@@ -80,17 +63,13 @@ export function Children({
             </Section>
 
             <Section
+              TitleIcon={LuFolderPlus}
               title={
-                <HStack>
-                  <Icon>
-                    <LuFolderPlus></LuFolderPlus>
-                  </Icon>{" "}
-                  Collections (
-                  {(filterByViewport &&
-                    filteredCollections.length + "/" + collections.length) ||
-                    collections.length}
-                  )
-                </HStack>
+                "Collections (" +
+                ((filterByViewport &&
+                  filteredCollections.length + "/" + collections.length) ||
+                  collections.length) +
+                ")"
               }
             >
               <Stack>

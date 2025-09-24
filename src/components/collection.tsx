@@ -3,7 +3,7 @@ import {
   Box,
   DataList,
   HStack,
-  Icon,
+  Span,
   Stack,
   Text,
 } from "@chakra-ui/react";
@@ -47,14 +47,12 @@ export function Collection({
 
       {searchLinks.length > 0 && (
         <Section
+          TitleIcon={LuFileSearch}
           title={
-            <HStack>
-              <Icon>
-                <LuFileSearch></LuFileSearch>
-              </Icon>{" "}
-              Item search
+            <Span>
+              Item search{" "}
               <Badge colorPalette={"orange"}>Under development</Badge>
-            </HStack>
+            </Span>
           }
         >
           <ItemSearch

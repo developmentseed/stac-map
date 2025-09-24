@@ -1,4 +1,4 @@
-import { HStack, Icon, Stack } from "@chakra-ui/react";
+import { Stack } from "@chakra-ui/react";
 import { LuFileImage } from "react-icons/lu";
 import type { StacItem } from "stac-ts";
 import Assets from "./assets";
@@ -9,16 +9,7 @@ export default function Item({ item }: { item: StacItem }) {
   return (
     <Stack>
       <Value value={item}></Value>
-      <Section
-        title={
-          <HStack>
-            <Icon>
-              <LuFileImage></LuFileImage>
-            </Icon>{" "}
-            Assets
-          </HStack>
-        }
-      >
+      <Section TitleIcon={LuFileImage} title={"Assets"}>
         <Assets assets={item.assets}></Assets>
       </Section>
     </Stack>

@@ -9,7 +9,6 @@ import {
   Group,
   Heading,
   HStack,
-  Icon,
   IconButton,
   Input,
   Link,
@@ -260,16 +259,7 @@ export function ItemSearchResults({
   const value = items?.length || 0;
 
   return (
-    <Section
-      title={
-        <HStack>
-          <Icon>
-            <LuFiles></LuFiles>
-          </Icon>
-          Item search results
-        </HStack>
-      }
-    >
+    <Section TitleIcon={LuFiles} title={"Item search results"}>
       <Stack>
         <Progress.Root
           value={results.isFetching && !numberMatched ? null : value}
