@@ -39,6 +39,8 @@ export default function App() {
   useEffect(() => {
     if (href && new URLSearchParams(location.search).get("href") != href) {
       history.pushState(null, "", "?href=" + href);
+    } else if (href === "") {
+      history.pushState(null, "", location.pathname);
     }
   }, [href]);
 
