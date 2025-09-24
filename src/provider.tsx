@@ -17,7 +17,8 @@ export function StacMapProvider({
   temporalFilter: TemporalFilter | undefined;
   children: ReactNode;
 }) {
-  const [picked, setPicked] = useState<StacItem>();
+  // TODO we should probably consolidate useStacValue and useStacGeoparquet into
+  // a single hook, since they're coupled.
   const {
     value,
     parquetPath,
@@ -34,6 +35,7 @@ export function StacMapProvider({
     item: stacGeoparquetItem,
   } = useStacGeoparquet(parquetPath, temporalFilter);
   const [items, setItems] = useState<StacItem[]>();
+  const [picked, setPicked] = useState<StacItem>();
 
   useEffect(() => {
     if (value?.title || value?.id) {
@@ -41,6 +43,9 @@ export function StacMapProvider({
     } else {
       document.title = "stac-map";
     }
+
+    setItems(undefined);
+    setPicked(undefined);
   }, [value]);
 
   useEffect(() => {
