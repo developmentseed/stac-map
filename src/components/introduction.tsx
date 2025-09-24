@@ -1,6 +1,5 @@
 import {
   type UseFileUploadReturn,
-  Box,
   FileUpload,
   Link,
   Stack,
