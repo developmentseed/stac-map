@@ -3,8 +3,8 @@ import { render } from "vitest-browser-react";
 import App from "../src/app";
 import { Provider } from "../src/components/ui/provider";
 
-async function renderApp() {
-  return await render(
+function renderApp() {
+  return render(
     <Provider>
       <App></App>
     </Provider>,
@@ -16,7 +16,7 @@ beforeEach(() => {
 });
 
 test("renders example button", async () => {
-  const app = await renderApp();
+  const app = renderApp();
   await expect
     .element(app.getByRole("button", { name: "examples" }))
     .toBeVisible();
@@ -24,7 +24,7 @@ test("renders example button", async () => {
 
 test("loads stac.eoapi.dev", async () => {
   window.history.pushState({}, "", "?href=https://stac.eoapi.dev/");
-  const app = await renderApp();
+  const app = renderApp();
   await expect.element(app.getByText(/eoAPI-stac/i)).toBeVisible();
   await expect.element(app.getByText(/collections/i)).toBeVisible();
 
@@ -41,7 +41,7 @@ test("loads CSDA Planet", async () => {
     "",
     "?href=https://csdap.earthdata.nasa.gov/stac/collections/planet",
   );
-  const app = await renderApp();
+  const app = renderApp();
   await expect
     .element(app.getByRole("heading", { name: "Planet" }))
     .toBeVisible();
@@ -53,12 +53,12 @@ test("loads NAIP stac-geoparquet", async () => {
     "",
     "?href=https://raw.githubusercontent.com/developmentseed/labs-375-stac-geoparquet-backend/refs/heads/main/data/naip.parquet",
   );
-  const app = await renderApp();
+  const app = renderApp();
   await expect.element(app.getByText(/stac-geoparquet/i)).toBeVisible();
 });
 
 test("navigates through a static catalog", async () => {
-  const app = await renderApp();
+  const app = renderApp();
   await app.getByRole("button", { name: "Examples" }).click();
   await app.getByRole("menuitem", { name: "Maxar Open Data static" }).click();
   await app.getByText("Bay of Bengal Cyclone Mocha").click();
