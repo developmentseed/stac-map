@@ -5,7 +5,7 @@ import {
   Stack,
   type UseFileUploadReturn,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { StacLink } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
 import type { SetHref } from "../types/app";
@@ -27,10 +27,15 @@ export default function Panel({
   setHref: SetHref;
   fileUpload: UseFileUploadReturn;
 }) {
-  const { value, picked } = useStacMap();
+  const { value, picked, setPicked, setItems } = useStacMap();
   const [search, setSearch] = useState<StacSearch>();
   const [searchLink, setSearchLink] = useState<StacLink>();
   const [autoLoad, setAutoLoad] = useState(false);
+
+  useEffect(() => {
+    setItems(undefined);
+    setPicked(undefined);
+  }, [search, setPicked, setItems]);
 
   let content;
   if (!href) {
