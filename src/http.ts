@@ -12,7 +12,7 @@ export async function fetchStac(
       Accept: "application/json",
     },
     body,
-  }).then((response) => {
+  }).then(async (response) => {
     if (response.ok) {
       return response
         .json()
