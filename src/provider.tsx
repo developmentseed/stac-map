@@ -36,6 +36,14 @@ export function StacMapProvider({
   const [items, setItems] = useState<StacItem[]>();
 
   useEffect(() => {
+    if (value?.title || value?.id) {
+      document.title = "stac-map | " + (value.title || value.id);
+    } else {
+      document.title = "stac-map";
+    }
+  }, [value]);
+
+  useEffect(() => {
     setPicked(stacGeoparquetItem);
   }, [stacGeoparquetItem]);
 
