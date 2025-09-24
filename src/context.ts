@@ -2,6 +2,7 @@ import type { Table } from "apache-arrow";
 import { createContext } from "react";
 import type { StacCollection, StacItem } from "stac-ts";
 import type { StacGeoparquetMetadata, StacValue } from "./types/stac";
+import type { TemporalFilter } from "./types/datetime";
 
 export const StacMapContext = createContext<StacMapContextType | null>(null);
 
@@ -14,10 +15,7 @@ interface StacMapContextType {
   /// Collections either loaded from the collections endpoint or linked from the value.
   collections: StacCollection[] | undefined;
 
-  /// STAC items linked form the value.
-  linkedItems: StacItem[] | undefined;
-
-  /// STAC items for visualization, often from search.
+  /// STAC items, either linked or from a search.
   items: StacItem[] | undefined;
 
   /// Set the items.
@@ -40,4 +38,13 @@ interface StacMapContextType {
 
   /// Set the picked item.
   setPicked: (value: StacItem | undefined) => void;
+
+  /// The temporal filter for items.
+  temporalFilter: TemporalFilter | undefined;
+
+  /// Sets the temporal filter.
+  setTemporalFilter: (temporalFilter: TemporalFilter | undefined) => void;
+
+  /// Filtered items.
+  filteredItems: StacItem[] | undefined;
 }

@@ -46,7 +46,7 @@ export default function Map() {
     value,
     collections,
     items,
-    linkedItems,
+    filteredItems,
     picked,
     setPicked,
     stacGeoparquetTable,
@@ -100,7 +100,7 @@ export default function Map() {
     }),
     new GeoJsonLayer({
       id: "items",
-      data: (items || linkedItems) as Feature[] | undefined,
+      data: (filteredItems || items) as Feature[] | undefined,
       filled: true,
       stroked: true,
       getFillColor: fillColor,

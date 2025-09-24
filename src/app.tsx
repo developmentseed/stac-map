@@ -58,11 +58,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <MapProvider>
-        <StacMapProvider
-          href={href}
-          fileUpload={fileUpload}
-          temporalFilter={undefined} // TODO re-add temporal filtering: https://github.com/developmentseed/stac-map/issues/123
-        >
+        <StacMapProvider href={href} fileUpload={fileUpload}>
           <Box zIndex={0} position={"absolute"} top={0} left={0}>
             <FileUpload.RootProvider value={fileUpload} unstyled={true}>
               <FileUpload.Dropzone
