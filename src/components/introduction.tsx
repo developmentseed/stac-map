@@ -17,13 +17,16 @@ export default function Introduction({
 }) {
   return (
     <Stack fontSize={"sm"} fontWeight={"lighter"}>
-      <Box>
-        <strong>stac-map</strong> is a map-first, statically-served, single-page
-        visualization tool for{" "}
+      <p>
+        <strong>stac-map</strong> is a map-first visualization tool for{" "}
         <Link variant={"underline"} href="https://stacspec.org">
           STAC
-        </Link>{" "}
-        catalogs, collections, and items. To get started, use the text input,{" "}
+        </Link>
+        .
+      </p>
+
+      <p>
+        To get started, use the text input,{" "}
         <FileUpload.RootProvider
           value={fileUpload}
           as={"span"}
@@ -33,13 +36,13 @@ export default function Introduction({
             <Link>upload a file</Link>
           </FileUpload.Trigger>
         </FileUpload.RootProvider>
-        , or load an{" "}
+        , or{" "}
         <Examples setHref={setHref}>
-          <Link>example</Link>
+          <Link>load an example</Link>
         </Examples>
         .
-      </Box>
-      <Box>
+      </p>
+      <p>
         Questions, issues, or feature requests? Get in touch on{" "}
         <Link asChild>
           <a href="https://github.com/developmentseed/stac-map" target="_blank">
@@ -47,7 +50,7 @@ export default function Introduction({
           </a>
         </Link>
         .
-      </Box>
+      </p>
     </Stack>
   );
 }
