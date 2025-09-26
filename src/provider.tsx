@@ -5,6 +5,7 @@ import { StacMapContext } from "./context";
 import useStacGeoparquet from "./hooks/stac-geoparquet";
 import { useStacValue } from "./hooks/stac-value";
 import type { TemporalFilter } from "./types/datetime";
+import { getItemDatetimes } from "./stac";
 
 export function StacMapProvider({
   href,
@@ -37,10 +38,6 @@ export function StacMapProvider({
     item: stacGeoparquetItem,
   } = useStacGeoparquet(parquetPath, temporalFilter);
 
-  const items = useMemo(() => {
-    return unlinkedItems || linkedItems;
-  }, [unlinkedItems, linkedItems]);
-
   useEffect(() => {
     if (value?.title || value?.id) {
       document.title = "stac-map | " + (value.title || value.id);
@@ -55,6 +52,10 @@ export function StacMapProvider({
   useEffect(() => {
     setPicked(stacGeoparquetItem);
   }, [stacGeoparquetItem]);
+
+  const items = useMemo(() => {
+    return unlinkedItems || linkedItems;
+  }, [unlinkedItems, linkedItems]);
 
   const filteredItems = useMemo(() => {
     if (items && temporalFilter) {
@@ -92,21 +93,8 @@ function isItemWithinTemporalFilter(
   item: StacItem,
   temporalFilter: TemporalFilter,
 ) {
-  const start = item.properties?.start_datetime
-    ? new Date(item.properties.start_datetime)
-    : item.properties?.datetime
-      ? new Date(item.properties.datetime)
-      : null;
-  if (!start) {
-    return false;
-  }
-  const end = item.properties?.end_datetime
-    ? new Date(item.properties.end_datetime)
-    : item.properties?.datetime
-      ? new Date(item.properties.datetime)
-      : null;
-  if (!end) {
-    return false;
-  }
-  return start >= temporalFilter.start && end <= temporalFilter.end;
+  const { start, end } = getItemDatetimes(item);
+  return (
+    start && end && start >= temporalFilter.start && end <= temporalFilter.end
+  );
 }

@@ -5,7 +5,7 @@ import {
   Stack,
   type UseFileUploadReturn,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { StacLink } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
 import type { SetHref } from "../types/app";
@@ -17,6 +17,8 @@ import Item from "./item";
 import ItemCollection from "./item-collection";
 import { NavigationBreadcrumbs } from "./navigation-breadcrumbs";
 import { ItemSearchResults } from "./search/item";
+import { getItemDatetimes } from "../stac";
+import TemporalFilter from "./filter/temporal";
 
 export default function Panel({
   href,
@@ -27,7 +29,7 @@ export default function Panel({
   setHref: SetHref;
   fileUpload: UseFileUploadReturn;
 }) {
-  const { value, picked, setPicked, setItems } = useStacMap();
+  const { value, picked, setPicked, items, setItems } = useStacMap();
   const [search, setSearch] = useState<StacSearch>();
   const [searchLink, setSearchLink] = useState<StacLink>();
   const [autoLoad, setAutoLoad] = useState(false);
@@ -36,6 +38,21 @@ export default function Panel({
     setItems(undefined);
     setPicked(undefined);
   }, [search, setPicked, setItems]);
+
+  const { start: itemsStart, end: itemsEnd } = useMemo(() => {
+    if (items) {
+      let start = null;
+      let end = null;
+      for (const item of items) {
+        const { start: itemStart, end: itemEnd } = getItemDatetimes(item);
+        if (itemStart && (!start || itemStart < start)) start = itemStart;
+        if (itemEnd && (!end || itemEnd > end)) end = itemEnd;
+      }
+      return { start, end };
+    } else {
+      return { start: null, end: null };
+    }
+  }, [items]);
 
   let content;
   if (!href) {
@@ -88,6 +105,9 @@ export default function Panel({
             autoLoad={autoLoad}
             setAutoLoad={setAutoLoad}
           ></ItemSearchResults>
+        )}
+        {itemsStart && itemsEnd && (
+          <TemporalFilter start={itemsStart} end={itemsEnd} />
         )}
       </Stack>
     </Box>
