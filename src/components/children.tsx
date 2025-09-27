@@ -1,8 +1,13 @@
 import { Card, Checkbox, Link, Stack, Text } from "@chakra-ui/react";
 import { useEffect, useState, type ReactNode } from "react";
-import { LuFolderPlus, LuFolderSearch } from "react-icons/lu";
+import {
+  LuFiles,
+  LuFolderPlus,
+  LuFolders,
+  LuFolderSearch,
+} from "react-icons/lu";
 import { MarkdownHooks } from "react-markdown";
-import type { StacCatalog, StacCollection } from "stac-ts";
+import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
 import useStacMap from "../hooks/stac-map";
 import { useChildren } from "../hooks/stac-value";
 import type { SetHref } from "../types/app";
@@ -18,7 +23,7 @@ export function Children({
   value: StacCatalog | StacCollection;
   setHref: SetHref;
 }) {
-  const { collections } = useStacMap();
+  const { collections, items, filteredItems } = useStacMap();
   const children = useChildren(value, !collections);
   const { map } = useMap();
   const selfHref = value?.links?.find((link) => link.rel === "self")?.href;
@@ -96,7 +101,7 @@ export function Children({
         )}
 
       {children && children.length > 0 && (
-        <Section title="Children">
+        <Section title="Children" TitleIcon={LuFolders}>
           <Stack>
             {children.map((child) => (
               <ChildCard
@@ -104,6 +109,20 @@ export function Children({
                 setHref={setHref}
                 key={"child-" + child.id}
               ></ChildCard>
+            ))}
+          </Stack>
+        </Section>
+      )}
+
+      {items && items.length > 0 && (
+        <Section title="Items" TitleIcon={LuFiles}>
+          <Stack>
+            {(filteredItems || items).map((item) => (
+              <ItemCard
+                item={item}
+                setHref={setHref}
+                key={"item-" + item.id}
+              ></ItemCard>
             ))}
           </Stack>
         </Section>
@@ -142,6 +161,25 @@ export function ChildCard({
           {footer}
         </Card.Footer>
       )}
+    </Card.Root>
+  );
+}
+function ItemCard({ item, setHref }: { item: StacItem; setHref: SetHref }) {
+  const selfHref = item.links.find((link) => link.rel === "self")?.href;
+
+  return (
+    <Card.Root size={"sm"}>
+      <Card.Body>
+        <Card.Title>
+          <Link onClick={() => selfHref && setHref(selfHref)}>{item.id}</Link>
+        </Card.Title>
+        <Card.Description>
+          {item.properties.datetime ||
+            item.properties.start_datetime ||
+            "unbounded" + " to " + item.properties.end_datetime ||
+            "unbounded"}
+        </Card.Description>
+      </Card.Body>
     </Card.Root>
   );
 }
