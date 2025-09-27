@@ -33,4 +33,13 @@ describe("loading", () => {
       .element(app.getByRole("heading", { name: "Planet" }))
       .toBeVisible();
   });
+
+  test("Item has TiTiler link", async () => {
+    const app = renderApp(
+      "?href=https://raw.githubusercontent.com/radiantearth/stac-spec/refs/heads/master/examples/simple-item.json",
+    );
+    await expect
+      .element(app.getByRole("link", { name: "TiTiler" }))
+      .toBeVisible();
+  });
 });

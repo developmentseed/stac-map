@@ -39,17 +39,22 @@ export default function Value({
 
         {children}
 
-        {selfHref && <SelfHrefButtons href={selfHref}></SelfHrefButtons>}
+        {selfHref && (
+          <SelfHrefButtons
+            href={selfHref}
+            isItem={value.type === "Feature"}
+          ></SelfHrefButtons>
+        )}
       </Stack>
     </Section>
   );
 }
 
-function SelfHrefButtons({ href: selfHref }: { href: string }) {
+function SelfHrefButtons({ href, isItem }: { href: string; isItem: boolean }) {
   return (
     <ButtonGroup size={"xs"} variant={"outline"} py={4}>
       <Button asChild>
-        <a href={selfHref} target="_blank">
+        <a href={href} target="_blank">
           <LuExternalLink></LuExternalLink> Source
         </a>
       </Button>
@@ -57,13 +62,23 @@ function SelfHrefButtons({ href: selfHref }: { href: string }) {
         <a
           href={
             "https://radiantearth.github.io/stac-browser/#/external/" +
-            selfHref.replace(/^(https?:\/\/)/, "")
+            href.replace(/^(https?:\/\/)/, "")
           }
           target="_blank"
         >
           <LuExternalLink></LuExternalLink> STAC Browser
         </a>
       </Button>
+      {isItem && (
+        <Button asChild>
+          <a
+            href={"https://titiler.xyz/stac/viewer?url=" + href}
+            target="_blank"
+          >
+            <LuExternalLink></LuExternalLink> TiTiler
+          </a>
+        </Button>
+      )}
     </ButtonGroup>
   );
 }
