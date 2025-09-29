@@ -1,203 +1,141 @@
+import { useEffect, useMemo } from "react";
 import type { UseFileUploadReturn } from "@chakra-ui/react";
 import { useInfiniteQuery, useQueries, useQuery } from "@tanstack/react-query";
-import { AsyncDuckDB, isParquetFile, useDuckDb } from "duckdb-wasm-kit";
-import { useEffect } from "react";
-import type { StacCatalog, StacCollection, StacItem, StacLink } from "stac-ts";
-import { fetchStac, fetchStacLink } from "../http";
-import type { TemporalFilter } from "../types/datetime";
-import type {
-  StacCollections,
-  StacItemCollection,
-  StacValue,
-} from "../types/stac";
+import { useDuckDb } from "duckdb-wasm-kit";
+import type { DatetimeBounds, StacCollections, StacValue } from "../types/stac";
+import { getStacJsonValue } from "../utils/stac";
+import {
+  getStacGeoparquet,
+  getStacGeoparquetItem,
+} from "../utils/stac-geoparquet";
 
-export function useStacValue({
+export default function useStacValue({
   href,
   fileUpload,
+  datetimeBounds,
+  stacGeoparquetItemId,
 }: {
   href: string | undefined;
-  fileUpload?: UseFileUploadReturn;
-  temporalFilter?: TemporalFilter;
-}): {
-  value?: StacValue;
-  parquetPath?: string;
-  collections: StacCollection[] | undefined;
-  items: StacItem[];
-} {
-  const { db } = useDuckDb();
-  const { data } = useStacValueQuery({ href, fileUpload, db });
-  const { values: items } = useStacValues(
-    data?.value.links?.filter((link) => link.rel == "item"),
-  );
-  const { collections } = useStacCollections(data?.value);
-
-  return {
-    value: data?.value,
-    parquetPath: data?.parquetPath,
-    collections,
-    items: items.filter((item) => item.type == "Feature"),
-  };
-}
-
-export function useStacLinkContainer(
-  value: StacValue | undefined,
-  rel: string,
-) {
-  const result = useStacValueQuery({
-    href: value?.links?.find((link) => link.rel == rel)?.href,
-  });
-  if (
-    result.data?.value.type == "Catalog" ||
-    result.data?.value.type == "Collection"
-  ) {
-    return result.data?.value;
-  } else {
-    return undefined;
-  }
-}
-
-export function useChildren(
-  value: StacValue | undefined,
-  includeCollections: boolean,
-) {
-  return useStacValues(
-    value?.links?.filter((link) => link.rel == "child"),
-  ).values.filter(
-    (value) =>
-      value.type == "Catalog" ||
-      (includeCollections && value.type == "Collection"),
-  ) as (StacCatalog | StacCollection)[];
-}
-
-function useStacValueQuery({
-  href,
-  fileUpload,
-  db,
-}: {
-  href: string | undefined;
-  fileUpload?: UseFileUploadReturn;
-  db?: AsyncDuckDB;
+  fileUpload: UseFileUploadReturn;
+  datetimeBounds: DatetimeBounds | undefined;
+  stacGeoparquetItemId: string | undefined;
 }) {
-  return useQuery<{
-    value: StacValue;
-    parquetPath: string | undefined;
-  } | null>({
-    queryKey: ["stac-value", href, fileUpload?.acceptedFiles],
-    queryFn: async () => {
-      if (href) {
-        return await getStacValue(href, fileUpload, db);
+  const { db } = useDuckDb();
+  // What happens when we upload another file with the same name? We probably
+  // need to clear the query key.
+  const jsonResult = useQuery<StacValue | null>({
+    queryKey: ["stac-value", href],
+    queryFn: () => getStacJsonValue(href || "", fileUpload),
+    enabled: (href && !href.endsWith(".parquet")) || false,
+  });
+  const geoparquetResult = useQuery({
+    queryKey: ["stac-geoparquet", href],
+    queryFn: () =>
+      (href && db && getStacGeoparquet(href, fileUpload, db, datetimeBounds)) ||
+      null,
+    enabled: (db && href && href.endsWith(".parquet")) || false,
+  });
+  const stacGeoparquetItem = useQuery({
+    queryKey: ["stac-geoparquet-item", href, stacGeoparquetItemId],
+    queryFn: () =>
+      href &&
+      db &&
+      stacGeoparquetItemId &&
+      getStacGeoparquetItem(href, db, stacGeoparquetItemId),
+    enabled: !!(db && href && stacGeoparquetItemId),
+  });
+  const value = jsonResult.data || geoparquetResult.data?.value;
+  const table = geoparquetResult.data?.table;
+  const error = jsonResult.error || geoparquetResult.error || undefined;
+
+  const collectionsLink = value?.links?.find((link) => link.rel == "data");
+  const collectionsResult = useInfiniteQuery({
+    queryKey: ["stac-collections", collectionsLink?.href],
+    queryFn: async ({ pageParam }) => {
+      if (pageParam) {
+        return await fetch(pageParam).then((response) => {
+          if (response.ok) return response.json();
+          else
+            throw new Error(
+              `Error while fetching collections from ${pageParam}`
+            );
+        });
       } else {
         return null;
       }
     },
-    enabled: !!href,
+    initialPageParam: collectionsLink?.href,
+    getNextPageParam: (lastPage: StacCollections | null) =>
+      lastPage?.links?.find((link) => link.rel == "next")?.href,
+    enabled: !!collectionsLink,
   });
-}
-
-function useStacValues(links: StacLink[] | undefined) {
-  const results = useQueries({
-    queries:
-      links?.map((link) => {
-        return {
-          queryKey: ["link", link],
-          queryFn: () => fetchStacLink(link),
-        };
-      }) || [],
-  });
-  return {
-    values: results
-      .map((value) => value.data)
-      .filter((value) => !!value) as StacValue[],
-  };
-}
-
-function useStacCollections(value: StacValue | undefined) {
-  const href = value?.links?.find((link) => link.rel == "data")?.href;
-  const { data, isFetching, hasNextPage, fetchNextPage } =
-    useInfiniteQuery<StacCollections | null>({
-      queryKey: ["collections", href],
-      enabled: !!href,
-      queryFn: async ({ pageParam }) => {
-        if (pageParam) {
-          // @ts-expect-error Not worth templating stuff
-          return await fetchStac(pageParam);
-        } else {
-          return null;
-        }
-      },
-      initialPageParam: href,
-      getNextPageParam: (lastPage: StacCollections | null) =>
-        lastPage?.links?.find((link) => link.rel == "next")?.href,
-    });
-
+  // TODO add a ceiling on the number of collections to fetch
+  // https://github.com/developmentseed/stac-map/issues/101
   useEffect(() => {
-    if (!isFetching && hasNextPage) {
-      fetchNextPage();
+    if (!collectionsResult.isFetching && collectionsResult.hasNextPage) {
+      collectionsResult.fetchNextPage();
     }
-  }, [isFetching, hasNextPage, fetchNextPage]);
+  }, [collectionsResult]);
 
-  return {
-    collections: data?.pages.flatMap((page) => page?.collections || []),
-  };
-}
-
-async function getStacValue(
-  href: string,
-  fileUpload: UseFileUploadReturn | undefined,
-  db: AsyncDuckDB | undefined,
-) {
-  if (isUrl(href)) {
-    // TODO allow this to be forced
-    if (href.endsWith(".parquet")) {
+  const linkResults = useQueries({
+    queries:
+      value?.links
+        ?.filter((link) => link.rel === "child" || link.rel === "item")
+        .map((link) => {
+          return {
+            queryKey: ["stac-value", link.href],
+            queryFn: () => getStacJsonValue(link.href),
+            enabled: !collectionsLink,
+          };
+        }) || [],
+    combine: (results) => {
       return {
-        value: getStacGeoparquetItemCollection(href),
-        parquetPath: href,
+        data: results.map((result) => result.data),
+      };
+    },
+  });
+
+  const { collections, catalogs, items } = useMemo(() => {
+    if (collectionsLink) {
+      return {
+        collections: collectionsResult.data?.pages.flatMap(
+          (page) => page?.collections || []
+        ),
+        catalogs: undefined,
+        items: undefined,
       };
     } else {
-      return {
-        value: await fetchStac(href),
-        parquetPath: undefined,
-      };
-    }
-  } else if (fileUpload?.acceptedFiles.length == 1) {
-    const file = fileUpload.acceptedFiles[0];
-    if (await isParquetFile(file)) {
-      if (db) {
-        db.registerFileBuffer(href, new Uint8Array(await file.arrayBuffer()));
-        return {
-          value: getStacGeoparquetItemCollection(href),
-          parquetPath: href,
-        };
-      } else {
-        return null;
+      const collections = [];
+      const catalogs = [];
+      const items = [];
+      for (const value of linkResults.data) {
+        switch (value?.type) {
+          case "Catalog":
+            catalogs.push(value);
+            break;
+          case "Collection":
+            collections.push(value);
+            break;
+          case "Feature":
+            items.push(value);
+            break;
+        }
       }
-    } else {
       return {
-        value: JSON.parse(await file.text()),
-        parquetPath: undefined,
+        collections: collections.length > 0 ? collections : undefined,
+        catalogs: catalogs.length > 0 ? catalogs : undefined,
+        items: items.length > 0 ? items : undefined,
       };
     }
-  } else {
-    throw new Error(
-      `Href '${href}' is not a URL, but there is not one (and only one) uploaded, accepted file`,
-    );
-  }
-}
+  }, [collectionsLink, collectionsResult.data, linkResults.data]);
 
-function getStacGeoparquetItemCollection(href: string): StacItemCollection {
   return {
-    type: "FeatureCollection",
-    features: [],
-    title: href.split("/").pop(),
-    description: "A stac-geoparquet file",
+    value,
+    error,
+    collections,
+    catalogs,
+    items,
+    table,
+    stacGeoparquetItem: stacGeoparquetItem.data,
   };
-}
-
-function isUrl(href: string) {
-  try {
-    new URL(href);
-    return true;
-  } catch {
-    return false;
-  }
 }

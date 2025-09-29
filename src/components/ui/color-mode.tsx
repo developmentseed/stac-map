@@ -1,11 +1,11 @@
 "use client";
 
+import * as React from "react";
+import { LuMoon, LuSun } from "react-icons/lu";
 import type { IconButtonProps, SpanProps } from "@chakra-ui/react";
 import { ClientOnly, IconButton, Skeleton, Span } from "@chakra-ui/react";
 import type { ThemeProviderProps } from "next-themes";
 import { ThemeProvider, useTheme } from "next-themes";
-import * as React from "react";
-import { LuMoon, LuSun } from "react-icons/lu";
 
 export interface ColorModeProviderProps extends ThemeProviderProps {}
 
@@ -87,7 +87,7 @@ export const LightMode = React.forwardRef<HTMLSpanElement, SpanProps>(
         {...props}
       />
     );
-  },
+  }
 );
 
 export const DarkMode = React.forwardRef<HTMLSpanElement, SpanProps>(
@@ -103,5 +103,5 @@ export const DarkMode = React.forwardRef<HTMLSpanElement, SpanProps>(
         {...props}
       />
     );
-  },
+  }
 );

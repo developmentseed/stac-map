@@ -1,11 +1,37 @@
-import type { StacLink } from "stac-ts";
-import type { StacValue } from "./types/stac";
+import type { UseFileUploadReturn } from "@chakra-ui/react";
+import type { StacItem } from "stac-ts";
+import type { StacValue } from "../types/stac";
+
+export async function getStacJsonValue(
+  href: string,
+  fileUpload?: UseFileUploadReturn
+): Promise<StacValue> {
+  let url;
+  try {
+    url = new URL(href);
+  } catch {
+    if (fileUpload) {
+      return getStacJsonValueFromUpload(fileUpload);
+    } else {
+      throw new Error(
+        `Cannot get STAC JSON value from href=${href} without a fileUpload`
+      );
+    }
+  }
+  return await fetchStac(url);
+}
+
+async function getStacJsonValueFromUpload(fileUpload: UseFileUploadReturn) {
+  // We assume there's one and only on file.
+  const file = fileUpload.acceptedFiles[0];
+  return JSON.parse(await file.text());
+}
 
 export async function fetchStac(
   href: string | URL,
   method: "GET" | "POST" = "GET",
-  body?: string,
-) {
+  body?: string
+): Promise<StacValue> {
   return await fetch(href, {
     method,
     headers: {
@@ -16,7 +42,7 @@ export async function fetchStac(
     if (response.ok) {
       return response
         .json()
-        .then((json) => makeStacHrefsAbsolute(json, href.toString()))
+        .then((json) => makeHrefsAbsolute(json, href.toString()))
         .then((json) => maybeAddTypeField(json));
     } else {
       throw new Error(`${method} ${href}: ${response.statusText}`);
@@ -24,25 +50,7 @@ export async function fetchStac(
   });
 }
 
-export async function fetchStacLink(link: StacLink, href?: string | undefined) {
-  return fetchStac(
-    new URL(link.href, href),
-    link.method as "GET" | "POST" | undefined,
-    // eslint-disable-next-line
-    (link.body as any) && JSON.stringify(link.body),
-  );
-}
-
-/**
- * Attempt to convert links and asset URLS to absolute URLs while ensuring a self link exists.
- *
- * @param value Source stac item, collection, or catalog
- * @param baseUrl base location of the STAC document
- */
-export function makeStacHrefsAbsolute<T extends StacValue>(
-  value: T,
-  baseUrl: string,
-): T {
+function makeHrefsAbsolute<T extends StacValue>(value: T, baseUrl: string): T {
   const baseUrlObj = new URL(baseUrl);
 
   if (value.links != null) {
@@ -70,10 +78,20 @@ export function makeStacHrefsAbsolute<T extends StacValue>(
   return value;
 }
 
-/**
- * Determine if the URL is absolute
- * @returns true if absolute, false otherwise
- */
+function toAbsoluteUrl(href: string, baseUrl: URL): string {
+  if (isAbsolute(href)) return href;
+
+  const targetUrl = new URL(href, baseUrl);
+
+  if (targetUrl.protocol === "http:" || targetUrl.protocol === "https:") {
+    return targetUrl.toString();
+  } else if (targetUrl.protocol === "s3:") {
+    return decodeURI(targetUrl.toString());
+  } else {
+    return targetUrl.toString();
+  }
+}
+
 function isAbsolute(url: string) {
   try {
     new URL(url);
@@ -81,32 +99,6 @@ function isAbsolute(url: string) {
   } catch {
     return false;
   }
-}
-
-/**
- * Attempt to convert a possibly relative URL to an absolute URL
- *
- * If the URL is already absolute, it is returned unchanged.
- *
- * **WARNING**: if the URL is http it will be returned as URL encoded
- *
- * @param href
- * @param baseUrl
- * @returns absolute URL
- */
-export function toAbsoluteUrl(href: string, baseUrl: URL): string {
-  if (isAbsolute(href)) return href;
-
-  const targetUrl = new URL(href, baseUrl);
-
-  if (targetUrl.protocol === "http:" || targetUrl.protocol === "https:") {
-    return targetUrl.toString();
-  }
-
-  // S3 links should not be encoded
-  if (targetUrl.protocol === "s3:") return decodeURI(targetUrl.toString());
-
-  return targetUrl.toString();
 }
 
 // eslint-disable-next-line
@@ -123,4 +115,18 @@ function maybeAddTypeField(value: any) {
     }
   }
   return value;
+}
+
+export function getItemDatetimes(item: StacItem) {
+  const start = item.properties?.start_datetime
+    ? new Date(item.properties.start_datetime)
+    : item.properties?.datetime
+      ? new Date(item.properties.datetime)
+      : null;
+  const end = item.properties?.end_datetime
+    ? new Date(item.properties.end_datetime)
+    : item.properties?.datetime
+      ? new Date(item.properties.datetime)
+      : null;
+  return { start, end };
 }

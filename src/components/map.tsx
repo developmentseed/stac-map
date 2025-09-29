@@ -1,152 +1,163 @@
-import { useBreakpointValue } from "@chakra-ui/react";
-import { Layer, type DeckProps } from "@deck.gl/core";
+import { type RefObject, useEffect, useMemo, useRef } from "react";
+import {
+  Map as MaplibreMap,
+  type MapRef,
+  useControl,
+} from "react-map-gl/maplibre";
+import { type DeckProps, Layer } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { GeoArrowPolygonLayer } from "@geoarrow/deck.gl-layers";
-import { bbox as turfBbox } from "@turf/bbox";
+import bbox from "@turf/bbox";
 import bboxPolygon from "@turf/bbox-polygon";
-import { featureCollection } from "@turf/helpers";
-import type { BBox, Feature, FeatureCollection, GeoJSON } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useEffect, useRef, type RefObject } from "react";
-import {
-  Map as MaplibreMap,
-  useControl,
-  type MapRef,
-} from "react-map-gl/maplibre";
-import type { StacCollection } from "stac-ts";
-import useStacMap from "../hooks/stac-map";
-import type { StacValue } from "../types/stac";
+import type { Table } from "apache-arrow";
+import type { SpatialExtent, StacCollection, StacItem } from "stac-ts";
+import type { BBox, Feature, FeatureCollection } from "geojson";
 import { useColorModeValue } from "./ui/color-mode";
-import { useChildren } from "../hooks/stac-value";
+import type { BBox2D, Color } from "../types/map";
+import type { StacValue } from "../types/stac";
 
-const fillColor: [number, number, number, number] = [207, 63, 2, 50];
-const lineColor: [number, number, number, number] = [207, 63, 2, 100];
-// FIXME terrible and ugly
-const inverseFillColor: [number, number, number, number] = [
-  256 - 207,
-  256 - 63,
-  256 - 2,
-  50,
-];
-const inverseLineColor: [number, number, number, number] = [
-  256 - 207,
-  256 - 63,
-  256 - 2,
-  100,
-];
-
-export default function Map() {
+export default function Map({
+  value,
+  collections,
+  filteredCollections,
+  items,
+  filteredItems,
+  fillColor,
+  lineColor,
+  setBbox,
+  picked,
+  setPicked,
+  table,
+  setStacGeoparquetItemId,
+}: {
+  value: StacValue | undefined;
+  collections: StacCollection[] | undefined;
+  filteredCollections: StacCollection[] | undefined;
+  items: StacItem[] | undefined;
+  filteredItems: StacItem[] | undefined;
+  fillColor: Color;
+  lineColor: Color;
+  setBbox: (bbox: BBox2D | undefined) => void;
+  picked: StacValue | undefined;
+  setPicked: (picked: StacValue | undefined) => void;
+  table: Table | undefined;
+  setStacGeoparquetItemId: (id: string | undefined) => void;
+}) {
   const mapRef = useRef<MapRef>(null);
   const mapStyle = useColorModeValue(
     "positron-gl-style",
-    "dark-matter-gl-style",
+    "dark-matter-gl-style"
   );
-  const {
-    value,
-    collections,
-    items,
-    filteredItems,
-    picked,
-    setPicked,
-    stacGeoparquetTable,
-    stacGeoparquetMetadata,
-    setStacGeoparquetItemId,
-  } = useStacMap();
-  const children = useChildren(value, !collections);
-  const {
-    geojson,
-    bbox: valueBbox,
-    filled,
-  } = useStacValueLayerProperties(
-    value,
-    collections || children.filter((child) => child.type === "Collection"),
-  );
-  const small = useBreakpointValue({ base: true, md: false });
-  const bbox = valueBbox || stacGeoparquetMetadata?.bbox;
-
-  useEffect(() => {
-    if (bbox && mapRef.current) {
-      const padding = small
-        ? {
-            top: window.innerHeight / 10 + window.innerHeight / 2,
-            bottom: window.innerHeight / 20,
-            right: window.innerWidth / 20,
-            left: window.innerWidth / 20,
-          }
-        : {
-            top: window.innerHeight / 10,
-            bottom: window.innerHeight / 20,
-            right: window.innerWidth / 20,
-            left: window.innerWidth / 20 + window.innerWidth / 3,
-          };
-      mapRef.current.fitBounds(sanitizeBbox(bbox), {
-        linear: true,
-        padding,
-      });
+  const valueGeoJson = useMemo(() => {
+    if (value) {
+      return valueToGeoJson(value);
+    } else {
+      return undefined;
     }
-  }, [bbox, small]);
+  }, [value]);
+  const pickedGeoJson = useMemo(() => {
+    if (picked) {
+      return valueToGeoJson(picked);
+    } else {
+      return undefined;
+    }
+  }, [picked]);
+  const collectionsGeoJson = useMemo(() => {
+    return (filteredCollections || collections)?.map((collection) =>
+      bboxPolygon(getCollectionExtents(collection) as BBox)
+    );
+  }, [collections, filteredCollections]);
+
+  const inverseFillColor: Color = [
+    256 - fillColor[0],
+    256 - fillColor[1],
+    256 - fillColor[2],
+    fillColor[3],
+  ];
+  const inverseLineColor: Color = [
+    256 - fillColor[0],
+    256 - fillColor[1],
+    256 - fillColor[2],
+    fillColor[3],
+  ];
 
   const layers: Layer[] = [
     new GeoJsonLayer({
       id: "picked",
-      data: picked as Feature | undefined,
+      data: pickedGeoJson,
       filled: true,
-      stroked: true,
       getFillColor: inverseFillColor,
       getLineColor: inverseLineColor,
-      lineWidthUnits: "pixels",
       getLineWidth: 2,
+      lineWidthUnits: "pixels",
     }),
     new GeoJsonLayer({
       id: "items",
       data: (filteredItems || items) as Feature[] | undefined,
       filled: true,
-      stroked: true,
       getFillColor: fillColor,
       getLineColor: lineColor,
-      lineWidthUnits: "pixels",
       getLineWidth: 2,
+      lineWidthUnits: "pixels",
       pickable: true,
       onClick: (info) => {
         setPicked(info.object);
       },
     }),
     new GeoJsonLayer({
-      id: "value",
-      data: geojson,
-      filled: filled && !picked && (!items || items.length == 0),
-      stroked: true,
-      getFillColor: fillColor,
+      id: "collections",
+      data: collectionsGeoJson,
+      filled: false,
       getLineColor: lineColor,
-      lineWidthUnits: "pixels",
       getLineWidth: 2,
-      updateTriggers: [picked, items],
+      lineWidthUnits: "pixels",
+    }),
+    new GeoJsonLayer({
+      id: "value",
+      data: valueGeoJson,
+      filled: !items,
+      getFillColor: collections ? inverseFillColor : fillColor,
+      getLineColor: collections ? inverseLineColor : lineColor,
+      getLineWidth: 2,
+      lineWidthUnits: "pixels",
+      pickable: value?.type !== "Collection",
+      onClick: (info) => {
+        setPicked(info.object);
+      },
     }),
   ];
 
-  if (stacGeoparquetTable) {
+  if (table)
     layers.push(
       new GeoArrowPolygonLayer({
-        id: "stac-geoparquet",
-        data: stacGeoparquetTable,
+        id: "table",
+        data: table,
         filled: true,
-        stroked: true,
         getFillColor: fillColor,
         getLineColor: lineColor,
-        lineWidthUnits: "pixels",
         getLineWidth: 2,
-        autoHighlight: true,
+        lineWidthUnits: "pixels",
         pickable: true,
         onClick: (info) => {
-          setStacGeoparquetItemId(
-            stacGeoparquetTable.getChild("id")?.get(info.index),
-          );
+          setStacGeoparquetItemId(table.getChild("id")?.get(info.index));
         },
-        updateTriggers: [picked],
-      }),
+      })
     );
-  }
+
+  useEffect(() => {
+    if (value && mapRef.current && !mapRef.current.isMoving()) {
+      const padding = {
+        top: window.innerHeight / 10,
+        bottom: window.innerHeight / 20,
+        right: window.innerWidth / 20,
+        left: window.innerWidth / 20 + window.innerWidth / 3,
+      };
+      const bbox = getBbox(value, collections);
+      if (bbox) mapRef.current.fitBounds(bbox, { linear: true, padding });
+    }
+  }, [value, collections]);
 
   return (
     <MaplibreMap
@@ -158,6 +169,11 @@ export default function Map() {
         zoom: 1,
       }}
       mapStyle={`https://basemaps.cartocdn.com/gl/${mapStyle}/style.json`}
+      style={{ zIndex: 0 }}
+      onMoveEnd={() => {
+        if (mapRef.current && !mapRef.current.isMoving())
+          setBbox(sanitizeBbox(mapRef.current?.getBounds().toArray().flat()));
+      }}
     >
       <DeckGLOverlay
         layers={layers}
@@ -181,7 +197,7 @@ function getCursor(
   }: {
     isHovering: boolean;
     isDragging: boolean;
-  },
+  }
 ) {
   let cursor = "grab";
   if (isHovering) {
@@ -195,105 +211,73 @@ function getCursor(
   return cursor;
 }
 
-function useStacValueLayerProperties(
-  value: StacValue | undefined,
-  collections: StacCollection[] | undefined,
-) {
-  const { geojson: collectionsGeojson, bbox: collectionsBbox } =
-    useCollectionsLayerProperties(collections);
-
-  if (value) {
-    switch (value.type) {
-      case "Catalog":
-        return {
-          geojson: collectionsGeojson,
-          bbox: collectionsBbox,
-          filled: false,
-        };
-      case "Collection":
-        return {
-          geojson:
-            value.extent?.spatial?.bbox &&
-            bboxPolygon(sanitizeBbox(value.extent.spatial.bbox[0])),
-          bbox: value.extent?.spatial?.bbox?.[0] as BBox,
-          filled: true,
-        };
-      case "Feature":
-        return {
-          geojson: value as GeoJSON,
-          bbox: value.bbox as BBox | undefined,
-          filled: true,
-        };
-      case "FeatureCollection":
-        return {
-          geojson: value.features as Feature[],
-          bbox:
-            (value.features.length > 0 &&
-              turfBbox(value as FeatureCollection)) ||
-            undefined,
-          filled: true,
-        };
-    }
-  } else {
-    return { geojson: undefined, bbox: undefined, filled: undefined };
+function valueToGeoJson(value: StacValue) {
+  switch (value.type) {
+    case "Catalog":
+      return undefined;
+    case "Collection":
+      return bboxPolygon(getCollectionExtents(value) as BBox);
+    case "Feature":
+      return value as Feature;
+    case "FeatureCollection":
+      return value as FeatureCollection;
   }
 }
 
-function useCollectionsLayerProperties(
-  collections: StacCollection[] | undefined,
-) {
-  if (collections) {
-    const bbox: [number, number, number, number] = [180, 90, -180, -90];
-    const polygons = collections
-      .map((collection) => {
-        if (collection.extent?.spatial?.bbox) {
-          const sanitizedBbox = sanitizeBbox(collection.extent.spatial.bbox[0]);
-          if (sanitizedBbox[0] < bbox[0]) {
-            bbox[0] = sanitizedBbox[0];
-          }
-          if (sanitizedBbox[1] < bbox[1]) {
-            bbox[1] = sanitizedBbox[1];
-          }
-          if (sanitizedBbox[2] > bbox[2]) {
-            bbox[2] = sanitizedBbox[2];
-          }
-          if (sanitizedBbox[3] > bbox[3]) {
-            bbox[3] = sanitizedBbox[3];
-          }
-          return bboxPolygon(sanitizedBbox);
-        } else {
-          return undefined;
-        }
-      })
-      .filter((bbox) => !!bbox);
-    if (polygons.length > 0) {
-      return { geojson: featureCollection(polygons), bbox };
-    } else {
-      return { geojson: undefined, bbox: undefined };
-    }
-  } else {
-    return { geojson: undefined, bbox: undefined };
-  }
+function getCollectionExtents(collection: StacCollection) {
+  return collection.extent.spatial.bbox[0];
 }
 
-function sanitizeBbox(bbox: number[]) {
-  const newBbox = (bbox.length == 6 && [
-    bbox[0],
-    bbox[1],
-    bbox[3],
-    bbox[4],
-  ]) || [bbox[0], bbox[1], bbox[2], bbox[3]];
-  if (newBbox[0] < -180) {
-    newBbox[0] = -180;
+function getBbox(
+  value: StacValue,
+  collections: StacCollection[] | undefined
+): BBox2D | undefined {
+  let valueBbox;
+  switch (value.type) {
+    case "Catalog":
+      valueBbox =
+        collections && collections.length > 0
+          ? sanitizeBbox(
+              collections
+                .map((collection) => getCollectionExtents(collection))
+                .reduce((accumulator, currentValue) => {
+                  return [
+                    Math.min(accumulator[0], currentValue[0]),
+                    Math.min(accumulator[1], currentValue[1]),
+                    Math.max(accumulator[2], currentValue[2]),
+                    Math.max(accumulator[3], currentValue[3]),
+                  ];
+                })
+            )
+          : undefined;
+      break;
+    case "Collection":
+      valueBbox = getCollectionExtents(value);
+      break;
+    case "Feature":
+      valueBbox = value.bbox;
+      break;
+    case "FeatureCollection":
+      valueBbox = bbox(value as FeatureCollection) as BBox2D;
+      break;
   }
-  if (newBbox[1] < -90) {
-    newBbox[1] = -90;
+  return valueBbox ? sanitizeBbox(valueBbox) : undefined;
+}
+
+function sanitizeBbox(bbox: BBox | SpatialExtent): BBox2D {
+  if (bbox.length === 6) {
+    return [
+      Math.max(bbox[0], -180),
+      Math.max(bbox[1], -90),
+      Math.min(bbox[3], 180),
+      Math.min(bbox[4], 90),
+    ];
+  } else {
+    return [
+      Math.max(bbox[0], -180),
+      Math.max(bbox[1], -90),
+      Math.min(bbox[2], 180),
+      Math.min(bbox[3], 90),
+    ];
   }
-  if (newBbox[2] > 180) {
-    newBbox[2] = 180;
-  }
-  if (newBbox[3] > 90) {
-    newBbox[3] = 90;
-  }
-  return newBbox as [number, number, number, number];
 }

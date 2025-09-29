@@ -1,23 +1,51 @@
-import { describe, test } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 import App from "../src/app";
+import { EXAMPLES } from "../src/components/examples";
 import { Provider } from "../src/components/ui/provider";
+
+const queryClient = new QueryClient();
 
 function renderApp() {
   return render(
     <Provider>
-      <App></App>
-    </Provider>,
+      <QueryClientProvider client={queryClient}>
+        <App></App>
+      </QueryClientProvider>
+    </Provider>
   );
 }
 
-describe("navigation", () => {
-  test("static catalog", async () => {
+describe("app", () => {
+  test("has a map", async () => {
     const app = renderApp();
-    await app.getByRole("button", { name: "Examples" }).click();
-    await app.getByRole("menuitem", { name: "Maxar Open Data static" }).click();
-    await app.getByText("Bay of Bengal Cyclone Mocha").click();
-    await app.getByText("10300100E6747500", { exact: true }).click();
-    // TODO test map clicking, oof
+    await expect
+      .element(app.getByRole("region", { name: "Map" }))
+      .toBeVisible();
+  });
+
+  test("has a input text box", async () => {
+    const app = renderApp();
+    await expect
+      .element(
+        app.getByRole("textbox", {
+          name: "Enter a url to STAC JSON or GeoParquet",
+        })
+      )
+      .toBeVisible();
+  });
+
+  describe("examples", () => {
+    for (const example of EXAMPLES) {
+      test(example.title, async () => {
+        const app = renderApp();
+        await app.getByRole("button", { name: "Examples" }).click();
+        await app.getByRole("menuitem", { name: example.title }).click();
+        await expect
+          .element(app.getByRole("button", { name: "Properties" }))
+          .toBeVisible();
+      });
+    }
   });
 });

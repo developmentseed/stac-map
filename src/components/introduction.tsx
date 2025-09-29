@@ -1,18 +1,17 @@
 import {
-  type UseFileUploadReturn,
   FileUpload,
   Link,
   Stack,
+  type UseFileUploadReturn,
 } from "@chakra-ui/react";
-import { Examples } from "../examples";
-import type { SetHref } from "../types/app";
+import { Examples } from "./examples";
 
 export default function Introduction({
   fileUpload,
   setHref,
 }: {
   fileUpload: UseFileUploadReturn;
-  setHref: SetHref;
+  setHref: (href: string | undefined) => void;
 }) {
   return (
     <Stack fontSize={"sm"} fontWeight={"lighter"}>

@@ -1,8 +1,7 @@
-import { Badge, Menu, Portal, Span } from "@chakra-ui/react";
 import { type ReactNode } from "react";
-import type { SetHref } from "./types/app";
+import { Badge, Menu, Portal, Span } from "@chakra-ui/react";
 
-const EXAMPLES = [
+export const EXAMPLES = [
   { title: "eoAPI DevSeed", badge: "API", href: "https://stac.eoapi.dev/" },
   {
     title: "Microsoft Planetary Computer",
@@ -40,7 +39,7 @@ export function Examples({
   setHref,
   children,
 }: {
-  setHref: SetHref;
+  setHref: (href: string | undefined) => void;
   children: ReactNode;
 }) {
   return (

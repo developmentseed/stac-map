@@ -1,52 +1,79 @@
+import { useState } from "react";
+import { LuDownload } from "react-icons/lu";
 import {
-  Badge,
+  Button,
   ButtonGroup,
   Card,
+  Collapsible,
+  DataList,
   HStack,
-  IconButton,
-  Stack,
-  Text,
+  Image,
 } from "@chakra-ui/react";
-import { LuDownload } from "react-icons/lu";
 import type { StacAsset } from "stac-ts";
+import Properties from "./properties";
+import type { StacAssets } from "../types/stac";
 
-export default function Assets({
-  assets,
-}: {
-  assets: { [k: string]: StacAsset };
-}) {
+export default function Assets({ assets }: { assets: StacAssets }) {
   return (
-    <Stack>
-      {Object.entries(assets).map(([key, asset]) => (
-        <Card.Root key={asset.href} size={"sm"}>
-          <Card.Body>
-            <Card.Title>
-              <HStack>
-                {asset.title || key}
-                {asset.roles &&
-                  asset.roles.map((role) => <Badge key={role}>{role}</Badge>)}
-              </HStack>
-            </Card.Title>
-            {asset.description && (
-              <Card.Description>{asset.description}</Card.Description>
-            )}
-          </Card.Body>
-          <Card.Footer>
-            <ButtonGroup size={"xs"} variant={"subtle"}>
-              <IconButton asChild>
-                <a href={asset.href} target="_blank">
-                  <LuDownload></LuDownload>
-                </a>
-              </IconButton>
-            </ButtonGroup>
-            {asset.type && (
-              <Text fontSize={"xs"} fontWeight={"light"}>
-                {asset.type}
-              </Text>
-            )}
-          </Card.Footer>
-        </Card.Root>
+    <DataList.Root>
+      {Object.keys(assets).map((key) => (
+        <DataList.Item key={"asset-" + key}>
+          <DataList.ItemLabel>{key}</DataList.ItemLabel>
+          <DataList.ItemValue>
+            <Asset asset={assets[key]} />
+          </DataList.ItemValue>
+        </DataList.Item>
       ))}
-    </Stack>
+    </DataList.Root>
+  );
+}
+
+function Asset({ asset }: { asset: StacAsset }) {
+  const [imageError, setImageError] = useState(false);
+  // eslint-disable-next-line
+  const { href, roles, type, title, ...properties } = asset;
+
+  return (
+    <Card.Root size={"sm"} w="full">
+      <Card.Header>
+        {asset.title && <Card.Title>{asset.title}</Card.Title>}
+      </Card.Header>
+      <Card.Body gap={6}>
+        {!imageError && (
+          <Image src={asset.href} onError={() => setImageError(true)} />
+        )}
+        <DataList.Root orientation={"horizontal"}>
+          {asset.roles && (
+            <DataList.Item>
+              <DataList.ItemLabel>Roles</DataList.ItemLabel>
+              <DataList.ItemValue>{asset.roles?.join(", ")}</DataList.ItemValue>
+            </DataList.Item>
+          )}
+          {asset.type && (
+            <DataList.Item>
+              <DataList.ItemLabel>Type</DataList.ItemLabel>
+              <DataList.ItemValue>{asset.type}</DataList.ItemValue>
+            </DataList.Item>
+          )}
+        </DataList.Root>
+        {Object.keys(properties).length > 0 && (
+          <Collapsible.Root>
+            <Collapsible.Trigger>Properties</Collapsible.Trigger>
+            <Collapsible.Content>
+              <Properties properties={properties} />
+            </Collapsible.Content>
+          </Collapsible.Root>
+        )}
+        <HStack justify={"right"}>
+          <ButtonGroup size="sm" variant="outline">
+            <Button asChild>
+              <a href={asset.href} target="_blank">
+                <LuDownload /> Download
+              </a>
+            </Button>
+          </ButtonGroup>
+        </HStack>
+      </Card.Body>
+    </Card.Root>
   );
 }

@@ -1,13 +1,4 @@
-import type { BBox } from "geojson";
-import type { StacCatalog, StacCollection, StacItem, StacLink } from "stac-ts";
-
-export type StacValue =
-  | StacCatalog
-  | StacCollection
-  | StacItem
-  | StacItemCollection;
-
-export type StacContainer = StacCatalog | StacCollection;
+import type { StacAsset, StacCatalog, StacCollection, StacItem } from "stac-ts";
 
 export interface StacItemCollection {
   type: "FeatureCollection";
@@ -20,42 +11,28 @@ export interface StacItemCollection {
   [k: string]: unknown;
 }
 
+export type StacValue =
+  | StacCatalog
+  | StacCollection
+  | StacItem
+  | StacItemCollection;
+
 export interface StacCollections {
   collections: StacCollection[];
   links?: StacLink[];
-}
-
-export interface StacSearch {
-  collections?: string[];
-  datetime?: string;
-  bbox?: number[];
-  limit?: number;
-}
-
-export interface StacSearchRequest {
-  search: StacSearch;
-  link: StacLink;
-}
-
-export interface StacGeoparquetMetadata {
-  count: number;
-  bbox: BBox;
-  keyValue: KeyValueMetadata[];
-  startDatetime: Date | null;
-  endDatetime: Date | null;
-  describe: {
-    column_name: string;
-    column_type: string;
-  }[];
-}
-
-export interface KeyValueMetadata {
-  key: string;
-  // eslint-disable-next-line
-  value: any;
 }
 
 export interface NaturalLanguageCollectionSearchResult {
   collection_id: string;
   explanation: string;
 }
+
+export type StacAssets = { [k: string]: StacAsset };
+
+export interface StacSearch {
+  collections?: string[];
+  datetime?: string;
+  bbox?: number[];
+}
+
+export type DatetimeBounds = { start: Date; end: Date };

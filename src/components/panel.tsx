@@ -1,179 +1,310 @@
+import { type ReactNode, useEffect, useMemo, useState } from "react";
+import type { IconType } from "react-icons/lib";
 import {
+  LuFiles,
+  LuFilter,
+  LuFilterX,
+  LuFolder,
+  LuFolderPlus,
+  LuFolderSearch,
+  LuLink,
+  LuList,
+  LuSearch,
+} from "react-icons/lu";
+import {
+  Accordion,
   Alert,
   Box,
+  HStack,
+  Icon,
   SkeletonText,
-  Stack,
   type UseFileUploadReturn,
 } from "@chakra-ui/react";
-import { useEffect, useMemo, useState } from "react";
-import type { StacLink } from "stac-ts";
-import useStacMap from "../hooks/stac-map";
-import type { SetHref } from "../types/app";
-import type { StacSearch, StacValue } from "../types/stac";
-import { Catalog } from "./catalog";
-import { Collection } from "./collection";
+import { useQuery } from "@tanstack/react-query";
+import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
+import Assets from "./assets";
+import Catalogs from "./catalogs";
+import CollectionSearch from "./collection-search";
+import Collections from "./collections";
+import Filter from "./filter";
 import Introduction from "./introduction";
-import Item from "./item";
-import ItemCollection from "./item-collection";
-import { NavigationBreadcrumbs } from "./navigation-breadcrumbs";
-import { ItemSearchResults } from "./search/item";
-import { getItemDatetimes } from "../stac";
-import TemporalFilter from "./filter/temporal";
+import ItemSearch from "./item-search";
+import Items from "./items";
+import Links from "./links";
+import Properties from "./properties";
+import Value from "./value";
+import type { BBox2D } from "../types/map";
+import type {
+  DatetimeBounds,
+  StacAssets,
+  StacSearch,
+  StacValue,
+} from "../types/stac";
+import { fetchStac } from "../utils/stac";
 
 export default function Panel({
+  value,
+  error,
+  catalogs,
+  collections,
+  filteredCollections,
+  items,
+  filteredItems,
   href,
   setHref,
   fileUpload,
+  filter,
+  setFilter,
+  bbox,
+  setItems,
+  setDatetimeBounds,
 }: {
+  value: StacValue | undefined;
+  error: Error | undefined;
+  catalogs: StacCatalog[] | undefined;
+  collections: StacCollection[] | undefined;
+  filteredCollections: StacCollection[] | undefined;
+  items: StacItem[] | undefined;
+  filteredItems: StacItem[] | undefined;
   href: string | undefined;
-  setHref: SetHref;
+  setHref: (href: string | undefined) => void;
   fileUpload: UseFileUploadReturn;
+  filter: boolean;
+  setFilter: (filter: boolean) => void;
+  bbox: BBox2D | undefined;
+  setItems: (items: StacItem[] | undefined) => void;
+  setDatetimeBounds: (bounds: DatetimeBounds | undefined) => void;
 }) {
-  const { value, picked, setPicked, items, setItems } = useStacMap();
   const [search, setSearch] = useState<StacSearch>();
-  const [searchLink, setSearchLink] = useState<StacLink>();
-  const [autoLoad, setAutoLoad] = useState(false);
+  const rootHref = value?.links?.find((link) => link.rel === "root")?.href;
+  const rootData = useQuery<StacValue>({
+    queryKey: ["stac-value", rootHref],
+    enabled: !!rootHref,
+    queryFn: () => fetchStac(rootHref),
+  });
+  const searchLinks = rootData.data?.links?.filter(
+    (link) => link.rel === "search"
+  );
+  const { links, assets, properties } = useMemo(() => {
+    if (value) {
+      if (value.type === "Feature") {
+        return {
+          links: value.links,
+          assets: value.assets as StacAssets | undefined,
+          properties: value.properties,
+        };
+      } else {
+        const { links, assets, ...properties } = value;
+        return { links, assets: assets as StacAssets | undefined, properties };
+      }
+    } else {
+      return { links: undefined, assets: undefined, properties: undefined };
+    }
+  }, [value]);
+
+  // Handled by the value
+  if (properties?.description) delete properties["description"];
+  const thumbnailAsset =
+    assets &&
+    ((Object.keys(assets).includes("thumbnail") && assets["thumbnail"]) ||
+      Object.values(assets).find((asset) =>
+        asset.roles?.includes("thumbnail")
+      ));
+  const nextLink = links?.find((link) => link.rel === "next");
+  const prevLink = links?.find((link) => link.rel === "previous");
+  // We already provide linked children and items in their own pane.
+  const filteredLinks = links?.filter(
+    (link) => link.rel !== "child" && link.rel !== "item"
+  );
 
   useEffect(() => {
     setItems(undefined);
-    setPicked(undefined);
-  }, [search, setPicked, setItems]);
-
-  const { start: itemsStart, end: itemsEnd } = useMemo(() => {
-    if (items) {
-      let start = null;
-      let end = null;
-      for (const item of items) {
-        const { start: itemStart, end: itemEnd } = getItemDatetimes(item);
-        if (itemStart && (!start || itemStart < start)) start = itemStart;
-        if (itemEnd && (!end || itemEnd > end)) end = itemEnd;
-      }
-      return { start, end };
-    } else {
-      return { start: null, end: null };
-    }
-  }, [items]);
-
-  let content;
-  if (!href) {
-    content = (
-      <Introduction fileUpload={fileUpload} setHref={setHref}></Introduction>
-    );
-  } else if (!value) {
-    content = <SkeletonText noOfLines={3} />;
-  } else if (picked) {
-    content = (
-      <ValueContent
-        value={picked}
-        setHref={setHref}
-        search={search}
-        setSearch={setSearch}
-        setSearchLink={setSearchLink}
-        autoLoad={autoLoad}
-        setAutoLoad={setAutoLoad}
-      ></ValueContent>
-    );
-  } else {
-    content = (
-      <ValueContent
-        value={value}
-        setHref={setHref}
-        search={search}
-        setSearch={setSearch}
-        setSearchLink={setSearchLink}
-        autoLoad={autoLoad}
-        setAutoLoad={setAutoLoad}
-      ></ValueContent>
-    );
-  }
+  }, [search, setItems]);
 
   return (
-    <Box bg={"bg.muted"} rounded={4} pointerEvents={"auto"} overflow={"hidden"}>
-      <Box px={4} py={3} borderBottomWidth={1} borderColor={"border.subtle"}>
-        <NavigationBreadcrumbs
+    <Box p={4} overflow={"scroll"} maxH={"80dvh"}>
+      {(href && value && (
+        <Value
+          value={value}
+          thumbnailAsset={thumbnailAsset}
           href={href}
           setHref={setHref}
-        ></NavigationBreadcrumbs>
-      </Box>
-      <Stack overflow={"scroll"} maxH={{ base: "40dvh", md: "80dvh" }} p={4}>
-        {content}
-        {search && searchLink && (
-          <ItemSearchResults
-            search={search}
-            setSearch={setSearch}
-            link={searchLink}
-            autoLoad={autoLoad}
-            setAutoLoad={setAutoLoad}
-          ></ItemSearchResults>
+          nextLink={nextLink}
+          prevLink={prevLink}
+        />
+      )) ||
+        (error && (
+          <Alert.Root status={"error"}>
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title>Error while fetching STAC value</Alert.Title>
+              <Alert.Description>{error.toString()}</Alert.Description>
+            </Alert.Content>
+          </Alert.Root>
+        )) ||
+        (href && <SkeletonText />) || (
+          <Introduction setHref={setHref} fileUpload={fileUpload} />
         )}
-        {itemsStart && itemsEnd && (
-          <TemporalFilter start={itemsStart} end={itemsEnd} />
-        )}
-      </Stack>
+
+      {value && (
+        <Accordion.Root multiple size={"sm"} variant={"enclosed"} mt={4}>
+          {catalogs && (
+            <Section
+              title={`Catalogs (${catalogs.length})`}
+              AccordionIcon={LuFolder}
+              accordionValue="catalogs"
+            >
+              <Catalogs catalogs={catalogs} setHref={setHref} />
+            </Section>
+          )}
+
+          {collections && (
+            <Section
+              title={
+                <>
+                  Collections{" "}
+                  {(filteredCollections &&
+                    `(${filteredCollections?.length}/${collections.length})`) ||
+                    `(${collections.length})`}
+                </>
+              }
+              AccordionIcon={LuFolderPlus}
+              accordionValue="collections"
+            >
+              <Collections
+                collections={filteredCollections || collections}
+                setHref={setHref}
+              />
+            </Section>
+          )}
+
+          {collections && (
+            <Section
+              title="Collection search"
+              AccordionIcon={LuFolderSearch}
+              accordionValue="collection-search"
+            >
+              <CollectionSearch
+                collections={collections}
+                setHref={setHref}
+                catalogHref={value?.type === "Catalog" ? href : undefined}
+              />
+            </Section>
+          )}
+
+          {value.type === "Collection" &&
+            searchLinks &&
+            searchLinks.length > 0 && (
+              <Section
+                title="Item search"
+                AccordionIcon={LuSearch}
+                accordionValue="item-search"
+              >
+                <ItemSearch
+                  search={search}
+                  setSearch={setSearch}
+                  links={searchLinks}
+                  bbox={bbox}
+                  collection={value}
+                  setItems={setItems}
+                />
+              </Section>
+            )}
+
+          {(items || collections) && (
+            <Section
+              title={"Filtering"}
+              AccordionIcon={filter ? LuFilter : LuFilterX}
+              accordionValue="filter"
+            >
+              <Filter
+                filter={filter}
+                setFilter={setFilter}
+                bbox={bbox}
+                setDatetimeBounds={setDatetimeBounds}
+                items={items}
+                collections={collections}
+              />
+            </Section>
+          )}
+
+          {items && (
+            <Section
+              title={
+                <>
+                  Items{" "}
+                  {(filteredItems &&
+                    `(${filteredItems?.length}/${items.length})`) ||
+                    `(${items.length})`}
+                </>
+              }
+              AccordionIcon={LuFolderPlus}
+              accordionValue="collections"
+            >
+              <Items items={filteredItems || items} setHref={setHref} />
+            </Section>
+          )}
+
+          {assets && (
+            <Section
+              title="Assets"
+              AccordionIcon={LuFiles}
+              accordionValue="assets"
+            >
+              <Assets assets={assets} />
+            </Section>
+          )}
+
+          {filteredLinks && filteredLinks.length > 0 && (
+            <Section
+              title="Links"
+              AccordionIcon={LuLink}
+              accordionValue="links"
+            >
+              <Links links={filteredLinks} setHref={setHref} />
+            </Section>
+          )}
+
+          {properties && (
+            <Section
+              title="Properties"
+              AccordionIcon={LuList}
+              accordionValue="properties"
+            >
+              <Properties properties={properties} />
+            </Section>
+          )}
+        </Accordion.Root>
+      )}
     </Box>
   );
 }
 
-function ValueContent({
-  value,
-  setHref,
-  search,
-  setSearch,
-  setSearchLink,
-  autoLoad,
-  setAutoLoad,
+function Section({
+  title,
+  AccordionIcon,
+  accordionValue,
+  children,
 }: {
-  value: StacValue;
-  setHref: SetHref;
-  search: StacSearch | undefined;
-  setSearch: (search: StacSearch | undefined) => void;
-  setSearchLink: (link: StacLink | undefined) => void;
-  autoLoad: boolean;
-  setAutoLoad: (autoLoad: boolean) => void;
+  title: ReactNode;
+  AccordionIcon: IconType;
+  accordionValue: string;
+  children: ReactNode;
 }) {
-  switch (value.type) {
-    case "Catalog":
-      return <Catalog catalog={value} setHref={setHref}></Catalog>;
-    case "Collection":
-      return (
-        <Collection
-          collection={value}
-          setHref={setHref}
-          search={search}
-          setSearch={setSearch}
-          setSearchLink={setSearchLink}
-          autoLoad={autoLoad}
-          setAutoLoad={setAutoLoad}
-        ></Collection>
-      );
-    case "Feature":
-      return <Item item={value}></Item>;
-    case "FeatureCollection":
-      return <ItemCollection itemCollection={value}></ItemCollection>;
-    case undefined:
-      return (
-        <Alert.Root status="error">
-          <Alert.Indicator />
-          <Alert.Content>
-            <Alert.Title>Value does not have a "type" field</Alert.Title>
-          </Alert.Content>
-        </Alert.Root>
-      );
-    default:
-      return (
-        <Alert.Root status="error">
-          <Alert.Indicator />
-          <Alert.Content>
-            <Alert.Title>Unknown "type" field</Alert.Title>
-            <Alert.Description>
-              {
-                // @ts-expect-error Fallback for unknown types
-                value.type
-              }{" "}
-              is not a valid STAC type
-            </Alert.Description>
-          </Alert.Content>
-        </Alert.Root>
-      );
-  }
+  return (
+    <Accordion.Item value={accordionValue}>
+      <Accordion.ItemTrigger>
+        <HStack flex={"1"}>
+          <Icon>
+            <AccordionIcon />
+          </Icon>{" "}
+          {title}
+        </HStack>
+        <Accordion.ItemIndicator />
+      </Accordion.ItemTrigger>
+      <Accordion.ItemContent>
+        <Accordion.ItemBody>{children}</Accordion.ItemBody>
+      </Accordion.ItemContent>
+    </Accordion.Item>
+  );
 }
