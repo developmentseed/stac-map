@@ -37,13 +37,11 @@ describe("app", () => {
   });
 
   describe.for(EXAMPLES)("example $title", ({ title }) => {
-    test("renders properties", async () => {
+    test("updates title", async ({ expect }) => {
       const app = renderApp();
       await app.getByRole("button", { name: "Examples" }).click();
       await app.getByRole("menuitem", { name: title }).click();
-      // await expect
-      //   .element(app.getByRole("button", { name: "Properties" }))
-      //   .toBeVisible();
+      expect(document.title !== "stac-map");
     });
   });
 
