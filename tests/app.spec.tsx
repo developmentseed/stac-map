@@ -36,17 +36,15 @@ describe("app", () => {
       .toBeVisible();
   });
 
-  describe("examples", () => {
-    for (const example of EXAMPLES) {
-      test(example.title, async () => {
-        const app = renderApp();
-        await app.getByRole("button", { name: "Examples" }).click();
-        await app.getByRole("menuitem", { name: example.title }).click();
-        await expect
-          .element(app.getByRole("button", { name: "Properties" }))
-          .toBeVisible();
-      });
-    }
+  describe.for(EXAMPLES)("example $title", ({ title }) => {
+    test("renders properties", async () => {
+      const app = renderApp();
+      await app.getByRole("button", { name: "Examples" }).click();
+      await app.getByRole("menuitem", { name: title }).click();
+      await expect
+        .element(app.getByRole("button", { name: "Properties" }))
+        .toBeVisible();
+    });
   });
 
   test("CSDA Planet", async () => {
