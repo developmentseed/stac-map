@@ -64,4 +64,21 @@ describe("app", () => {
       .element(app.getByRole("heading", { name: "Planet" }))
       .toBeVisible();
   });
+
+  test("renders download buttons", async () => {
+    window.history.pushState(
+      {},
+      "",
+      "?href=https://stac.eoapi.dev/collections/MAXAR_yellowstone_flooding22"
+    );
+    const app = renderApp();
+    await app.getByRole("button", { name: "Item search" }).click();
+    await app.getByRole("button", { name: "Search", exact: true }).click();
+    await expect
+      .element(app.getByRole("button", { name: "JSON" }))
+      .toBeVisible();
+    await expect
+      .element(app.getByRole("button", { name: "stac-geoparquet" }))
+      .toBeVisible();
+  });
 });

@@ -1,10 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { LuPause, LuPlay, LuSearch, LuStepForward, LuX } from "react-icons/lu";
+import {
+  LuDownload,
+  LuPause,
+  LuPlay,
+  LuSearch,
+  LuStepForward,
+  LuX,
+} from "react-icons/lu";
 import {
   Alert,
   Button,
   ButtonGroup,
   createListCollection,
+  DownloadTrigger,
   Field,
   Group,
   Heading,
@@ -25,6 +33,7 @@ import type {
   StacLink,
   TemporalExtent,
 } from "stac-ts";
+import * as stac_wasm from "stac-wasm";
 import { SpatialExtent } from "./extent";
 import useStacSearch from "../hooks/stac-search";
 import type { BBox2D } from "../types/map";
@@ -175,6 +184,16 @@ function Search({
     setItems(items);
   }, [items, setItems]);
 
+  const downloadJson = () => {
+    return JSON.stringify(
+      items ? { type: "FeatureCollection", features: items } : {}
+    );
+  };
+
+  const downloadStacGeoparquet = () => {
+    return new Blob(items ? [stac_wasm.stacJsonToParquet(items)] : []);
+  };
+
   return (
     <Stack gap={4}>
       <Heading size={"md"}>Search results</Heading>
@@ -230,6 +249,33 @@ function Search({
           Clear <LuX />
         </Button>
       </ButtonGroup>
+      {items && items.length > 0 && (
+        <>
+          <Heading size={"sm"}>Download</Heading>
+          <ButtonGroup variant={"surface"} size={"xs"}>
+            <DownloadTrigger
+              data={downloadJson}
+              fileName="search.json"
+              mimeType="application/json"
+              asChild
+            >
+              <Button>
+                JSON <LuDownload />
+              </Button>
+            </DownloadTrigger>
+            <DownloadTrigger
+              data={downloadStacGeoparquet}
+              fileName="search.parquet"
+              mimeType="application/json"
+              asChild
+            >
+              <Button>
+                stac-geoparquet <LuDownload />
+              </Button>
+            </DownloadTrigger>
+          </ButtonGroup>
+        </>
+      )}
     </Stack>
   );
 }
