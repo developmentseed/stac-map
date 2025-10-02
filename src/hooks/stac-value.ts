@@ -38,8 +38,6 @@ export default function useStacValue({
         }
         setConnection(connection);
       })();
-    } else {
-      setConnection(undefined);
     }
   }, [db, href, fileUpload]);
 
