@@ -179,7 +179,6 @@ function Search({
   return (
     <Stack gap={4}>
       <Heading size={"md"}>Search results</Heading>
-
       {(numberMatched && (
         <Progress.Root value={items?.length || 0} max={numberMatched}>
           <HStack>
@@ -190,8 +189,7 @@ function Search({
           </HStack>
         </Progress.Root>
       )) ||
-        (result.isFetching && <Spinner size={"xs"} />)}
-
+        (items && <Text fontSize={"xs"}>{items.length} item(s) fetched</Text>)}
       {result.error && (
         <Alert.Root status={"error"}>
           <Alert.Indicator />
@@ -201,7 +199,6 @@ function Search({
           </Alert.Content>
         </Alert.Root>
       )}
-
       <ButtonGroup variant={"surface"}>
         <Button
           disabled={autoFetch || result.isFetching || !result.hasNextPage}

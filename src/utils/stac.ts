@@ -50,7 +50,10 @@ export async function fetchStac(
   });
 }
 
-function makeHrefsAbsolute<T extends StacValue>(value: T, baseUrl: string): T {
+export function makeHrefsAbsolute<T extends StacValue>(
+  value: T,
+  baseUrl: string
+): T {
   const baseUrlObj = new URL(baseUrl);
 
   if (value.links != null) {
@@ -78,7 +81,7 @@ function makeHrefsAbsolute<T extends StacValue>(value: T, baseUrl: string): T {
   return value;
 }
 
-function toAbsoluteUrl(href: string, baseUrl: URL): string {
+export function toAbsoluteUrl(href: string, baseUrl: URL): string {
   if (isAbsolute(href)) return href;
 
   const targetUrl = new URL(href, baseUrl);

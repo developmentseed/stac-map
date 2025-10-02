@@ -48,4 +48,17 @@ describe("app", () => {
       });
     }
   });
+
+  test("CSDA Planet", async () => {
+    // https://github.com/developmentseed/stac-map/issues/96
+    window.history.pushState(
+      {},
+      "",
+      "?href=https://csdap.earthdata.nasa.gov/stac/collections/planet"
+    );
+    const app = renderApp();
+    await expect
+      .element(app.getByRole("heading", { name: "Planet" }))
+      .toBeVisible();
+  });
 });

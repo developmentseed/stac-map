@@ -41,12 +41,15 @@ export default function Filter({
 
     if (collections) {
       for (const collection of collections) {
-        const extents = collection.extent.temporal.interval[0];
-        const collectionStart = extents[0] ? new Date(extents[0]) : null;
-        if (collectionStart && (!start || collectionStart < start))
-          start = collectionStart;
-        const collectionEnd = extents[1] ? new Date(extents[1]) : null;
-        if (collectionEnd && (!end || collectionEnd > end)) end = collectionEnd;
+        const extents = collection.extent?.temporal?.interval?.[0];
+        if (extents) {
+          const collectionStart = extents[0] ? new Date(extents[0]) : null;
+          if (collectionStart && (!start || collectionStart < start))
+            start = collectionStart;
+          const collectionEnd = extents[1] ? new Date(extents[1]) : null;
+          if (collectionEnd && (!end || collectionEnd > end))
+            end = collectionEnd;
+        }
       }
     }
 

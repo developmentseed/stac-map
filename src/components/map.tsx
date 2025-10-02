@@ -65,9 +65,13 @@ export default function Map({
     }
   }, [picked]);
   const collectionsGeoJson = useMemo(() => {
-    return (filteredCollections || collections)?.map((collection) =>
-      bboxPolygon(getCollectionExtents(collection) as BBox)
-    );
+    return (filteredCollections || collections)
+      ?.map(
+        (collection) =>
+          collection.extent?.spatial?.bbox &&
+          bboxPolygon(getCollectionExtents(collection) as BBox)
+      )
+      .filter((feature) => !!feature);
   }, [collections, filteredCollections]);
 
   const inverseFillColor: Color = [
@@ -147,7 +151,7 @@ export default function Map({
     );
 
   useEffect(() => {
-    if (value && mapRef.current && !mapRef.current.isMoving()) {
+    if (value && mapRef.current) {
       const padding = {
         top: window.innerHeight / 10,
         bottom: window.innerHeight / 20,
@@ -216,7 +220,10 @@ function valueToGeoJson(value: StacValue) {
     case "Catalog":
       return undefined;
     case "Collection":
-      return bboxPolygon(getCollectionExtents(value) as BBox);
+      return (
+        value.extent?.spatial?.bbox &&
+        bboxPolygon(getCollectionExtents(value) as BBox)
+      );
     case "Feature":
       return value as Feature;
     case "FeatureCollection":
@@ -225,7 +232,7 @@ function valueToGeoJson(value: StacValue) {
 }
 
 function getCollectionExtents(collection: StacCollection) {
-  return collection.extent.spatial.bbox[0];
+  return collection.extent?.spatial?.bbox?.[0];
 }
 
 function getBbox(
@@ -240,6 +247,7 @@ function getBbox(
           ? sanitizeBbox(
               collections
                 .map((collection) => getCollectionExtents(collection))
+                .filter((extents) => !!extents)
                 .reduce((accumulator, currentValue) => {
                   return [
                     Math.min(accumulator[0], currentValue[0]),
