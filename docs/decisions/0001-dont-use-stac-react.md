@@ -11,8 +11,8 @@ However, **stac-map** has some additional requirements that are _not_ directly s
 
 ## Considered Options
 
-* Extend **stac-react** with the functionality we need for **stac-map**
-* Don't use **stac-react**
+- Extend **stac-react** with the functionality we need for **stac-map**
+- Don't use **stac-react**
 
 ## Decision Outcome
 
@@ -20,6 +20,6 @@ We decided to not use **stac-react** for the initial build out of **stac-map**.
 
 ### Consequences
 
-* We were able to build more quickly because we didn't have to work around limitations of **stac-react**.
-* We did a lot of work that might not be as reusable by other STAC+React projects.
+- We were able to build more quickly because we didn't have to work around limitations of **stac-react**.
+- We did a lot of work that might not be as reusable by other STAC+React projects.
   Over the medium-to-long term, we should find parts of **stac-map** that we can move to **stac-react**, and/or refactor **stac-react** to more directly support **stac-map** requirements.
