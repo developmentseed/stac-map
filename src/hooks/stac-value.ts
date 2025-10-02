@@ -76,8 +76,8 @@ export default function useStacValue({
       getStacGeoparquetItem(href, connection, stacGeoparquetItemId),
     enabled: enableStacGeoparquet && !!stacGeoparquetItemId,
   });
-  const value = jsonResult.data || stacGeoparquetResult.data;
-  const table = stacGeoparquetTableResult.data;
+  const value = jsonResult.data || stacGeoparquetResult.data || undefined;
+  const table = stacGeoparquetTableResult.data || undefined;
   const error =
     jsonResult.error ||
     stacGeoparquetResult.error ||
