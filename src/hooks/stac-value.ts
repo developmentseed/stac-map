@@ -1,5 +1,6 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { UseFileUploadReturn } from "@chakra-ui/react";
+import { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { useInfiniteQuery, useQueries, useQuery } from "@tanstack/react-query";
 import { useDuckDb } from "duckdb-wasm-kit";
 import type { DatetimeBounds, StacCollections, StacValue } from "../types/stac";
@@ -7,6 +8,7 @@ import { getStacJsonValue } from "../utils/stac";
 import {
   getStacGeoparquet,
   getStacGeoparquetItem,
+  getStacGeoparquetTable,
 } from "../utils/stac-geoparquet";
 
 export default function useStacValue({
@@ -21,32 +23,66 @@ export default function useStacValue({
   stacGeoparquetItemId: string | undefined;
 }) {
   const { db } = useDuckDb();
-  // What happens when we upload another file with the same name? We probably
-  // need to clear the query key.
+  const [connection, setConnection] = useState<AsyncDuckDBConnection>();
+
+  useEffect(() => {
+    if (db && href?.endsWith(".parquet")) {
+      (async () => {
+        const connection = await db.connect();
+        await connection.query("LOAD spatial;");
+        try {
+          new URL(href);
+        } catch {
+          const file = fileUpload.acceptedFiles[0];
+          db.registerFileBuffer(href, new Uint8Array(await file.arrayBuffer()));
+        }
+        setConnection(connection);
+      })();
+    } else {
+      setConnection(undefined);
+    }
+  }, [db, href, fileUpload]);
+
+  const enableStacGeoparquet =
+    (connection && href && href.endsWith(".parquet")) || false;
+
   const jsonResult = useQuery<StacValue | null>({
     queryKey: ["stac-value", href],
     queryFn: () => getStacJsonValue(href || "", fileUpload),
     enabled: (href && !href.endsWith(".parquet")) || false,
   });
-  const geoparquetResult = useQuery({
+  const stacGeoparquetResult = useQuery({
     queryKey: ["stac-geoparquet", href],
     queryFn: () =>
-      (href && db && getStacGeoparquet(href, fileUpload, db, datetimeBounds)) ||
+      (href && connection && getStacGeoparquet(href, connection)) || null,
+    enabled: enableStacGeoparquet,
+  });
+  const stacGeoparquetTableResult = useQuery({
+    queryKey: ["stac-geoparquet", href, datetimeBounds],
+    queryFn: () =>
+      (href &&
+        connection &&
+        getStacGeoparquetTable(href, connection, datetimeBounds)) ||
       null,
-    enabled: (db && href && href.endsWith(".parquet")) || false,
+    placeholderData: (previousData) => previousData,
+    enabled: enableStacGeoparquet,
   });
   const stacGeoparquetItem = useQuery({
     queryKey: ["stac-geoparquet-item", href, stacGeoparquetItemId],
     queryFn: () =>
       href &&
-      db &&
+      connection &&
       stacGeoparquetItemId &&
-      getStacGeoparquetItem(href, db, stacGeoparquetItemId),
-    enabled: !!(db && href && stacGeoparquetItemId),
+      getStacGeoparquetItem(href, connection, stacGeoparquetItemId),
+    enabled: enableStacGeoparquet && !!stacGeoparquetItemId,
   });
-  const value = jsonResult.data || geoparquetResult.data?.value;
-  const table = geoparquetResult.data?.table;
-  const error = jsonResult.error || geoparquetResult.error || undefined;
+  const value = jsonResult.data || stacGeoparquetResult.data;
+  const table = stacGeoparquetTableResult.data;
+  const error =
+    jsonResult.error ||
+    stacGeoparquetResult.error ||
+    stacGeoparquetTableResult.error ||
+    undefined;
 
   const collectionsLink = value?.links?.find((link) => link.rel == "data");
   const collectionsResult = useInfiniteQuery({

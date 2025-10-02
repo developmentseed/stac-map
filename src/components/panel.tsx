@@ -211,7 +211,7 @@ export default function Panel({
               </Section>
             )}
 
-          {(items || collections) && (
+          {(items || collections || value.type === "FeatureCollection") && (
             <Section
               title={"Filtering"}
               AccordionIcon={filter ? LuFilter : LuFilterX}
@@ -222,6 +222,7 @@ export default function Panel({
                 setFilter={setFilter}
                 bbox={bbox}
                 setDatetimeBounds={setDatetimeBounds}
+                value={value}
                 items={items}
                 collections={collections}
               />

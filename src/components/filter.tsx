@@ -3,7 +3,7 @@ import { Checkbox, DataList, Slider, Stack, Text } from "@chakra-ui/react";
 import type { StacCollection, StacItem } from "stac-ts";
 import { SpatialExtent } from "./extent";
 import type { BBox2D } from "../types/map";
-import type { DatetimeBounds } from "../types/stac";
+import type { DatetimeBounds, StacValue } from "../types/stac";
 import { getItemDatetimes } from "../utils/stac";
 
 export default function Filter({
@@ -11,6 +11,7 @@ export default function Filter({
   setFilter,
   bbox,
   setDatetimeBounds,
+  value,
   items,
   collections,
 }: {
@@ -18,16 +19,23 @@ export default function Filter({
   setFilter: (filter: boolean) => void;
   bbox: BBox2D | undefined;
   setDatetimeBounds: (bounds: DatetimeBounds | undefined) => void;
+  value: StacValue;
   items: StacItem[] | undefined;
   collections: StacCollection[] | undefined;
 }) {
   const [filterStart, setFilterStart] = useState<Date>();
   const [filterEnd, setFilterEnd] = useState<Date>();
-  const [value, setValue] = useState<number[]>();
+  const [sliderValue, setSliderValue] = useState<number[]>();
 
   const datetimes = useMemo(() => {
-    let start = null;
-    let end = null;
+    let start =
+      value.start_datetime && typeof value.start_datetime === "string"
+        ? new Date(value.start_datetime as string)
+        : null;
+    let end =
+      value.end_datetime && typeof value.end_datetime === "string"
+        ? new Date(value.end_datetime as string)
+        : null;
 
     if (items) {
       for (const item of items) {
@@ -54,17 +62,17 @@ export default function Filter({
     }
 
     return start && end ? { start, end } : null;
-  }, [items, collections]);
+  }, [value, items, collections]);
 
   useEffect(() => {
     if (datetimes && !filterStart && !filterEnd) {
-      setValue([datetimes.start.getTime(), datetimes.end.getTime()]);
+      setSliderValue([datetimes.start.getTime(), datetimes.end.getTime()]);
     }
   }, [datetimes, filterStart, filterEnd]);
 
   useEffect(() => {
     if (filterStart && filterEnd) {
-      setValue([filterStart.getTime(), filterEnd.getTime()]);
+      setSliderValue([filterStart.getTime(), filterEnd.getTime()]);
       setDatetimeBounds({ start: filterStart, end: filterEnd });
     }
   }, [filterStart, filterEnd, setDatetimeBounds]);
@@ -105,7 +113,7 @@ export default function Filter({
                 <Slider.Root
                   min={datetimes.start.getTime()}
                   max={datetimes.end.getTime()}
-                  value={value}
+                  value={sliderValue}
                   onValueChange={(e) => {
                     setFilterStart(new Date(e.value[0]));
                     setFilterEnd(new Date(e.value[1]));
