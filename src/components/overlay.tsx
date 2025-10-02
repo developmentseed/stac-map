@@ -12,6 +12,7 @@ import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
 import Breadcrumbs from "./breadcrumbs";
 import { Examples } from "./examples";
 import Panel from "./panel";
+import { ColorModeButton } from "./ui/color-mode";
 import type { BBox2D } from "../types/map";
 import type { DatetimeBounds, StacValue } from "../types/stac";
 
@@ -103,6 +104,7 @@ export default function Overlay({
               Examples
             </Button>
           </Examples>
+          <ColorModeButton />
         </HStack>
       </GridItem>
     </SimpleGrid>

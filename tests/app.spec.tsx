@@ -36,6 +36,13 @@ describe("app", () => {
       .toBeVisible();
   });
 
+  test("has a color mode button", async () => {
+    const app = renderApp();
+    await expect
+      .element(app.getByRole("button", { name: "Toggle color mode" }))
+      .toBeVisible();
+  });
+
   describe.for(EXAMPLES)("example $title", ({ title }) => {
     test("updates title", async ({ expect }) => {
       const app = renderApp();
