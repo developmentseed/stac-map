@@ -2,8 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 import App from "../src/app";
-import { EXAMPLES } from "../src/components/examples";
 import { Provider } from "../src/components/ui/provider";
+import { EXAMPLES } from "../src/constants";
 
 const queryClient = new QueryClient();
 
