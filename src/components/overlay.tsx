@@ -9,55 +9,29 @@ import {
   IconButton,
   Input,
   SimpleGrid,
-  type UseFileUploadReturn,
 } from "@chakra-ui/react";
-import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
 import Breadcrumbs from "./breadcrumbs";
 import { Examples } from "./examples";
-import Panel from "./panel";
+import Panel, { type PanelProps } from "./panel";
 import { ColorModeButton } from "./ui/color-mode";
-import type { BBox2D } from "../types/map";
-import type { DatetimeBounds, StacValue } from "../types/stac";
+import type { StacValue } from "../types/stac";
+
+export interface OverlayProps extends PanelProps {
+  picked: StacValue | undefined;
+  setPicked: (picked: StacValue | undefined) => void;
+}
 
 export default function Overlay({
   href,
   setHref,
   fileUpload,
   value,
-  error,
-  catalogs,
-  setCollections,
-  collections,
-  filteredCollections,
-  filter,
-  setFilter,
-  bbox,
   picked,
   setPicked,
   items,
   filteredItems,
-  setItems,
-  setDatetimeBounds,
-}: {
-  href: string | undefined;
-  setHref: (href: string | undefined) => void;
-  error: Error | undefined;
-  value: StacValue | undefined;
-  catalogs: StacCatalog[] | undefined;
-  setCollections: (collections: StacCollection[] | undefined) => void;
-  collections: StacCollection[] | undefined;
-  filteredCollections: StacCollection[] | undefined;
-  fileUpload: UseFileUploadReturn;
-  filter: boolean;
-  setFilter: (filter: boolean) => void;
-  bbox: BBox2D | undefined;
-  picked: StacValue | undefined;
-  setPicked: (picked: StacValue | undefined) => void;
-  items: StacItem[] | undefined;
-  filteredItems: StacItem[] | undefined;
-  setItems: (items: StacItem[] | undefined) => void;
-  setDatetimeBounds: (bounds: DatetimeBounds | undefined) => void;
-}) {
+  ...props
+}: OverlayProps) {
   return (
     <SimpleGrid columns={3} gap={4}>
       <GridItem colSpan={1}>
@@ -82,24 +56,17 @@ export default function Overlay({
               />
             )) || <HStack fontWeight={"light"}>stac-map</HStack>}
           </Box>
-          <Panel
-            href={href}
-            setHref={setHref}
-            value={picked || value}
-            error={error}
-            catalogs={catalogs}
-            setCollections={setCollections}
-            collections={collections}
-            filteredCollections={filteredCollections}
-            fileUpload={fileUpload}
-            filter={filter}
-            setFilter={setFilter}
-            bbox={bbox}
-            items={picked ? undefined : items}
-            filteredItems={picked ? undefined : filteredItems}
-            setItems={setItems}
-            setDatetimeBounds={setDatetimeBounds}
-          />
+          <Box p={4} overflow={"scroll"} maxH={"80dvh"}>
+            <Panel
+              href={href}
+              setHref={setHref}
+              value={picked || value}
+              fileUpload={fileUpload}
+              items={picked ? undefined : items}
+              filteredItems={picked ? undefined : filteredItems}
+              {...props}
+            />
+          </Box>
         </Box>
       </GridItem>
       <GridItem colSpan={2}>
