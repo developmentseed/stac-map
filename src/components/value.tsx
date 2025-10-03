@@ -32,8 +32,8 @@ import {
   Span,
   Stack,
 } from "@chakra-ui/react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import type { StacCatalog, StacCollection, StacItem, StacLink } from "stac-ts";
+import { useQuery } from "@tanstack/react-query";
+import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
 import Assets from "./assets";
 import Catalogs from "./catalogs";
 import CollectionSearch from "./collection-search";
@@ -44,15 +44,10 @@ import Items from "./items";
 import Links from "./links";
 import Properties from "./properties";
 import { Prose } from "./ui/prose";
+import useStacCollections from "../hooks/stac-collections";
 import type { BBox2D } from "../types/map";
-import type {
-  DatetimeBounds,
-  StacAssets,
-  StacCollections,
-  StacSearch,
-  StacValue,
-} from "../types/stac";
-import { fetchStac } from "../utils/stac";
+import type { DatetimeBounds, StacSearch, StacValue } from "../types/stac";
+import { deconstructStac, fetchStac, getImportantLinks } from "../utils/stac";
 
 export interface SharedValueProps {
   catalogs: StacCatalog[] | undefined;
@@ -94,103 +89,33 @@ export function Value({
   const [numberOfCollections, setNumberOfCollections] = useState<number>();
   const [fetchAllCollections, setFetchAllCollections] = useState(false);
   const [thumbnailError, setThumbnailError] = useState(false);
+
   const selfHref = value.links?.find((link) => link.rel === "self")?.href;
+
   const { links, assets, properties } = useMemo(() => {
-    if (value) {
-      if (value.type === "Feature") {
-        return {
-          links: value.links,
-          assets: value.assets as StacAssets | undefined,
-          properties: value.properties,
-        };
-      } else {
-        const { links, assets, ...properties } = value;
-        return { links, assets: assets as StacAssets | undefined, properties };
-      }
-    } else {
-      return { links: undefined, assets: undefined, properties: undefined };
-    }
+    return deconstructStac(value);
   }, [value]);
+  // Description is handled at the top of the panel, so we don't need it down in
+  // the properties.
+  if (properties?.description) delete properties["description"];
+
   const { rootLink, collectionsLink, nextLink, prevLink, filteredLinks } =
     useMemo(() => {
-      let rootLink: StacLink | undefined = undefined;
-      let collectionsLink: StacLink | undefined = undefined;
-      let nextLink: StacLink | undefined = undefined;
-      let prevLink: StacLink | undefined = undefined;
-      const filteredLinks = [];
-      if (links) {
-        for (const link of links) {
-          switch (link.rel) {
-            case "root":
-              rootLink = link;
-              break;
-            case "data":
-              collectionsLink = link;
-              break;
-            case "next":
-              nextLink = link;
-              break;
-            case "previous":
-              prevLink = link;
-              break;
-          }
-          // We already show children and items in their own pane
-          if (link.rel !== "child" && link.rel !== "item")
-            filteredLinks.push(link);
-        }
-      }
-      return { rootLink, collectionsLink, nextLink, prevLink, filteredLinks };
+      return getImportantLinks(links);
     }, [links]);
+
   const rootData = useQuery<StacValue | undefined>({
     queryKey: ["stac-value", rootLink?.href],
     enabled: !!rootLink,
     queryFn: () => rootLink && fetchStac(rootLink.href),
   });
+
   const searchLinks = useMemo(() => {
     return rootData.data?.links?.filter((link) => link.rel === "search");
   }, [rootData.data]);
-  const collectionsResult = useInfiniteQuery({
-    queryKey: ["stac-collections", collectionsLink?.href],
-    queryFn: async ({ pageParam }) => {
-      if (pageParam) {
-        return await fetch(pageParam).then((response) => {
-          if (response.ok) return response.json();
-          else
-            throw new Error(
-              `Error while fetching collections from ${pageParam}`
-            );
-        });
-      } else {
-        return null;
-      }
-    },
-    initialPageParam: collectionsLink?.href,
-    getNextPageParam: (lastPage: StacCollections | null) =>
-      lastPage?.links?.find((link) => link.rel == "next")?.href,
-    enabled: !!collectionsLink,
-  });
-  useEffect(() => {
-    setCollections(
-      collectionsResult.data?.pages.flatMap((page) => page?.collections || [])
-    );
-    if (collectionsResult.data?.pages.at(0)?.numberMatched)
-      setNumberOfCollections(collectionsResult.data?.pages[0]?.numberMatched);
-  }, [collectionsResult.data, setCollections]);
-  useEffect(() => {
-    if (
-      fetchAllCollections &&
-      !collectionsResult.isFetching &&
-      collectionsResult.hasNextPage
-    )
-      collectionsResult.fetchNextPage();
-  }, [fetchAllCollections, collectionsResult]);
-  useEffect(() => {
-    setFetchAllCollections(false);
-    setNumberOfCollections(undefined);
-  }, [value]);
 
-  // Handled by the value
-  if (properties?.description) delete properties["description"];
+  const collectionsResult = useStacCollections(collectionsLink?.href);
+
   const thumbnailAsset = useMemo(() => {
     return (
       assets &&
@@ -200,6 +125,28 @@ export function Value({
         ))
     );
   }, [assets]);
+
+  useEffect(() => {
+    setCollections(
+      collectionsResult.data?.pages.flatMap((page) => page?.collections || [])
+    );
+    if (collectionsResult.data?.pages.at(0)?.numberMatched)
+      setNumberOfCollections(collectionsResult.data?.pages[0]?.numberMatched);
+  }, [collectionsResult.data, setCollections]);
+
+  useEffect(() => {
+    if (
+      fetchAllCollections &&
+      !collectionsResult.isFetching &&
+      collectionsResult.hasNextPage
+    )
+      collectionsResult.fetchNextPage();
+  }, [fetchAllCollections, collectionsResult]);
+
+  useEffect(() => {
+    setFetchAllCollections(false);
+    setNumberOfCollections(undefined);
+  }, [value]);
 
   useEffect(() => {
     setItems(undefined);
@@ -220,6 +167,7 @@ export function Value({
         <Image
           src={thumbnailAsset.href}
           onError={() => setThumbnailError(true)}
+          maxH={"200"}
         />
       )}
 

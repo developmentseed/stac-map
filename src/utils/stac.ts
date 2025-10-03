@@ -1,7 +1,7 @@
 import type { UseFileUploadReturn } from "@chakra-ui/react";
-import type { StacCollection, StacItem } from "stac-ts";
+import type { StacCollection, StacItem, StacLink } from "stac-ts";
 import type { BBox2D } from "../types/map";
-import type { DatetimeBounds, StacValue } from "../types/stac";
+import type { DatetimeBounds, StacAssets, StacValue } from "../types/stac";
 
 export async function getStacJsonValue(
   href: string,
@@ -203,4 +203,50 @@ export function isItemInDatetimeBounds(item: StacItem, bounds: DatetimeBounds) {
     (datetimes.end && datetimes.end < bounds.start) ||
     (datetimes.start && datetimes.start > bounds.end)
   );
+}
+
+export function deconstructStac(value: StacValue) {
+  if (value.type === "Feature") {
+    return {
+      links: value.links,
+      assets: value.assets as StacAssets | undefined,
+      properties: value.properties,
+    };
+  } else {
+    const { links, assets, ...properties } = value;
+    return {
+      links: links || [],
+      assets: assets as StacAssets | undefined,
+      properties,
+    };
+  }
+}
+
+export function getImportantLinks(links: StacLink[]) {
+  let rootLink: StacLink | undefined = undefined;
+  let collectionsLink: StacLink | undefined = undefined;
+  let nextLink: StacLink | undefined = undefined;
+  let prevLink: StacLink | undefined = undefined;
+  const filteredLinks = [];
+  if (links) {
+    for (const link of links) {
+      switch (link.rel) {
+        case "root":
+          rootLink = link;
+          break;
+        case "data":
+          collectionsLink = link;
+          break;
+        case "next":
+          nextLink = link;
+          break;
+        case "previous":
+          prevLink = link;
+          break;
+      }
+      // We already show children and items in their own pane
+      if (link.rel !== "child" && link.rel !== "item") filteredLinks.push(link);
+    }
+  }
+  return { rootLink, collectionsLink, nextLink, prevLink, filteredLinks };
 }
