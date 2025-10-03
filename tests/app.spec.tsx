@@ -36,6 +36,13 @@ describe("app", () => {
       .toBeVisible();
   });
 
+  test("has an upload button", async () => {
+    const app = renderApp();
+    await expect
+      .element(app.getByRole("button", { name: "upload" }))
+      .toBeVisible();
+  });
+
   test("has a color mode button", async () => {
     const app = renderApp();
     await expect

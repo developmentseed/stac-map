@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
+import { LuUpload } from "react-icons/lu";
 import {
   Box,
   Button,
+  FileUpload,
   GridItem,
   HStack,
+  IconButton,
   Input,
   SimpleGrid,
   type UseFileUploadReturn,
@@ -104,7 +107,15 @@ export default function Overlay({
               Examples
             </Button>
           </Examples>
-          <ColorModeButton />
+          <FileUpload.RootProvider value={fileUpload} flex={"0"}>
+            <FileUpload.HiddenInput />
+            <FileUpload.Trigger asChild>
+              <IconButton variant={"surface"} aria-label="upload">
+                <LuUpload />
+              </IconButton>
+            </FileUpload.Trigger>
+          </FileUpload.RootProvider>
+          <ColorModeButton variant={"surface"} />
         </HStack>
       </GridItem>
     </SimpleGrid>
@@ -133,7 +144,7 @@ function HrefInput({
         e.preventDefault();
         setHref(value);
       }}
-      w={"full"}
+      flex="1"
     >
       <Input
         bg={"bg.muted/90"}
