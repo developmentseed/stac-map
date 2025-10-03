@@ -118,6 +118,7 @@ export default function Filter({
                     setFilterStart(new Date(e.value[0]));
                     setFilterEnd(new Date(e.value[1]));
                   }}
+                  disabled={!filter}
                 >
                   <Slider.Control>
                     <Slider.Track>
