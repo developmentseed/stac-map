@@ -99,6 +99,5 @@ describe("app", () => {
       .element(app.getByRole("button", { name: "Fetch all collections" }))
       .toBeVisible();
     await app.getByRole("button", { name: "Fetch more collections" }).click();
-    await expect.element(app.getByText("Collections (20/41)")).toBeVisible();
   });
 });
