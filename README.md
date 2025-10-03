@@ -50,6 +50,7 @@ yarn test
 
 ## Contributing
 
+We have some [architecture documentation](./docs/architecture.md) to help you get the lay of the land.
 We use Github [Pull Requests](https://github.com/developmentseed/stac-map/pulls) to propose changes, and [Issues](https://github.com/developmentseed/stac-map/issues) to report bugs and request features.
 
 We use [semantic-release](https://github.com/semantic-release/semantic-release?tab=readme-ov-file) to create [releases](https://github.com/developmentseed/stac-map/releases).
