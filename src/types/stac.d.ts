@@ -20,6 +20,7 @@ export type StacValue =
 export interface StacCollections {
   collections: StacCollection[];
   links?: StacLink[];
+  numberMatched?: number;
 }
 
 export interface NaturalLanguageCollectionSearchResult {

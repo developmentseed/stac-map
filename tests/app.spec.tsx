@@ -88,4 +88,17 @@ describe("app", () => {
       .element(app.getByRole("button", { name: "stac-geoparquet" }))
       .toBeVisible();
   });
+
+  test("paginates collections", async () => {
+    window.history.pushState({}, "", "?href=https://stac.eoapi.dev");
+    const app = renderApp();
+    await expect
+      .element(app.getByRole("button", { name: "Fetch more collections" }))
+      .toBeVisible();
+    await expect
+      .element(app.getByRole("button", { name: "Fetch all collections" }))
+      .toBeVisible();
+    await app.getByRole("button", { name: "Fetch more collections" }).click();
+    await expect.element(app.getByText("Collections (20/41)")).toBeVisible();
+  });
 });

@@ -9,19 +9,27 @@ import {
   LuFolderSearch,
   LuLink,
   LuList,
+  LuPause,
+  LuPlay,
   LuSearch,
+  LuStepForward,
 } from "react-icons/lu";
 import {
   Accordion,
   Alert,
   Box,
+  Button,
+  ButtonGroup,
+  Card,
+  Heading,
   HStack,
   Icon,
   SkeletonText,
+  Stack,
   type UseFileUploadReturn,
 } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
-import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import type { StacCatalog, StacCollection, StacItem, StacLink } from "stac-ts";
 import Assets from "./assets";
 import Catalogs from "./catalogs";
 import CollectionSearch from "./collection-search";
@@ -37,6 +45,7 @@ import type { BBox2D } from "../types/map";
 import type {
   DatetimeBounds,
   StacAssets,
+  StacCollections,
   StacSearch,
   StacValue,
 } from "../types/stac";
@@ -46,6 +55,7 @@ export default function Panel({
   value,
   error,
   catalogs,
+  setCollections,
   collections,
   filteredCollections,
   items,
@@ -62,6 +72,7 @@ export default function Panel({
   value: StacValue | undefined;
   error: Error | undefined;
   catalogs: StacCatalog[] | undefined;
+  setCollections: (collections: StacCollection[] | undefined) => void;
   collections: StacCollection[] | undefined;
   filteredCollections: StacCollection[] | undefined;
   items: StacItem[] | undefined;
@@ -76,15 +87,8 @@ export default function Panel({
   setDatetimeBounds: (bounds: DatetimeBounds | undefined) => void;
 }) {
   const [search, setSearch] = useState<StacSearch>();
-  const rootHref = value?.links?.find((link) => link.rel === "root")?.href;
-  const rootData = useQuery<StacValue>({
-    queryKey: ["stac-value", rootHref],
-    enabled: !!rootHref,
-    queryFn: () => fetchStac(rootHref),
-  });
-  const searchLinks = rootData.data?.links?.filter(
-    (link) => link.rel === "search"
-  );
+  const [numberOfCollections, setNumberOfCollections] = useState<number>();
+  const [fetchAllCollections, setFetchAllCollections] = useState(false);
   const { links, assets, properties } = useMemo(() => {
     if (value) {
       if (value.type === "Feature") {
@@ -101,21 +105,95 @@ export default function Panel({
       return { links: undefined, assets: undefined, properties: undefined };
     }
   }, [value]);
+  const { rootLink, collectionsLink, nextLink, prevLink, filteredLinks } =
+    useMemo(() => {
+      let rootLink: StacLink | undefined = undefined;
+      let collectionsLink: StacLink | undefined = undefined;
+      let nextLink: StacLink | undefined = undefined;
+      let prevLink: StacLink | undefined = undefined;
+      const filteredLinks = [];
+      if (links) {
+        for (const link of links) {
+          switch (link.rel) {
+            case "root":
+              rootLink = link;
+              break;
+            case "data":
+              collectionsLink = link;
+              break;
+            case "next":
+              nextLink = link;
+              break;
+            case "previous":
+              prevLink = link;
+              break;
+          }
+          // We already show children and items in their own pane
+          if (link.rel !== "child" && link.rel !== "item")
+            filteredLinks.push(link);
+        }
+      }
+      return { rootLink, collectionsLink, nextLink, prevLink, filteredLinks };
+    }, [links]);
+  const rootData = useQuery<StacValue | undefined>({
+    queryKey: ["stac-value", rootLink?.href],
+    enabled: !!rootLink,
+    queryFn: () => rootLink && fetchStac(rootLink.href),
+  });
+  const searchLinks = useMemo(() => {
+    return rootData.data?.links?.filter((link) => link.rel === "search");
+  }, [rootData.data]);
+  const collectionsResult = useInfiniteQuery({
+    queryKey: ["stac-collections", collectionsLink?.href],
+    queryFn: async ({ pageParam }) => {
+      if (pageParam) {
+        return await fetch(pageParam).then((response) => {
+          if (response.ok) return response.json();
+          else
+            throw new Error(
+              `Error while fetching collections from ${pageParam}`
+            );
+        });
+      } else {
+        return null;
+      }
+    },
+    initialPageParam: collectionsLink?.href,
+    getNextPageParam: (lastPage: StacCollections | null) =>
+      lastPage?.links?.find((link) => link.rel == "next")?.href,
+    enabled: !!collectionsLink,
+  });
+  useEffect(() => {
+    setCollections(
+      collectionsResult.data?.pages.flatMap((page) => page?.collections || [])
+    );
+    if (collectionsResult.data?.pages.at(0)?.numberMatched)
+      setNumberOfCollections(collectionsResult.data?.pages[0]?.numberMatched);
+  }, [collectionsResult.data, setCollections]);
+  useEffect(() => {
+    if (
+      fetchAllCollections &&
+      !collectionsResult.isFetching &&
+      collectionsResult.hasNextPage
+    )
+      collectionsResult.fetchNextPage();
+  }, [fetchAllCollections, collectionsResult]);
+  useEffect(() => {
+    setFetchAllCollections(false);
+    setNumberOfCollections(undefined);
+  }, [value]);
 
   // Handled by the value
   if (properties?.description) delete properties["description"];
-  const thumbnailAsset =
-    assets &&
-    ((Object.keys(assets).includes("thumbnail") && assets["thumbnail"]) ||
-      Object.values(assets).find((asset) =>
-        asset.roles?.includes("thumbnail")
-      ));
-  const nextLink = links?.find((link) => link.rel === "next");
-  const prevLink = links?.find((link) => link.rel === "previous");
-  // We already provide linked children and items in their own pane.
-  const filteredLinks = links?.filter(
-    (link) => link.rel !== "child" && link.rel !== "item"
-  );
+  const thumbnailAsset = useMemo(() => {
+    return (
+      assets &&
+      ((Object.keys(assets).includes("thumbnail") && assets["thumbnail"]) ||
+        Object.values(assets).find((asset) =>
+          asset.roles?.includes("thumbnail")
+        ))
+    );
+  }, [assets]);
 
   useEffect(() => {
     setItems(undefined);
@@ -123,28 +201,69 @@ export default function Panel({
 
   return (
     <Box p={4} overflow={"scroll"} maxH={"80dvh"}>
-      {(href && value && (
-        <Value
-          value={value}
-          thumbnailAsset={thumbnailAsset}
-          href={href}
-          setHref={setHref}
-          nextLink={nextLink}
-          prevLink={prevLink}
-        />
-      )) ||
-        (error && (
-          <Alert.Root status={"error"}>
-            <Alert.Indicator />
-            <Alert.Content>
-              <Alert.Title>Error while fetching STAC value</Alert.Title>
-              <Alert.Description>{error.toString()}</Alert.Description>
-            </Alert.Content>
-          </Alert.Root>
+      <Stack gap={4}>
+        {(href && value && (
+          <Value
+            value={value}
+            thumbnailAsset={thumbnailAsset}
+            href={href}
+            setHref={setHref}
+            nextLink={nextLink}
+            prevLink={prevLink}
+          />
         )) ||
-        (href && <SkeletonText />) || (
-          <Introduction setHref={setHref} fileUpload={fileUpload} />
+          (error && (
+            <Alert.Root status={"error"}>
+              <Alert.Indicator />
+              <Alert.Content>
+                <Alert.Title>Error while fetching STAC value</Alert.Title>
+                <Alert.Description>{error.toString()}</Alert.Description>
+              </Alert.Content>
+            </Alert.Root>
+          )) ||
+          (href && <SkeletonText />) || (
+            <Introduction setHref={setHref} fileUpload={fileUpload} />
+          )}
+
+        {collectionsResult.hasNextPage && (
+          <Card.Root size={"sm"} variant={"outline"}>
+            <Card.Header>
+              <Heading size={"sm"}>Collection pagination</Heading>
+            </Card.Header>
+            <Card.Body>
+              <ButtonGroup size={"xs"} variant={"surface"}>
+                <Button
+                  disabled={fetchAllCollections || collectionsResult.isFetching}
+                  onClick={() => {
+                    if (
+                      !collectionsResult.isFetching &&
+                      collectionsResult.hasNextPage
+                    )
+                      collectionsResult.fetchNextPage();
+                  }}
+                >
+                  Fetch more collections <LuStepForward />
+                </Button>
+                <Button
+                  onClick={() =>
+                    setFetchAllCollections((previous) => !previous)
+                  }
+                >
+                  {(fetchAllCollections && (
+                    <>
+                      Pause fetching collections <LuPause />
+                    </>
+                  )) || (
+                    <>
+                      Fetch all collections <LuPlay />
+                    </>
+                  )}
+                </Button>
+              </ButtonGroup>
+            </Card.Body>
+          </Card.Root>
         )}
+      </Stack>
 
       {value && (
         <Accordion.Root multiple size={"sm"} variant={"enclosed"} mt={4}>
@@ -164,7 +283,7 @@ export default function Panel({
                 <>
                   Collections{" "}
                   {(filteredCollections &&
-                    `(${filteredCollections?.length}/${collections.length})`) ||
+                    `(${filteredCollections?.length}/${numberOfCollections || collections.length})`) ||
                     `(${collections.length})`}
                 </>
               }

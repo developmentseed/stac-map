@@ -26,6 +26,7 @@ export default function Overlay({
   value,
   error,
   catalogs,
+  setCollections,
   collections,
   filteredCollections,
   filter,
@@ -43,6 +44,7 @@ export default function Overlay({
   error: Error | undefined;
   value: StacValue | undefined;
   catalogs: StacCatalog[] | undefined;
+  setCollections: (collections: StacCollection[] | undefined) => void;
   collections: StacCollection[] | undefined;
   filteredCollections: StacCollection[] | undefined;
   fileUpload: UseFileUploadReturn;
@@ -86,6 +88,7 @@ export default function Overlay({
             value={picked || value}
             error={error}
             catalogs={catalogs}
+            setCollections={setCollections}
             collections={collections}
             filteredCollections={filteredCollections}
             fileUpload={fileUpload}

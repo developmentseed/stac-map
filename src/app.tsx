@@ -4,6 +4,7 @@ import type { StacCollection, StacItem } from "stac-ts";
 import Map from "./components/map";
 import Overlay from "./components/overlay";
 import { Toaster } from "./components/ui/toaster";
+import useStacChildren from "./hooks/stac-children";
 import useStacValue from "./hooks/stac-value";
 import type { BBox2D, Color } from "./types/map";
 import type { DatetimeBounds, StacValue } from "./types/stac";
@@ -17,6 +18,7 @@ export default function App() {
   // State
   const [href, setHref] = useState<string | undefined>(getInitialHref());
   const fileUpload = useFileUpload({ maxFiles: 1 });
+  const [userCollections, setCollections] = useState<StacCollection[]>();
   const [userItems, setItems] = useState<StacItem[]>();
   const [picked, setPicked] = useState<StacValue>();
   const [bbox, setBbox] = useState<BBox2D>();
@@ -28,8 +30,6 @@ export default function App() {
   const {
     value,
     error,
-    collections,
-    catalogs,
     items: linkedItems,
     table,
     stacGeoparquetItem,
@@ -39,6 +39,12 @@ export default function App() {
     datetimeBounds: filter ? datetimeBounds : undefined,
     stacGeoparquetItemId,
   });
+  const collectionsLink = value?.links?.find((link) => link.rel === "data");
+  const { catalogs, collections: linkedCollections } = useStacChildren({
+    value,
+    enabled: !!value && !collectionsLink,
+  });
+  const collections = collectionsLink ? userCollections : linkedCollections;
   const items = userItems || linkedItems;
   const filteredCollections = useMemo(() => {
     if (filter && collections) {
@@ -161,6 +167,7 @@ export default function App() {
           value={value}
           error={error}
           catalogs={catalogs}
+          setCollections={setCollections}
           collections={collections}
           filteredCollections={filteredCollections}
           filter={filter}
