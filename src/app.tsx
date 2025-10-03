@@ -36,7 +36,7 @@ export default function App() {
   } = useStacValue({
     href,
     fileUpload,
-    datetimeBounds,
+    datetimeBounds: filter ? datetimeBounds : undefined,
     stacGeoparquetItemId,
   });
   const items = userItems || linkedItems;
