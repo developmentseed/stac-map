@@ -1,6 +1,7 @@
 import type { UseFileUploadReturn } from "@chakra-ui/react";
-import type { StacItem } from "stac-ts";
-import type { StacValue } from "../types/stac";
+import type { StacCollection, StacItem } from "stac-ts";
+import type { BBox2D } from "../types/map";
+import type { DatetimeBounds, StacValue } from "../types/stac";
 
 export async function getStacJsonValue(
   href: string,
@@ -132,4 +133,74 @@ export function getItemDatetimes(item: StacItem) {
       ? new Date(item.properties.datetime)
       : null;
   return { start, end };
+}
+
+export function isCollectionInBbox(collection: StacCollection, bbox: BBox2D) {
+  if (bbox[2] - bbox[0] >= 360) {
+    // A global bbox always contains every collection
+    return true;
+  }
+  const collectionBbox = collection?.extent?.spatial?.bbox?.[0];
+  if (collectionBbox) {
+    return (
+      !(
+        collectionBbox[0] < bbox[0] &&
+        collectionBbox[1] < bbox[1] &&
+        collectionBbox[2] > bbox[2] &&
+        collectionBbox[3] > bbox[3]
+      ) &&
+      !(
+        collectionBbox[0] > bbox[2] ||
+        collectionBbox[1] > bbox[3] ||
+        collectionBbox[2] < bbox[0] ||
+        collectionBbox[3] < bbox[1]
+      )
+    );
+  } else {
+    return false;
+  }
+}
+
+export function isCollectionInDatetimeBounds(
+  collection: StacCollection,
+  bounds: DatetimeBounds
+) {
+  const interval = collection.extent.temporal.interval[0];
+  const start = interval[0] ? new Date(interval[0]) : null;
+  const end = interval[1] ? new Date(interval[1]) : null;
+  return !((end && end < bounds.start) || (start && start > bounds.end));
+}
+
+export function isItemInBbox(item: StacItem, bbox: BBox2D) {
+  if (bbox[2] - bbox[0] >= 360) {
+    // A global bbox always contains every item
+    return true;
+  }
+  const itemBbox = item.bbox;
+  if (itemBbox) {
+    return (
+      !(
+        itemBbox[0] < bbox[0] &&
+        itemBbox[1] < bbox[1] &&
+        itemBbox[2] > bbox[2] &&
+        itemBbox[3] > bbox[3]
+      ) &&
+      !(
+        itemBbox[0] > bbox[2] ||
+        itemBbox[1] > bbox[3] ||
+        itemBbox[2] < bbox[0] ||
+        itemBbox[3] < bbox[1]
+      )
+    );
+  } else {
+    return false;
+  }
+}
+
+export function isItemInDatetimeBounds(item: StacItem, bounds: DatetimeBounds) {
+  const datetimes = getItemDatetimes(item);
+  return !(
+    (datetimes.end && datetimes.end < bounds.start) ||
+    (datetimes.start && datetimes.start > bounds.end)
+  );
 }
