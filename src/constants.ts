@@ -16,6 +16,11 @@ export const EXAMPLES = [
     href: "https://openveda.cloud/api/stac",
   },
   {
+    title: "STAC Collection Discovery (experimental)",
+    badge: "API",
+    href: "https://discover-api.dit.maap-project.org/",
+  },
+  {
     title: "Maxar Open Data",
     badge: "static",
     href: "https://maxar-opendata.s3.dualstack.us-west-2.amazonaws.com/events/catalog.json",
