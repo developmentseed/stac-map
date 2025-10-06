@@ -118,17 +118,7 @@ export default function App() {
     setPicked(undefined);
     setItems(undefined);
     setDatetimeBounds(undefined);
-
-    let cogTileHref = undefined;
-    if (value && value.assets) {
-      for (const asset of Object.values(value.assets)) {
-        if (isCog(asset) && isVisual(asset)) {
-          cogTileHref = asset.href as string;
-          break;
-        }
-      }
-    }
-    setCogTileHref(cogTileHref);
+    setCogTileHref(value && getCogTileHref(value));
 
     if (value && (value.title || value.id)) {
       document.title = "stac-map | " + (value.title || value.id);
@@ -136,6 +126,10 @@ export default function App() {
       document.title = "stac-map";
     }
   }, [value]);
+
+  useEffect(() => {
+    setCogTileHref(picked && getCogTileHref(picked));
+  }, [picked]);
 
   useEffect(() => {
     setPicked(stacGeoparquetItem);
@@ -216,4 +210,17 @@ function getInitialHref() {
     return undefined;
   }
   return href;
+}
+
+function getCogTileHref(value: StacValue) {
+  let cogTileHref = undefined;
+  if (value.assets) {
+    for (const asset of Object.values(value.assets)) {
+      if (isCog(asset) && isVisual(asset)) {
+        cogTileHref = asset.href as string;
+        break;
+      }
+    }
+  }
+  return cogTileHref;
 }
