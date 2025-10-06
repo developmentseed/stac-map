@@ -126,7 +126,7 @@ export default function Map({
       getLineColor: collections ? inverseLineColor : lineColor,
       getLineWidth: 2,
       lineWidthUnits: "pixels",
-      pickable: value?.type !== "Collection",
+      pickable: value?.type !== "Collection" && value?.type !== "Feature",
       onClick: (info) => {
         setPicked(info.object);
       },
