@@ -1,5 +1,5 @@
 import type { UseFileUploadReturn } from "@chakra-ui/react";
-import type { StacCollection, StacItem, StacLink } from "stac-ts";
+import type { StacAsset, StacCollection, StacItem, StacLink } from "stac-ts";
 import type { BBox2D } from "../types/map";
 import type { DatetimeBounds, StacAssets, StacValue } from "../types/stac";
 
@@ -249,4 +249,21 @@ export function getImportantLinks(links: StacLink[]) {
     }
   }
   return { rootLink, collectionsLink, nextLink, prevLink, filteredLinks };
+}
+
+export function isCog(asset: StacAsset) {
+  return (
+    asset.type === "image/tiff; application=geotiff; profile=cloud-optimized"
+  );
+}
+
+export function isVisual(asset: StacAsset) {
+  if (asset.roles) {
+    for (const role of asset.roles) {
+      if (role === "visual" || role === "thumbnail") {
+        return true;
+      }
+    }
+  }
+  return false;
 }

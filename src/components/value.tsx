@@ -62,6 +62,8 @@ export interface SharedValueProps {
   bbox: BBox2D | undefined;
   setItems: (items: StacItem[] | undefined) => void;
   setDatetimeBounds: (bounds: DatetimeBounds | undefined) => void;
+  cogTileHref: string | undefined;
+  setCogTileHref: (href: string | undefined) => void;
 }
 
 interface ValueProps extends SharedValueProps {
@@ -84,6 +86,8 @@ export function Value({
   setFilter,
   bbox,
   setDatetimeBounds,
+  cogTileHref,
+  setCogTileHref,
 }: ValueProps) {
   const [search, setSearch] = useState<StacSearch>();
   const [numberOfCollections, setNumberOfCollections] = useState<number>();
@@ -369,7 +373,11 @@ export function Value({
             AccordionIcon={LuFiles}
             accordionValue="assets"
           >
-            <Assets assets={assets} />
+            <Assets
+              assets={assets}
+              cogTileHref={cogTileHref}
+              setCogTileHref={setCogTileHref}
+            />
           </Section>
         )}
 

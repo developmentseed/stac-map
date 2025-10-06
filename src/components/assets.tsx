@@ -1,26 +1,41 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LuDownload } from "react-icons/lu";
 import {
   Button,
   ButtonGroup,
   Card,
+  Checkbox,
   Collapsible,
   DataList,
   HStack,
   Image,
+  Span,
 } from "@chakra-ui/react";
 import type { StacAsset } from "stac-ts";
 import Properties from "./properties";
 import type { StacAssets } from "../types/stac";
+import { isCog, isVisual } from "../utils/stac";
 
-export default function Assets({ assets }: { assets: StacAssets }) {
+export default function Assets({
+  assets,
+  cogTileHref,
+  setCogTileHref,
+}: {
+  assets: StacAssets;
+  cogTileHref: string | undefined;
+  setCogTileHref: (href: string | undefined) => void;
+}) {
   return (
     <DataList.Root>
       {Object.keys(assets).map((key) => (
         <DataList.Item key={"asset-" + key}>
           <DataList.ItemLabel>{key}</DataList.ItemLabel>
           <DataList.ItemValue>
-            <Asset asset={assets[key]} />
+            <Asset
+              asset={assets[key]}
+              cogTileHref={cogTileHref}
+              setCogTileHref={setCogTileHref}
+            />
           </DataList.ItemValue>
         </DataList.Item>
       ))}
@@ -28,10 +43,23 @@ export default function Assets({ assets }: { assets: StacAssets }) {
   );
 }
 
-function Asset({ asset }: { asset: StacAsset }) {
+function Asset({
+  asset,
+  cogTileHref,
+  setCogTileHref,
+}: {
+  asset: StacAsset;
+  cogTileHref: string | undefined;
+  setCogTileHref: (href: string | undefined) => void;
+}) {
   const [imageError, setImageError] = useState(false);
+  const [checked, setChecked] = useState(false);
   // eslint-disable-next-line
   const { href, roles, type, title, ...properties } = asset;
+
+  useEffect(() => {
+    setChecked(cogTileHref === asset.href);
+  }, [cogTileHref, asset.href]);
 
   return (
     <Card.Root size={"sm"} w="full">
@@ -64,7 +92,24 @@ function Asset({ asset }: { asset: StacAsset }) {
             </Collapsible.Content>
           </Collapsible.Root>
         )}
-        <HStack justify={"right"}>
+        <HStack>
+          {isCog(asset) && isVisual(asset) && (
+            <Checkbox.Root
+              checked={checked}
+              onCheckedChange={(e) => {
+                setChecked(!!e.checked);
+                if (e.checked) setCogTileHref(asset.href);
+                else setCogTileHref(undefined);
+              }}
+            >
+              <Checkbox.HiddenInput />
+              <Checkbox.Control />
+              <Checkbox.Label>Visualize</Checkbox.Label>
+            </Checkbox.Root>
+          )}
+
+          <Span flex={"1"} />
+
           <ButtonGroup size="sm" variant="outline">
             <Button asChild>
               <a href={asset.href} target="_blank">

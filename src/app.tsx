@@ -9,10 +9,12 @@ import useStacValue from "./hooks/stac-value";
 import type { BBox2D, Color } from "./types/map";
 import type { DatetimeBounds, StacValue } from "./types/stac";
 import {
+  isCog,
   isCollectionInBbox,
   isCollectionInDatetimeBounds,
   isItemInBbox,
   isItemInDatetimeBounds,
+  isVisual,
 } from "./utils/stac";
 
 // TODO make this configurable by the user.
@@ -30,6 +32,7 @@ export default function App() {
   const [datetimeBounds, setDatetimeBounds] = useState<DatetimeBounds>();
   const [filter, setFilter] = useState(true);
   const [stacGeoparquetItemId, setStacGeoparquetItemId] = useState<string>();
+  const [cogTileHref, setCogTileHref] = useState<string>();
 
   // Derived state
   const {
@@ -116,6 +119,17 @@ export default function App() {
     setItems(undefined);
     setDatetimeBounds(undefined);
 
+    let cogTileHref = undefined;
+    if (value && value.assets) {
+      for (const asset of Object.values(value.assets)) {
+        if (isCog(asset) && isVisual(asset)) {
+          cogTileHref = asset.href as string;
+          break;
+        }
+      }
+    }
+    setCogTileHref(cogTileHref);
+
     if (value && (value.title || value.id)) {
       document.title = "stac-map | " + (value.title || value.id);
     } else {
@@ -151,6 +165,7 @@ export default function App() {
               picked={picked}
               setPicked={setPicked}
               setStacGeoparquetItemId={setStacGeoparquetItemId}
+              cogTileHref={cogTileHref}
             ></Map>
           </FileUpload.Dropzone>
         </FileUpload.RootProvider>
@@ -184,6 +199,8 @@ export default function App() {
           filteredItems={filteredItems}
           setItems={setItems}
           setDatetimeBounds={setDatetimeBounds}
+          cogTileHref={cogTileHref}
+          setCogTileHref={setCogTileHref}
         ></Overlay>
       </Container>
       <Toaster></Toaster>

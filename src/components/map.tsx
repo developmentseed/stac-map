@@ -5,7 +5,8 @@ import {
   useControl,
 } from "react-map-gl/maplibre";
 import { type DeckProps, Layer } from "@deck.gl/core";
-import { GeoJsonLayer } from "@deck.gl/layers";
+import { TileLayer } from "@deck.gl/geo-layers";
+import { BitmapLayer, GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { GeoArrowPolygonLayer } from "@geoarrow/deck.gl-layers";
 import bbox from "@turf/bbox";
@@ -31,6 +32,7 @@ export default function Map({
   setPicked,
   table,
   setStacGeoparquetItemId,
+  cogTileHref,
 }: {
   value: StacValue | undefined;
   collections: StacCollection[] | undefined;
@@ -44,6 +46,7 @@ export default function Map({
   setPicked: (picked: StacValue | undefined) => void;
   table: Table | undefined;
   setStacGeoparquetItemId: (id: string | undefined) => void;
+  cogTileHref: string | undefined;
 }) {
   const mapRef = useRef<MapRef>(null);
   const mapStyle = useColorModeValue(
@@ -87,7 +90,36 @@ export default function Map({
     fillColor[3],
   ];
 
-  const layers: Layer[] = [
+  let layers: Layer[] = [];
+
+  if (cogTileHref)
+    layers.push(
+      new TileLayer({
+        id: "cog-tiles",
+        extent: value && getBbox(value, collections),
+        maxRequests: 10,
+        data:
+          cogTileHref &&
+          `https://titiler.xyz/cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png?url=${cogTileHref}`,
+        renderSubLayers: (props) => {
+          const { boundingBox } = props.tile;
+
+          return new BitmapLayer(props, {
+            data: undefined,
+            image: props.data,
+            bounds: [
+              boundingBox[0][0],
+              boundingBox[0][1],
+              boundingBox[1][0],
+              boundingBox[1][1],
+            ],
+          });
+        },
+      })
+    );
+
+  layers = [
+    ...layers,
     new GeoJsonLayer({
       id: "picked",
       data: pickedGeoJson,
@@ -121,7 +153,7 @@ export default function Map({
     new GeoJsonLayer({
       id: "value",
       data: valueGeoJson,
-      filled: !items,
+      filled: !items && !cogTileHref,
       getFillColor: collections ? inverseFillColor : fillColor,
       getLineColor: collections ? inverseLineColor : lineColor,
       getLineWidth: 2,
