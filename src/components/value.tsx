@@ -25,10 +25,13 @@ import {
   Button,
   ButtonGroup,
   Card,
+  CloseButton,
+  Dialog,
   Heading,
   HStack,
   Icon,
   Image,
+  Portal,
   Span,
   Stack,
 } from "@chakra-ui/react";
@@ -176,9 +179,36 @@ export function Value({
       )}
 
       {!!value.description && (
-        <Prose>
-          <MarkdownHooks>{value.description as string}</MarkdownHooks>
-        </Prose>
+        <>
+          <Prose lineClamp={5}>
+            <MarkdownHooks>{value.description as string}</MarkdownHooks>
+          </Prose>
+
+          <Dialog.Root>
+            <Dialog.Trigger asChild>
+              <Button size={"sm"} variant={"outline"}>
+                View full description
+              </Button>
+            </Dialog.Trigger>
+            <Portal>
+              <Dialog.Backdrop />
+              <Dialog.Positioner>
+                <Dialog.Content>
+                  <Dialog.Body>
+                    <Prose>
+                      <MarkdownHooks>
+                        {value.description as string}
+                      </MarkdownHooks>
+                    </Prose>
+                  </Dialog.Body>
+                  <Dialog.CloseTrigger>
+                    <CloseButton size={"sm"} />
+                  </Dialog.CloseTrigger>
+                </Dialog.Content>
+              </Dialog.Positioner>
+            </Portal>
+          </Dialog.Root>
+        </>
       )}
 
       {selfHref && (
