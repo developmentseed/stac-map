@@ -15,8 +15,8 @@ import {
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import type { StacCollection } from "stac-ts";
-import { CollectionCard } from "./collections";
-import type { NaturalLanguageCollectionSearchResult } from "../types/stac";
+import type { NaturalLanguageCollectionSearchResult } from "../../types/stac";
+import CollectionCard from "../cards/collection";
 
 export default function CollectionSearch({
   collections,

@@ -10,10 +10,10 @@ import {
   Input,
   SimpleGrid,
 } from "@chakra-ui/react";
-import Breadcrumbs from "./breadcrumbs";
-import { Examples } from "./examples";
-import Panel, { type PanelProps } from "./panel";
-import { ColorModeButton } from "./ui/color-mode";
+import Breadcrumbs from "../components/breadcrumbs";
+import { Examples } from "../components/examples";
+import Panel, { type PanelProps } from "../components/panel";
+import { ColorModeButton } from "../components/ui/color-mode";
 import type { StacValue } from "../types/stac";
 
 export interface OverlayProps extends PanelProps {

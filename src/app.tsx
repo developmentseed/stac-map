@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Box, Container, FileUpload, useFileUpload } from "@chakra-ui/react";
 import type { StacCollection, StacItem } from "stac-ts";
-import Map from "./components/map";
-import Overlay from "./components/overlay";
 import { Toaster } from "./components/ui/toaster";
 import useStacChildren from "./hooks/stac-children";
 import useStacValue from "./hooks/stac-value";
+import Map from "./layers/map";
+import Overlay from "./layers/overlay";
 import type { BBox2D, Color } from "./types/map";
 import type { DatetimeBounds, StacValue } from "./types/stac";
 import {

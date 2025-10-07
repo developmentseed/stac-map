@@ -34,10 +34,10 @@ import type {
   TemporalExtent,
 } from "stac-ts";
 import * as stac_wasm from "stac-wasm";
-import { SpatialExtent } from "./extent";
-import useStacSearch from "../hooks/stac-search";
-import type { BBox2D } from "../types/map";
-import type { StacSearch } from "../types/stac";
+import useStacSearch from "../../hooks/stac-search";
+import type { BBox2D } from "../../types/map";
+import type { StacSearch } from "../../types/stac";
+import { SpatialExtent } from "../extent";
 
 export default function ItemSearch({
   search,

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Checkbox, DataList, Slider, Stack, Text } from "@chakra-ui/react";
 import type { StacCollection, StacItem } from "stac-ts";
-import { SpatialExtent } from "./extent";
-import type { BBox2D } from "../types/map";
-import type { DatetimeBounds, StacValue } from "../types/stac";
-import { getItemDatetimes } from "../utils/stac";
+import type { BBox2D } from "../../types/map";
+import type { DatetimeBounds, StacValue } from "../../types/stac";
+import { getItemDatetimes } from "../../utils/stac";
+import { SpatialExtent } from "../extent";
 
 export default function Filter({
   filter,

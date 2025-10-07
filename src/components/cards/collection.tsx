@@ -1,29 +1,9 @@
 import { MarkdownHooks } from "react-markdown";
 import { Card, Link, Stack, Text } from "@chakra-ui/react";
 import type { StacCollection } from "stac-ts";
-import { SpatialExtent, TemporalExtent } from "./extent";
+import { SpatialExtent, TemporalExtent } from "../extent";
 
-export default function Collections({
-  collections,
-  setHref,
-}: {
-  collections: StacCollection[];
-  setHref: (href: string | undefined) => void;
-}) {
-  return (
-    <Stack>
-      {collections.map((collection) => (
-        <CollectionCard
-          key={"collection-" + collection.id}
-          collection={collection}
-          setHref={setHref}
-        />
-      ))}
-    </Stack>
-  );
-}
-
-export function CollectionCard({
+export default function CollectionCard({
   collection,
   setHref,
   footer,

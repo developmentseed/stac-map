@@ -15,7 +15,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { Table } from "apache-arrow";
 import type { SpatialExtent, StacCollection, StacItem } from "stac-ts";
 import type { BBox, Feature, FeatureCollection } from "geojson";
-import { useColorModeValue } from "./ui/color-mode";
+import { useColorModeValue } from "../components/ui/color-mode";
 import type { BBox2D, Color } from "../types/map";
 import type { StacValue } from "../types/stac";
 

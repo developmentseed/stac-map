@@ -13,8 +13,8 @@ import {
 } from "@chakra-ui/react";
 import type { StacAsset } from "stac-ts";
 import Properties from "./properties";
-import type { StacAssets } from "../types/stac";
-import { isCog, isVisual } from "../utils/stac";
+import type { StacAssets } from "../../types/stac";
+import { isCog, isVisual } from "../../utils/stac";
 
 export default function Assets({
   assets,
