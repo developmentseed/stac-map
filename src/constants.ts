@@ -16,7 +16,7 @@ export const EXAMPLES = [
     href: "https://openveda.cloud/api/stac",
   },
   {
-    title: "STAC Collection Discovery (experimental)",
+    title: "STAC Collection Discovery",
     badge: "API",
     href: "https://discover-api.dit.maap-project.org/",
   },

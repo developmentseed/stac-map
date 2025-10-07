@@ -1,9 +1,13 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { StacCollections } from "../types/stac";
 
-export default function useStacCollections(href: string | undefined) {
+export default function useStacCollections(
+  href: string | undefined,
+  query?: string
+) {
+  const initialPageParam = query ? href + "?q=" + query : href;
   return useInfiniteQuery({
-    queryKey: ["stac-collections", href],
+    queryKey: ["stac-collections", href, query],
     queryFn: async ({ pageParam }) => {
       if (pageParam) {
         return await fetch(pageParam).then((response) => {
@@ -17,7 +21,7 @@ export default function useStacCollections(href: string | undefined) {
         return null;
       }
     },
-    initialPageParam: href,
+    initialPageParam,
     getNextPageParam: (lastPage: StacCollections | null) =>
       lastPage?.links?.find((link) => link.rel == "next")?.href,
     enabled: !!href,

@@ -1,6 +1,7 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import {
+  Alert,
   CloseButton,
   Combobox,
   createListCollection,
@@ -14,34 +15,44 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import type { StacCollection } from "stac-ts";
-import { CollectionCard } from "./collections";
+import type { StacCollection, StacLink } from "stac-ts";
+import Collections, { CollectionCard } from "./collections";
+import useStacCollections from "../hooks/stac-collections";
 import type { NaturalLanguageCollectionSearchResult } from "../types/stac";
+
+type CollectionSearchType = "Server" | "Client" | "Natural language";
 
 export default function CollectionSearch({
   collections,
   catalogHref,
   setHref,
+  collectionSearchLink,
 }: {
   collections: StacCollection[];
   catalogHref: string | undefined;
   setHref: (href: string | undefined) => void;
+  collectionSearchLink: StacLink | undefined;
 }) {
-  const [value, setValue] = useState<"Text" | "Natural language">("Text");
+  const [value, setValue] = useState<CollectionSearchType>(
+    collectionSearchLink ? "Server" : "Client"
+  );
   return (
     <Stack>
       <HStack justify={"space-between"}>
         <SegmentGroup.Root
           size={"xs"}
           value={value}
-          onValueChange={(e) =>
-            setValue(e.value as "Text" | "Natural language")
-          }
+          onValueChange={(e) => setValue(e.value as CollectionSearchType)}
         >
           <SegmentGroup.Indicator></SegmentGroup.Indicator>
           <SegmentGroup.Items
             items={[
-              { label: "Text", value: "Text" },
+              {
+                label: "Server",
+                value: "Server",
+                disabled: !collectionSearchLink,
+              },
+              { label: "Client", value: "Client" },
               {
                 label: "Natural language",
                 value: "Natural language",
@@ -51,7 +62,13 @@ export default function CollectionSearch({
           />
         </SegmentGroup.Root>
       </HStack>
-      {value === "Text" && (
+      {value === "Server" && collectionSearchLink && (
+        <ServerCollectionSearch
+          setHref={setHref}
+          link={collectionSearchLink}
+        ></ServerCollectionSearch>
+      )}
+      {value === "Client" && (
         <CollectionCombobox
           collections={collections}
           setHref={setHref}
@@ -66,6 +83,71 @@ export default function CollectionSearch({
       )}
     </Stack>
   );
+}
+
+function ServerCollectionSearch({
+  setHref,
+  link,
+}: {
+  setHref: (href: string | undefined) => void;
+  link: StacLink;
+}) {
+  const [value, setValue] = useState("");
+  const [query, setQuery] = useState<string>();
+  return (
+    <Stack>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          setQuery(value);
+        }}
+      >
+        <Input
+          placeholder="Free-text collection search..."
+          value={value}
+          onChange={(e) => setValue(e.currentTarget.value)}
+        />
+      </form>
+
+      {query && <QueryResults query={query} setHref={setHref} link={link} />}
+    </Stack>
+  );
+}
+
+function QueryResults({
+  query,
+  setHref,
+  link,
+}: {
+  query: string;
+  setHref: (href: string | undefined) => void;
+  link: StacLink;
+}) {
+  const result = useStacCollections(link.href, query);
+  const [collections, setCollections] = useState<StacCollection[]>();
+
+  useEffect(() => {
+    if (result.data)
+      setCollections(
+        result.data.pages.flatMap((page) => page?.collections || [])
+      );
+    else setCollections(undefined);
+  }, [result.data]);
+
+  if (result.error)
+    return (
+      <Alert.Root status={"error"}>
+        <Alert.Indicator />
+        <Alert.Content>
+          <Alert.Title>Collection search error</Alert.Title>
+          <Alert.Description>{result.error.toString()}</Alert.Description>
+        </Alert.Content>
+      </Alert.Root>
+    );
+  else if (collections)
+    return <Collections collections={collections} setHref={setHref} />;
+  else if (result.isFetching) return <SkeletonText />;
+  else return null;
 }
 
 function CollectionCombobox({

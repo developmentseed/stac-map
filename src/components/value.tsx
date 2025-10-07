@@ -133,6 +133,13 @@ export function Value({
     );
   }, [assets]);
 
+  // TODO check for other versions
+  let hasFreeTextCollectionSearch = false;
+  if (value.conformsTo && Array.isArray(value.conformsTo))
+    hasFreeTextCollectionSearch = value.conformsTo.includes(
+      "https://api.stacspec.org/v1.0.0-rc.1/collection-search#free-text"
+    );
+
   useEffect(() => {
     setCollections(
       collectionsResult.data?.pages.flatMap((page) => page?.collections || [])
@@ -339,6 +346,9 @@ export function Value({
               collections={collections}
               setHref={setHref}
               catalogHref={value?.type === "Catalog" ? href : undefined}
+              collectionSearchLink={
+                hasFreeTextCollectionSearch && collectionsLink
+              }
             />
           </Section>
         )}
