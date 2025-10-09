@@ -38,8 +38,26 @@ import useStacSearch from "../../hooks/stac-search";
 import type { BBox2D } from "../../types/map";
 import type { StacSearch } from "../../types/stac";
 import { SpatialExtent } from "../extent";
+import Section from "../section";
 
-export default function ItemSearch({
+interface ItemSearchProps {
+  search: StacSearch | undefined;
+  setSearch: (search: StacSearch | undefined) => void;
+  links: StacLink[];
+  bbox: BBox2D | undefined;
+  collection: StacCollection;
+  setItems: (items: StacItem[] | undefined) => void;
+}
+
+export default function ItemSearchSection({ ...props }: ItemSearchProps) {
+  return (
+    <Section title="Item search" TitleIcon={LuSearch} value="item-search">
+      <ItemSearch {...props} />
+    </Section>
+  );
+}
+
+function ItemSearch({
   search,
   setSearch,
   links,

@@ -1,5 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useState } from "react";
-import type { IconType } from "react-icons/lib";
+import { useEffect, useMemo, useState } from "react";
 import {
   LuArrowLeft,
   LuArrowRight,
@@ -7,16 +6,10 @@ import {
   LuFile,
   LuFileQuestion,
   LuFiles,
-  LuFilter,
-  LuFilterX,
   LuFolder,
   LuFolderPlus,
-  LuFolderSearch,
-  LuLink,
-  LuList,
   LuPause,
   LuPlay,
-  LuSearch,
   LuStepForward,
 } from "react-icons/lu";
 import { MarkdownHooks } from "react-markdown";
@@ -34,15 +27,15 @@ import {
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
-import Assets from "./sections/assets";
-import Catalogs from "./sections/catalogs";
-import CollectionSearch from "./sections/collection-search";
-import Collections from "./sections/collections";
-import Filter from "./sections/filter";
-import ItemSearch from "./sections/item-search";
-import Items from "./sections/items";
-import Links from "./sections/links";
-import Properties from "./sections/properties";
+import AssetsSection from "./sections/assets";
+import CatalogsSection from "./sections/catalogs";
+import CollectionSearchSection from "./sections/collection-search";
+import CollectionsSection from "./sections/collections";
+import FilterSection from "./sections/filter";
+import ItemSearchSection from "./sections/item-search";
+import ItemsSection from "./sections/items";
+import LinksSection from "./sections/links";
+import PropertiesSection from "./sections/properties";
 import { Prose } from "./ui/prose";
 import useStacCollections from "../hooks/stac-collections";
 import type { BBox2D } from "../types/map";
@@ -269,164 +262,75 @@ export function Value({
       )}
 
       <Accordion.Root multiple size={"sm"} variant={"enclosed"}>
-        {catalogs && (
-          <Section
-            title={`Catalogs (${catalogs.length})`}
-            AccordionIcon={LuFolder}
-            accordionValue="catalogs"
-          >
-            <Catalogs catalogs={catalogs} setHref={setHref} />
-          </Section>
+        {catalogs && catalogs.length > 0 && (
+          <CatalogsSection catalogs={catalogs} setHref={setHref} />
+        )}
+
+        {collections && collections.length && (
+          <CollectionsSection
+            collections={collections}
+            numberOfCollections={numberOfCollections}
+            filteredCollections={filteredCollections}
+            setHref={setHref}
+          />
         )}
 
         {collections && (
-          <Section
-            title={
-              <>
-                Collections{" "}
-                {(filteredCollections &&
-                  `(${filteredCollections?.length}/${numberOfCollections || collections.length})`) ||
-                  `(${collections.length})`}
-              </>
-            }
-            AccordionIcon={LuFolderPlus}
-            accordionValue="collections"
-          >
-            <Collections
-              collections={filteredCollections || collections}
-              setHref={setHref}
-            />
-          </Section>
-        )}
-
-        {collections && (
-          <Section
-            title="Collection search"
-            AccordionIcon={LuFolderSearch}
-            accordionValue="collection-search"
-          >
-            <CollectionSearch
-              collections={collections}
-              setHref={setHref}
-              catalogHref={value?.type === "Catalog" ? href : undefined}
-            />
-          </Section>
+          <CollectionSearchSection
+            collections={collections}
+            setHref={setHref}
+            catalogHref={value?.type === "Catalog" ? href : undefined}
+          />
         )}
 
         {value.type === "Collection" &&
           searchLinks &&
           searchLinks.length > 0 && (
-            <Section
-              title="Item search"
-              AccordionIcon={LuSearch}
-              accordionValue="item-search"
-            >
-              <ItemSearch
-                search={search}
-                setSearch={setSearch}
-                links={searchLinks}
-                bbox={bbox}
-                collection={value}
-                setItems={setItems}
-              />
-            </Section>
+            <ItemSearchSection
+              search={search}
+              setSearch={setSearch}
+              links={searchLinks}
+              bbox={bbox}
+              collection={value}
+              setItems={setItems}
+            />
           )}
 
         {(items || collections || value.type === "FeatureCollection") && (
-          <Section
-            title={"Filtering"}
-            AccordionIcon={filter ? LuFilter : LuFilterX}
-            accordionValue="filter"
-          >
-            <Filter
-              filter={filter}
-              setFilter={setFilter}
-              bbox={bbox}
-              setDatetimeBounds={setDatetimeBounds}
-              value={value}
-              items={items}
-              collections={collections}
-            />
-          </Section>
+          <FilterSection
+            filter={filter}
+            setFilter={setFilter}
+            bbox={bbox}
+            setDatetimeBounds={setDatetimeBounds}
+            value={value}
+            items={items}
+            collections={collections}
+          />
         )}
 
         {items && (
-          <Section
-            title={
-              <>
-                Items{" "}
-                {(filteredItems &&
-                  `(${filteredItems?.length}/${items.length})`) ||
-                  `(${items.length})`}
-              </>
-            }
-            AccordionIcon={LuFolderPlus}
-            accordionValue="collections"
-          >
-            <Items items={filteredItems || items} setHref={setHref} />
-          </Section>
+          <ItemsSection
+            items={items}
+            filteredItems={filteredItems}
+            setHref={setHref}
+          />
         )}
 
         {assets && (
-          <Section
-            title="Assets"
-            AccordionIcon={LuFiles}
-            accordionValue="assets"
-          >
-            <Assets
-              assets={assets}
-              cogTileHref={cogTileHref}
-              setCogTileHref={setCogTileHref}
-            />
-          </Section>
+          <AssetsSection
+            assets={assets}
+            cogTileHref={cogTileHref}
+            setCogTileHref={setCogTileHref}
+          />
         )}
 
         {filteredLinks && filteredLinks.length > 0 && (
-          <Section title="Links" AccordionIcon={LuLink} accordionValue="links">
-            <Links links={filteredLinks} setHref={setHref} />
-          </Section>
+          <LinksSection links={filteredLinks} setHref={setHref} />
         )}
 
-        {properties && (
-          <Section
-            title="Properties"
-            AccordionIcon={LuList}
-            accordionValue="properties"
-          >
-            <Properties properties={properties} />
-          </Section>
-        )}
+        {properties && <PropertiesSection properties={properties} />}
       </Accordion.Root>
     </Stack>
-  );
-}
-
-function Section({
-  title,
-  AccordionIcon,
-  accordionValue,
-  children,
-}: {
-  title: ReactNode;
-  AccordionIcon: IconType;
-  accordionValue: string;
-  children: ReactNode;
-}) {
-  return (
-    <Accordion.Item value={accordionValue}>
-      <Accordion.ItemTrigger>
-        <HStack flex={"1"}>
-          <Icon>
-            <AccordionIcon />
-          </Icon>{" "}
-          {title}
-        </HStack>
-        <Accordion.ItemIndicator />
-      </Accordion.ItemTrigger>
-      <Accordion.ItemContent>
-        <Accordion.ItemBody>{children}</Accordion.ItemBody>
-      </Accordion.ItemContent>
-    </Accordion.Item>
   );
 }
 

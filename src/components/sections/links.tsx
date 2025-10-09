@@ -1,6 +1,7 @@
-import { LuArrowUpToLine, LuExternalLink } from "react-icons/lu";
+import { LuArrowUpToLine, LuExternalLink, LuLink } from "react-icons/lu";
 import { ButtonGroup, IconButton, Link, List, Span } from "@chakra-ui/react";
 import type { StacLink } from "stac-ts";
+import Section from "../section";
 
 const SET_HREF_REL_TYPES = [
   "root",
@@ -12,13 +13,20 @@ const SET_HREF_REL_TYPES = [
   "items",
 ];
 
-export default function Links({
-  links,
-  setHref,
-}: {
+interface LinksProps {
   links: StacLink[];
   setHref: (href: string | undefined) => void;
-}) {
+}
+
+export default function LinksSection({ ...props }: LinksProps) {
+  return (
+    <Section title="links" TitleIcon={LuLink} value="links">
+      <Links {...props} />
+    </Section>
+  );
+}
+
+function Links({ links, setHref }: LinksProps) {
   return (
     <List.Root variant={"plain"} gap={2}>
       {links.map((link, i) => (

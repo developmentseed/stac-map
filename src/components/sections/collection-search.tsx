@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { LuSearch } from "react-icons/lu";
+import { LuFolderSearch, LuSearch } from "react-icons/lu";
 import {
   CloseButton,
   Combobox,
@@ -17,16 +17,33 @@ import { useQuery } from "@tanstack/react-query";
 import type { StacCollection } from "stac-ts";
 import type { NaturalLanguageCollectionSearchResult } from "../../types/stac";
 import CollectionCard from "../cards/collection";
+import Section from "../section";
 
-export default function CollectionSearch({
-  collections,
-  catalogHref,
-  setHref,
-}: {
+interface CollectionSearchProps {
   collections: StacCollection[];
   catalogHref: string | undefined;
   setHref: (href: string | undefined) => void;
-}) {
+}
+
+export default function CollectionSearchSection({
+  ...props
+}: CollectionSearchProps) {
+  return (
+    <Section
+      title="Collections search"
+      TitleIcon={LuFolderSearch}
+      value="collection-search"
+    >
+      <CollectionSearch {...props} />
+    </Section>
+  );
+}
+
+function CollectionSearch({
+  collections,
+  catalogHref,
+  setHref,
+}: CollectionSearchProps) {
   const [value, setValue] = useState<"Text" | "Natural language">("Text");
   return (
     <Stack>
