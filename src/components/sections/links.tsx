@@ -20,7 +20,7 @@ interface LinksProps {
 
 export default function LinksSection({ ...props }: LinksProps) {
   return (
-    <Section title="links" TitleIcon={LuLink} value="links">
+    <Section title="Links" TitleIcon={LuLink} value="links">
       <Links {...props} />
     </Section>
   );
