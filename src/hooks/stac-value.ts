@@ -33,6 +33,7 @@ export default function useStacValue({
       (async () => {
         const connection = await db.connect();
         await connection.query("LOAD spatial;");
+        await connection.query("LOAD icu;");
         try {
           new URL(href);
         } catch {
