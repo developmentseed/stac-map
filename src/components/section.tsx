@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { type IconType } from "react-icons/lib";
-import { Accordion, Alert, Button, HStack, Icon, Span } from "@chakra-ui/react";
+import { Accordion, Alert, HStack, Icon } from "@chakra-ui/react";
 
 export default function Section({
   title,
@@ -36,30 +36,13 @@ export default function Section({
   );
 }
 
-function FallbackComponent({
-  error,
-  resetErrorBoundary,
-}: {
-  error: Error;
-  resetErrorBoundary: () => void;
-}) {
+function FallbackComponent({ error }: { error: Error }) {
   return (
     <Alert.Root status={"error"}>
       <Alert.Indicator />
       <Alert.Content>
         <Alert.Title>An error occurred during rendering</Alert.Title>
-        <Alert.Description>
-          <HStack>
-            <Span>{error.message}</Span>
-            <Button
-              size={"sm"}
-              variant={"surface"}
-              onClick={resetErrorBoundary}
-            >
-              Reload section
-            </Button>
-          </HStack>
-        </Alert.Description>
+        <Alert.Description>{error.message}</Alert.Description>
       </Alert.Content>
     </Alert.Root>
   );
