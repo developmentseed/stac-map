@@ -43,7 +43,7 @@ export default function useStacValue({
         setConnection(connection);
       })();
     }
-  }, [db, href, fileUpload]);
+  }, [db, href]);
 
   const jsonResult = useQuery<StacValue | null>({
     queryKey: ["stac-value", href],
