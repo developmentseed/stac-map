@@ -43,8 +43,7 @@ export default function useStacValue({
         setConnection(connection);
       })();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [db, href]);
+  }, [db, href, fileUpload.acceptedFiles]);
 
   const jsonResult = useQuery<StacValue | null>({
     queryKey: ["stac-value", href],
