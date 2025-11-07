@@ -26,6 +26,11 @@ export const EXAMPLES = [
     href: "https://raw.githubusercontent.com/developmentseed/labs-375-stac-geoparquet-backend/refs/heads/main/data/naip.parquet",
   },
   {
+    title: "Kentucky Imagery & Elevation",
+    badge: "API",
+    href: "https://spved5ihrl.execute-api.us-west-2.amazonaws.com/",
+  },
+  {
     title: "Simple item",
     badge: "item",
     href: "https://raw.githubusercontent.com/radiantearth/stac-spec/refs/heads/master/examples/simple-item.json",
