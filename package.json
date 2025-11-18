@@ -55,7 +55,7 @@
     "react-dom": "^19.1.0",
     "react-error-boundary": "^6.0.0",
     "react-icons": "^5.5.0",
-    "react-map-gl": "^7.1.7",
+    "react-map-gl": "^8.1.0",
     "react-markdown": "^10.1.0",
     "stac-ts": "^1.0.4",
     "stac-wasm": "^0.0.3"
