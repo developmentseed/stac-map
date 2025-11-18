@@ -266,7 +266,9 @@ function valueToGeoJson(value: StacValue) {
 function getCollectionExtents(collection: StacCollection): SpatialExtent {
   const spatialExtent = collection.extent?.spatial;
   // check if bbox is a list of lists, otherwise its a single list of nums
-  return Array.isArray(spatialExtent?.bbox?.[0]) ? spatialExtent?.bbox[0] : ((spatialExtent?.bbox as unknown) as SpatialExtent);
+  return Array.isArray(spatialExtent?.bbox?.[0])
+    ? spatialExtent?.bbox[0]
+    : (spatialExtent?.bbox as unknown as SpatialExtent);
 }
 
 function getBbox(
