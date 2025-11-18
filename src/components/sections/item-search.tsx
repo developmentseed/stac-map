@@ -209,7 +209,9 @@ function Search({
   };
 
   const downloadStacGeoparquet = () => {
-    return new Blob(items ? [stac_wasm.stacJsonToParquet(items)] : []);
+    return new Blob(
+      items ? [stac_wasm.stacJsonToParquet(items) as BlobPart] : []
+    );
   };
 
   return (
