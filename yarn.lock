@@ -2608,7 +2608,16 @@
     "@types/babel__core" "^7.20.5"
     react-refresh "^0.17.0"
 
-"@vitest/browser@^4.0.10":
+"@vitest/browser-playwright@^4.0.10":
+  version "4.0.10"
+  resolved "https://registry.yarnpkg.com/@vitest/browser-playwright/-/browser-playwright-4.0.10.tgz#c40196145283ea08459cc3ad4bda64af8db618c7"
+  integrity sha512-pm7Hl7BNyluox+uGJPnT7vCRDSI+ibHcWQRtnCACAZWxD6/b2gN+8pO0qTDPHpxDSTPKDS5sT2dKTHLcr+lsng==
+  dependencies:
+    "@vitest/browser" "4.0.10"
+    "@vitest/mocker" "4.0.10"
+    tinyrainbow "^3.0.3"
+
+"@vitest/browser@4.0.10", "@vitest/browser@^4.0.10":
   version "4.0.10"
   resolved "https://registry.yarnpkg.com/@vitest/browser/-/browser-4.0.10.tgz#b910ae0ecc63bc6bb51185e5b90b22ec44c4ecb2"
   integrity sha512-irO+aGxYx/rAhjEBLsGPO4JQ8dA+A43enIST0j4xQ2kYHatHi9tUcxkRRGpClGuUVU42mi+iQsFFzd4xxpoV3g==
