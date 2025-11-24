@@ -32,7 +32,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@chakra-ui/react": "^3.21.0",
+    "@chakra-ui/react": "^3.30.0",
     "@deck.gl/core": "^9.1.8",
     "@deck.gl/geo-layers": "^9.1.12",
     "@deck.gl/layers": "^9.1.12",
