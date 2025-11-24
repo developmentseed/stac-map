@@ -7,8 +7,8 @@ import { EXAMPLES } from "../src/constants";
 
 const queryClient = new QueryClient();
 
-function renderApp() {
-  return render(
+async function renderApp() {
+  return await render(
     <Provider>
       <QueryClientProvider client={queryClient}>
         <App></App>
@@ -19,14 +19,14 @@ function renderApp() {
 
 describe("app", () => {
   test("has a map", async () => {
-    const app = renderApp();
+    const app = await renderApp();
     await expect
       .element(app.getByRole("region", { name: "Map" }))
       .toBeVisible();
   });
 
   test("has a input text box", async () => {
-    const app = renderApp();
+    const app = await renderApp();
     await expect
       .element(
         app.getByRole("textbox", {
@@ -37,14 +37,14 @@ describe("app", () => {
   });
 
   test("has an upload button", async () => {
-    const app = renderApp();
+    const app = await renderApp();
     await expect
       .element(app.getByRole("button", { name: "upload" }))
       .toBeVisible();
   });
 
   test("has a color mode button", async () => {
-    const app = renderApp();
+    const app = await renderApp();
     await expect
       .element(app.getByRole("button", { name: "Toggle color mode" }))
       .toBeVisible();
@@ -52,7 +52,7 @@ describe("app", () => {
 
   describe.for(EXAMPLES)("example $title", ({ title }) => {
     test("updates title", async ({ expect }) => {
-      const app = renderApp();
+      const app = await renderApp();
       await app.getByRole("button", { name: "Examples" }).click();
       await app.getByRole("menuitem", { name: title }).click();
       expect(document.title !== "stac-map");
@@ -66,7 +66,7 @@ describe("app", () => {
       "",
       "?href=https://csdap.earthdata.nasa.gov/stac/collections/planet"
     );
-    const app = renderApp();
+    const app = await renderApp();
     await expect
       .element(app.getByRole("heading", { name: "Planet" }))
       .toBeVisible();
@@ -78,7 +78,7 @@ describe("app", () => {
       "",
       "?href=https://stac.eoapi.dev/collections/MAXAR_yellowstone_flooding22"
     );
-    const app = renderApp();
+    const app = await renderApp();
     await app.getByRole("button", { name: "Item search" }).click();
     await app.getByRole("button", { name: "Search", exact: true }).click();
     await expect
@@ -91,7 +91,7 @@ describe("app", () => {
 
   test("paginates collections", async () => {
     window.history.pushState({}, "", "?href=https://stac.eoapi.dev");
-    const app = renderApp();
+    const app = await renderApp();
     await expect
       .element(app.getByRole("button", { name: "Fetch more collections" }))
       .toBeVisible();
