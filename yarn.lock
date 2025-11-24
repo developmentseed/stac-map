@@ -8288,10 +8288,10 @@ vite-tsconfig-paths@^5.1.4:
   optionalDependencies:
     fsevents "~2.3.3"
 
-vitest-browser-react@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/vitest-browser-react/-/vitest-browser-react-1.0.1.tgz#e36f0a9ca46bf622841f0285defe0bebbb37e16d"
-  integrity sha512-LqiGFCdknrbMoSDWXTCTrPsED3SvdIXIgYOOZyYUNj2dkJusW2eF6NENOlBlxwq+FBQqzNK1X59b+b03pXFpAQ==
+vitest-browser-react@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/vitest-browser-react/-/vitest-browser-react-2.0.2.tgz#553d9ad8084c09366235cb6200788de47e3847f4"
+  integrity sha512-zuSgTe/CKODU3ip+w4ls6Qm4xZ9+A4OHmDf0obt/mwAqavpOtqtq2YcioZt8nfDQE50EWmhdnRfDmpS1jCsbTQ==
 
 vitest@^4.0.10:
   version "4.0.10"
