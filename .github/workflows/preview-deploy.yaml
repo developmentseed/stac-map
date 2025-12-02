@@ -30,7 +30,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const { createDeployingComment } = require('./.github/workflows/github-pr-update.js')
+            const { createDeployingComment } = require('./.github/workflows/github-pr-update.cjs')
             await createDeployingComment({ github, context, core })
       - name: Install
         run: yarn install --ignore-engines
@@ -41,7 +41,7 @@ jobs:
         if: failure()
         with:
           script: |
-            const { createFailedComment } = require('./.github/workflows/github-pr-update.js')
+            const { createFailedComment } = require('./.github/workflows/github-pr-update.cjs')
             await createFailedComment({ github, context, core })
       - uses: actions/upload-artifact@v4
         with:
@@ -107,12 +107,12 @@ jobs:
         if: success()
         with:
           script: |
-            const { createSuccessComment } = require('./.github/workflows/github-pr-update.js')
+            const { createSuccessComment } = require('./.github/workflows/github-pr-update.cjs')
             await createSuccessComment({ github, context, core })
       - name: Post comment with preview URL
         uses: actions/github-script@v6
         if: failure()
         with:
           script: |
-            const { createFailedComment } = require('./.github/workflows/github-pr-update.js')
+            const { createFailedComment } = require('./.github/workflows/github-pr-update.cjs')
             await createFailedComment({ github, context, core })

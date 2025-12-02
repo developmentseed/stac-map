@@ -47,5 +47,5 @@ jobs:
         if: success()
         with:
           script: |
-            const { deleteComment } = require('./.github/workflows/github-pr-update.js')
+            const { deleteComment } = require('./.github/workflows/github-pr-update.cjs')
             await deleteComment({ github, context, core })
