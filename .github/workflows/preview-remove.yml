@@ -1,0 +1,51 @@
+name: Remove preview
+
+on:
+  pull_request_target:
+    types: [ closed ]
+
+env:
+  BUCKET_NAME: ds-preview-stac-map-${{ github.event.number }}
+  AWS_ROLE_ARN: arn:aws:iam::552819999234:role/stac-map-gh-preview
+  AWS_REGION: us-west-2
+
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  remove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Check if bucket exists
+        id: check_bucket
+        run: |
+          if aws s3 ls "s3://${{ env.BUCKET_NAME }}" 2>&1 | grep -q 'NoSuchBucket'; then
+            echo "Bucket does not exist."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Bucket exists."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Empty the bucket
+        if: steps.check_bucket.outputs.exists == 'true'
+        run: |
+          aws s3 rm s3://$BUCKET_NAME --recursive --quiet
+      - name: Remove the bucket
+        if: steps.check_bucket.outputs.exists == 'true'
+        run: |
+          aws s3 rb s3://$BUCKET_NAME
+      - name: Remove PR comment
+        uses: actions/github-script@v6
+        if: success()
+        with:
+          script: |
+            const { deleteComment } = require('./.github/workflows/github-pr-update.js')
+            await deleteComment({ github, context, core })
