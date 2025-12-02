@@ -25,6 +25,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build-preview": "tsc -b && vite build --base=/",
     "lint": "eslint .",
     "format": "prettier . --write",
     "format:check": "prettier . --check",

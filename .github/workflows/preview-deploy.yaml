@@ -35,7 +35,7 @@ jobs:
       - name: Install
         run: yarn install --ignore-engines
       - name: Build
-        run: yarn build
+        run: yarn build-preview
       - name: Post error comment
         uses: actions/github-script@v6
         if: failure()
