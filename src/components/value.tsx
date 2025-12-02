@@ -37,10 +37,12 @@ import ItemsSection from "./sections/items";
 import LinksSection from "./sections/links";
 import PropertiesSection from "./sections/properties";
 import { Prose } from "./ui/prose";
-import useStacCollections from "../hooks/stac-collections";
+// import useStacCollections from "../hooks/stac-collections";
 import type { BBox2D } from "../types/map";
 import type { DatetimeBounds, StacSearch, StacValue } from "../types/stac";
 import { deconstructStac, fetchStac, getImportantLinks } from "../utils/stac";
+
+import { useCollections } from "@developmentseed/stac-react";
 
 export interface SharedValueProps {
   catalogs: StacCatalog[] | undefined;
@@ -86,6 +88,7 @@ export function Value({
   const [numberOfCollections, setNumberOfCollections] = useState<number>();
   const [fetchAllCollections, setFetchAllCollections] = useState(false);
   const [thumbnailError, setThumbnailError] = useState(false);
+  const [collectionsAggregate, setCollectionsAggregate] = useState<StacCollection[]>([]);
 
   const selfHref = value.links?.find((link) => link.rel === "self")?.href;
 
@@ -111,7 +114,8 @@ export function Value({
     return rootData.data?.links?.filter((link) => link.rel === "search");
   }, [rootData.data]);
 
-  const collectionsResult = useStacCollections(collectionsLink?.href);
+  const collectionsResult = useCollections();
+  console.log(`collectionsResult: `, collectionsResult)
 
   const thumbnailAsset = useMemo(() => {
     return (
@@ -124,21 +128,36 @@ export function Value({
   }, [assets]);
 
   useEffect(() => {
-    setCollections(
-      collectionsResult.data?.pages.flatMap((page) => page?.collections || [])
-    );
-    if (collectionsResult.data?.pages.at(0)?.numberMatched)
-      setNumberOfCollections(collectionsResult.data?.pages[0]?.numberMatched);
-  }, [collectionsResult.data, setCollections]);
+    if (!fetchAllCollections) {
+      setCollections(
+        collectionsResult.collections?.collections || []
+      );
+      if (collectionsResult.collections?.numberMatched)
+        setNumberOfCollections(collectionsResult.collections?.numberMatched);
+    }
+  }, [collectionsResult, setCollections]);
+
+  useEffect(() => {
+    if (collectionsResult.collections && fetchAllCollections) {
+      setCollectionsAggregate((previous) => [...previous, ...collectionsResult.collections?.collections || []]);
+    }
+  }, [fetchAllCollections, collectionsResult.collections]);
 
   useEffect(() => {
     if (
       fetchAllCollections &&
-      !collectionsResult.isFetching &&
-      collectionsResult.hasNextPage
-    )
-      collectionsResult.fetchNextPage();
-  }, [fetchAllCollections, collectionsResult]);
+      collectionsResult.nextPage
+    ) {
+      collectionsResult.nextPage?.();
+    }
+  }, [fetchAllCollections, collectionsResult.nextPage]);
+
+  useEffect(() => {
+    if (numberOfCollections == collectionsAggregate.length) {
+      console.log(`setting collections because of match`);
+      setCollections(collectionsAggregate);
+    }
+  }, [numberOfCollections, collectionsAggregate]);
 
   useEffect(() => {
     setFetchAllCollections(false);
@@ -149,6 +168,11 @@ export function Value({
     setItems(undefined);
   }, [search, setItems]);
 
+  // console.log(`collections: `, collections)
+  console.log(`numberMatched: `, numberOfCollections)
+  console.log(`collectionsAggregate.length: `, collectionsAggregate.length)
+  console.log(`collectionsResult: `, collectionsResult)
+  console.log(`collectionsAggregate: `, collectionsAggregate)
   return (
     <Stack gap={4}>
       <Heading>
@@ -224,7 +248,7 @@ export function Value({
         </ButtonGroup>
       )}
 
-      {collectionsResult.hasNextPage && (
+      {/* {collectionsResult.hasNextPage && (
         <Card.Root size={"sm"} variant={"outline"}>
           <Card.Header>
             <Heading size={"sm"}>Collection pagination</Heading>
@@ -259,7 +283,44 @@ export function Value({
             </ButtonGroup>
           </Card.Body>
         </Card.Root>
+      )} */}
+
+      {collectionsResult.nextPage && (
+        <Card.Root size={"sm"} variant={"outline"}>
+          <Card.Header>
+            <Heading size={"sm"}>Collection pagination</Heading>
+          </Card.Header>
+          <Card.Body>
+            <ButtonGroup size={"xs"} variant={"surface"}>
+              <Button
+                disabled={fetchAllCollections}
+                onClick={() => {
+                  if (
+                    collectionsResult.nextPage
+                  )
+                    collectionsResult.nextPage?.();
+                }}
+              >
+                Fetch more collections <LuStepForward />
+              </Button>
+              <Button
+                onClick={() => setFetchAllCollections((previous) => !previous)}
+              >
+                {(fetchAllCollections && (
+                  <>
+                    Pause fetching collections <LuPause />
+                  </>
+                )) || (
+                  <>
+                    Fetch all collections <LuPlay />
+                  </>
+                )}
+              </Button>
+            </ButtonGroup>
+          </Card.Body>
+        </Card.Root>
       )}
+
 
       <Accordion.Root multiple size={"sm"} variant={"enclosed"}>
         {catalogs && catalogs.length > 0 && (
