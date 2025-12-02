@@ -103,14 +103,14 @@ jobs:
             }]
           }' > bucket-policy.json
           aws s3api put-bucket-policy --bucket ${{ env.BUCKET_NAME }} --policy file://bucket-policy.json
-      - name: Post error comment
+      - name: Post comment with preview URL
         uses: actions/github-script@v6
         if: success()
         with:
           script: |
             const { createSuccessComment } = require('./.github/workflows/github-pr-update.cjs')
             await createSuccessComment({ github, context, core })
-      - name: Post comment with preview URL
+      - name: Post error comment
         uses: actions/github-script@v6
         if: failure()
         with:
