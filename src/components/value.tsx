@@ -88,7 +88,6 @@ export function Value({
   const [numberOfCollections, setNumberOfCollections] = useState<number>();
   const [fetchAllCollections, setFetchAllCollections] = useState(false);
   const [thumbnailError, setThumbnailError] = useState(false);
-  const [collectionsAggregate, setCollectionsAggregate] = useState<StacCollection[]>([]);
 
   const selfHref = value.links?.find((link) => link.rel === "self")?.href;
 
@@ -128,18 +127,13 @@ export function Value({
   }, [assets]);
 
   useEffect(() => {
-    if (!fetchAllCollections) {
+    if (fetchAllCollections) {
+      setCollections((previous) => [...previous, ...collectionsResult.collections?.collections || []]);
+    } else {
       setCollections(
         collectionsResult.collections?.collections || []
       );
-      if (collectionsResult.collections?.numberMatched)
-        setNumberOfCollections(collectionsResult.collections?.numberMatched);
-    }
-  }, [collectionsResult, setCollections]);
-
-  useEffect(() => {
-    if (collectionsResult.collections && fetchAllCollections) {
-      setCollectionsAggregate((previous) => [...previous, ...collectionsResult.collections?.collections || []]);
+      setNumberOfCollections(collectionsResult.collections?.numberMatched);
     }
   }, [fetchAllCollections, collectionsResult.collections]);
 
@@ -153,13 +147,6 @@ export function Value({
   }, [fetchAllCollections, collectionsResult.nextPage]);
 
   useEffect(() => {
-    if (numberOfCollections == collectionsAggregate.length) {
-      console.log(`setting collections because of match`);
-      setCollections(collectionsAggregate);
-    }
-  }, [numberOfCollections, collectionsAggregate]);
-
-  useEffect(() => {
     setFetchAllCollections(false);
     setNumberOfCollections(undefined);
   }, [value]);
@@ -168,11 +155,6 @@ export function Value({
     setItems(undefined);
   }, [search, setItems]);
 
-  // console.log(`collections: `, collections)
-  console.log(`numberMatched: `, numberOfCollections)
-  console.log(`collectionsAggregate.length: `, collectionsAggregate.length)
-  console.log(`collectionsResult: `, collectionsResult)
-  console.log(`collectionsAggregate: `, collectionsAggregate)
   return (
     <Stack gap={4}>
       <Heading>
@@ -247,43 +229,6 @@ export function Value({
           )}
         </ButtonGroup>
       )}
-
-      {/* {collectionsResult.hasNextPage && (
-        <Card.Root size={"sm"} variant={"outline"}>
-          <Card.Header>
-            <Heading size={"sm"}>Collection pagination</Heading>
-          </Card.Header>
-          <Card.Body>
-            <ButtonGroup size={"xs"} variant={"surface"}>
-              <Button
-                disabled={fetchAllCollections || collectionsResult.isFetching}
-                onClick={() => {
-                  if (
-                    !collectionsResult.isFetching &&
-                    collectionsResult.hasNextPage
-                  )
-                    collectionsResult.fetchNextPage();
-                }}
-              >
-                Fetch more collections <LuStepForward />
-              </Button>
-              <Button
-                onClick={() => setFetchAllCollections((previous) => !previous)}
-              >
-                {(fetchAllCollections && (
-                  <>
-                    Pause fetching collections <LuPause />
-                  </>
-                )) || (
-                  <>
-                    Fetch all collections <LuPlay />
-                  </>
-                )}
-              </Button>
-            </ButtonGroup>
-          </Card.Body>
-        </Card.Root>
-      )} */}
 
       {collectionsResult.nextPage && (
         <Card.Root size={"sm"} variant={"outline"}>

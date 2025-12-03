@@ -16,8 +16,6 @@ import Panel, { type PanelProps } from "../components/panel";
 import { ColorModeButton } from "../components/ui/color-mode";
 import type { StacValue } from "../types/stac";
 
-import { StacApiProvider } from "@developmentseed/stac-react";
-
 export interface OverlayProps extends PanelProps {
   picked: StacValue | undefined;
   setPicked: (picked: StacValue | undefined) => void;
@@ -59,17 +57,15 @@ export default function Overlay({
             )) || <HStack fontWeight={"light"}>stac-map</HStack>}
           </Box>
           <Box p={4} overflow={"scroll"} maxH={"80dvh"}>
-            <StacApiProvider apiUrl={href}>
-              <Panel
-                href={href}
-                setHref={setHref}
-                value={picked || value}
-                fileUpload={fileUpload}
-                items={picked ? undefined : items}
-                filteredItems={picked ? undefined : filteredItems}
-                {...props}
-              />
-            </StacApiProvider>
+            <Panel
+              href={href}
+              setHref={setHref}
+              value={picked || value}
+              fileUpload={fileUpload}
+              items={picked ? undefined : items}
+              filteredItems={picked ? undefined : filteredItems}
+              {...props}
+            />
           </Box>
         </Box>
       </GridItem>

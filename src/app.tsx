@@ -16,6 +16,7 @@ import {
   isItemInDatetimeBounds,
   isVisual,
 } from "./utils/stac";
+import { StacApiProvider } from "@developmentseed/stac-react";
 
 // TODO make this configurable by the user.
 const lineColor: Color = [207, 63, 2, 100];
@@ -33,6 +34,8 @@ export default function App() {
   const [filter, setFilter] = useState(true);
   const [stacGeoparquetItemId, setStacGeoparquetItemId] = useState<string>();
   const [cogTileHref, setCogTileHref] = useState<string>();
+  const [filteredCollections, setFilteredCollections] = useState<StacCollection[] | undefined>();
+  const [collections, setFinalCollections] = useState<StacCollection[] | undefined>();
 
   // Derived state
   const {
@@ -52,20 +55,9 @@ export default function App() {
     value,
     enabled: !!value && !collectionsLink,
   });
-  const collections = collectionsLink ? userCollections : linkedCollections;
+  
   const items = userItems || linkedItems;
-  const filteredCollections = useMemo(() => {
-    if (filter && collections) {
-      return collections.filter(
-        (collection) =>
-          (!bbox || isCollectionInBbox(collection, bbox)) &&
-          (!datetimeBounds ||
-            isCollectionInDatetimeBounds(collection, datetimeBounds))
-      );
-    } else {
-      return undefined;
-    }
-  }, [collections, filter, bbox, datetimeBounds]);
+
   const filteredItems = useMemo(() => {
     if (filter && items) {
       return items.filter(
@@ -79,6 +71,22 @@ export default function App() {
   }, [items, filter, bbox, datetimeBounds]);
 
   // Effects
+  useEffect(() => {
+    setFinalCollections(collectionsLink ? userCollections : linkedCollections);
+  }, [collectionsLink, userCollections, linkedCollections]);
+
+  useEffect(() => {
+    if(filter && collections) {
+      const filtered = collections.filter(
+        (collection) =>
+          (!bbox || isCollectionInBbox(collection, bbox)) &&
+          (!datetimeBounds ||
+            isCollectionInDatetimeBounds(collection, datetimeBounds))
+      );
+      setFilteredCollections(filtered ?? undefined)
+    }
+  }, [filter, collections, userCollections, bbox, datetimeBounds]);
+
   useEffect(() => {
     function handlePopState() {
       setHref(new URLSearchParams(location.search).get("href") ?? "");
@@ -137,67 +145,69 @@ export default function App() {
 
   return (
     <>
-      <Box h={"100dvh"}>
-        <FileUpload.RootProvider value={fileUpload} unstyled={true}>
-          <FileUpload.Dropzone
-            disableClick={true}
-            style={{
-              height: "100dvh",
-              width: "100dvw",
-            }}
-          >
-            <Map
-              value={value}
-              table={table}
-              collections={collections}
-              filteredCollections={filteredCollections}
-              items={items}
-              filteredItems={filteredItems}
-              fillColor={fillColor}
-              lineColor={lineColor}
-              setBbox={setBbox}
-              picked={picked}
-              setPicked={setPicked}
-              setStacGeoparquetItemId={setStacGeoparquetItemId}
-              cogTileHref={cogTileHref}
-            ></Map>
-          </FileUpload.Dropzone>
-        </FileUpload.RootProvider>
-      </Box>
-      <Container
-        zIndex={1}
-        fluid
-        h="100dvh"
-        pointerEvents={"none"}
-        position={"absolute"}
-        top={0}
-        left={0}
-        pt={4}
-      >
-        <Overlay
-          href={href}
-          setHref={setHref}
-          fileUpload={fileUpload}
-          value={value}
-          error={error}
-          catalogs={catalogs}
-          setCollections={setCollections}
-          collections={collections}
-          filteredCollections={filteredCollections}
-          filter={filter}
-          setFilter={setFilter}
-          bbox={bbox}
-          setPicked={setPicked}
-          picked={picked}
-          items={items}
-          filteredItems={filteredItems}
-          setItems={setItems}
-          setDatetimeBounds={setDatetimeBounds}
-          cogTileHref={cogTileHref}
-          setCogTileHref={setCogTileHref}
-        ></Overlay>
-      </Container>
-      <Toaster></Toaster>
+      <StacApiProvider apiUrl={href || ""}>
+        <Box h={"100dvh"}>
+          <FileUpload.RootProvider value={fileUpload} unstyled={true}>
+            <FileUpload.Dropzone
+              disableClick={true}
+              style={{
+                height: "100dvh",
+                width: "100dvw",
+              }}
+            >
+              <Map
+                value={value}
+                table={table}
+                collections={collections}
+                filteredCollections={filteredCollections}
+                items={items}
+                filteredItems={filteredItems}
+                fillColor={fillColor}
+                lineColor={lineColor}
+                setBbox={setBbox}
+                picked={picked}
+                setPicked={setPicked}
+                setStacGeoparquetItemId={setStacGeoparquetItemId}
+                cogTileHref={cogTileHref}
+              ></Map>
+            </FileUpload.Dropzone>
+          </FileUpload.RootProvider>
+        </Box>
+        <Container
+          zIndex={1}
+          fluid
+          h="100dvh"
+          pointerEvents={"none"}
+          position={"absolute"}
+          top={0}
+          left={0}
+          pt={4}
+        >
+          <Overlay
+            href={href}
+            setHref={setHref}
+            fileUpload={fileUpload}
+            value={value}
+            error={error}
+            catalogs={catalogs}
+            setCollections={setCollections}
+            collections={collections}
+            filteredCollections={filteredCollections}
+            filter={filter}
+            setFilter={setFilter}
+            bbox={bbox}
+            setPicked={setPicked}
+            picked={picked}
+            items={items}
+            filteredItems={filteredItems}
+            setItems={setItems}
+            setDatetimeBounds={setDatetimeBounds}
+            cogTileHref={cogTileHref}
+            setCogTileHref={setCogTileHref}
+          ></Overlay>
+        </Container>
+        <Toaster></Toaster>
+      </StacApiProvider>
     </>
   );
 }
