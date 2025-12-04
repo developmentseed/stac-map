@@ -1,21 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Container, FileUpload, useFileUpload } from "@chakra-ui/react";
 import type { StacCollection, StacItem } from "stac-ts";
 import { Toaster } from "./components/ui/toaster";
+import useDocumentTitle from "./hooks/document-title";
+import useHrefParam from "./hooks/href-param";
 import useStacChildren from "./hooks/stac-children";
+import useStacFilters from "./hooks/stac-filters";
 import useStacValue from "./hooks/stac-value";
 import Map from "./layers/map";
 import Overlay from "./layers/overlay";
 import type { BBox2D, Color } from "./types/map";
 import type { DatetimeBounds, StacValue } from "./types/stac";
-import {
-  isCog,
-  isCollectionInBbox,
-  isCollectionInDatetimeBounds,
-  isItemInBbox,
-  isItemInDatetimeBounds,
-  isVisual,
-} from "./utils/stac";
+import { getCogTileHref } from "./utils/stac";
 
 // TODO make this configurable by the user.
 const lineColor: Color = [207, 63, 2, 100];
@@ -23,8 +19,8 @@ const fillColor: Color = [207, 63, 2, 50];
 
 export default function App() {
   // User state
-  const [href, setHref] = useState<string | undefined>(getInitialHref());
   const fileUpload = useFileUpload({ maxFiles: 1 });
+  const { href, setHref } = useHrefParam(fileUpload);
   const [userCollections, setCollections] = useState<StacCollection[]>();
   const [userItems, setItems] = useState<StacItem[]>();
   const [picked, setPicked] = useState<StacValue>();
@@ -54,77 +50,22 @@ export default function App() {
   });
   const collections = collectionsLink ? userCollections : linkedCollections;
   const items = userItems || linkedItems;
-  const filteredCollections = useMemo(() => {
-    if (filter && collections) {
-      return collections.filter(
-        (collection) =>
-          (!bbox || isCollectionInBbox(collection, bbox)) &&
-          (!datetimeBounds ||
-            isCollectionInDatetimeBounds(collection, datetimeBounds))
-      );
-    } else {
-      return undefined;
-    }
-  }, [collections, filter, bbox, datetimeBounds]);
-  const filteredItems = useMemo(() => {
-    if (filter && items) {
-      return items.filter(
-        (item) =>
-          (!bbox || isItemInBbox(item, bbox)) &&
-          (!datetimeBounds || isItemInDatetimeBounds(item, datetimeBounds))
-      );
-    } else {
-      return undefined;
-    }
-  }, [items, filter, bbox, datetimeBounds]);
+  const { filteredCollections, filteredItems } = useStacFilters({
+    collections,
+    items,
+    filter,
+    bbox,
+    datetimeBounds,
+  });
 
   // Effects
-  useEffect(() => {
-    function handlePopState() {
-      setHref(new URLSearchParams(location.search).get("href") ?? "");
-    }
-    window.addEventListener("popstate", handlePopState);
-
-    const href = new URLSearchParams(location.search).get("href");
-    if (href) {
-      try {
-        new URL(href);
-      } catch {
-        history.pushState(null, "", location.pathname);
-      }
-    }
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (href && new URLSearchParams(location.search).get("href") != href) {
-      history.pushState(null, "", "?href=" + href);
-    } else if (href === "") {
-      history.pushState(null, "", location.pathname);
-    }
-  }, [href]);
-
-  useEffect(() => {
-    // It should never be more than 1.
-    if (fileUpload.acceptedFiles.length == 1) {
-      setHref(fileUpload.acceptedFiles[0].name);
-    }
-  }, [fileUpload.acceptedFiles]);
+  useDocumentTitle(value);
 
   useEffect(() => {
     setPicked(undefined);
     setItems(undefined);
     setDatetimeBounds(undefined);
     setCogTileHref(value && getCogTileHref(value));
-
-    if (value && (value.title || value.id)) {
-      document.title = "stac-map | " + (value.title || value.id);
-    } else {
-      document.title = "stac-map";
-    }
   }, [value]);
 
   useEffect(() => {
@@ -200,27 +141,4 @@ export default function App() {
       <Toaster></Toaster>
     </>
   );
-}
-
-function getInitialHref() {
-  const href = new URLSearchParams(location.search).get("href") || "";
-  try {
-    new URL(href);
-  } catch {
-    return undefined;
-  }
-  return href;
-}
-
-function getCogTileHref(value: StacValue) {
-  let cogTileHref = undefined;
-  if (value.assets) {
-    for (const asset of Object.values(value.assets)) {
-      if (isCog(asset) && isVisual(asset)) {
-        cogTileHref = asset.href as string;
-        break;
-      }
-    }
-  }
-  return cogTileHref;
 }

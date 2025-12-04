@@ -267,3 +267,17 @@ export function isVisual(asset: StacAsset) {
   }
   return false;
 }
+
+export function getCogTileHref(value: StacValue): string | undefined {
+  if (!value.assets) {
+    return undefined;
+  }
+
+  for (const asset of Object.values(value.assets)) {
+    if (isCog(asset) && isVisual(asset)) {
+      return asset.href as string;
+    }
+  }
+
+  return undefined;
+}
