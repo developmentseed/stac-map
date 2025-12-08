@@ -51,7 +51,7 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v6
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
