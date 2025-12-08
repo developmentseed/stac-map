@@ -27,7 +27,7 @@ jobs:
           node-version-file: ".node-version"
           cache: "yarn"
       - name: Post building comment
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
           script: |
             const { createDeployingComment } = require('./.github/workflows/github-pr-update.cjs')
@@ -37,7 +37,7 @@ jobs:
       - name: Build
         run: yarn build-preview
       - name: Post error comment
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         if: failure()
         with:
           script: |
@@ -104,14 +104,14 @@ jobs:
           }' > bucket-policy.json
           aws s3api put-bucket-policy --bucket ${{ env.BUCKET_NAME }} --policy file://bucket-policy.json
       - name: Post comment with preview URL
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         if: success()
         with:
           script: |
             const { createSuccessComment } = require('./.github/workflows/github-pr-update.cjs')
             await createSuccessComment({ github, context, core })
       - name: Post error comment
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         if: failure()
         with:
           script: |

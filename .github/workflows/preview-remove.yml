@@ -43,7 +43,7 @@ jobs:
         run: |
           aws s3 rb s3://$BUCKET_NAME
       - name: Remove PR comment
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         if: success()
         with:
           script: |
