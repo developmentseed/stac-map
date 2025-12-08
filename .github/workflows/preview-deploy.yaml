@@ -43,7 +43,7 @@ jobs:
           script: |
             const { createFailedComment } = require('./.github/workflows/github-pr-update.cjs')
             await createFailedComment({ github, context, core })
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           path: ${{ env.DIST_DIRECTORY }}
   deploy:
