@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import type { UseFileUploadReturn } from "@chakra-ui/react";
 
 function getInitialHref(): string | undefined {
   const href = new URLSearchParams(location.search).get("href") || "";
@@ -11,7 +10,7 @@ function getInitialHref(): string | undefined {
   return href;
 }
 
-export default function useHrefParam(fileUpload: UseFileUploadReturn) {
+export default function useHrefParam() {
   const [href, setHref] = useState<string | undefined>(getInitialHref());
 
   // Sync href with URL params
@@ -43,13 +42,6 @@ export default function useHrefParam(fileUpload: UseFileUploadReturn) {
       window.removeEventListener("popstate", handlePopState);
     };
   }, []);
-
-  // Handle file uploads
-  useEffect(() => {
-    if (fileUpload.acceptedFiles.length == 1) {
-      setHref(fileUpload.acceptedFiles[0].name);
-    }
-  }, [fileUpload.acceptedFiles]);
 
   return { href, setHref };
 }

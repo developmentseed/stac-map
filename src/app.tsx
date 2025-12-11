@@ -19,8 +19,15 @@ const fillColor: Color = [207, 63, 2, 50];
 
 export default function App() {
   // User state
-  const fileUpload = useFileUpload({ maxFiles: 1 });
-  const { href, setHref } = useHrefParam(fileUpload);
+  const { href, setHref } = useHrefParam();
+  const fileUpload = useFileUpload({
+    maxFiles: 1,
+    onFileChange: (details) => {
+      if (details.acceptedFiles.length === 1) {
+        setHref(details.acceptedFiles[0].name);
+      }
+    },
+  });
   const [userCollections, setCollections] = useState<StacCollection[]>();
   const [userItems, setItems] = useState<StacItem[]>();
   const [picked, setPicked] = useState<StacValue>();
