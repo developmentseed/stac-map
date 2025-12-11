@@ -127,7 +127,7 @@ export function Value({
     setCollections(
       collectionsResult.data?.pages.flatMap((page) => page?.collections || [])
     );
-    if (collectionsResult.data?.pages.at(0)?.numberMatched)
+    if (collectionsResult.data?.pages[0]?.numberMatched)
       setNumberOfCollections(collectionsResult.data?.pages[0]?.numberMatched);
   }, [collectionsResult.data, setCollections]);
 
@@ -156,7 +156,7 @@ export function Value({
           <Icon>{getValueIcon(value)}</Icon>
           {(value.title as string) ||
             value.id ||
-            href.split("/").at(-1)?.split("?").at(0)}
+            href.split("/").slice(-1)[0]?.split("?")[0]}
         </HStack>
       </Heading>
 

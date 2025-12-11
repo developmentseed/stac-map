@@ -187,7 +187,7 @@ function Search({
   setItems: (items: StacItem[] | undefined) => void;
 }) {
   const result = useStacSearch(search, link);
-  const numberMatched = result.data?.pages.at(0)?.numberMatched;
+  const numberMatched = result.data?.pages[0]?.numberMatched;
   const items = useMemo(() => {
     return result.data?.pages.flatMap((page) => page.features);
   }, [result.data]);

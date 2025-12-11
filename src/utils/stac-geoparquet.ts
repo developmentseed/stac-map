@@ -45,7 +45,7 @@ export async function getStacGeoparquet(
     type: "FeatureCollection",
     bbox: [summaryRow.xmin, summaryRow.ymin, summaryRow.xmax, summaryRow.ymax],
     features: [],
-    title: href.split("/").at(-1),
+    title: href.split("/").slice(-1)[0],
     description: `A stac-geoparquet file with ${summaryRow.count} items`,
     start_datetime: summaryRow.start_datetime
       ? new Date(summaryRow.start_datetime).toLocaleString()
