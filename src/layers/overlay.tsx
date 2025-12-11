@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LuUpload } from "react-icons/lu";
 import {
   Box,
@@ -71,7 +71,7 @@ export default function Overlay({
       </GridItem>
       <GridItem colSpan={2}>
         <HStack pointerEvents={"auto"}>
-          <HrefInput href={href} setHref={setHref} />
+          <HrefInput key={href} href={href} setHref={setHref} />
           <Examples setHref={setHref}>
             <Button bg={"bg.muted/90"} variant={"outline"}>
               Examples
@@ -100,12 +100,6 @@ function HrefInput({
   setHref: (href: string | undefined) => void;
 }) {
   const [value, setValue] = useState<string | undefined>(href || "");
-
-  useEffect(() => {
-    if (href) {
-      setValue(href);
-    }
-  }, [href]);
 
   return (
     <Box

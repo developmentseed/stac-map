@@ -103,17 +103,21 @@ export default function Map({
           `https://titiler.xyz/cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png?url=${cogTileHref}`,
         renderSubLayers: (props) => {
           const { boundingBox } = props.tile;
+          const { data, ...otherProps } = props;
 
-          return new BitmapLayer(props, {
-            data: undefined,
-            image: props.data,
-            bounds: [
-              boundingBox[0][0],
-              boundingBox[0][1],
-              boundingBox[1][0],
-              boundingBox[1][1],
-            ],
-          });
+          if (data) {
+            return new BitmapLayer(otherProps, {
+              image: data,
+              bounds: [
+                boundingBox[0][0],
+                boundingBox[0][1],
+                boundingBox[1][0],
+                boundingBox[1][1],
+              ],
+            });
+          } else {
+            return null;
+          }
         },
       })
     );
