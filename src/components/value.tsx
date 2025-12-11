@@ -77,7 +77,7 @@ export function Value({
   setDatetimeBounds,
   cogTileHref,
   setCogTileHref,
-  totalNumOfCollections
+  totalNumOfCollections,
 }: { totalNumOfCollections: number | undefined } & ValueProps) {
   const [search, setSearch] = useState<StacSearch>();
   const [fetchAllCollections, setFetchAllCollections] = useState(false);

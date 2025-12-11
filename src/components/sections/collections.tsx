@@ -18,16 +18,14 @@ export default function CollectionsSection({
   collectionsNumberMatched: number | undefined;
   totalNumOfCollections: number | undefined;
 } & CollectionsProps) {
-  const parenthetical = collections.length !== collectionsNumberMatched
-  ? `${collections.length}/${collectionsNumberMatched || totalNumOfCollections}`
-  : collections.length;
+  const parenthetical =
+    collections.length !== collectionsNumberMatched
+      ? `${collections.length}/${collectionsNumberMatched || totalNumOfCollections}`
+      : collections.length;
   const title = `Collections (${parenthetical})`;
   return (
     <Section title={title} TitleIcon={LuFolderPlus} value="collections">
-      <Collections
-        collections={collections}
-        setHref={setHref}
-      />
+      <Collections collections={collections} setHref={setHref} />
     </Section>
   );
 }

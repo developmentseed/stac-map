@@ -133,7 +133,7 @@ export default function Map({
     }),
     new GeoJsonLayer({
       id: "items",
-      data: (items) as Feature[] | undefined,
+      data: items as Feature[] | undefined,
       filled: true,
       getFillColor: fillColor,
       getLineColor: lineColor,

@@ -5,7 +5,7 @@ function getCurrentHref(): string {
 }
 
 function getInitialHref(): string | undefined {
-  const  href = getCurrentHref();
+  const href = getCurrentHref();
   try {
     new URL(href);
   } catch {

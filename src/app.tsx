@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Box, Container, FileUpload, useFileUpload } from "@chakra-ui/react";
 import type { StacCollection, StacItem } from "stac-ts";
 import { Toaster } from "./components/ui/toaster";
-import setDocumentTitle from "./utils/utilities";
 import useHrefParam from "./hooks/href-param";
 import useStacChildren from "./hooks/stac-children";
 import useStacFilters from "./hooks/stac-filters";
@@ -12,6 +11,7 @@ import Overlay from "./layers/overlay";
 import type { BBox2D, Color } from "./types/map";
 import type { DatetimeBounds, StacValue } from "./types/stac";
 import { getCogTileHref } from "./utils/stac";
+import setDocumentTitle from "./utils/utilities";
 
 // TODO make this configurable by the user.
 const lineColor: Color = [207, 63, 2, 100];
@@ -68,7 +68,7 @@ export default function App() {
   // Effects
   useEffect(() => {
     document.title = setDocumentTitle(value);
-  }, [value])
+  }, [value]);
 
   useEffect(() => {
     setPicked(undefined);

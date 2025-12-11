@@ -12,10 +12,11 @@ export default function ItemsSection({
   totalNumOfItems,
   items,
   ...props
-}: {totalNumOfItems: number | undefined} & ItemsProps) {
-  const parenthetical = items.length !== totalNumOfItems
-  ? `${items.length}/${totalNumOfItems}`
-  : items.length;
+}: { totalNumOfItems: number | undefined } & ItemsProps) {
+  const parenthetical =
+    items.length !== totalNumOfItems
+      ? `${items.length}/${totalNumOfItems}`
+      : items.length;
   const title = `Items (${parenthetical})`;
   return (
     <Section title={title} TitleIcon={LuFiles} value="items">
