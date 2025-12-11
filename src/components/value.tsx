@@ -77,7 +77,8 @@ export function Value({
   setDatetimeBounds,
   cogTileHref,
   setCogTileHref,
-}: ValueProps) {
+  totalNumOfCollections
+}: { totalNumOfCollections: number | undefined } & ValueProps) {
   const [search, setSearch] = useState<StacSearch>();
   const [fetchAllCollections, setFetchAllCollections] = useState(false);
   const [thumbnailError, setThumbnailError] = useState(false);
@@ -127,7 +128,7 @@ export function Value({
     );
   }, [assets]);
 
-  const numberOfCollections = useMemo(() => {
+  const collectionsNumberMatched = useMemo(() => {
     return collectionsResult.data?.pages.at(0)?.numberMatched;
   }, [collectionsResult.data]);
 
@@ -272,7 +273,8 @@ export function Value({
         {collections && collections.length && (
           <CollectionsSection
             collections={collections}
-            numberOfCollections={numberOfCollections}
+            collectionsNumberMatched={collectionsNumberMatched}
+            totalNumOfCollections={totalNumOfCollections}
             setHref={setHref}
           />
         )}

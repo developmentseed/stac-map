@@ -21,7 +21,7 @@ export default function Panel({
   error,
   fileUpload,
   ...props
-}: PanelProps) {
+}: { totalNumOfCollections: number | undefined } & PanelProps) {
   if (error)
     return (
       <Alert.Root status={"error"}>

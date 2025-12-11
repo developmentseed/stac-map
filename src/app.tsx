@@ -132,6 +132,7 @@ export default function App() {
           catalogs={catalogs}
           setCollections={setCollections}
           collections={filteredCollections}
+          totalNumOfCollections={collections?.length}
           filter={filter}
           setFilter={setFilter}
           bbox={bbox}

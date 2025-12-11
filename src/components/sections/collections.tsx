@@ -11,13 +11,15 @@ interface CollectionsProps {
 
 export default function CollectionsSection({
   collections,
-  numberOfCollections,
+  collectionsNumberMatched,
+  totalNumOfCollections,
   setHref,
 }: {
-  numberOfCollections: number | undefined;
+  collectionsNumberMatched: number | undefined;
+  totalNumOfCollections: number | undefined;
 } & CollectionsProps) {
-  const parenthetical = collections.length !== numberOfCollections
-  ? `${collections.length}/${numberOfCollections || collections.length}`
+  const parenthetical = collections.length !== collectionsNumberMatched
+  ? `${collections.length}/${collectionsNumberMatched || totalNumOfCollections}`
   : collections.length;
   const title = `Collections (${parenthetical})`;
   return (

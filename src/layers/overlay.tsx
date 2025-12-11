@@ -30,7 +30,7 @@ export default function Overlay({
   setPicked,
   items,
   ...props
-}: OverlayProps) {
+}: { totalNumOfCollections: number | undefined | undefined } & OverlayProps) {
   return (
     <SimpleGrid columns={3} gap={4}>
       <GridItem colSpan={1}>
