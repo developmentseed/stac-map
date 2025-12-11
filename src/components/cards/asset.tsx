@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LuDownload } from "react-icons/lu";
 import {
   Button,
@@ -25,13 +25,10 @@ export default function AssetCard({
   setCogTileHref: (href: string | undefined) => void;
 }) {
   const [imageError, setImageError] = useState(false);
-  const [checked, setChecked] = useState(false);
   // eslint-disable-next-line
   const { href, roles, type, title, ...properties } = asset;
 
-  useEffect(() => {
-    setChecked(cogTileHref === asset.href);
-  }, [cogTileHref, asset.href]);
+  const checked = cogTileHref === asset.href;
 
   return (
     <Card.Root size={"sm"} w="full">
@@ -69,7 +66,6 @@ export default function AssetCard({
             <Checkbox.Root
               checked={checked}
               onCheckedChange={(e) => {
-                setChecked(!!e.checked);
                 if (e.checked) setCogTileHref(asset.href);
                 else setCogTileHref(undefined);
               }}
