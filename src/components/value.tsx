@@ -46,9 +46,7 @@ export interface SharedValueProps {
   catalogs: StacCatalog[] | undefined;
   setCollections: (collections: StacCollection[] | undefined) => void;
   collections: StacCollection[] | undefined;
-  filteredCollections: StacCollection[] | undefined;
   items: StacItem[] | undefined;
-  filteredItems: StacItem[] | undefined;
   setHref: (href: string | undefined) => void;
   filter: boolean;
   setFilter: (filter: boolean) => void;
@@ -70,10 +68,8 @@ export function Value({
   value,
   catalogs,
   collections,
-  filteredCollections,
   setCollections,
   items,
-  filteredItems,
   setItems,
   filter,
   setFilter,
@@ -134,6 +130,8 @@ export function Value({
   const numberOfCollections = useMemo(() => {
     return collectionsResult.data?.pages.at(0)?.numberMatched;
   }, [collectionsResult.data]);
+
+  const totalNumOfItems = items?.length;
 
   useEffect(() => {
     setCollections(
@@ -275,7 +273,6 @@ export function Value({
           <CollectionsSection
             collections={collections}
             numberOfCollections={numberOfCollections}
-            filteredCollections={filteredCollections}
             setHref={setHref}
           />
         )}
@@ -316,7 +313,7 @@ export function Value({
         {items && (
           <ItemsSection
             items={items}
-            filteredItems={filteredItems}
+            totalNumOfItems={totalNumOfItems}
             setHref={setHref}
           />
         )}

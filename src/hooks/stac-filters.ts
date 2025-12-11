@@ -23,30 +23,30 @@ export default function useStacFilters({
   filter,
   bbox,
   datetimeBounds,
-}: UseStacFiltersProps) {
+}: UseStacFiltersProps): ({ filteredCollections: StacCollection[] | undefined, filteredItems: StacItem[] | undefined }) {
   const filteredCollections = useMemo(() => {
     if (filter && collections) {
-      return collections.filter(
+      const filtered = collections.filter(
         (collection) =>
           (!bbox || isCollectionInBbox(collection, bbox)) &&
           (!datetimeBounds ||
             isCollectionInDatetimeBounds(collection, datetimeBounds))
       );
-    } else {
-      return undefined;
-    }
+      return filtered;
+    } 
+    return collections;
   }, [collections, filter, bbox, datetimeBounds]);
 
   const filteredItems = useMemo(() => {
     if (filter && items) {
-      return items.filter(
+      const filtered = items.filter(
         (item) =>
           (!bbox || isItemInBbox(item, bbox)) &&
           (!datetimeBounds || isItemInDatetimeBounds(item, datetimeBounds))
       );
-    } else {
-      return undefined;
-    }
+      return filtered;
+    } 
+    return items;
   }, [items, filter, bbox, datetimeBounds]);
 
   return { filteredCollections, filteredItems };

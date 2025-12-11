@@ -29,7 +29,6 @@ export default function Overlay({
   picked,
   setPicked,
   items,
-  filteredItems,
   ...props
 }: OverlayProps) {
   return (
@@ -63,7 +62,6 @@ export default function Overlay({
               value={picked || value}
               fileUpload={fileUpload}
               items={picked ? undefined : items}
-              filteredItems={picked ? undefined : filteredItems}
               {...props}
             />
           </Box>

@@ -101,8 +101,7 @@ export default function App() {
               table={table}
               collections={collections}
               filteredCollections={filteredCollections}
-              items={items}
-              filteredItems={filteredItems}
+              items={filteredItems}
               fillColor={fillColor}
               lineColor={lineColor}
               setBbox={setBbox}
@@ -132,15 +131,13 @@ export default function App() {
           error={error}
           catalogs={catalogs}
           setCollections={setCollections}
-          collections={collections}
-          filteredCollections={filteredCollections}
+          collections={filteredCollections}
           filter={filter}
           setFilter={setFilter}
           bbox={bbox}
           setPicked={setPicked}
           picked={picked}
-          items={items}
-          filteredItems={filteredItems}
+          items={filteredItems}
           setItems={setItems}
           setDatetimeBounds={setDatetimeBounds}
           cogTileHref={cogTileHref}
