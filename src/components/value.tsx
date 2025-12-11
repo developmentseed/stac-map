@@ -83,18 +83,26 @@ export function Value({
   setCogTileHref,
 }: ValueProps) {
   const [search, setSearch] = useState<StacSearch>();
-  const [numberOfCollections, setNumberOfCollections] = useState<number>();
   const [fetchAllCollections, setFetchAllCollections] = useState(false);
   const [thumbnailError, setThumbnailError] = useState(false);
 
   const selfHref = value.links?.find((link) => link.rel === "self")?.href;
 
-  const { links, assets, properties } = useMemo(() => {
+  const {
+    links,
+    assets,
+    properties: rawProperties,
+  } = useMemo(() => {
     return deconstructStac(value);
   }, [value]);
   // Description is handled at the top of the panel, so we don't need it down in
   // the properties.
-  if (properties?.description) delete properties["description"];
+  const properties = useMemo(() => {
+    if (!rawProperties) return undefined;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { description, ...rest } = rawProperties;
+    return Object.keys(rest).length > 0 ? rest : undefined;
+  }, [rawProperties]);
 
   const { rootLink, collectionsLink, nextLink, prevLink, filteredLinks } =
     useMemo(() => {
@@ -123,12 +131,14 @@ export function Value({
     );
   }, [assets]);
 
+  const numberOfCollections = useMemo(() => {
+    return collectionsResult.data?.pages.at(0)?.numberMatched;
+  }, [collectionsResult.data]);
+
   useEffect(() => {
     setCollections(
       collectionsResult.data?.pages.flatMap((page) => page?.collections || [])
     );
-    if (collectionsResult.data?.pages.at(0)?.numberMatched)
-      setNumberOfCollections(collectionsResult.data?.pages[0]?.numberMatched);
   }, [collectionsResult.data, setCollections]);
 
   useEffect(() => {
@@ -139,11 +149,6 @@ export function Value({
     )
       collectionsResult.fetchNextPage();
   }, [fetchAllCollections, collectionsResult]);
-
-  useEffect(() => {
-    setFetchAllCollections(false);
-    setNumberOfCollections(undefined);
-  }, [value]);
 
   useEffect(() => {
     setItems(undefined);

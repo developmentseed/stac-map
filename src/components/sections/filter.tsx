@@ -41,7 +41,6 @@ function Filter({
 }: FilterProps) {
   const [filterStart, setFilterStart] = useState<Date>();
   const [filterEnd, setFilterEnd] = useState<Date>();
-  const [sliderValue, setSliderValue] = useState<number[]>();
 
   const datetimes = useMemo(() => {
     let start =
@@ -80,15 +79,16 @@ function Filter({
     return start && end ? { start, end } : null;
   }, [value, items, collections]);
 
-  useEffect(() => {
-    if (datetimes && !filterStart && !filterEnd) {
-      setSliderValue([datetimes.start.getTime(), datetimes.end.getTime()]);
+  const sliderValue = useMemo(() => {
+    if (!datetimes) return undefined;
+    if (filterStart && filterEnd) {
+      return [filterStart.getTime(), filterEnd.getTime()];
     }
+    return [datetimes.start.getTime(), datetimes.end.getTime()];
   }, [datetimes, filterStart, filterEnd]);
 
   useEffect(() => {
     if (filterStart && filterEnd) {
-      setSliderValue([filterStart.getTime(), filterEnd.getTime()]);
       setDatetimeBounds({ start: filterStart, end: filterEnd });
     }
   }, [filterStart, filterEnd, setDatetimeBounds]);

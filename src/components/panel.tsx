@@ -34,7 +34,15 @@ export default function Panel({
     );
   else if (href) {
     if (value) {
-      return <Value href={href} value={value} setHref={setHref} {...props} />;
+      return (
+        <Value
+          key={href}
+          href={href}
+          value={value}
+          setHref={setHref}
+          {...props}
+        />
+      );
     } else {
       return <SkeletonText />;
     }
