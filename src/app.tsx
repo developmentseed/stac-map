@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Box, Container, FileUpload, useFileUpload } from "@chakra-ui/react";
 import type { StacCollection, StacItem } from "stac-ts";
 import { Toaster } from "./components/ui/toaster";
-import useDocumentTitle from "./hooks/document-title";
+import setDocumentTitle from "./utils/utilities";
 import useHrefParam from "./hooks/href-param";
 import useStacChildren from "./hooks/stac-children";
 import useStacFilters from "./hooks/stac-filters";
@@ -66,7 +66,9 @@ export default function App() {
   });
 
   // Effects
-  useDocumentTitle(value);
+  useEffect(() => {
+    document.title = setDocumentTitle(value);
+  }, [value])
 
   useEffect(() => {
     setPicked(undefined);

@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 
+function getCurrentHref(): string {
+  return new URLSearchParams(location.search).get("href") || "";
+}
+
 function getInitialHref(): string | undefined {
-  const href = new URLSearchParams(location.search).get("href") || "";
+  const  href = getCurrentHref();
   try {
     new URL(href);
   } catch {
@@ -15,7 +19,7 @@ export default function useHrefParam() {
 
   // Sync href with URL params
   useEffect(() => {
-    if (href && new URLSearchParams(location.search).get("href") != href) {
+    if (href && getCurrentHref() != href) {
       history.pushState(null, "", "?href=" + href);
     } else if (href === "") {
       history.pushState(null, "", location.pathname);
@@ -25,14 +29,13 @@ export default function useHrefParam() {
   // Handle browser back/forward
   useEffect(() => {
     function handlePopState() {
-      setHref(new URLSearchParams(location.search).get("href") ?? "");
+      setHref(getCurrentHref() ?? "");
     }
     window.addEventListener("popstate", handlePopState);
 
-    const href = new URLSearchParams(location.search).get("href");
-    if (href) {
+    if (getCurrentHref()) {
       try {
-        new URL(href);
+        new URL(getCurrentHref());
       } catch {
         history.pushState(null, "", location.pathname);
       }
