@@ -1,6 +1,7 @@
 import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import type { StacItemCollection, StacValue } from "../../src/types/stac";
+import getDocumentTitle from "../../src/utils/title";
 
 describe("useDocumentTitle logic", () => {
   let originalTitle: string;
@@ -18,11 +19,9 @@ describe("useDocumentTitle logic", () => {
   });
 
   function setDocumentTitle(value: StacValue | undefined) {
-    if (value && (value.title || value.id)) {
-      document.title = "stac-map | " + (value.title || value.id);
-    } else {
-      document.title = "stac-map";
-    }
+    const title = getDocumentTitle(value);
+    document.title = title;
+    return;
   }
 
   test("should set default title when value is undefined", () => {

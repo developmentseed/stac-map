@@ -10,8 +10,8 @@ import Map from "./layers/map";
 import Overlay from "./layers/overlay";
 import type { BBox2D, Color } from "./types/map";
 import type { DatetimeBounds, StacValue } from "./types/stac";
-import setDocumentTitle from "./utils";
 import { getCogTileHref } from "./utils/stac";
+import getDocumentTitle from "./utils/title";
 
 // TODO make this configurable by the user.
 const lineColor: Color = [207, 63, 2, 100];
@@ -67,7 +67,7 @@ export default function App() {
 
   // Effects
   useEffect(() => {
-    document.title = setDocumentTitle(value);
+    document.title = getDocumentTitle(value);
   }, [value]);
 
   useEffect(() => {
