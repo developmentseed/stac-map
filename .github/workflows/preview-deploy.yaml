@@ -55,7 +55,7 @@ jobs:
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           path: ${{ env.DIST_DIRECTORY }}
       - name: Check if bucket exists
