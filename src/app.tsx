@@ -11,7 +11,7 @@ import Overlay from "./layers/overlay";
 import type { BBox2D, Color } from "./types/map";
 import type { DatetimeBounds, StacValue } from "./types/stac";
 import { getCogTileHref } from "./utils/stac";
-import setDocumentTitle from "./utils/utilities";
+import setDocumentTitle from "./utils";
 
 // TODO make this configurable by the user.
 const lineColor: Color = [207, 63, 2, 100];
