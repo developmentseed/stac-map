@@ -21,7 +21,13 @@ export default function Panel({
   error,
   fileUpload,
   ...props
-}: { totalNumOfCollections: number | undefined } & PanelProps) {
+}: {
+  totalNumOfCollections: number | undefined;
+  datetimes: {
+    start: Date;
+    end: Date;
+  } | null;
+} & PanelProps) {
   if (error)
     return (
       <Alert.Root status={"error"}>
