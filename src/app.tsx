@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Box, Container, FileUpload, useFileUpload } from "@chakra-ui/react";
 import type { StacCollection, StacItem } from "stac-ts";
 import { Toaster } from "./components/ui/toaster";
@@ -10,6 +10,7 @@ import Map from "./layers/map";
 import Overlay from "./layers/overlay";
 import type { BBox2D, Color } from "./types/map";
 import type { DatetimeBounds, StacValue } from "./types/stac";
+import getDateTimes from "./utils/datetimes";
 import { getCogTileHref } from "./utils/stac";
 import getDocumentTitle from "./utils/title";
 
@@ -64,6 +65,11 @@ export default function App() {
     bbox,
     datetimeBounds,
   });
+
+  const datetimes = useMemo(
+    () => (value ? getDateTimes(value, items, collections) : null),
+    [value, items, collections]
+  );
 
   // Effects
   useEffect(() => {
@@ -143,6 +149,7 @@ export default function App() {
           setDatetimeBounds={setDatetimeBounds}
           cogTileHref={cogTileHref}
           setCogTileHref={setCogTileHref}
+          datetimes={datetimes}
         ></Overlay>
       </Container>
       <Toaster></Toaster>

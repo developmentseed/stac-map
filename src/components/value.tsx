@@ -78,7 +78,14 @@ export function Value({
   cogTileHref,
   setCogTileHref,
   totalNumOfCollections,
-}: { totalNumOfCollections: number | undefined } & ValueProps) {
+  datetimes,
+}: {
+  totalNumOfCollections: number | undefined;
+  datetimes: {
+    start: Date;
+    end: Date;
+  } | null;
+} & ValueProps) {
   const [search, setSearch] = useState<StacSearch>();
   const [fetchAllCollections, setFetchAllCollections] = useState(false);
   const [thumbnailError, setThumbnailError] = useState(false);
@@ -309,6 +316,7 @@ export function Value({
             value={value}
             items={items}
             collections={collections}
+            datetimes={datetimes}
           />
         )}
 
