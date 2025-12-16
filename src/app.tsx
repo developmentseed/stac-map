@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Box, Container, FileUpload, useFileUpload } from "@chakra-ui/react";
 import type { StacCollection, StacItem } from "stac-ts";
 import { Toaster } from "./components/ui/toaster";
-import useDocumentTitle from "./hooks/document-title";
 import useHrefParam from "./hooks/href-param";
 import useStacChildren from "./hooks/stac-children";
 import useStacFilters from "./hooks/stac-filters";
@@ -11,7 +10,9 @@ import Map from "./layers/map";
 import Overlay from "./layers/overlay";
 import type { BBox2D, Color } from "./types/map";
 import type { DatetimeBounds, StacValue } from "./types/stac";
+import getDateTimes from "./utils/datetimes";
 import { getCogTileHref } from "./utils/stac";
+import getDocumentTitle from "./utils/title";
 
 // TODO make this configurable by the user.
 const lineColor: Color = [207, 63, 2, 100];
@@ -65,8 +66,15 @@ export default function App() {
     datetimeBounds,
   });
 
+  const datetimes = useMemo(
+    () => (value ? getDateTimes(value, items, collections) : null),
+    [value, items, collections]
+  );
+
   // Effects
-  useDocumentTitle(value);
+  useEffect(() => {
+    document.title = getDocumentTitle(value);
+  }, [value]);
 
   useEffect(() => {
     setPicked(undefined);
@@ -99,8 +107,7 @@ export default function App() {
               table={table}
               collections={collections}
               filteredCollections={filteredCollections}
-              items={items}
-              filteredItems={filteredItems}
+              items={filteredItems}
               fillColor={fillColor}
               lineColor={lineColor}
               setBbox={setBbox}
@@ -130,19 +137,19 @@ export default function App() {
           error={error}
           catalogs={catalogs}
           setCollections={setCollections}
-          collections={collections}
-          filteredCollections={filteredCollections}
+          collections={filteredCollections}
+          totalNumOfCollections={collections?.length}
           filter={filter}
           setFilter={setFilter}
           bbox={bbox}
           setPicked={setPicked}
           picked={picked}
-          items={items}
-          filteredItems={filteredItems}
+          items={filteredItems}
           setItems={setItems}
           setDatetimeBounds={setDatetimeBounds}
           cogTileHref={cogTileHref}
           setCogTileHref={setCogTileHref}
+          datetimes={datetimes}
         ></Overlay>
       </Container>
       <Toaster></Toaster>

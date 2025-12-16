@@ -29,9 +29,14 @@ export default function Overlay({
   picked,
   setPicked,
   items,
-  filteredItems,
   ...props
-}: OverlayProps) {
+}: {
+  totalNumOfCollections: number | undefined;
+  datetimes: {
+    start: Date;
+    end: Date;
+  } | null;
+} & OverlayProps) {
   return (
     <SimpleGrid columns={3} gap={4}>
       <GridItem colSpan={1}>
@@ -63,7 +68,6 @@ export default function Overlay({
               value={picked || value}
               fileUpload={fileUpload}
               items={picked ? undefined : items}
-              filteredItems={picked ? undefined : filteredItems}
               {...props}
             />
           </Box>

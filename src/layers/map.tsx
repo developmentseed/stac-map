@@ -24,7 +24,6 @@ export default function Map({
   collections,
   filteredCollections,
   items,
-  filteredItems,
   fillColor,
   lineColor,
   setBbox,
@@ -38,7 +37,6 @@ export default function Map({
   collections: StacCollection[] | undefined;
   filteredCollections: StacCollection[] | undefined;
   items: StacItem[] | undefined;
-  filteredItems: StacItem[] | undefined;
   fillColor: Color;
   lineColor: Color;
   setBbox: (bbox: BBox2D | undefined) => void;
@@ -135,7 +133,7 @@ export default function Map({
     }),
     new GeoJsonLayer({
       id: "items",
-      data: (filteredItems || items) as Feature[] | undefined,
+      data: items as Feature[] | undefined,
       filled: true,
       getFillColor: fillColor,
       getLineColor: lineColor,

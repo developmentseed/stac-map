@@ -46,9 +46,7 @@ export interface SharedValueProps {
   catalogs: StacCatalog[] | undefined;
   setCollections: (collections: StacCollection[] | undefined) => void;
   collections: StacCollection[] | undefined;
-  filteredCollections: StacCollection[] | undefined;
   items: StacItem[] | undefined;
-  filteredItems: StacItem[] | undefined;
   setHref: (href: string | undefined) => void;
   filter: boolean;
   setFilter: (filter: boolean) => void;
@@ -70,10 +68,8 @@ export function Value({
   value,
   catalogs,
   collections,
-  filteredCollections,
   setCollections,
   items,
-  filteredItems,
   setItems,
   filter,
   setFilter,
@@ -81,7 +77,15 @@ export function Value({
   setDatetimeBounds,
   cogTileHref,
   setCogTileHref,
-}: ValueProps) {
+  totalNumOfCollections,
+  datetimes,
+}: {
+  totalNumOfCollections: number | undefined;
+  datetimes: {
+    start: Date;
+    end: Date;
+  } | null;
+} & ValueProps) {
   const [search, setSearch] = useState<StacSearch>();
   const [fetchAllCollections, setFetchAllCollections] = useState(false);
   const [thumbnailError, setThumbnailError] = useState(false);
@@ -131,9 +135,11 @@ export function Value({
     );
   }, [assets]);
 
-  const numberOfCollections = useMemo(() => {
+  const collectionsNumberMatched = useMemo(() => {
     return collectionsResult.data?.pages.at(0)?.numberMatched;
   }, [collectionsResult.data]);
+
+  const totalNumOfItems = items?.length;
 
   useEffect(() => {
     setCollections(
@@ -274,8 +280,8 @@ export function Value({
         {collections && collections.length && (
           <CollectionsSection
             collections={collections}
-            numberOfCollections={numberOfCollections}
-            filteredCollections={filteredCollections}
+            collectionsNumberMatched={collectionsNumberMatched}
+            totalNumOfCollections={totalNumOfCollections}
             setHref={setHref}
           />
         )}
@@ -310,13 +316,14 @@ export function Value({
             value={value}
             items={items}
             collections={collections}
+            datetimes={datetimes}
           />
         )}
 
         {items && (
           <ItemsSection
             items={items}
-            filteredItems={filteredItems}
+            totalNumOfItems={totalNumOfItems}
             setHref={setHref}
           />
         )}

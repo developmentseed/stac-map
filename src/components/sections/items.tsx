@@ -9,17 +9,18 @@ interface ItemsProps {
 }
 
 export default function ItemsSection({
-  filteredItems,
+  totalNumOfItems,
   items,
   ...props
-}: { filteredItems: StacItem[] | undefined } & ItemsProps) {
-  const parenthetical = filteredItems
-    ? `${filteredItems.length}/${items.length}`
-    : items.length;
+}: { totalNumOfItems: number | undefined } & ItemsProps) {
+  const parenthetical =
+    items.length !== totalNumOfItems
+      ? `${items.length}/${totalNumOfItems}`
+      : items.length;
   const title = `Items (${parenthetical})`;
   return (
     <Section title={title} TitleIcon={LuFiles} value="items">
-      <Items items={filteredItems || items} {...props} />
+      <Items items={items} {...props} />
     </Section>
   );
 }

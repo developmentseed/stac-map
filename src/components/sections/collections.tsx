@@ -11,23 +11,21 @@ interface CollectionsProps {
 
 export default function CollectionsSection({
   collections,
-  filteredCollections,
-  numberOfCollections,
+  collectionsNumberMatched,
+  totalNumOfCollections,
   setHref,
 }: {
-  filteredCollections: StacCollection[] | undefined;
-  numberOfCollections: number | undefined;
+  collectionsNumberMatched: number | undefined;
+  totalNumOfCollections: number | undefined;
 } & CollectionsProps) {
-  const parenthetical = filteredCollections
-    ? `${filteredCollections.length}/${numberOfCollections || collections.length}`
-    : collections.length;
+  const parenthetical =
+    collections.length !== collectionsNumberMatched
+      ? `${collections.length}/${collectionsNumberMatched || totalNumOfCollections}`
+      : collections.length;
   const title = `Collections (${parenthetical})`;
   return (
     <Section title={title} TitleIcon={LuFolderPlus} value="collections">
-      <Collections
-        collections={filteredCollections || collections}
-        setHref={setHref}
-      />
+      <Collections collections={collections} setHref={setHref} />
     </Section>
   );
 }
