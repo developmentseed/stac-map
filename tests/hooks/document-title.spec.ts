@@ -19,9 +19,7 @@ describe("useDocumentTitle logic", () => {
   });
 
   function setDocumentTitle(value: StacValue | undefined) {
-    const title = getDocumentTitle(value);
-    document.title = title;
-    return;
+    document.title = getDocumentTitle(value);
   }
 
   test("should set default title when value is undefined", () => {

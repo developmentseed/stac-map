@@ -31,7 +31,7 @@ export default function Overlay({
   items,
   ...props
 }: {
-  totalNumOfCollections: number | undefined | undefined;
+  totalNumOfCollections: number | undefined;
   datetimes: {
     start: Date;
     end: Date;
