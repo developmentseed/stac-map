@@ -43,7 +43,7 @@ jobs:
           script: |
             const { createFailedComment } = require('./.github/workflows/github-pr-update.cjs')
             await createFailedComment({ github, context, core })
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           path: ${{ env.DIST_DIRECTORY }}
   deploy:
@@ -55,7 +55,7 @@ jobs:
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           path: ${{ env.DIST_DIRECTORY }}
       - name: Check if bucket exists
