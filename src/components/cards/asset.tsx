@@ -12,7 +12,7 @@ import {
   Span,
 } from "@chakra-ui/react";
 import type { StacAsset } from "stac-ts";
-import { isCog, isVisual } from "../../utils/stac";
+import { isGeoTiff } from "../../utils/stac";
 import Properties from "../sections/properties";
 
 export default function AssetCard({
@@ -62,7 +62,7 @@ export default function AssetCard({
           </Collapsible.Root>
         )}
         <HStack>
-          {isCog(asset) && isVisual(asset) && (
+          {isGeoTiff(asset) && (
             <Checkbox.Root
               checked={checked}
               onCheckedChange={(e) => {
@@ -75,9 +75,7 @@ export default function AssetCard({
               <Checkbox.Label>Visualize</Checkbox.Label>
             </Checkbox.Root>
           )}
-
           <Span flex={"1"} />
-
           <ButtonGroup size="sm" variant="outline">
             <Button asChild>
               <a href={asset.href} target="_blank">

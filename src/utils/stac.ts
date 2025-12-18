@@ -251,10 +251,8 @@ export function getImportantLinks(links: StacLink[]) {
   return { rootLink, collectionsLink, nextLink, prevLink, filteredLinks };
 }
 
-export function isCog(asset: StacAsset) {
-  return (
-    asset.type === "image/tiff; application=geotiff; profile=cloud-optimized"
-  );
+export function isGeoTiff(asset: StacAsset) {
+  return asset.type?.startsWith("image/tiff; application=geotiff");
 }
 
 export function isVisual(asset: StacAsset) {
@@ -273,8 +271,8 @@ export function getCogTileHref(value: StacValue): string | undefined {
     return undefined;
   }
 
-  for (const asset of Object.values(value.assets)) {
-    if (isCog(asset) && isVisual(asset)) {
+  for (const [key, asset] of Object.entries(value.assets)) {
+    if (isGeoTiff(asset) && (isVisual(asset) || key === "visual")) {
       return asset.href as string;
     }
   }
