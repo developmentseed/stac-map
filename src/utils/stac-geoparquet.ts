@@ -11,6 +11,20 @@ import {
 import * as stacWasm from "stac-wasm";
 import type { DatetimeBounds, StacItemCollection } from "../types/stac";
 
+// @ts-expect-error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+export enum ValidGeometryType {
+  Point = "point",
+  Polygon = "polygon",
+}
+
+const isValidGeometryType = (
+  geometryType: string
+): geometryType is ValidGeometryType => {
+  return Object.values(ValidGeometryType).includes(
+    geometryType as ValidGeometryType
+  );
+};
+
 export async function getStacGeoparquet(
   href: string,
   connection: AsyncDuckDBConnection
@@ -18,9 +32,12 @@ export async function getStacGeoparquet(
   const { startDatetimeColumnName, endDatetimeColumnName } =
     await getStacGeoparquetDatetimeColumns(href, connection);
 
-  const summaryResult = await connection.query(
-    `SELECT COUNT(*) as count, MIN(bbox.xmin) as xmin, MIN(bbox.ymin) as ymin, MAX(bbox.xmax) as xmax, MAX(bbox.ymax) as ymax, MIN(${startDatetimeColumnName}) as start_datetime, MAX(${endDatetimeColumnName}) as end_datetime FROM read_parquet('${href}')`
-  );
+  const query =
+    startDatetimeColumnName && endDatetimeColumnName
+      ? `SELECT COUNT(*) as count, MIN(bbox.xmin) as xmin, MIN(bbox.ymin) as ymin, MAX(bbox.xmax) as xmax, MAX(bbox.ymax) as ymax, MIN(${startDatetimeColumnName}) as start_datetime, MAX(${endDatetimeColumnName}) as end_datetime FROM read_parquet('${href}')`
+      : `SELECT COUNT(*) as count, MIN(bbox.xmin) as xmin, MIN(bbox.ymin) as ymin, MAX(bbox.xmax) as xmax, MAX(bbox.ymax) as ymax FROM read_parquet('${href}')`;
+
+  const summaryResult = await connection.query(query);
   const summaryRow = summaryResult.toArray().map((row) => row.toJSON())[0];
 
   const kvMetadataResult = await connection.query(
@@ -65,12 +82,21 @@ export async function getStacGeoparquetTable(
   const { startDatetimeColumnName, endDatetimeColumnName } =
     await getStacGeoparquetDatetimeColumns(href, connection);
 
-  let query = `SELECT ST_AsWKB(geometry) as geometry, id FROM read_parquet('${href}')`;
+  let query = `SELECT ST_AsWKB(geometry) AS geometry, ST_GeometryType(geometry) AS geometry_type, id FROM read_parquet('${href}')`;
   if (datetimeBounds) {
     query += ` WHERE ${startDatetimeColumnName} >= DATETIME '${datetimeBounds.start.toISOString()}'  AND ${endDatetimeColumnName} <= DATETIME '${datetimeBounds.end.toISOString()}'`;
   }
   const result = await connection.query(query);
   const geometry: Uint8Array[] = result.getChildAt(0)?.toArray();
+  const geometryType: string = result
+    .getChildAt(1)
+    ?.toArray()[0]
+    ?.toLowerCase();
+  if (!isValidGeometryType(geometryType)) {
+    throw new Error(
+      `Invalid geometry type: ${geometryType}. We currently do not support this type.`
+    );
+  }
   const wkb = new Uint8Array(geometry?.flatMap((array) => [...array]));
   const valueOffsets = new Int32Array(geometry.length + 1);
   for (let i = 0, len = geometry.length; i < len; i++) {
@@ -82,17 +108,35 @@ export async function getStacGeoparquetTable(
     data: wkb,
     valueOffsets,
   });
-  const polygons = io.parseWkb(data, io.WKBType.Polygon, 2);
-  const table = new Table({
-    // @ts-expect-error: 2769
-    geometry: makeVector(polygons),
-    id: vectorFromArray(result.getChild("id")?.toArray()),
-  });
-  table.schema.fields[0].metadata.set(
-    "ARROW:extension:name",
-    "geoarrow.polygon"
-  );
-  return table;
+  let table: Table | undefined = undefined;
+  if (geometryType === ValidGeometryType.Polygon) {
+    const polygons = io.parseWkb(data, io.WKBType.Polygon, 2);
+    table = new Table({
+      // @ts-expect-error: 2769
+      geometry: makeVector(polygons),
+      id: vectorFromArray(result.getChild("id")?.toArray()),
+    });
+    table.schema.fields[0].metadata.set(
+      "ARROW:extension:name",
+      "geoarrow.polygon"
+    );
+  } else if (geometryType === ValidGeometryType.Point) {
+    const points = io.parseWkb(data, io.WKBType.Point, 2);
+    table = new Table({
+      // @ts-expect-error: 2769
+      geometry: makeVector(points),
+      id: vectorFromArray(result.getChild("id")?.toArray()),
+    });
+    table.schema.fields[0].metadata.set(
+      "ARROW:extension:name",
+      "geoarrow.point"
+    );
+  }
+
+  return {
+    table: table,
+    geometryType: geometryType,
+  };
 }
 
 export async function getStacGeoparquetItem(
@@ -117,6 +161,16 @@ async function getStacGeoparquetDatetimeColumns(
   );
   const describe = describeResult.toArray().map((row) => row.toJSON());
   const columnNames = describe.map((row) => row.column_name);
+  const containsDates: boolean = columnNames.some((columnName: string) => {
+    return columnName.includes("date");
+  });
+
+  if (!containsDates)
+    return {
+      startDatetimeColumnName: null,
+      endDatetimeColumnName: null,
+    };
+
   const startDatetimeColumnName = columnNames.includes("start_datetime")
     ? "start_datetime"
     : "datetime";

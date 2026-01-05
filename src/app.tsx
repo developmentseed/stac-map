@@ -44,6 +44,7 @@ export default function App() {
     error,
     items: linkedItems,
     table,
+    geometryType,
     stacGeoparquetItem,
   } = useStacValue({
     href,
@@ -105,6 +106,7 @@ export default function App() {
             <Map
               value={value}
               table={table}
+              geometryType={geometryType}
               collections={collections}
               filteredCollections={filteredCollections}
               items={filteredItems}

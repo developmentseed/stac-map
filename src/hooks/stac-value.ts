@@ -77,7 +77,10 @@ export default function useStacValue({
   });
   const value = jsonResult.data || stacGeoparquetResult.data || undefined;
   const table = enableStacGeoparquet
-    ? stacGeoparquetTableResult.data || undefined
+    ? stacGeoparquetTableResult.data?.table || undefined
+    : undefined;
+  const parquetGeometryType = enableStacGeoparquet
+    ? stacGeoparquetTableResult.data?.geometryType || undefined
     : undefined;
   const error =
     jsonResult.error ||
@@ -102,11 +105,11 @@ export default function useStacValue({
       };
     },
   });
-
   return {
     value,
     error,
     table,
+    geometryType: parquetGeometryType,
     stacGeoparquetItem: stacGeoparquetItem.data,
     items: itemsResult.data.length > 0 ? itemsResult.data : undefined,
   };
