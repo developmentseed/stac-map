@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { UseFileUploadReturn } from "@chakra-ui/react";
 import { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { useQueries, useQuery } from "@tanstack/react-query";
+import type { Table } from "apache-arrow";
 import type { StacItem } from "stac-ts";
 import { useDuckDb } from "duckdb-wasm-kit";
 import type { DatetimeBounds, StacValue } from "../types/stac";
@@ -11,6 +12,13 @@ import {
   getStacGeoparquetItem,
   getStacGeoparquetTable,
 } from "../utils/stac-geoparquet";
+import { ValidGeometryType } from "../utils/stac-geoparquet";
+
+export interface GeoparquetTable {
+  // eslint-disable-next-line
+  table: Table<any> | undefined;
+  geometryType: ValidGeometryType | undefined;
+}
 
 export default function useStacValue({
   href,
@@ -76,12 +84,13 @@ export default function useStacValue({
     enabled: enableStacGeoparquet && !!stacGeoparquetItemId,
   });
   const value = jsonResult.data || stacGeoparquetResult.data || undefined;
-  const table = enableStacGeoparquet
-    ? stacGeoparquetTableResult.data?.table || undefined
+  const table: GeoparquetTable | undefined = enableStacGeoparquet
+    ? {
+        table: stacGeoparquetTableResult.data?.table || undefined,
+        geometryType: stacGeoparquetTableResult.data?.geometryType || undefined,
+      }
     : undefined;
-  const parquetGeometryType = enableStacGeoparquet
-    ? stacGeoparquetTableResult.data?.geometryType || undefined
-    : undefined;
+
   const error =
     jsonResult.error ||
     stacGeoparquetResult.error ||
@@ -108,8 +117,7 @@ export default function useStacValue({
   return {
     value,
     error,
-    table,
-    geometryType: parquetGeometryType,
+    geoparqetTable: table,
     stacGeoparquetItem: stacGeoparquetItem.data,
     items: itemsResult.data.length > 0 ? itemsResult.data : undefined,
   };

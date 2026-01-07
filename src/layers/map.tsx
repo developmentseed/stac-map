@@ -15,10 +15,10 @@ import {
 import bbox from "@turf/bbox";
 import bboxPolygon from "@turf/bbox-polygon";
 import "maplibre-gl/dist/maplibre-gl.css";
-import type { Table } from "apache-arrow";
 import type { SpatialExtent, StacCollection, StacItem } from "stac-ts";
 import type { BBox, Feature, FeatureCollection } from "geojson";
 import { useColorModeValue } from "../components/ui/color-mode";
+import type { GeoparquetTable } from "../hooks/stac-value";
 import type { BBox2D, Color } from "../types/map";
 import type { StacValue } from "../types/stac";
 import { ValidGeometryType } from "../utils/stac-geoparquet";
@@ -33,10 +33,9 @@ export default function Map({
   setBbox,
   picked,
   setPicked,
-  table,
+  geoparquetTable,
   setStacGeoparquetItemId,
   cogTileHref,
-  geometryType,
 }: {
   value: StacValue | undefined;
   collections: StacCollection[] | undefined;
@@ -47,16 +46,17 @@ export default function Map({
   setBbox: (bbox: BBox2D | undefined) => void;
   picked: StacValue | undefined;
   setPicked: (picked: StacValue | undefined) => void;
-  table: Table | undefined;
+  geoparquetTable: GeoparquetTable | undefined;
   setStacGeoparquetItemId: (id: string | undefined) => void;
   cogTileHref: string | undefined;
-  geometryType: string | undefined;
 }) {
   const mapRef = useRef<MapRef>(null);
   const mapStyle = useColorModeValue(
     "positron-gl-style",
     "dark-matter-gl-style"
   );
+  const table = geoparquetTable?.table;
+  const geometryType = geoparquetTable?.geometryType;
   const valueGeoJson = useMemo(() => {
     if (value) {
       return valueToGeoJson(value);
@@ -194,8 +194,11 @@ export default function Map({
           id: "table-point",
           data: table,
           getFillColor: fillColor,
-          opacity: 0.9,
-          radiusMinPixels: 0.1,
+          getPosition: table.getChild("geometry")!,
+          getLineColor: lineColor,
+          getLineWidth: 2,
+          opacity: 1,
+          radiusMinPixels: 0.5,
           pickable: true,
           onClick: (info) => {
             setStacGeoparquetItemId(table.getChild("id")?.get(info.index));

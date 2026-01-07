@@ -124,7 +124,7 @@ export async function getStacGeoparquetTable(
     const points = io.parseWkb(data, io.WKBType.Point, 2);
     table = new Table({
       // @ts-expect-error: 2769
-      geometry: makeVector(points),
+      geometry: points,
       id: vectorFromArray(result.getChild("id")?.toArray()),
     });
     table.schema.fields[0].metadata.set(
