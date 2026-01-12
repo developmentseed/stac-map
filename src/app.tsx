@@ -11,7 +11,7 @@ import Overlay from "./layers/overlay";
 import type { BBox2D, Color } from "./types/map";
 import type { DatetimeBounds, StacValue } from "./types/stac";
 import getDateTimes from "./utils/datetimes";
-import { getcogHref } from "./utils/stac";
+import { getCogHref } from "./utils/stac";
 import getDocumentTitle from "./utils/title";
 
 // TODO make this configurable by the user.
@@ -80,11 +80,11 @@ export default function App() {
     setPicked(undefined);
     setItems(undefined);
     setDatetimeBounds(undefined);
-    setcogHref(value && getcogHref(value));
+    setcogHref(value && getCogHref(value));
   }, [value]);
 
   useEffect(() => {
-    setcogHref(picked && getcogHref(picked));
+    setcogHref(picked && getCogHref(picked));
   }, [picked]);
 
   useEffect(() => {

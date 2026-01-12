@@ -255,24 +255,13 @@ export function isGeoTiff(asset: StacAsset) {
   return asset.type?.startsWith("image/tiff; application=geotiff");
 }
 
-export function isVisual(asset: StacAsset) {
-  if (asset.roles) {
-    for (const role of asset.roles) {
-      if (role === "visual" || role === "thumbnail") {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-export function getcogHref(value: StacValue): string | undefined {
+export function getCogHref(value: StacValue): string | undefined {
   if (!value.assets) {
     return undefined;
   }
 
-  for (const [key, asset] of Object.entries(value.assets)) {
-    if (isGeoTiff(asset) && (isVisual(asset) || key === "visual")) {
+  for (const asset of Object.values(value.assets)) {
+    if (isGeoTiff(asset)) {
       return asset.href as string;
     }
   }
