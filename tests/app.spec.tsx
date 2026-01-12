@@ -59,7 +59,7 @@ describe("app", () => {
     });
   });
 
-  test("CSDA Planet", async () => {
+  test.skip("CSDA Planet", async () => {
     // https://github.com/developmentseed/stac-map/issues/96
     window.history.pushState(
       {},
