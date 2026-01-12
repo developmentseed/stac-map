@@ -6,8 +6,8 @@ import Section from "../section";
 
 interface AssetsProps {
   assets: StacAssets;
-  cogTileHref: string | undefined;
-  setCogTileHref: (href: string | undefined) => void;
+  cogHref: string | undefined;
+  setcogHref: (href: string | undefined) => void;
 }
 
 export default function AssetsSection({ ...props }: AssetsProps) {
@@ -18,7 +18,7 @@ export default function AssetsSection({ ...props }: AssetsProps) {
   );
 }
 
-function Assets({ assets, cogTileHref, setCogTileHref }: AssetsProps) {
+function Assets({ assets, cogHref, setcogHref }: AssetsProps) {
   return (
     <DataList.Root>
       {Object.keys(assets).map((key) => (
@@ -27,8 +27,8 @@ function Assets({ assets, cogTileHref, setCogTileHref }: AssetsProps) {
           <DataList.ItemValue>
             <AssetCard
               asset={assets[key]}
-              cogTileHref={cogTileHref}
-              setCogTileHref={setCogTileHref}
+              cogHref={cogHref}
+              setcogHref={setcogHref}
             />
           </DataList.ItemValue>
         </DataList.Item>

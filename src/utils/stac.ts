@@ -266,7 +266,7 @@ export function isVisual(asset: StacAsset) {
   return false;
 }
 
-export function getCogTileHref(value: StacValue): string | undefined {
+export function getcogHref(value: StacValue): string | undefined {
   if (!value.assets) {
     return undefined;
   }

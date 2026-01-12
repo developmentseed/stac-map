@@ -11,7 +11,7 @@ import Overlay from "./layers/overlay";
 import type { BBox2D, Color } from "./types/map";
 import type { DatetimeBounds, StacValue } from "./types/stac";
 import getDateTimes from "./utils/datetimes";
-import { getCogTileHref } from "./utils/stac";
+import { getcogHref } from "./utils/stac";
 import getDocumentTitle from "./utils/title";
 
 // TODO make this configurable by the user.
@@ -36,7 +36,7 @@ export default function App() {
   const [datetimeBounds, setDatetimeBounds] = useState<DatetimeBounds>();
   const [filter, setFilter] = useState(true);
   const [stacGeoparquetItemId, setStacGeoparquetItemId] = useState<string>();
-  const [cogTileHref, setCogTileHref] = useState<string>();
+  const [cogHref, setcogHref] = useState<string>();
 
   // Derived state
   const {
@@ -80,11 +80,11 @@ export default function App() {
     setPicked(undefined);
     setItems(undefined);
     setDatetimeBounds(undefined);
-    setCogTileHref(value && getCogTileHref(value));
+    setcogHref(value && getcogHref(value));
   }, [value]);
 
   useEffect(() => {
-    setCogTileHref(picked && getCogTileHref(picked));
+    setcogHref(picked && getcogHref(picked));
   }, [picked]);
 
   useEffect(() => {
@@ -114,7 +114,7 @@ export default function App() {
               picked={picked}
               setPicked={setPicked}
               setStacGeoparquetItemId={setStacGeoparquetItemId}
-              cogTileHref={cogTileHref}
+              cogHref={cogHref}
             ></Map>
           </FileUpload.Dropzone>
         </FileUpload.RootProvider>
@@ -147,8 +147,8 @@ export default function App() {
           items={filteredItems}
           setItems={setItems}
           setDatetimeBounds={setDatetimeBounds}
-          cogTileHref={cogTileHref}
-          setCogTileHref={setCogTileHref}
+          cogHref={cogHref}
+          setcogHref={setcogHref}
           datetimes={datetimes}
         ></Overlay>
       </Container>

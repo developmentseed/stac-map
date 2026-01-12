@@ -38,6 +38,8 @@
     "@deck.gl/geo-layers": "^9.2.5",
     "@deck.gl/layers": "^9.2.5",
     "@deck.gl/mapbox": "^9.2.5",
+    "@developmentseed/deck.gl-geotiff": "^0.1.0",
+    "@developmentseed/deck.gl-raster": "^0.1.0",
     "@duckdb/duckdb-wasm": "^1.32.0",
     "@emotion/react": "^11.13.5",
     "@geoarrow/deck.gl-layers": "^0.3.0",

@@ -17,18 +17,18 @@ import Properties from "../sections/properties";
 
 export default function AssetCard({
   asset,
-  cogTileHref,
-  setCogTileHref,
+  cogHref,
+  setcogHref,
 }: {
   asset: StacAsset;
-  cogTileHref: string | undefined;
-  setCogTileHref: (href: string | undefined) => void;
+  cogHref: string | undefined;
+  setcogHref: (href: string | undefined) => void;
 }) {
   const [imageError, setImageError] = useState(false);
   // eslint-disable-next-line
   const { href, roles, type, title, ...properties } = asset;
 
-  const checked = cogTileHref === asset.href;
+  const checked = cogHref === asset.href;
 
   return (
     <Card.Root size={"sm"} w="full">
@@ -66,8 +66,8 @@ export default function AssetCard({
             <Checkbox.Root
               checked={checked}
               onCheckedChange={(e) => {
-                if (e.checked) setCogTileHref(asset.href);
-                else setCogTileHref(undefined);
+                if (e.checked) setcogHref(asset.href);
+                else setcogHref(undefined);
               }}
             >
               <Checkbox.HiddenInput />

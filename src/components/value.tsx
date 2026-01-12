@@ -53,8 +53,8 @@ export interface SharedValueProps {
   bbox: BBox2D | undefined;
   setItems: (items: StacItem[] | undefined) => void;
   setDatetimeBounds: (bounds: DatetimeBounds | undefined) => void;
-  cogTileHref: string | undefined;
-  setCogTileHref: (href: string | undefined) => void;
+  cogHref: string | undefined;
+  setcogHref: (href: string | undefined) => void;
 }
 
 interface ValueProps extends SharedValueProps {
@@ -75,8 +75,8 @@ export function Value({
   setFilter,
   bbox,
   setDatetimeBounds,
-  cogTileHref,
-  setCogTileHref,
+  cogHref,
+  setcogHref,
   totalNumOfCollections,
   datetimes,
 }: {
@@ -331,8 +331,8 @@ export function Value({
         {assets && (
           <AssetsSection
             assets={assets}
-            cogTileHref={cogTileHref}
-            setCogTileHref={setCogTileHref}
+            cogHref={cogHref}
+            setcogHref={setcogHref}
           />
         )}
 
