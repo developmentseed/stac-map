@@ -193,12 +193,10 @@ export default function Map({
         new GeoArrowScatterplotLayer({
           id: "table-point",
           data: table,
-          getFillColor: fillColor,
+          getColor: lineColor,
+          getRadius: 2,
           getPosition: table.getChild("geometry")!,
-          getLineColor: lineColor,
-          getLineWidth: 2,
-          opacity: 1,
-          radiusMinPixels: 0.5,
+          radiusUnits: "pixels",
           pickable: true,
           onClick: (info) => {
             setStacGeoparquetItemId(table.getChild("id")?.get(info.index));
