@@ -1,12 +1,11 @@
-import { type RefObject, useEffect, useMemo, useRef } from "react";
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import {
   Map as MaplibreMap,
   type MapRef,
   useControl,
 } from "react-map-gl/maplibre";
 import { type DeckProps, Layer } from "@deck.gl/core";
-import { TileLayer } from "@deck.gl/geo-layers";
-import { BitmapLayer, GeoJsonLayer } from "@deck.gl/layers";
+import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import {
   GeoArrowPolygonLayer,
@@ -52,6 +51,7 @@ export default function Map({
   cogHref: string | undefined;
 }) {
   const mapRef = useRef<MapRef>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const mapStyle = useColorModeValue(
     "positron-gl-style",
     "dark-matter-gl-style"
@@ -186,7 +186,7 @@ export default function Map({
   }
 
   useEffect(() => {
-    if (value && mapRef.current) {
+    if (value && mapRef.current && mapLoaded) {
       const padding = {
         top: window.innerHeight / 10,
         bottom: window.innerHeight / 20,
@@ -196,7 +196,7 @@ export default function Map({
       const bbox = getBbox(value, collections);
       if (bbox) mapRef.current.fitBounds(bbox, { linear: true, padding });
     }
-  }, [value, collections]);
+  }, [value, collections, mapLoaded]);
 
   return (
     <MaplibreMap
@@ -209,6 +209,7 @@ export default function Map({
       }}
       mapStyle={`https://basemaps.cartocdn.com/gl/${mapStyle}/style.json`}
       style={{ zIndex: 0 }}
+      onLoad={() => setMapLoaded(true)}
       onMoveEnd={() => {
         if (mapRef.current && !mapRef.current.isMoving())
           setBbox(sanitizeBbox(mapRef.current?.getBounds().toArray().flat()));
