@@ -6,6 +6,6 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/stac-map/",
+  base: process.env.VITE_BASE_PATH || "/stac-map/",
   plugins: [react(), tsconfigPaths(), wasm(), topLevelAwait()],
 });

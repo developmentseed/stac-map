@@ -60,6 +60,30 @@ This requires our commit messages to conform to [Conventional Commits](https://w
 
 See [deploy.yaml](./.github/workflows/deploy.yaml) for a (drop-dead simple) example of deploying this application as a static site via Github Pages.
 
+### White-label deployment
+
+You can deploy your own customized version of stac-map using environment variables:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_BASE_PATH` | URL path prefix (e.g., `/my-app/`) | `/stac-map/` |
+| `VITE_DEFAULT_HREF` | STAC resource to load on startup | None (shows intro) |
+
+Example:
+
+```shell
+VITE_BASE_PATH=/ VITE_DEFAULT_HREF=https://my-stac-api.com yarn build
+```
+
+Or create a `.env` file:
+
+```shell
+VITE_BASE_PATH=/
+VITE_DEFAULT_HREF=https://my-stac-api.com
+```
+
+Then run `yarn build` and deploy the `dist/` directory to your static hosting provider.
+
 ## Versioning
 
 For now, we use a form of [Sentimental Versioning](https://github.com/dominictarr/sentimental-versioning#readme), where we use MAJOR, MINOR, and PATCH versions to communicate the "weight" of changes.

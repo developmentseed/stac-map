@@ -5,7 +5,7 @@ function getCurrentHref(): string {
 }
 
 function getInitialHref(): string | undefined {
-  const href = getCurrentHref();
+  const href = getCurrentHref() || import.meta.env.VITE_DEFAULT_HREF || "";
   try {
     new URL(href);
   } catch {
