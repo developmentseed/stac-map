@@ -1,0 +1,156 @@
+import { useEffect, useRef } from "react";
+import { useMemo, useState } from "react";
+import {
+  Map as MaplibreMap,
+  type MapRef,
+  useControl,
+} from "react-map-gl/maplibre";
+import { type DeckProps } from "@deck.gl/core";
+import { GeoJsonLayer } from "@deck.gl/layers";
+import { MapboxOverlay } from "@deck.gl/mapbox";
+import bbox from "@turf/bbox";
+import bboxPolygon from "@turf/bbox-polygon";
+import "maplibre-gl/dist/maplibre-gl.css";
+import type { SpatialExtent, StacCollection } from "stac-ts";
+import type { BBox, FeatureCollection } from "geojson";
+import { useColorModeValue } from "../components/ui/color-mode";
+import { useStore } from "../store";
+import type { BBox2D } from "../types/map";
+import type { StacValue } from "../types/stac";
+
+export default function Map() {
+  const mapRef = useRef<MapRef>(null);
+  const mapStyle = useColorModeValue(
+    "positron-gl-style",
+    "dark-matter-gl-style"
+  );
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const value = useStore((store) => store.value);
+  const collections = useStore((store) => store.collections);
+  const lineColor = useStore((store) => store.lineColor);
+  const lineWidth = useStore((store) => store.lineWidth);
+
+  const collectionsGeoJson = useMemo(() => {
+    return collections
+      ?.map(
+        (collection) =>
+          collection.extent?.spatial?.bbox &&
+          bboxPolygon(getCollectionExtents(collection) as BBox)
+      )
+      .filter((feature) => !!feature);
+  }, [collections]);
+
+  useEffect(() => {
+    if (value && mapRef.current && isMapLoaded) {
+      const padding = {
+        top: window.innerHeight / 10,
+        bottom: window.innerHeight / 20,
+        right: window.innerWidth / 20,
+        left: window.innerWidth / 20 + window.innerWidth / 3,
+      };
+      const bbox = getBbox(value, collections);
+      if (bbox) mapRef.current.fitBounds(bbox, { linear: true, padding });
+    }
+  }, [value, isMapLoaded, collections]);
+
+  const layers = [];
+
+  if (collections) {
+    layers.push(
+      new GeoJsonLayer({
+        id: "collections",
+        data: collectionsGeoJson,
+        filled: false,
+        getLineColor: lineColor,
+        getLineWidth: lineWidth,
+        lineWidthUnits: "pixels",
+      })
+    );
+  }
+
+  return (
+    <MaplibreMap
+      id="map"
+      ref={mapRef}
+      initialViewState={{
+        longitude: 0,
+        latitude: 0,
+        zoom: 1,
+      }}
+      mapStyle={`https://basemaps.cartocdn.com/gl/${mapStyle}/style.json`}
+      style={{ zIndex: 0 }}
+      onLoad={() => setIsMapLoaded(true)}
+    >
+      <DeckGLOverlay layers={layers}></DeckGLOverlay>
+    </MaplibreMap>
+  );
+}
+
+function DeckGLOverlay(props: DeckProps) {
+  const control = useControl<MapboxOverlay>(() => new MapboxOverlay({}));
+  control.setProps(props);
+  return <></>;
+}
+
+function getCollectionExtents(collection: StacCollection): SpatialExtent {
+  const spatialExtent = collection.extent?.spatial;
+  // check if bbox is a list of lists, otherwise its a single list of nums
+  return Array.isArray(spatialExtent?.bbox?.[0])
+    ? spatialExtent?.bbox[0]
+    : (spatialExtent?.bbox as unknown as SpatialExtent);
+}
+
+function getBbox(
+  value: StacValue,
+  collections: StacCollection[] | null
+): BBox2D | undefined {
+  let valueBbox;
+  switch (value.type) {
+    case "Catalog":
+      valueBbox =
+        collections && collections.length > 0
+          ? sanitizeBbox(
+              collections
+                .map((collection) => getCollectionExtents(collection))
+                .filter((extents) => !!extents)
+                .reduce((accumulator, currentValue) => {
+                  return [
+                    Math.min(accumulator[0], currentValue[0]),
+                    Math.min(accumulator[1], currentValue[1]),
+                    Math.max(accumulator[2], currentValue[2]),
+                    Math.max(accumulator[3], currentValue[3]),
+                  ];
+                })
+            )
+          : undefined;
+      break;
+    case "Collection":
+      valueBbox = getCollectionExtents(value);
+      break;
+    case "Feature":
+      valueBbox = value.bbox;
+      break;
+    case "FeatureCollection":
+      valueBbox = bbox(value as FeatureCollection) as BBox2D;
+      break;
+  }
+  return valueBbox ? sanitizeBbox(valueBbox) : undefined;
+}
+
+function sanitizeBbox(bbox: BBox | SpatialExtent): BBox2D {
+  if (bbox.length === 6) {
+    return [
+      Math.max(bbox[0], -180),
+      Math.max(bbox[1], -90),
+      Math.min(bbox[3], 180),
+      Math.min(bbox[4], 90),
+    ];
+  } else {
+    return [
+      Math.max(bbox[0], -180),
+      Math.max(bbox[1], -90),
+      Math.min(bbox[2], 180),
+      Math.min(bbox[3], 90),
+    ];
+  }
+}
