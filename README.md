@@ -64,10 +64,10 @@ See [deploy.yaml](./.github/workflows/deploy.yaml) for a (drop-dead simple) exam
 
 You can deploy your own customized version of stac-map using environment variables:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `VITE_BASE_PATH` | URL path prefix (e.g., `/my-app/`) | `/stac-map/` |
-| `VITE_DEFAULT_HREF` | STAC resource to load on startup | None (shows intro) |
+| Variable            | Description                        | Default            |
+| ------------------- | ---------------------------------- | ------------------ |
+| `VITE_BASE_PATH`    | URL path prefix (e.g., `/my-app/`) | `/stac-map/`       |
+| `VITE_DEFAULT_HREF` | STAC resource to load on startup   | None (shows intro) |
 
 Example:
 
