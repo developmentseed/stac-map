@@ -308,6 +308,7 @@ function CollectionActionBar({
   setFetchAllCollections,
   data,
   hasNextPage,
+  isFetching,
   fetchNextPage,
 }: {
   fetchAllCollections: boolean;
@@ -317,7 +318,7 @@ function CollectionActionBar({
   const numberMatched = data?.pages.at(0)?.numberMatched;
 
   return (
-    <ActionBar.Root open={true}>
+    <ActionBar.Root open={!!collections}>
       <Portal>
         <ActionBar.Positioner>
           <ActionBar.Content>
@@ -335,7 +336,7 @@ function CollectionActionBar({
                 <ButtonGroup variant="outline" size="sm">
                   <Button
                     onClick={() => fetchNextPage()}
-                    disabled={!hasNextPage}
+                    disabled={isFetching || fetchAllCollections}
                   >
                     <LuForward />
                     Fetch next page
@@ -344,7 +345,6 @@ function CollectionActionBar({
                     onClick={() =>
                       setFetchAllCollections((previous) => !previous)
                     }
-                    disabled={!hasNextPage}
                   >
                     {fetchAllCollections ? <LuPause /> : <LuPlay />}
                     {fetchAllCollections && hasNextPage ? "Pause" : "Fetch all"}
