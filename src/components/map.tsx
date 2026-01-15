@@ -104,7 +104,7 @@ export default function Map() {
       new GeoJsonLayer({
         id: "value",
         data: valueGeoJson,
-        filled: !geotiffHref && !searchItems,
+        filled: !(geotiffHref || searchItems),
         getFillColor: fillColor,
         getLineColor: lineColor,
         getLineWidth: lineWidth,
@@ -134,7 +134,7 @@ export default function Map() {
         id: "collections",
         data: collectionsGeoJson,
         filled: true,
-        getFillColor: [fillColor[0], fillColor[1], fillColor[2], 1],
+        getFillColor: [fillColor[0], fillColor[1], fillColor[2], 0],
         getLineColor: lineColor,
         getLineWidth: lineWidth,
         lineWidthUnits: "pixels",
