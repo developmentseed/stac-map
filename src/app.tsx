@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { MapProvider } from "react-map-gl/maplibre";
 import { Box, Container } from "@chakra-ui/react";
 import Map from "./components/map";
 import Overlay from "./components/overlay";
@@ -38,7 +39,7 @@ export default function App() {
   }, [setHref]);
 
   return (
-    <>
+    <MapProvider>
       <Box h={"100dvh"}>
         <Map />
       </Box>
@@ -55,6 +56,6 @@ export default function App() {
         <Overlay />
       </Container>
       <Toaster />
-    </>
+    </MapProvider>
   );
 }

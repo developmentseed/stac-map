@@ -13,7 +13,7 @@ export function useStacJson({
   const result = useQuery({
     queryKey: ["stac-json", href],
     enabled,
-    queryFn: async () => (href && (await fetchStac(href))) || null,
+    queryFn: async () => (href && (await fetchStac({ href }))) || null,
   });
 
   useEffect(() => {

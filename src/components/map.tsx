@@ -18,6 +18,7 @@ import { useColorModeValue } from "../components/ui/color-mode";
 import { useStore } from "../store";
 import type { BBox2D } from "../types/map";
 import type { StacValue } from "../types/stac";
+import { sanitizeBbox } from "../utils/map";
 
 export default function Map() {
   const mapRef = useRef<MapRef>(null);
@@ -76,7 +77,7 @@ export default function Map() {
       new GeoJsonLayer({
         id: "value",
         data: valueGeoJson,
-        filled: true,
+        filled: !geotiffHref,
         getFillColor: fillColor,
         getLineColor: lineColor,
         getLineWidth: lineWidth,
@@ -180,22 +181,4 @@ function getBbox(
       break;
   }
   return valueBbox ? sanitizeBbox(valueBbox) : undefined;
-}
-
-function sanitizeBbox(bbox: BBox | SpatialExtent): BBox2D {
-  if (bbox.length === 6) {
-    return [
-      Math.max(bbox[0], -180),
-      Math.max(bbox[1], -90),
-      Math.min(bbox[3], 180),
-      Math.min(bbox[4], 90),
-    ];
-  } else {
-    return [
-      Math.max(bbox[0], -180),
-      Math.max(bbox[1], -90),
-      Math.min(bbox[2], 180),
-      Math.min(bbox[3], 90),
-    ];
-  }
 }

@@ -1,4 +1,4 @@
-import type { StacAsset } from "stac-ts";
+import type { StacAsset, StacLink } from "stac-ts";
 import type { StacValue } from "../types/stac";
 
 export function getStacValueTitle(value: StacValue) {
@@ -28,11 +28,18 @@ export function getStacValueType(value: StacValue) {
   }
 }
 
+export function getLink(
+  value: { links?: Array<StacLink> },
+  rel: string
+): StacLink | undefined {
+  return value.links?.find((link) => link.rel === rel);
+}
+
 export function getLinkHref(
-  value: { links?: Array<{ rel: string; href?: string }> },
+  value: { links?: Array<StacLink> },
   rel: string
 ): string | undefined {
-  return value.links?.find((link) => link.rel === rel)?.href;
+  return getLink(value, rel)?.href;
 }
 
 export function getSelfHref(value: StacValue) {
@@ -45,12 +52,21 @@ export function getThumbnailAsset(value: StacValue) {
   }
 }
 
-export async function fetchStac(href: string | URL): Promise<StacValue> {
+export async function fetchStac({
+  href,
+  method = "GET",
+  body,
+}: {
+  href: string | URL;
+  method?: "GET" | "POST";
+  body?: string;
+}): Promise<StacValue> {
   return await fetch(href, {
-    method: "GET",
+    method,
     headers: {
       Accept: "application/json",
     },
+    body,
   }).then(async (response) => {
     if (response.ok) {
       return response

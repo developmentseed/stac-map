@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 tests/**/__screenshots__/
 codebook.toml
+.env

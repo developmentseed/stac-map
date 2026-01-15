@@ -61,7 +61,7 @@ export default function Value({ value }: { value: StacValue }) {
 
   return (
     <>
-      <Stack gap={4}>
+      <Stack gap={6}>
         <Heading>{getStacValueTitle(value)}</Heading>
 
         <HStack>
@@ -105,6 +105,7 @@ export default function Value({ value }: { value: StacValue }) {
         </HStack>
 
         {thumbnailAsset && <Thumbnail asset={thumbnailAsset} />}
+
         {"description" in value && (
           <Description description={value.description as string} />
         )}

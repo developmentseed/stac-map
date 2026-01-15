@@ -1,4 +1,4 @@
-import type { StacCollection } from "stac-ts";
+import type { StacCollection, StacItem } from "stac-ts";
 import { create } from "zustand";
 import type { StacValue } from "./types/stac";
 import { getInitialHref } from "./utils/href";
@@ -14,6 +14,8 @@ interface State {
   setCollections: (collections: StacCollection[] | null) => void;
   filteredCollections: StacCollection[] | null;
   setFilteredCollections: (collections: StacCollection[] | null) => void;
+  searchItems: StacItem[] | null;
+  setSearchItems: (items: StacItem[] | null) => void;
 
   geotiffHref: string | null;
   setGeotiffHref: (geotiffHref: string | null) => void;
@@ -37,6 +39,8 @@ export const useStore = create<State>((set) => ({
   filteredCollections: null,
   setFilteredCollections: (collections) =>
     set({ filteredCollections: collections }),
+  searchItems: null,
+  setSearchItems: (items) => set({ searchItems: items }),
   geotiffHref: null,
   setGeotiffHref: (geotiffHref) => set({ geotiffHref }),
   fillColor: [207, 63, 2, 50] as [number, number, number, number],

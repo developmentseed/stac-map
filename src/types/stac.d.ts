@@ -32,8 +32,7 @@ export type StacAssets = { [k: string]: StacAsset };
 
 export interface StacSearch {
   collections?: string[];
-  datetime?: string;
-  bbox?: number[];
+  bbox?: [number, number, number, number];
 }
 
 export type DatetimeBounds = { start: Date; end: Date };

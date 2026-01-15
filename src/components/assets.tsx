@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { LuDownload, LuFileImage } from "react-icons/lu";
 import {
+  Badge,
   ButtonGroup,
+  Clipboard,
   Group,
   Heading,
   HStack,
@@ -24,7 +26,7 @@ export default function Assets({
 
   useEffect(() => {
     if (value) {
-      setGeotiffHref(assets[value].href);
+      setGeotiffHref(assets[value]?.href);
     } else {
       setGeotiffHref(null);
     }
@@ -37,8 +39,12 @@ export default function Assets({
           <LuFileImage /> Assets
         </HStack>
       </Heading>
-      <RadioCard.Root value={value} onValueChange={(e) => setValue(e.value)}>
-        <Group attached orientation="vertical">
+      <RadioCard.Root
+        value={value}
+        onValueChange={(e) => setValue(e.value)}
+        size={"sm"}
+      >
+        <Group orientation="vertical">
           {Object.entries(assets).map(([key, asset]) => (
             <Asset key={key} assetKey={key} asset={asset} />
           ))}
@@ -49,6 +55,8 @@ export default function Assets({
 }
 
 function Asset({ assetKey, asset }: { assetKey: string; asset: StacAsset }) {
+  const scheme = asset.href.split(":").at(0);
+
   return (
     <RadioCard.Item
       value={assetKey}
@@ -59,19 +67,29 @@ function Asset({ assetKey, asset }: { assetKey: string; asset: StacAsset }) {
       <RadioCard.ItemControl>
         <RadioCard.ItemContent>
           <RadioCard.ItemText>{asset.title || assetKey}</RadioCard.ItemText>
-          {asset.type && (
-            <RadioCard.ItemDescription>{asset.type}</RadioCard.ItemDescription>
-          )}
+          <RadioCard.ItemDescription>
+            <Badge>{scheme}</Badge>
+            {asset.type && <Badge>{asset.type}</Badge>}
+          </RadioCard.ItemDescription>
         </RadioCard.ItemContent>
         <RadioCard.ItemIndicator />
       </RadioCard.ItemControl>
       <RadioCard.ItemAddon>
         <ButtonGroup size={"xs"} variant={"plain"}>
-          <IconButton asChild>
-            <a href={asset.href}>
-              <LuDownload />
-            </a>
-          </IconButton>
+          <Clipboard.Root value={asset.href}>
+            <Clipboard.Trigger asChild>
+              <IconButton>
+                <Clipboard.Indicator />
+              </IconButton>
+            </Clipboard.Trigger>
+          </Clipboard.Root>
+          {scheme?.startsWith("http") && (
+            <IconButton asChild>
+              <a href={asset.href}>
+                <LuDownload />
+              </a>
+            </IconButton>
+          )}
         </ButtonGroup>
       </RadioCard.ItemAddon>
     </RadioCard.Item>
@@ -79,5 +97,8 @@ function Asset({ assetKey, asset }: { assetKey: string; asset: StacAsset }) {
 }
 
 function isGeotiff(asset: StacAsset) {
-  return asset.type?.startsWith("image/tiff; application=geotiff");
+  return (
+    asset.type?.startsWith("image/tiff; application=geotiff") &&
+    asset.href.startsWith("http")
+  );
 }
