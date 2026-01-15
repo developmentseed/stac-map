@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Box, HStack } from "@chakra-ui/react";
+import { Box, HStack, SkeletonText } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import Introduction from "./introduction";
 import Value from "./value";
@@ -45,7 +45,8 @@ export default function Panel() {
         <HStack fontWeight={"light"}>{heading}</HStack>
       </Box>
       <Box p={4} overflow={"scroll"} maxH={"80dvh"}>
-        {(value && <Value value={value} />) || <Introduction />}
+        {(value && <Value value={value} />) ||
+          (valueJsonQuery.isLoading && <SkeletonText />) || <Introduction />}
       </Box>
     </Box>
   );

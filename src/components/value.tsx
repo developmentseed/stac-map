@@ -1,4 +1,4 @@
-import { Badge, Heading, HStack, Span, Stack } from "@chakra-ui/react";
+import { Badge, Heading, HStack, Stack } from "@chakra-ui/react";
 import Collections from "./collections";
 import Description from "./description";
 import type { StacValue } from "../types/stac";
@@ -12,15 +12,13 @@ export default function Value({ value }: { value: StacValue }) {
 
   return (
     <Stack gap={4}>
-      <Heading>
-        <HStack>
-          <Span mr={4}>{getStacValueTitle(value)}</Span>
-          {value.id && (
-            <Badge variant={"surface"}>{getStacValueType(value)}</Badge>
-          )}
-          {version && <Badge variant={"surface"}>{version}</Badge>}
-        </HStack>
-      </Heading>
+      <Heading>{getStacValueTitle(value)}</Heading>
+      <HStack>
+        {value.id && (
+          <Badge variant={"surface"}>{getStacValueType(value)}</Badge>
+        )}
+        {version && <Badge variant={"surface"}>{version}</Badge>}
+      </HStack>
       {"description" in value && (
         <Description description={value.description as string} />
       )}
