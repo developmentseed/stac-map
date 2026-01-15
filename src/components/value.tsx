@@ -1,4 +1,9 @@
-import { LuArrowUp, LuArrowUpLeft, LuFileJson } from "react-icons/lu";
+import {
+  LuArrowUp,
+  LuArrowUpLeft,
+  LuExternalLink,
+  LuFileJson,
+} from "react-icons/lu";
 import {
   Badge,
   Button,
@@ -28,6 +33,7 @@ import {
   getThumbnailAsset,
 } from "../utils/stac";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({
   async load() {
     const { createHighlighter } = await import("shiki");
@@ -78,50 +84,22 @@ export default function Value({ value }: { value: StacValue }) {
                 Parent
               </Button>
             )}
-            <Dialog.Root size={"xl"}>
-              <Dialog.Trigger asChild>
-                <Button>
-                  <LuFileJson />
-                  JSON
-                </Button>
-              </Dialog.Trigger>
-              <Portal>
-                <Dialog.Backdrop />
-                <Dialog.Positioner>
-                  <Dialog.Content>
-                    <Dialog.Header>
-                      <Dialog.Title>JSON</Dialog.Title>
-                    </Dialog.Header>
-                    <Dialog.Body>
-                      <CodeBlock.AdapterProvider value={shikiAdapter}>
-                        <CodeBlock.Root
-                          code={JSON.stringify(value, null, 2)}
-                          language="json"
-                          size={"sm"}
-                        >
-                          <CodeBlock.Header>
-                            <CodeBlock.Title>{value.id}.json</CodeBlock.Title>
-                            <CodeBlock.CopyTrigger asChild>
-                              <IconButton variant="ghost" size="2xs">
-                                <CodeBlock.CopyIndicator />
-                              </IconButton>
-                            </CodeBlock.CopyTrigger>
-                          </CodeBlock.Header>
-                          <CodeBlock.Content>
-                            <CodeBlock.Code>
-                              <CodeBlock.CodeText />
-                            </CodeBlock.Code>
-                          </CodeBlock.Content>
-                        </CodeBlock.Root>
-                      </CodeBlock.AdapterProvider>
-                    </Dialog.Body>
-                    <Dialog.CloseTrigger asChild>
-                      <CloseButton size="sm" />
-                    </Dialog.CloseTrigger>
-                  </Dialog.Content>
-                </Dialog.Positioner>
-              </Portal>
-            </Dialog.Root>
+            {selfHref && (
+              <Button asChild>
+                <a
+                  href={
+                    // TODO make this configurable
+                    "https://radiantearth.github.io/stac-browser/#/external/" +
+                    selfHref.replace(/^(https?:\/\/)/, "")
+                  }
+                  target="_blank"
+                >
+                  <LuExternalLink />
+                  STAC Browser
+                </a>
+              </Button>
+            )}
+            <JsonButton value={value} />
           </ButtonGroup>
         </HStack>
 
@@ -137,5 +115,54 @@ export default function Value({ value }: { value: StacValue }) {
         {collectionsHref && <Collections href={collectionsHref} />}
       </Stack>
     </>
+  );
+}
+
+function JsonButton({ value }: { value: StacValue }) {
+  return (
+    <Dialog.Root size={"xl"}>
+      <Dialog.Trigger asChild>
+        <Button>
+          <LuFileJson />
+          JSON
+        </Button>
+      </Dialog.Trigger>
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.Header>
+              <Dialog.Title>JSON</Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body>
+              <CodeBlock.AdapterProvider value={shikiAdapter}>
+                <CodeBlock.Root
+                  code={JSON.stringify(value, null, 2)}
+                  language="json"
+                  size={"sm"}
+                >
+                  <CodeBlock.Header>
+                    <CodeBlock.Title>{value.id}.json</CodeBlock.Title>
+                    <CodeBlock.CopyTrigger asChild>
+                      <IconButton variant="ghost" size="2xs">
+                        <CodeBlock.CopyIndicator />
+                      </IconButton>
+                    </CodeBlock.CopyTrigger>
+                  </CodeBlock.Header>
+                  <CodeBlock.Content>
+                    <CodeBlock.Code>
+                      <CodeBlock.CodeText />
+                    </CodeBlock.Code>
+                  </CodeBlock.Content>
+                </CodeBlock.Root>
+              </CodeBlock.AdapterProvider>
+            </Dialog.Body>
+            <Dialog.CloseTrigger asChild>
+              <CloseButton size="sm" />
+            </Dialog.CloseTrigger>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   );
 }
