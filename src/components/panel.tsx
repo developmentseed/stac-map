@@ -1,47 +1,35 @@
 import { useEffect } from "react";
 import { Box, HStack, SkeletonText } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
 import Introduction from "./introduction";
 import { StacIcon } from "./stac";
 import Value from "./value";
-import { toaster } from "../components/ui/toaster";
+import { useStacJson } from "../hooks/stac";
 import { useStore } from "../store";
-import { fetchStac, getStacValueId } from "../utils/stac";
+import { getStacValueId } from "../utils/stac";
 
 export default function Panel() {
   const href = useStore((store) => store.href);
   const value = useStore((store) => store.value);
   const setValue = useStore((state) => state.setValue);
 
-  const valueJsonQuery = useQuery({
-    queryKey: ["stac-value-json", href],
+  const result = useStacJson({
+    href,
     enabled: !href?.endsWith(".parquet"),
-    queryFn: async () => (href && (await fetchStac(href))) || null,
   });
 
   const heading = value ? (
     <HStack>
       <StacIcon value={value} /> {getStacValueId(value)}
     </HStack>
-  ) : valueJsonQuery.isFetching ? (
+  ) : result.isFetching ? (
     "Fetching..."
   ) : (
     "stac-map"
   );
 
   useEffect(() => {
-    setValue(valueJsonQuery.data || null);
-  }, [valueJsonQuery.data, setValue]);
-
-  useEffect(() => {
-    if (href && valueJsonQuery.error) {
-      toaster.create({
-        type: "error",
-        title: href,
-        description: valueJsonQuery.error.message,
-      });
-    }
-  }, [valueJsonQuery.error, href]);
+    setValue(result.data || null);
+  }, [result.data, setValue]);
 
   return (
     <Box
@@ -56,7 +44,7 @@ export default function Panel() {
       <Box p={4} overflow={"scroll"} maxH={"80dvh"}>
         {value ? (
           <Value value={value} />
-        ) : valueJsonQuery.isLoading ? (
+        ) : result.isLoading ? (
           <SkeletonText />
         ) : (
           <Introduction />

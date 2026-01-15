@@ -23,6 +23,7 @@ import type { HighlighterGeneric } from "shiki";
 import Assets from "./assets";
 import Collections from "./collections";
 import Description from "./description";
+import Root from "./root";
 import Thumbnail from "./thumbnail";
 import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
@@ -108,11 +109,13 @@ export default function Value({ value }: { value: StacValue }) {
           <Description description={value.description as string} />
         )}
 
+        {rootHref && <Root href={rootHref} />}
+
+        {collectionsHref && <Collections href={collectionsHref} />}
+
         {(value.assets as { [k: string]: StacAsset }) && (
           <Assets assets={value.assets as { [k: string]: StacAsset }} />
         )}
-
-        {collectionsHref && <Collections href={collectionsHref} />}
       </Stack>
     </>
   );
