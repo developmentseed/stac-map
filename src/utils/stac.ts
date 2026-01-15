@@ -48,8 +48,7 @@ export async function fetchStac(href: string | URL): Promise<StacValue> {
     if (response.ok) {
       return response
         .json()
-        .then((json) => makeHrefsAbsolute(json, href.toString()))
-        .then((json) => maybeAddTypeField(json));
+        .then((json) => makeHrefsAbsolute(json, href.toString()));
     } else {
       throw new Error(`GET ${href}: ${response.statusText}`);
     }
@@ -108,20 +107,4 @@ function isAbsolute(url: string) {
   } catch {
     return false;
   }
-}
-
-// eslint-disable-next-line
-function maybeAddTypeField(value: any) {
-  if (!value.type) {
-    if (value.features && Array.isArray(value.features)) {
-      value.type = "FeatureCollection";
-    } else if (value.extent) {
-      value.type = "Collection";
-    } else if (value.geometry && value.properties) {
-      value.type = "Feature";
-    } else if (value.stac_version) {
-      value.type = "Catalog";
-    }
-  }
-  return value;
 }
