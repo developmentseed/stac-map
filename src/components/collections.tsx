@@ -281,7 +281,7 @@ function CollectionCard({ collection }: { collection: StacCollection }) {
       </Card.Header>
       <Card.Body>
         <Card.Description>
-          <Prose>
+          <Prose lineClamp={5}>
             <MarkdownHooks>{collection.description}</MarkdownHooks>
           </Prose>
         </Card.Description>
