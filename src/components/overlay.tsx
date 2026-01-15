@@ -1,4 +1,5 @@
-import { GridItem, HStack, SimpleGrid } from "@chakra-ui/react";
+import { Button, GridItem, HStack, SimpleGrid } from "@chakra-ui/react";
+import { Examples } from "./examples";
 import HrefInput from "./href-input";
 import Panel from "./panel";
 import { ColorModeButton } from "./ui/color-mode";
@@ -12,6 +13,11 @@ export default function Overlay() {
       <GridItem colSpan={2}>
         <HStack pointerEvents={"auto"}>
           <HrefInput />
+          <Examples>
+            <Button bg={"bg.muted/90"} variant={"outline"}>
+              Examples
+            </Button>
+          </Examples>
           <ColorModeButton variant={"surface"} />
         </HStack>
       </GridItem>
