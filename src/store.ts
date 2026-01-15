@@ -14,6 +14,7 @@ interface State {
   setCollections: (collections: StacCollection[] | null) => void;
   filteredCollections: StacCollection[] | null;
   setFilteredCollections: (collections: StacCollection[] | null) => void;
+  fillColor: [number, number, number, number];
   lineColor: [number, number, number, number];
   lineWidth: number;
 }
@@ -32,6 +33,7 @@ export const useStore = create<State>((set) => ({
   filteredCollections: null,
   setFilteredCollections: (collections) =>
     set({ filteredCollections: collections }),
+  fillColor: [207, 63, 2, 50] as [number, number, number, number],
   lineColor: [207, 63, 2, 100] as [number, number, number, number],
   lineWidth: 2,
 }));

@@ -12,7 +12,7 @@ import bbox from "@turf/bbox";
 import bboxPolygon from "@turf/bbox-polygon";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { SpatialExtent, StacCollection } from "stac-ts";
-import type { BBox, FeatureCollection } from "geojson";
+import type { BBox, Feature, FeatureCollection } from "geojson";
 import { useColorModeValue } from "../components/ui/color-mode";
 import { useStore } from "../store";
 import type { BBox2D } from "../types/map";
@@ -27,9 +27,15 @@ export default function Map() {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const value = useStore((store) => store.value);
   const collections = useStore((store) => store.collections);
+  const fillColor = useStore((store) => store.fillColor);
   const lineColor = useStore((store) => store.lineColor);
   const lineWidth = useStore((store) => store.lineWidth);
 
+  const valueGeoJson = useMemo(() => {
+    if (value) {
+      return toGeoJson(value);
+    }
+  }, [value]);
   const collectionsGeoJson = useMemo(() => {
     return collections
       ?.map(
@@ -55,7 +61,20 @@ export default function Map() {
 
   const layers = [];
 
-  if (collections) {
+  if (valueGeoJson) {
+    layers.push(
+      new GeoJsonLayer({
+        id: "value",
+        data: valueGeoJson,
+        filled: true,
+        getFillColor: fillColor,
+        getLineColor: lineColor,
+        getLineWidth: lineWidth,
+        lineWidthUnits: "pixels",
+      })
+    );
+  }
+  if (collectionsGeoJson) {
     layers.push(
       new GeoJsonLayer({
         id: "collections",
@@ -90,6 +109,22 @@ function DeckGLOverlay(props: DeckProps) {
   const control = useControl<MapboxOverlay>(() => new MapboxOverlay({}));
   control.setProps(props);
   return <></>;
+}
+
+function toGeoJson(value: StacValue) {
+  switch (value.type) {
+    case "Catalog":
+      return undefined;
+    case "Collection":
+      return (
+        value.extent?.spatial?.bbox &&
+        bboxPolygon(getCollectionExtents(value) as BBox)
+      );
+    case "Feature":
+      return value as Feature;
+    case "FeatureCollection":
+      return value as FeatureCollection;
+  }
 }
 
 function getCollectionExtents(collection: StacCollection): SpatialExtent {
