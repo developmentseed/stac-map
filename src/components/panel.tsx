@@ -5,8 +5,7 @@ import Introduction from "./introduction";
 import Value from "./value";
 import { toaster } from "../components/ui/toaster";
 import { useStore } from "../store";
-import { fetchStac } from "../utils/stac";
-import { getStacValueId } from "../utils/stac";
+import { fetchStac, getStacValueId } from "../utils/stac";
 
 export default function Panel() {
   const href = useStore((store) => store.href);

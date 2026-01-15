@@ -1,3 +1,4 @@
+import type { StacAsset } from "stac-ts";
 import type { StacValue } from "../types/stac";
 
 export function getStacValueTitle(value: StacValue) {
@@ -29,6 +30,12 @@ export function getStacValueType(value: StacValue) {
 
 export function getSelfHref(value: StacValue) {
   return value.links?.find((link) => link.rel == "self")?.href;
+}
+
+export function getThumbnailAsset(value: StacValue) {
+  if ("assets" in value) {
+    return (value.assets as { [key: string]: StacAsset })["thumbnail"];
+  }
 }
 
 export async function fetchStac(href: string | URL): Promise<StacValue> {
