@@ -88,8 +88,8 @@ export default function Value({ value }: { value: StacValue }) {
               <Button asChild>
                 <a
                   href={
-                    // TODO make this configurable
-                    "https://radiantearth.github.io/stac-browser/#/external/" +
+                    (import.meta.env.VITE_STAC_BROWSER_URL ||
+                      "https://radiantearth.github.io/stac-browser/#/external/") +
                     selfHref.replace(/^(https?:\/\/)/, "")
                   }
                   target="_blank"
