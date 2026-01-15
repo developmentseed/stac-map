@@ -54,8 +54,13 @@ export default function Panel() {
         <HStack fontWeight={"light"}>{heading}</HStack>
       </Box>
       <Box p={4} overflow={"scroll"} maxH={"80dvh"}>
-        {(value && <Value value={value} />) ||
-          (valueJsonQuery.isLoading && <SkeletonText />) || <Introduction />}
+        {value ? (
+          <Value value={value} />
+        ) : valueJsonQuery.isLoading ? (
+          <SkeletonText />
+        ) : (
+          <Introduction />
+        )}
       </Box>
     </Box>
   );

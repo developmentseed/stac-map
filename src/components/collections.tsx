@@ -369,6 +369,6 @@ function matchesFilter(collection: StacCollection, filter: string) {
   const lowerCaseFilter = filter.toLowerCase();
   return (
     collection.id.toLowerCase().includes(lowerCaseFilter) ||
-    collection.title?.includes(lowerCaseFilter)
+    collection.title?.toLowerCase().includes(lowerCaseFilter)
   );
 }
