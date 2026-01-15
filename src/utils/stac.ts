@@ -4,10 +4,27 @@ export function getStacValueTitle(value: StacValue) {
   if ("title" in value && value.title) {
     return value.title as string;
   }
+  return getStacValueId(value);
+}
+
+export function getStacValueId(value: StacValue) {
   if ("id" in value && value.id) {
     return value.id;
   }
-  return value.type;
+  return getStacValueType(value);
+}
+
+export function getStacValueType(value: StacValue) {
+  switch (value.type) {
+    case "Collection":
+      return "Collection";
+    case "Feature":
+      return "Item";
+    case "Catalog":
+      return "Catalog";
+    default:
+      return "unknown";
+  }
 }
 
 export function getSelfHref(value: StacValue) {

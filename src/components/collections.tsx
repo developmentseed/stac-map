@@ -27,7 +27,11 @@ import {
   SkeletonText,
   Stack,
 } from "@chakra-ui/react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  type InfiniteData,
+  useInfiniteQuery,
+  type UseInfiniteQueryResult,
+} from "@tanstack/react-query";
 import type { StacCollection } from "stac-ts";
 import { Prose } from "./ui/prose";
 import { toaster } from "./ui/toaster";
@@ -43,8 +47,9 @@ export default function Collections({ href }: { href: string }) {
     (state) => state.setFilteredCollections
   );
   const [fetchAllCollections, setFetchAllCollections] = useState(false);
-  const [value, setValue] = useState("card");
-  const [filter, setFilter] = useState("");
+  const [listOrCard, setListOrCard] = useState("card");
+  const [searchMode, setSearchMode] = useState("Filter");
+  const [search, setSearch] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const result = useInfiniteQuery({
@@ -94,48 +99,48 @@ export default function Collections({ href }: { href: string }) {
   }, [result.error, href]);
 
   useEffect(() => {
-    if (filter.length > 0 && collections) {
+    if (search.length > 0 && collections) {
       setFilteredCollections(
-        collections.filter((collection) => matchesFilter(collection, filter))
+        collections.filter((collection) => matchesFilter(collection, search))
       );
     } else {
       setFilteredCollections(null);
     }
-  }, [filter, collections, setFilteredCollections]);
+  }, [search, collections, setFilteredCollections]);
 
   return (
     <>
       <Stack gap={4}>
-        <Heading size={"md"}>
-          <HStack>
-            <LuFolderPlus /> Collections{" "}
-            {collections &&
-              `(${filteredCollections ? filteredCollections.length + "/" : ""}${collections.length})`}
-            <Box flex={1} />
-            <SegmentGroup.Root
-              value={value}
-              onValueChange={(e) => setValue(e.value || "card")}
-              size={"xs"}
-            >
-              <SegmentGroup.Indicator />
-              <SegmentGroup.Items
-                items={[
-                  { value: "list", label: <LuList /> },
-                  { value: "card", label: <LuSquare /> },
-                ]}
-              />
-            </SegmentGroup.Root>
-          </HStack>
-        </Heading>
+        <Header
+          collections={collections}
+          filteredCollections={filteredCollections}
+          listOrCard={listOrCard}
+          setListOrCard={setListOrCard}
+          {...result}
+        />
+
+        <Box>
+          <SegmentGroup.Root
+            size={"sm"}
+            value={searchMode}
+            onValueChange={(e) => setSearchMode(e.value || "Filter")}
+          >
+            <SegmentGroup.Indicator />
+            <SegmentGroup.Items
+              items={["Filter", "Search", "Natural language search"]}
+            />
+          </SegmentGroup.Root>
+        </Box>
+
         {collections && (
           <InputGroup
             endElement={
-              filter && (
+              search && (
                 <CloseButton
                   size={"xs"}
                   me="-2"
                   onClick={() => {
-                    setFilter("");
+                    setSearch("");
                     inputRef.current?.focus();
                   }}
                 />
@@ -145,13 +150,14 @@ export default function Collections({ href }: { href: string }) {
             <Input
               placeholder="Filter collections by title or id"
               ref={inputRef}
-              value={filter}
-              onChange={(e) => setFilter(e.currentTarget.value)}
+              value={search}
+              onChange={(e) => setSearch(e.currentTarget.value)}
             />
           </InputGroup>
         )}
+
         {collections &&
-          (value === "card" ? (
+          (listOrCard === "card" ? (
             <Stack>
               {(filteredCollections || collections).map((collection) => (
                 <CollectionCard key={collection.id} collection={collection} />
@@ -167,7 +173,9 @@ export default function Collections({ href }: { href: string }) {
               ))}
             </List.Root>
           ))}
+
         {result.isFetching && <SkeletonText />}
+
         {result.hasNextPage && (
           <Center>
             <Button
@@ -180,6 +188,7 @@ export default function Collections({ href }: { href: string }) {
           </Center>
         )}
       </Stack>
+
       <ActionBar.Root open={true}>
         <Portal>
           <ActionBar.Positioner>
@@ -266,5 +275,59 @@ function matchesFilter(collection: StacCollection, filter: string) {
   return (
     collection.id.toLowerCase().includes(lowerCaseFilter) ||
     collection.title?.includes(lowerCaseFilter)
+  );
+}
+
+type HeaderProps = UseInfiniteQueryResult<
+  InfiniteData<StacCollections | null, unknown>,
+  Error
+> & {
+  collections: StacCollection[] | null;
+  filteredCollections: StacCollection[] | null;
+  listOrCard: string;
+  setListOrCard: (listOrCard: string) => void;
+};
+
+function Header({
+  collections,
+  filteredCollections,
+  listOrCard,
+  setListOrCard,
+  isFetching,
+  fetchNextPage,
+  hasNextPage,
+}: HeaderProps) {
+  return (
+    <Heading size={"md"}>
+      <HStack>
+        <LuFolderPlus /> Collections{" "}
+        {collections &&
+          `(${filteredCollections ? filteredCollections.length + "/" : ""}${collections.length})`}
+        {hasNextPage && (
+          <Button
+            size={"xs"}
+            variant={"plain"}
+            onClick={() => fetchNextPage()}
+            disabled={isFetching}
+          >
+            Load more...
+          </Button>
+        )}
+        <Box flex={1} />
+        <SegmentGroup.Root
+          value={listOrCard}
+          onValueChange={(e) => setListOrCard(e.value || "card")}
+          size={"xs"}
+        >
+          <SegmentGroup.Indicator />
+          <SegmentGroup.Items
+            items={[
+              { value: "list", label: <LuList /> },
+              { value: "card", label: <LuSquare /> },
+            ]}
+          />
+        </SegmentGroup.Root>
+      </HStack>
+    </Heading>
   );
 }

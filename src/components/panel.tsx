@@ -6,13 +6,13 @@ import Value from "./value";
 import { toaster } from "../components/ui/toaster";
 import { useStore } from "../store";
 import { fetchStac } from "../utils/stac";
-import { getStacValueTitle } from "../utils/stac";
+import { getStacValueId } from "../utils/stac";
 
 export default function Panel() {
   const href = useStore((store) => store.href);
   const value = useStore((store) => store.value);
   const setValue = useStore((state) => state.setValue);
-  const heading = value ? getStacValueTitle(value) : "stac-map";
+  const heading = value ? getStacValueId(value) : "stac-map";
 
   const valueJsonQuery = useQuery({
     queryKey: ["stac-value-json", href],
