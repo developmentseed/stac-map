@@ -1,12 +1,21 @@
 import { useEffect, useState } from "react";
-import { LuSearch, LuSettings, LuX } from "react-icons/lu";
+import {
+  LuForward,
+  LuPause,
+  LuPlay,
+  LuSearch,
+  LuSettings,
+  LuX,
+} from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
 import {
+  ActionBar,
   Button,
   ButtonGroup,
   Card,
   Link,
   List,
+  Portal,
   SkeletonText,
   Stack,
 } from "@chakra-ui/react";
@@ -31,6 +40,7 @@ interface Props {
 
 export default function Search({ href, collection }: Props) {
   const [listOrCard, setListOrCard] = useState<ListOrCard>("list");
+  const searchItems = useStore((store) => store.searchItems);
   const setSearchItems = useStore((store) => store.setSearchItems);
   const [search, setSearch] = useState<StacSearch | null>(null);
   const { map } = useMap();
@@ -39,7 +49,7 @@ export default function Search({ href, collection }: Props) {
     <Stack gap={4}>
       <SectionHeader
         icon={<LuSearch />}
-        title="Item search"
+        title={"Item search" + (searchItems ? ` (${searchItems?.length})` : "")}
         listOrCard={listOrCard}
         setListOrCard={setListOrCard}
       />
@@ -51,7 +61,13 @@ export default function Search({ href, collection }: Props) {
         </Button>
 
         {search ? (
-          <Button onClick={() => setSearch(null)} variant={"surface"}>
+          <Button
+            onClick={() => {
+              setSearchItems(null);
+              setSearch(null);
+            }}
+            variant={"surface"}
+          >
             <LuX /> Clear
           </Button>
         ) : (
@@ -88,12 +104,14 @@ function SearchResults({
 }) {
   const searchItems = useStore((store) => store.searchItems);
   const setSearchItems = useStore((store) => store.setSearchItems);
+  const [fetchAllItems, setFetchAllItems] = useState(false);
 
   const url = new URL(href);
   if (search.collections)
     url.searchParams.set("collections", search.collections.join(","));
   if (search.bbox) url.searchParams.set("bbox", search.bbox.join(","));
   url.searchParams.set("sortby", "-datetime");
+
   const result = useInfiniteQuery({
     queryKey: ["stac-search", href, search],
     queryFn: async ({ pageParam }) => {
@@ -111,19 +129,64 @@ function SearchResults({
       lastPage ? getLinkHref(lastPage, "next") : null,
   });
 
+  const numberMatched = result.data?.pages.at(0)?.numberMatched;
+
   useEffect(() => {
     if (result.data)
       setSearchItems(result.data.pages.flatMap((page) => page?.features || []));
   }, [result.data, setSearchItems]);
 
-  return (
-    <Stack>
-      {searchItems && (
-        <SearchItems listOrCard={listOrCard} items={searchItems} />
-      )}
+  useEffect(() => {
+    if (fetchAllItems && !result.isFetching && result.hasNextPage)
+      result.fetchNextPage();
+  }, [fetchAllItems, result]);
 
-      {result.isFetching && <SkeletonText />}
-    </Stack>
+  return (
+    <>
+      <Stack>
+        {searchItems && (
+          <SearchItems listOrCard={listOrCard} items={searchItems} />
+        )}
+
+        {result.isFetching && <SkeletonText />}
+      </Stack>
+      <ActionBar.Root open={!!searchItems}>
+        <Portal>
+          <ActionBar.Positioner>
+            <ActionBar.Content>
+              <ActionBar.SelectionTrigger>
+                {searchItems?.length}
+                {numberMatched && "/" + numberMatched} item
+                {searchItems?.length != 1 && "s"} fetched
+              </ActionBar.SelectionTrigger>
+              <ActionBar.Separator />
+              {result.hasNextPage && (
+                <>
+                  <ActionBar.Separator />
+                  <ButtonGroup variant="outline" size="sm">
+                    <Button
+                      onClick={() => result.fetchNextPage()}
+                      disabled={result.isFetching || fetchAllItems}
+                    >
+                      <LuForward />
+                      Fetch next page
+                    </Button>
+                    <Button
+                      onClick={() => setFetchAllItems((previous) => !previous)}
+                    >
+                      {fetchAllItems ? <LuPause /> : <LuPlay />}
+                      {fetchAllItems && result.hasNextPage
+                        ? "Pause"
+                        : "Fetch all"}
+                    </Button>
+                  </ButtonGroup>
+                </>
+              )}
+            </ActionBar.Content>
+          </ActionBar.Positioner>
+        </Portal>
+      </ActionBar.Root>
+    </>
   );
 }
 
