@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Box, HStack, SkeletonText } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import Introduction from "./introduction";
+import { StacIcon } from "./stac";
 import Value from "./value";
 import { toaster } from "../components/ui/toaster";
 import { useStore } from "../store";
@@ -11,13 +12,22 @@ export default function Panel() {
   const href = useStore((store) => store.href);
   const value = useStore((store) => store.value);
   const setValue = useStore((state) => state.setValue);
-  const heading = value ? getStacValueId(value) : "stac-map";
 
   const valueJsonQuery = useQuery({
     queryKey: ["stac-value-json", href],
     enabled: !href?.endsWith(".parquet"),
     queryFn: async () => (href && (await fetchStac(href))) || null,
   });
+
+  const heading = value ? (
+    <HStack>
+      <StacIcon value={value} /> {getStacValueId(value)}
+    </HStack>
+  ) : valueJsonQuery.isFetching ? (
+    "Fetching..."
+  ) : (
+    "stac-map"
+  );
 
   useEffect(() => {
     setValue(valueJsonQuery.data || null);
