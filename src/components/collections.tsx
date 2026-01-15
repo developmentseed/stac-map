@@ -47,8 +47,12 @@ import { Prose } from "./ui/prose";
 import { toaster } from "./ui/toaster";
 import { useStore } from "../store";
 import type { StacCollections } from "../types/stac";
-import { getStacValueTitle } from "../utils/stac";
-import { getSelfHref, getThumbnailAsset } from "../utils/stac";
+import {
+  getLinkHref,
+  getSelfHref,
+  getStacValueTitle,
+  getThumbnailAsset,
+} from "../utils/stac";
 
 export default function Collections({ href }: { href: string }) {
   const setCollections = useStore((state) => state.setCollections);
@@ -72,7 +76,7 @@ export default function Collections({ href }: { href: string }) {
     },
     initialPageParam: href,
     getNextPageParam: (lastPage: StacCollections | null) =>
-      lastPage?.links?.find((link) => link.rel == "next")?.href,
+      lastPage ? getLinkHref(lastPage, "next") : undefined,
   });
 
   useEffect(() => {

@@ -28,8 +28,15 @@ export function getStacValueType(value: StacValue) {
   }
 }
 
+export function getLinkHref(
+  value: { links?: Array<{ rel: string; href?: string }> },
+  rel: string
+): string | undefined {
+  return value.links?.find((link) => link.rel === rel)?.href;
+}
+
 export function getSelfHref(value: StacValue) {
-  return value.links?.find((link) => link.rel == "self")?.href;
+  return getLinkHref(value, "self");
 }
 
 export function getThumbnailAsset(value: StacValue) {

@@ -15,6 +15,7 @@ import Thumbnail from "./thumbnail";
 import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
 import {
+  getLinkHref,
   getStacValueTitle,
   getStacValueType,
   getThumbnailAsset,
@@ -22,19 +23,11 @@ import {
 
 export default function Value({ value }: { value: StacValue }) {
   const setHref = useStore((store) => store.setHref);
-  const collectionsHref: string | undefined = value.links?.find(
-    (link) => link.rel == "data"
-  )?.href;
-  const selfHref: string | undefined = value.links?.find(
-    (link) => link.rel === "self"
-  )?.href;
-  const rootHref: string | undefined = value.links?.find(
-    (link) => link.rel === "root"
-  )?.href;
+  const collectionsHref = getLinkHref(value, "data");
+  const selfHref = getLinkHref(value, "self");
+  const rootHref = getLinkHref(value, "root");
   const showRootHref = rootHref && rootHref !== selfHref;
-  const parentHref: string | undefined = value.links?.find(
-    (link) => link.rel === "parent"
-  )?.href;
+  const parentHref = getLinkHref(value, "parent");
   const showParentHref = parentHref && parentHref !== rootHref;
   const version = value.stac_version as string | undefined;
   const thumbnailAsset = getThumbnailAsset(value);
