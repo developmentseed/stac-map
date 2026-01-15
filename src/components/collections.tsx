@@ -1,10 +1,13 @@
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import {
+  LuFilter,
   LuFolderPlus,
   LuForward,
   LuList,
   LuPause,
   LuPlay,
+  LuSearch,
+  LuSearchCode,
   LuSquare,
 } from "react-icons/lu";
 import { MarkdownHooks } from "react-markdown";
@@ -17,6 +20,8 @@ import {
   Center,
   Heading,
   HStack,
+  Input,
+  InputGroup,
   Link,
   List,
   Portal,
@@ -94,6 +99,7 @@ export default function Collections({ href }: { href: string }) {
           {...result}
         />
 
+        <CollectionSearch />
         <CollectionValues listOrCard={listOrCard} {...result} />
       </Stack>
 
@@ -140,6 +146,51 @@ function Header({
         />
       </SegmentGroup.Root>
     </HStack>
+  );
+}
+
+function CollectionSearch() {
+  const collections = useStore((store) => store.collections);
+  const setFilteredCollections = useStore(
+    (store) => store.setFilteredCollections
+  );
+  const [value, setValue] = useState("");
+  const [searchMode, setSearchMode] = useState<
+    "filter" | "search" | "natural-language-search"
+  >("filter");
+
+  const startElement =
+    searchMode === "filter" ? (
+      <LuFilter />
+    ) : searchMode === "search" ? (
+      <LuSearch />
+    ) : (
+      <LuSearchCode />
+    );
+  const placeholder =
+    searchMode === "filter"
+      ? "Filter collections by id or title"
+      : searchMode === "search"
+        ? "Search collections"
+        : "Search collections with natural language";
+
+  useEffect(() => {
+    if (searchMode === "filter") {
+      setFilteredCollections(
+        collections?.filter((collection) => matchesFilter(collection, value)) ||
+          null
+      );
+    }
+  }, [searchMode, collections, setFilteredCollections, value]);
+
+  return (
+    <InputGroup startElement={startElement}>
+      <Input
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => setValue(e.currentTarget.value)}
+      />
+    </InputGroup>
   );
 }
 
@@ -280,5 +331,13 @@ function CollectionActionBar({
         </ActionBar.Positioner>
       </Portal>
     </ActionBar.Root>
+  );
+}
+
+function matchesFilter(collection: StacCollection, filter: string) {
+  const lowerCaseFilter = filter.toLowerCase();
+  return (
+    collection.id.toLowerCase().includes(lowerCaseFilter) ||
+    collection.title?.includes(lowerCaseFilter)
   );
 }
