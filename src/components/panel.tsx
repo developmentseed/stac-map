@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 import { Box, HStack, SkeletonText } from "@chakra-ui/react";
 import Introduction from "./introduction";
 import { StacIcon } from "./stac";
@@ -9,28 +9,53 @@ import { getStacValueId } from "../utils/stac";
 
 export default function Panel() {
   const href = useStore((store) => store.href);
-  const value = useStore((store) => store.value);
-  const setValue = useStore((state) => state.setValue);
 
-  const result = useStacJson({
-    href,
-    enabled: !href?.endsWith(".parquet"),
-  });
+  if (href) {
+    return <HrefPanel href={href} />;
+  } else {
+    return (
+      <BasePanel header="stac-map">
+        <Introduction />
+      </BasePanel>
+    );
+  }
+}
 
-  const heading = value ? (
-    <HStack>
-      <StacIcon value={value} /> {getStacValueId(value)}
-    </HStack>
-  ) : result.isFetching ? (
-    "Fetching..."
-  ) : (
-    "stac-map"
-  );
+function HrefPanel({ href }: { href: string }) {
+  const setValue = useStore((store) => store.setValue);
+  const result = useStacJson({ href });
 
   useEffect(() => {
-    setValue(result.data || null);
+    if (result.data) setValue(result.data);
   }, [result.data, setValue]);
 
+  if (result.data) {
+    const header = (
+      <HStack>
+        <StacIcon value={result.data} /> {getStacValueId(result.data)}{" "}
+      </HStack>
+    );
+    return (
+      <BasePanel header={header}>
+        <Value value={result.data} />
+      </BasePanel>
+    );
+  } else if (result.isFetching) {
+    return (
+      <BasePanel header="Fetching...">
+        <SkeletonText />
+      </BasePanel>
+    );
+  }
+}
+
+function BasePanel({
+  header,
+  children,
+}: {
+  header: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <Box
       bg={"bg.muted"}
@@ -39,16 +64,10 @@ export default function Panel() {
       borderColor={"bg.emphasized"}
     >
       <Box borderBottomWidth={1} borderColor={"border.subtle"} py={2} px={4}>
-        <HStack fontWeight={"light"}>{heading}</HStack>
+        {header}
       </Box>
       <Box p={4} overflow={"scroll"} maxH={"80dvh"}>
-        {value ? (
-          <Value value={value} />
-        ) : result.isLoading ? (
-          <SkeletonText />
-        ) : (
-          <Introduction />
-        )}
+        {children}
       </Box>
     </Box>
   );
