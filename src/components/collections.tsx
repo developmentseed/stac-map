@@ -155,7 +155,7 @@ function CollectionSearch() {
     (store) => store.setFilteredCollections
   );
   const [value, setValue] = useState("");
-  const [searchMode, setSearchMode] = useState<
+  const [searchMode] = useState<
     "filter" | "search" | "natural-language-search"
   >("filter");
 
