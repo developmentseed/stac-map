@@ -21,6 +21,7 @@ import {
   ButtonGroup,
   Card,
   Center,
+  Checkbox,
   CloseButton,
   Input,
   InputGroup,
@@ -47,6 +48,7 @@ import {
   getSelfHref,
   getStacValueTitle,
   getThumbnailAsset,
+  isCollectionInBbox,
 } from "../utils/stac";
 
 export default function Collections({ href }: { href: string }) {
@@ -145,8 +147,10 @@ function CollectionSearch() {
   const setFilteredCollections = useStore(
     (store) => store.setFilteredCollections
   );
+  const bbox = useStore((store) => store.bbox);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [value, setValue] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+  const [filterViewport, setFilterViewport] = useState(true);
   const [searchMode] = useState<
     "filter" | "search" | "natural-language-search"
   >("filter");
@@ -164,7 +168,7 @@ function CollectionSearch() {
       size={"xs"}
       me="-2"
       onClick={() => {
-        setValue("");
+        setSearchValue("");
         inputRef.current?.focus();
       }}
     />
@@ -179,21 +183,46 @@ function CollectionSearch() {
   useEffect(() => {
     if (searchMode === "filter") {
       setFilteredCollections(
-        collections?.filter((collection) => matchesFilter(collection, value)) ||
-          null
+        collections?.filter(
+          (collection) =>
+            matchesFilter(collection, searchValue) &&
+            (!filterViewport || !bbox || isCollectionInBbox(collection, bbox))
+        ) || null
       );
     }
-  }, [searchMode, collections, setFilteredCollections, value]);
+  }, [
+    collections,
+    setFilteredCollections,
+    setSearchValue,
+    searchMode,
+    searchValue,
+    bbox,
+    filterViewport,
+  ]);
 
   return (
-    <InputGroup startElement={startElement} endElement={value && endElement}>
-      <Input
-        placeholder={placeholder}
-        ref={inputRef}
-        value={value}
-        onChange={(e) => setValue(e.currentTarget.value)}
-      />
-    </InputGroup>
+    <Stack gap={4}>
+      <InputGroup
+        startElement={startElement}
+        endElement={searchValue && endElement}
+      >
+        <Input
+          placeholder={placeholder}
+          ref={inputRef}
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.currentTarget.value)}
+        />
+      </InputGroup>
+      <Checkbox.Root
+        onCheckedChange={(e) => setFilterViewport(!!e.checked)}
+        checked={filterViewport}
+        size={"sm"}
+      >
+        <Checkbox.HiddenInput />
+        <Checkbox.Control />
+        <Checkbox.Label>Filter by viewport</Checkbox.Label>
+      </Checkbox.Root>
+    </Stack>
   );
 }
 

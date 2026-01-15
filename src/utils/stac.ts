@@ -1,4 +1,5 @@
-import type { StacAsset, StacLink } from "stac-ts";
+import type { StacAsset, StacCollection, StacLink } from "stac-ts";
+import type { BBox2D } from "../types/map";
 import type { StacValue } from "../types/stac";
 
 export function getStacValueTitle(value: StacValue) {
@@ -128,6 +129,32 @@ function isAbsolute(url: string) {
     new URL(url);
     return true;
   } catch {
+    return false;
+  }
+}
+
+export function isCollectionInBbox(collection: StacCollection, bbox: BBox2D) {
+  if (bbox[2] - bbox[0] >= 360) {
+    // A global bbox always contains every collection
+    return true;
+  }
+  const collectionBbox = collection?.extent?.spatial?.bbox?.[0];
+  if (collectionBbox) {
+    return (
+      !(
+        collectionBbox[0] < bbox[0] &&
+        collectionBbox[1] < bbox[1] &&
+        collectionBbox[2] > bbox[2] &&
+        collectionBbox[3] > bbox[3]
+      ) &&
+      !(
+        collectionBbox[0] > bbox[2] ||
+        collectionBbox[1] > bbox[3] ||
+        collectionBbox[2] < bbox[0] ||
+        collectionBbox[3] < bbox[1]
+      )
+    );
+  } else {
     return false;
   }
 }

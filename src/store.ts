@@ -1,5 +1,6 @@
 import type { StacCollection, StacItem } from "stac-ts";
 import { create } from "zustand";
+import type { BBox2D } from "./types/map";
 import type { StacValue } from "./types/stac";
 import { getInitialHref } from "./utils/href";
 
@@ -19,6 +20,9 @@ interface State {
 
   geotiffHref: string | null;
   setGeotiffHref: (geotiffHref: string | null) => void;
+
+  bbox: BBox2D | null;
+  setBbox: (bbox: BBox2D) => void;
 
   fillColor: [number, number, number, number];
   lineColor: [number, number, number, number];
@@ -51,6 +55,8 @@ export const useStore = create<State>((set) => ({
   setSearchItems: (items) => set({ searchItems: items }),
   geotiffHref: null,
   setGeotiffHref: (geotiffHref) => set({ geotiffHref }),
+  bbox: null,
+  setBbox: (bbox) => set({ bbox }),
   fillColor: [207, 63, 2, 50] as [number, number, number, number],
   lineColor: [207, 63, 2, 100] as [number, number, number, number],
   lineWidth: 2,

@@ -32,6 +32,7 @@ export default function Map() {
   const collections = useStore((store) => store.collections);
   const searchItems = useStore((store) => store.searchItems);
   const geotiffHref = useStore((store) => store.geotiffHref);
+  const setBbox = useStore((store) => store.setBbox);
   const fillColor = useStore((store) => store.fillColor);
   const lineColor = useStore((store) => store.lineColor);
   const lineWidth = useStore((store) => store.lineWidth);
@@ -128,6 +129,10 @@ export default function Map() {
       mapStyle={`https://basemaps.cartocdn.com/gl/${mapStyle}/style.json`}
       style={{ zIndex: 0 }}
       onLoad={() => setIsMapLoaded(true)}
+      onMoveEnd={() => {
+        if (mapRef.current && !mapRef.current.isMoving())
+          setBbox(sanitizeBbox(mapRef.current?.getBounds().toArray().flat()));
+      }}
     >
       <DeckGLOverlay layers={layers}></DeckGLOverlay>
     </MaplibreMap>
