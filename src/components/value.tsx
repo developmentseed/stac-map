@@ -7,6 +7,8 @@ import {
   HStack,
   Stack,
 } from "@chakra-ui/react";
+import type { StacAsset } from "stac-ts";
+import Assets from "./assets";
 import Collections from "./collections";
 import Description from "./description";
 import Thumbnail from "./thumbnail";
@@ -29,9 +31,11 @@ export default function Value({ value }: { value: StacValue }) {
   const rootHref: string | undefined = value.links?.find(
     (link) => link.rel === "root"
   )?.href;
+  const showRootHref = rootHref && rootHref !== selfHref;
   const parentHref: string | undefined = value.links?.find(
     (link) => link.rel === "parent"
   )?.href;
+  const showParentHref = parentHref && parentHref !== rootHref;
   const version = value.stac_version as string | undefined;
   const thumbnailAsset = getThumbnailAsset(value);
 
@@ -44,27 +48,33 @@ export default function Value({ value }: { value: StacValue }) {
         )}
         {version && <Badge variant={"surface"}>{version}</Badge>}
       </HStack>
+      {(showRootHref || showParentHref) && (
+        <HStack>
+          <ButtonGroup variant={"outline"} size="xs">
+            {rootHref && rootHref !== selfHref && (
+              <Button onClick={() => setHref(rootHref)}>
+                <LuArrowUpLeft />
+                Root
+              </Button>
+            )}
+            {parentHref && parentHref !== rootHref && (
+              <Button onClick={() => setHref(parentHref)}>
+                <LuArrowUp />
+                Parent
+              </Button>
+            )}
+          </ButtonGroup>
+        </HStack>
+      )}
+
       {thumbnailAsset && <Thumbnail asset={thumbnailAsset} />}
       {"description" in value && (
         <Description description={value.description as string} />
       )}
 
-      <HStack>
-        <ButtonGroup variant={"surface"}>
-          {rootHref && rootHref !== selfHref && (
-            <Button size={"xs"} onClick={() => setHref(rootHref)}>
-              <LuArrowUpLeft />
-              Root
-            </Button>
-          )}
-          {parentHref && parentHref !== rootHref && (
-            <Button size={"xs"} onClick={() => setHref(parentHref)}>
-              <LuArrowUp />
-              Parent
-            </Button>
-          )}
-        </ButtonGroup>
-      </HStack>
+      {(value.assets as { [k: string]: StacAsset }) && (
+        <Assets assets={value.assets as { [k: string]: StacAsset }} />
+      )}
 
       {collectionsHref && <Collections href={collectionsHref} />}
     </Stack>

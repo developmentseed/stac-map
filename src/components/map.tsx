@@ -12,6 +12,7 @@ import bbox from "@turf/bbox";
 import bboxPolygon from "@turf/bbox-polygon";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { SpatialExtent, StacCollection } from "stac-ts";
+import { COGLayer } from "@developmentseed/deck.gl-geotiff";
 import type { BBox, Feature, FeatureCollection } from "geojson";
 import { useColorModeValue } from "../components/ui/color-mode";
 import { useStore } from "../store";
@@ -27,6 +28,7 @@ export default function Map() {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const value = useStore((store) => store.value);
   const collections = useStore((store) => store.collections);
+  const geotiffHref = useStore((store) => store.geotiffHref);
   const fillColor = useStore((store) => store.fillColor);
   const lineColor = useStore((store) => store.lineColor);
   const lineWidth = useStore((store) => store.lineWidth);
@@ -61,6 +63,14 @@ export default function Map() {
 
   const layers = [];
 
+  if (geotiffHref) {
+    layers.push(
+      new COGLayer({
+        id: "cog-layer",
+        geotiff: geotiffHref,
+      })
+    );
+  }
   if (valueGeoJson) {
     layers.push(
       new GeoJsonLayer({
