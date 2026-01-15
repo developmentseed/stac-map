@@ -285,8 +285,8 @@ function CollectionCard({ collection }: { collection: StacCollection }) {
   const setHref = useStore((store) => store.setHref);
   const hoveredCollection = useStore((store) => store.hoveredCollection);
   const setHoveredCollection = useStore((store) => store.setHoveredCollection);
-  const [hovered, setHovered] = useState(false);
   const thumbnailAsset = getThumbnailAsset(collection);
+  const hovered = hoveredCollection == collection;
 
   return (
     <Card.Root
@@ -295,11 +295,9 @@ function CollectionCard({ collection }: { collection: StacCollection }) {
       cursor={"pointer"}
       onClick={() => href && setHref(href)}
       onMouseEnter={() => {
-        setHovered(true);
         setHoveredCollection(collection);
       }}
       onMouseLeave={() => {
-        setHovered(false);
         if (hoveredCollection == collection) setHoveredCollection(null);
       }}
     >

@@ -12,7 +12,7 @@ import bbox from "@turf/bbox";
 import bboxPolygon from "@turf/bbox-polygon";
 import { featureCollection } from "@turf/helpers";
 import "maplibre-gl/dist/maplibre-gl.css";
-import type { SpatialExtent, StacCollection } from "stac-ts";
+import type { StacCollection } from "stac-ts";
 import { COGLayer } from "@developmentseed/deck.gl-geotiff";
 import type { BBox, Feature, FeatureCollection } from "geojson";
 import { useColorModeValue } from "../components/ui/color-mode";
@@ -20,6 +20,11 @@ import { useStore } from "../store";
 import type { BBox2D } from "../types/map";
 import type { StacValue } from "../types/stac";
 import { sanitizeBbox } from "../utils/map";
+import {
+  getCollectionExtents,
+  getSelfHref,
+  isGlobalCollection,
+} from "../utils/stac";
 
 export default function Map() {
   const mapRef = useRef<MapRef>(null);
@@ -28,9 +33,12 @@ export default function Map() {
     "dark-matter-gl-style"
   );
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const setHref = useStore((store) => store.setHref);
   const value = useStore((store) => store.value);
   const collections = useStore((store) => store.collections);
+  const filteredCollections = useStore((store) => store.filteredCollections);
   const hoveredCollection = useStore((store) => store.hoveredCollection);
+  const setHoveredCollection = useStore((store) => store.setHoveredCollection);
   const searchItems = useStore((store) => store.searchItems);
   const geotiffHref = useStore((store) => store.geotiffHref);
   const setBbox = useStore((store) => store.setBbox);
@@ -44,14 +52,16 @@ export default function Map() {
     }
   }, [value]);
   const collectionsGeoJson = useMemo(() => {
-    return collections
+    return (filteredCollections || collections)
       ?.map(
         (collection) =>
           collection.extent?.spatial?.bbox &&
-          bboxPolygon(getCollectionExtents(collection) as BBox)
+          bboxPolygon(getCollectionExtents(collection) as BBox, {
+            id: collection.id,
+          })
       )
       .filter((feature) => !!feature);
-  }, [collections]);
+  }, [collections, filteredCollections]);
 
   useEffect(() => {
     if (value && mapRef.current && isMapLoaded) {
@@ -123,10 +133,28 @@ export default function Map() {
       new GeoJsonLayer({
         id: "collections",
         data: collectionsGeoJson,
-        filled: false,
+        filled: true,
+        getFillColor: [fillColor[0], fillColor[1], fillColor[2], 1],
         getLineColor: lineColor,
         getLineWidth: lineWidth,
         lineWidthUnits: "pixels",
+        pickable: true,
+        onHover: (e) => {
+          setHoveredCollection(
+            collections?.find(
+              (collection) =>
+                collection.id == e.object?.id && !isGlobalCollection(collection)
+            ) || null
+          );
+        },
+        onClick: (e) => {
+          const collection = collections?.find(
+            (collection) =>
+              collection.id == e.object?.id && !isGlobalCollection(collection)
+          );
+          const href = collection && getSelfHref(collection);
+          if (href) setHref(href);
+        },
       })
     );
   }
@@ -173,14 +201,6 @@ function toGeoJson(value: StacValue) {
     case "FeatureCollection":
       return value as FeatureCollection;
   }
-}
-
-function getCollectionExtents(collection: StacCollection): SpatialExtent {
-  const spatialExtent = collection.extent?.spatial;
-  // check if bbox is a list of lists, otherwise its a single list of nums
-  return Array.isArray(spatialExtent?.bbox?.[0])
-    ? spatialExtent?.bbox[0]
-    : (spatialExtent?.bbox as unknown as SpatialExtent);
 }
 
 function getBbox(

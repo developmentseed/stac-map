@@ -1,4 +1,6 @@
 import type { StacAsset, StacCollection, StacLink } from "stac-ts";
+import type { SpatialExtent } from "stac-ts";
+import { sanitizeBbox } from "./map";
 import type { BBox2D } from "../types/map";
 import type { StacValue } from "../types/stac";
 
@@ -157,4 +159,19 @@ export function isCollectionInBbox(collection: StacCollection, bbox: BBox2D) {
   } else {
     return false;
   }
+}
+
+export function isGlobalCollection(collection: StacCollection) {
+  const bbox = sanitizeBbox(getCollectionExtents(collection));
+  return bbox[0] == -180 && bbox[1] == -90 && bbox[2] == 180 && bbox[3] == 90;
+}
+
+export function getCollectionExtents(
+  collection: StacCollection
+): SpatialExtent {
+  const spatialExtent = collection.extent?.spatial;
+  // check if bbox is a list of lists, otherwise its a single list of nums
+  return Array.isArray(spatialExtent?.bbox?.[0])
+    ? spatialExtent?.bbox[0]
+    : (spatialExtent?.bbox as unknown as SpatialExtent);
 }
