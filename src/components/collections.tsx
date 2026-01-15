@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import {
   LuFolderPlus,
   LuForward,
@@ -15,16 +15,12 @@ import {
   ButtonGroup,
   Card,
   Center,
-  CloseButton,
   Heading,
   HStack,
-  Input,
-  InputGroup,
   Link,
   List,
   Portal,
   SegmentGroup,
-  SkeletonText,
   Stack,
 } from "@chakra-ui/react";
 import {
@@ -37,20 +33,13 @@ import { Prose } from "./ui/prose";
 import { toaster } from "./ui/toaster";
 import { useStore } from "../store";
 import type { StacCollections } from "../types/stac";
-import { getSelfHref, getStacValueTitle } from "../utils/stac";
+import { getStacValueTitle } from "../utils/stac";
+import { getSelfHref } from "../utils/stac";
 
 export default function Collections({ href }: { href: string }) {
-  const collections = useStore((store) => store.collections);
   const setCollections = useStore((state) => state.setCollections);
-  const filteredCollections = useStore((store) => store.filteredCollections);
-  const setFilteredCollections = useStore(
-    (state) => state.setFilteredCollections
-  );
   const [fetchAllCollections, setFetchAllCollections] = useState(false);
   const [listOrCard, setListOrCard] = useState("card");
-  const [searchMode, setSearchMode] = useState("Filter");
-  const [search, setSearch] = useState("");
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const result = useInfiniteQuery({
     queryKey: ["stac-collections", href],
@@ -71,8 +60,6 @@ export default function Collections({ href }: { href: string }) {
     getNextPageParam: (lastPage: StacCollections | null) =>
       lastPage?.links?.find((link) => link.rel == "next")?.href,
   });
-
-  const totalCollectionsCount = result.data?.pages.at(0)?.numberMatched;
 
   useEffect(() => {
     setCollections(
@@ -98,141 +85,111 @@ export default function Collections({ href }: { href: string }) {
     }
   }, [result.error, href]);
 
-  useEffect(() => {
-    if (search.length > 0 && collections) {
-      setFilteredCollections(
-        collections.filter((collection) => matchesFilter(collection, search))
-      );
-    } else {
-      setFilteredCollections(null);
-    }
-  }, [search, collections, setFilteredCollections]);
-
   return (
     <>
       <Stack gap={4}>
         <Header
-          collections={collections}
-          filteredCollections={filteredCollections}
           listOrCard={listOrCard}
           setListOrCard={setListOrCard}
           {...result}
         />
 
-        <Box>
-          <SegmentGroup.Root
-            size={"sm"}
-            value={searchMode}
-            onValueChange={(e) => setSearchMode(e.value || "Filter")}
-          >
-            <SegmentGroup.Indicator />
-            <SegmentGroup.Items
-              items={["Filter", "Search", "Natural language search"]}
-            />
-          </SegmentGroup.Root>
-        </Box>
+        <CollectionValues listOrCard={listOrCard} {...result} />
+      </Stack>
 
-        {collections && (
-          <InputGroup
-            endElement={
-              search && (
-                <CloseButton
-                  size={"xs"}
-                  me="-2"
-                  onClick={() => {
-                    setSearch("");
-                    inputRef.current?.focus();
-                  }}
-                />
-              )
-            }
-          >
-            <Input
-              placeholder="Filter collections by title or id"
-              ref={inputRef}
-              value={search}
-              onChange={(e) => setSearch(e.currentTarget.value)}
-            />
-          </InputGroup>
+      <CollectionActionBar
+        fetchAllCollections={fetchAllCollections}
+        setFetchAllCollections={setFetchAllCollections}
+        {...result}
+      />
+    </>
+  );
+}
+
+function Header({
+  listOrCard,
+  setListOrCard,
+}: {
+  listOrCard: string;
+  setListOrCard: (listOrCard: string) => void;
+}) {
+  const collections = useStore((store) => store.collections);
+  const filteredCollections = useStore((store) => store.filteredCollections);
+
+  return (
+    <HStack>
+      <Heading size={"md"}>
+        <HStack>
+          <LuFolderPlus /> Collections{" "}
+          {collections &&
+            `(${filteredCollections ? filteredCollections.length + "/" : ""}${collections.length})`}
+        </HStack>
+      </Heading>
+      <Box flex={1} />
+      <SegmentGroup.Root
+        value={listOrCard}
+        onValueChange={(e) => setListOrCard(e.value || "card")}
+        size={"xs"}
+      >
+        <SegmentGroup.Indicator />
+        <SegmentGroup.Items
+          items={[
+            { value: "list", label: <LuList /> },
+            { value: "card", label: <LuSquare /> },
+          ]}
+        />
+      </SegmentGroup.Root>
+    </HStack>
+  );
+}
+
+function CollectionValues({
+  listOrCard,
+  hasNextPage,
+  fetchNextPage,
+  isFetching,
+}: { listOrCard: string } & UseInfiniteQueryResult) {
+  const collections = useStore((store) => store.collections);
+  const filteredCollections = useStore((store) => store.filteredCollections);
+  const values = (filteredCollections || collections)?.map((collection) =>
+    listOrCard === "list" ? (
+      <CollectionListItem key={collection.id} collection={collection} />
+    ) : (
+      <CollectionCard key={collection.id} collection={collection} />
+    )
+  );
+  if (listOrCard === "list") {
+    return (
+      <List.Root variant={"plain"} gap={2}>
+        {values}
+        {hasNextPage && !isFetching && (
+          <Center>
+            <List.Item>
+              <Link onClick={() => fetchNextPage()}>Load more...</Link>
+            </List.Item>
+          </Center>
         )}
-
-        {collections &&
-          (listOrCard === "card" ? (
-            <Stack>
-              {(filteredCollections || collections).map((collection) => (
-                <CollectionCard key={collection.id} collection={collection} />
-              ))}
-            </Stack>
-          ) : (
-            <List.Root variant={"plain"} gap={1}>
-              {(filteredCollections || collections).map((collection) => (
-                <CollectionListItem
-                  key={collection.id}
-                  collection={collection}
-                />
-              ))}
-            </List.Root>
-          ))}
-
-        {result.isFetching && <SkeletonText />}
-
-        {result.hasNextPage && (
+      </List.Root>
+    );
+  } else {
+    return (
+      <Stack>
+        {values}
+        {hasNextPage && (
           <Center>
             <Button
-              variant={"outline"}
-              onClick={() => result.fetchNextPage()}
-              disabled={result.isFetching}
+              variant={"plain"}
+              disabled={isFetching}
+              onClick={() => fetchNextPage()}
             >
               Load more...
             </Button>
           </Center>
         )}
       </Stack>
-
-      <ActionBar.Root open={true}>
-        <Portal>
-          <ActionBar.Positioner>
-            <ActionBar.Content>
-              {collections && (
-                <ActionBar.SelectionTrigger>
-                  {totalCollectionsCount &&
-                  totalCollectionsCount > collections.length
-                    ? `${collections.length}/${totalCollectionsCount}`
-                    : collections.length}{" "}
-                  collection{collections.length != 1 && "s"} loaded
-                </ActionBar.SelectionTrigger>
-              )}
-              {result.hasNextPage && (
-                <>
-                  <ActionBar.Separator />
-                  <ButtonGroup variant="outline" size="sm">
-                    <Button
-                      onClick={() => result.fetchNextPage()}
-                      disabled={!result.hasNextPage}
-                    >
-                      <LuForward />
-                      Fetch next page
-                    </Button>
-                    <Button
-                      onClick={() =>
-                        setFetchAllCollections((previous) => !previous)
-                      }
-                      disabled={!result.hasNextPage}
-                    >
-                      {fetchAllCollections ? <LuPause /> : <LuPlay />}
-                      {fetchAllCollections && result.hasNextPage
-                        ? "Pause"
-                        : "Fetch all"}
-                    </Button>
-                  </ButtonGroup>
-                </>
-              )}
-            </ActionBar.Content>
-          </ActionBar.Positioner>
-        </Portal>
-      </ActionBar.Root>
-    </>
-  );
+    );
+  }
+  return <></>;
 }
 
 function CollectionCard({ collection }: { collection: StacCollection }) {
@@ -270,64 +227,58 @@ function CollectionListItem({ collection }: { collection: StacCollection }) {
   );
 }
 
-function matchesFilter(collection: StacCollection, filter: string) {
-  const lowerCaseFilter = filter.toLowerCase();
-  return (
-    collection.id.toLowerCase().includes(lowerCaseFilter) ||
-    collection.title?.includes(lowerCaseFilter)
-  );
-}
-
-type HeaderProps = UseInfiniteQueryResult<
-  InfiniteData<StacCollections | null, unknown>,
-  Error
-> & {
-  collections: StacCollection[] | null;
-  filteredCollections: StacCollection[] | null;
-  listOrCard: string;
-  setListOrCard: (listOrCard: string) => void;
-};
-
-function Header({
-  collections,
-  filteredCollections,
-  listOrCard,
-  setListOrCard,
-  isFetching,
-  fetchNextPage,
+function CollectionActionBar({
+  fetchAllCollections,
+  setFetchAllCollections,
+  data,
   hasNextPage,
-}: HeaderProps) {
+  fetchNextPage,
+}: {
+  fetchAllCollections: boolean;
+  setFetchAllCollections: Dispatch<SetStateAction<boolean>>;
+} & UseInfiniteQueryResult<InfiniteData<StacCollections | null>>) {
+  const collections = useStore((store) => store.collections);
+  const numberMatched = data?.pages.at(0)?.numberMatched;
+
   return (
-    <Heading size={"md"}>
-      <HStack>
-        <LuFolderPlus /> Collections{" "}
-        {collections &&
-          `(${filteredCollections ? filteredCollections.length + "/" : ""}${collections.length})`}
-        {hasNextPage && (
-          <Button
-            size={"xs"}
-            variant={"plain"}
-            onClick={() => fetchNextPage()}
-            disabled={isFetching}
-          >
-            Load more...
-          </Button>
-        )}
-        <Box flex={1} />
-        <SegmentGroup.Root
-          value={listOrCard}
-          onValueChange={(e) => setListOrCard(e.value || "card")}
-          size={"xs"}
-        >
-          <SegmentGroup.Indicator />
-          <SegmentGroup.Items
-            items={[
-              { value: "list", label: <LuList /> },
-              { value: "card", label: <LuSquare /> },
-            ]}
-          />
-        </SegmentGroup.Root>
-      </HStack>
-    </Heading>
+    <ActionBar.Root open={true}>
+      <Portal>
+        <ActionBar.Positioner>
+          <ActionBar.Content>
+            {collections && (
+              <ActionBar.SelectionTrigger>
+                {numberMatched && numberMatched > collections.length
+                  ? `${collections.length}/${numberMatched}`
+                  : collections.length}{" "}
+                collection{collections.length != 1 && "s"} fetched
+              </ActionBar.SelectionTrigger>
+            )}
+            {hasNextPage && (
+              <>
+                <ActionBar.Separator />
+                <ButtonGroup variant="outline" size="sm">
+                  <Button
+                    onClick={() => fetchNextPage()}
+                    disabled={!hasNextPage}
+                  >
+                    <LuForward />
+                    Fetch next page
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      setFetchAllCollections((previous) => !previous)
+                    }
+                    disabled={!hasNextPage}
+                  >
+                    {fetchAllCollections ? <LuPause /> : <LuPlay />}
+                    {fetchAllCollections && hasNextPage ? "Pause" : "Fetch all"}
+                  </Button>
+                </ButtonGroup>
+              </>
+            )}
+          </ActionBar.Content>
+        </ActionBar.Positioner>
+      </Portal>
+    </ActionBar.Root>
   );
 }
