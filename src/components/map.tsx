@@ -10,6 +10,7 @@ import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import bbox from "@turf/bbox";
 import bboxPolygon from "@turf/bbox-polygon";
+import { featureCollection } from "@turf/helpers";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { SpatialExtent, StacCollection } from "stac-ts";
 import { COGLayer } from "@developmentseed/deck.gl-geotiff";
@@ -29,6 +30,7 @@ export default function Map() {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const value = useStore((store) => store.value);
   const collections = useStore((store) => store.collections);
+  const searchItems = useStore((store) => store.searchItems);
   const geotiffHref = useStore((store) => store.geotiffHref);
   const fillColor = useStore((store) => store.fillColor);
   const lineColor = useStore((store) => store.lineColor);
@@ -67,8 +69,21 @@ export default function Map() {
   if (geotiffHref) {
     layers.push(
       new COGLayer({
-        id: "cog-layer",
+        id: "cog",
         geotiff: geotiffHref,
+      })
+    );
+  }
+  if (searchItems) {
+    layers.push(
+      new GeoJsonLayer({
+        id: "search-items",
+        data: featureCollection(searchItems as Feature[]),
+        filled: true,
+        getFillColor: fillColor,
+        getLineColor: lineColor,
+        getLineWidth: lineWidth,
+        lineWidthUnits: "pixels",
       })
     );
   }
@@ -77,11 +92,14 @@ export default function Map() {
       new GeoJsonLayer({
         id: "value",
         data: valueGeoJson,
-        filled: !geotiffHref,
+        filled: !geotiffHref && !searchItems,
         getFillColor: fillColor,
         getLineColor: lineColor,
         getLineWidth: lineWidth,
         lineWidthUnits: "pixels",
+        updateTriggers: {
+          filled: [geotiffHref, searchItems],
+        },
       })
     );
   }
