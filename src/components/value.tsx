@@ -35,12 +35,14 @@ export default function Value({ value }: { value: StacValue }) {
   return (
     <Stack gap={4}>
       <Heading>{getStacValueTitle(value)}</Heading>
+
       <HStack>
         {value.id && (
           <Badge variant={"surface"}>{getStacValueType(value)}</Badge>
         )}
         {version && <Badge variant={"surface"}>{version}</Badge>}
       </HStack>
+
       {(showRootHref || showParentHref) && (
         <HStack>
           <ButtonGroup variant={"outline"} size="xs">
