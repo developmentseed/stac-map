@@ -1,4 +1,10 @@
-import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   LuFilter,
   LuFolderPlus,
@@ -18,6 +24,7 @@ import {
   ButtonGroup,
   Card,
   Center,
+  CloseButton,
   Heading,
   HStack,
   Input,
@@ -26,6 +33,7 @@ import {
   List,
   Portal,
   SegmentGroup,
+  SkeletonText,
   Stack,
 } from "@chakra-ui/react";
 import {
@@ -154,6 +162,7 @@ function CollectionSearch() {
   const setFilteredCollections = useStore(
     (store) => store.setFilteredCollections
   );
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [value, setValue] = useState("");
   const [searchMode] = useState<
     "filter" | "search" | "natural-language-search"
@@ -167,6 +176,16 @@ function CollectionSearch() {
     ) : (
       <LuSearchCode />
     );
+  const endElement = (
+    <CloseButton
+      size={"xs"}
+      me="-2"
+      onClick={() => {
+        setValue("");
+        inputRef.current?.focus();
+      }}
+    />
+  );
   const placeholder =
     searchMode === "filter"
       ? "Filter collections by id or title"
@@ -184,9 +203,10 @@ function CollectionSearch() {
   }, [searchMode, collections, setFilteredCollections, value]);
 
   return (
-    <InputGroup startElement={startElement}>
+    <InputGroup startElement={startElement} endElement={value && endElement}>
       <Input
         placeholder={placeholder}
+        ref={inputRef}
         value={value}
         onChange={(e) => setValue(e.currentTarget.value)}
       />
@@ -213,6 +233,11 @@ function CollectionValues({
     return (
       <List.Root variant={"plain"} gap={2}>
         {values}
+        {isFetching && (
+          <List.Item>
+            <SkeletonText />
+          </List.Item>
+        )}
         {hasNextPage && !isFetching && (
           <Center>
             <List.Item>
@@ -226,6 +251,7 @@ function CollectionValues({
     return (
       <Stack>
         {values}
+        {isFetching && <SkeletonText />}
         {hasNextPage && (
           <Center>
             <Button
@@ -240,7 +266,6 @@ function CollectionValues({
       </Stack>
     );
   }
-  return <></>;
 }
 
 function CollectionCard({ collection }: { collection: StacCollection }) {
