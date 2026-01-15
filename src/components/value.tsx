@@ -1,13 +1,20 @@
-import { LuArrowUp, LuArrowUpLeft } from "react-icons/lu";
+import { LuArrowUp, LuArrowUpLeft, LuFileJson } from "react-icons/lu";
 import {
   Badge,
   Button,
   ButtonGroup,
+  CloseButton,
+  CodeBlock,
+  createShikiAdapter,
+  Dialog,
   Heading,
   HStack,
+  IconButton,
+  Portal,
   Stack,
 } from "@chakra-ui/react";
 import type { StacAsset } from "stac-ts";
+import type { HighlighterGeneric } from "shiki";
 import Assets from "./assets";
 import Collections from "./collections";
 import Description from "./description";
@@ -21,29 +28,42 @@ import {
   getThumbnailAsset,
 } from "../utils/stac";
 
+const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({
+  async load() {
+    const { createHighlighter } = await import("shiki");
+    return createHighlighter({
+      langs: ["json"],
+      themes: ["github-dark", "github-light"],
+    });
+  },
+  theme: {
+    light: "github-light",
+    dark: "github-dark",
+  },
+});
+
 export default function Value({ value }: { value: StacValue }) {
   const setHref = useStore((store) => store.setHref);
+
   const collectionsHref = getLinkHref(value, "data");
   const selfHref = getLinkHref(value, "self");
   const rootHref = getLinkHref(value, "root");
-  const showRootHref = rootHref && rootHref !== selfHref;
   const parentHref = getLinkHref(value, "parent");
-  const showParentHref = parentHref && parentHref !== rootHref;
   const version = value.stac_version as string | undefined;
   const thumbnailAsset = getThumbnailAsset(value);
 
   return (
-    <Stack gap={4}>
-      <Heading>{getStacValueTitle(value)}</Heading>
+    <>
+      <Stack gap={4}>
+        <Heading>{getStacValueTitle(value)}</Heading>
 
-      <HStack>
-        {value.id && (
-          <Badge variant={"surface"}>{getStacValueType(value)}</Badge>
-        )}
-        {version && <Badge variant={"surface"}>{version}</Badge>}
-      </HStack>
+        <HStack>
+          {value.id && (
+            <Badge variant={"surface"}>{getStacValueType(value)}</Badge>
+          )}
+          {version && <Badge variant={"surface"}>{version}</Badge>}
+        </HStack>
 
-      {(showRootHref || showParentHref) && (
         <HStack>
           <ButtonGroup variant={"outline"} size="xs">
             {rootHref && rootHref !== selfHref && (
@@ -58,20 +78,64 @@ export default function Value({ value }: { value: StacValue }) {
                 Parent
               </Button>
             )}
+            <Dialog.Root size={"xl"}>
+              <Dialog.Trigger asChild>
+                <Button>
+                  <LuFileJson />
+                  JSON
+                </Button>
+              </Dialog.Trigger>
+              <Portal>
+                <Dialog.Backdrop />
+                <Dialog.Positioner>
+                  <Dialog.Content>
+                    <Dialog.Header>
+                      <Dialog.Title>JSON</Dialog.Title>
+                    </Dialog.Header>
+                    <Dialog.Body>
+                      <CodeBlock.AdapterProvider value={shikiAdapter}>
+                        <CodeBlock.Root
+                          code={JSON.stringify(value, null, 2)}
+                          language="json"
+                          size={"sm"}
+                        >
+                          <CodeBlock.Header>
+                            <CodeBlock.Title>{value.id}.json</CodeBlock.Title>
+                            <CodeBlock.CopyTrigger asChild>
+                              <IconButton variant="ghost" size="2xs">
+                                <CodeBlock.CopyIndicator />
+                              </IconButton>
+                            </CodeBlock.CopyTrigger>
+                          </CodeBlock.Header>
+                          <CodeBlock.Content>
+                            <CodeBlock.Code>
+                              <CodeBlock.CodeText />
+                            </CodeBlock.Code>
+                          </CodeBlock.Content>
+                        </CodeBlock.Root>
+                      </CodeBlock.AdapterProvider>
+                    </Dialog.Body>
+                    <Dialog.CloseTrigger asChild>
+                      <CloseButton size="sm" />
+                    </Dialog.CloseTrigger>
+                  </Dialog.Content>
+                </Dialog.Positioner>
+              </Portal>
+            </Dialog.Root>
           </ButtonGroup>
         </HStack>
-      )}
 
-      {thumbnailAsset && <Thumbnail asset={thumbnailAsset} />}
-      {"description" in value && (
-        <Description description={value.description as string} />
-      )}
+        {thumbnailAsset && <Thumbnail asset={thumbnailAsset} />}
+        {"description" in value && (
+          <Description description={value.description as string} />
+        )}
 
-      {(value.assets as { [k: string]: StacAsset }) && (
-        <Assets assets={value.assets as { [k: string]: StacAsset }} />
-      )}
+        {(value.assets as { [k: string]: StacAsset }) && (
+          <Assets assets={value.assets as { [k: string]: StacAsset }} />
+        )}
 
-      {collectionsHref && <Collections href={collectionsHref} />}
-    </Stack>
+        {collectionsHref && <Collections href={collectionsHref} />}
+      </Stack>
+    </>
   );
 }
