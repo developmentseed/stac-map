@@ -283,14 +283,28 @@ function CollectionValues({
 function CollectionCard({ collection }: { collection: StacCollection }) {
   const href = getSelfHref(collection);
   const setHref = useStore((store) => store.setHref);
+  const hoveredCollection = useStore((store) => store.hoveredCollection);
+  const setHoveredCollection = useStore((store) => store.setHoveredCollection);
+  const [hovered, setHovered] = useState(false);
   const thumbnailAsset = getThumbnailAsset(collection);
 
   return (
-    <Card.Root>
+    <Card.Root
+      borderWidth={2}
+      borderColor={hovered ? "colorPalette.solid" : "transparent"}
+      cursor={"pointer"}
+      onClick={() => href && setHref(href)}
+      onMouseEnter={() => {
+        setHovered(true);
+        setHoveredCollection(collection);
+      }}
+      onMouseLeave={() => {
+        setHovered(false);
+        if (hoveredCollection == collection) setHoveredCollection(null);
+      }}
+    >
       <Card.Header>
-        <Card.Title>
-          <Link onClick={() => href && setHref(href)}>{collection.title}</Link>
-        </Card.Title>
+        <Card.Title>{getStacValueTitle(collection)}</Card.Title>
       </Card.Header>
       <Card.Body>
         <Card.Description as="div">

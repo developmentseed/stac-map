@@ -30,6 +30,7 @@ export default function Map() {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const value = useStore((store) => store.value);
   const collections = useStore((store) => store.collections);
+  const hoveredCollection = useStore((store) => store.hoveredCollection);
   const searchItems = useStore((store) => store.searchItems);
   const geotiffHref = useStore((store) => store.geotiffHref);
   const setBbox = useStore((store) => store.setBbox);
@@ -101,6 +102,19 @@ export default function Map() {
         updateTriggers: {
           filled: [geotiffHref, searchItems],
         },
+      })
+    );
+  }
+  if (hoveredCollection) {
+    layers.push(
+      new GeoJsonLayer({
+        id: "hovered-collection",
+        data: [bboxPolygon(getCollectionExtents(hoveredCollection) as BBox)],
+        filled: true,
+        getFillColor: fillColor,
+        getLineColor: lineColor,
+        getLineWidth: lineWidth,
+        lineWidthUnits: "pixels",
       })
     );
   }
