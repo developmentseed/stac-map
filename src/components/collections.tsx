@@ -9,30 +9,24 @@ import {
   LuFilter,
   LuFolderPlus,
   LuForward,
-  LuList,
   LuPause,
   LuPlay,
   LuSearch,
   LuSearchCode,
-  LuSquare,
 } from "react-icons/lu";
 import { MarkdownHooks } from "react-markdown";
 import {
   ActionBar,
-  Box,
   Button,
   ButtonGroup,
   Card,
   Center,
   CloseButton,
-  Heading,
-  HStack,
   Input,
   InputGroup,
   Link,
   List,
   Portal,
-  SegmentGroup,
   SkeletonText,
   Stack,
 } from "@chakra-ui/react";
@@ -42,6 +36,7 @@ import {
   type UseInfiniteQueryResult,
 } from "@tanstack/react-query";
 import type { StacCollection } from "stac-ts";
+import SectionHeader, { type ListOrCard } from "./section-header";
 import Thumbnail from "./thumbnail";
 import { Prose } from "./ui/prose";
 import { toaster } from "./ui/toaster";
@@ -57,7 +52,7 @@ import {
 export default function Collections({ href }: { href: string }) {
   const setCollections = useStore((state) => state.setCollections);
   const [fetchAllCollections, setFetchAllCollections] = useState(false);
-  const [listOrCard, setListOrCard] = useState("card");
+  const [listOrCard, setListOrCard] = useState<ListOrCard>("card");
 
   const result = useInfiniteQuery({
     queryKey: ["stac-collections", href],
@@ -106,10 +101,9 @@ export default function Collections({ href }: { href: string }) {
   return (
     <>
       <Stack gap={4}>
-        <Header
+        <CollectionsHeader
           listOrCard={listOrCard}
           setListOrCard={setListOrCard}
-          {...result}
         />
         <CollectionSearch />
         <CollectionValues listOrCard={listOrCard} {...result} />
@@ -124,40 +118,25 @@ export default function Collections({ href }: { href: string }) {
   );
 }
 
-function Header({
+function CollectionsHeader({
   listOrCard,
   setListOrCard,
 }: {
-  listOrCard: string;
-  setListOrCard: (listOrCard: string) => void;
+  listOrCard: ListOrCard;
+  setListOrCard: (listOrCard: ListOrCard) => void;
 }) {
   const collections = useStore((store) => store.collections);
   const filteredCollections = useStore((store) => store.filteredCollections);
 
   return (
-    <HStack>
-      <Heading size={"md"}>
-        <HStack>
-          <LuFolderPlus /> Collections{" "}
-          {collections &&
-            `(${filteredCollections ? filteredCollections.length + "/" : ""}${collections.length})`}
-        </HStack>
-      </Heading>
-      <Box flex={1} />
-      <SegmentGroup.Root
-        value={listOrCard}
-        onValueChange={(e) => setListOrCard(e.value || "card")}
-        size={"xs"}
-      >
-        <SegmentGroup.Indicator />
-        <SegmentGroup.Items
-          items={[
-            { value: "list", label: <LuList /> },
-            { value: "card", label: <LuSquare /> },
-          ]}
-        />
-      </SegmentGroup.Root>
-    </HStack>
+    <SectionHeader
+      icon={<LuFolderPlus />}
+      title="Collections"
+      count={collections?.length}
+      filteredCount={filteredCollections?.length}
+      listOrCard={listOrCard}
+      setListOrCard={setListOrCard}
+    />
   );
 }
 
@@ -223,7 +202,7 @@ function CollectionValues({
   hasNextPage,
   fetchNextPage,
   isFetching,
-}: { listOrCard: string } & UseInfiniteQueryResult) {
+}: { listOrCard: ListOrCard } & UseInfiniteQueryResult) {
   const collections = useStore((store) => store.collections);
   const filteredCollections = useStore((store) => store.filteredCollections);
   const values = (filteredCollections || collections)?.map((collection) =>
