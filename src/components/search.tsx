@@ -12,17 +12,12 @@ import {
   ActionBar,
   Button,
   ButtonGroup,
-  List,
   Portal,
-  SkeletonText,
-  Stack,
+  Progress,
 } from "@chakra-ui/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import type { StacCollection, StacItem } from "stac-ts";
+import type { StacCollection } from "stac-ts";
 import type { BBox } from "geojson";
-import { type ListOrCard, Section } from "./section";
-import ValueCard from "./value-card";
-import ValueListItem from "./value-list-item";
 import { useStore } from "../store.ts";
 import type { StacItemCollection, StacSearch } from "../types/stac";
 import { sanitizeBbox } from "../utils/map.ts";
@@ -34,76 +29,49 @@ interface Props {
 }
 
 export default function Search({ href, collection }: Props) {
-  const searchItems = useStore((store) => store.searchItems);
   const setSearchItems = useStore((store) => store.setSearchItems);
   const [search, setSearch] = useState<StacSearch | null>(null);
   const { map } = useMap();
 
   return (
-    <Section
-      icon={<LuSearch />}
-      title="Item search"
-      count={searchItems?.length}
-      defaultListOrCard="list"
-    >
-      {(listOrCard) => (
-        <>
-          <ButtonGroup>
-            <Button variant={"outline"} disabled={!!search}>
-              <LuSettings />
-              Configure
-            </Button>
+    <>
+      <ButtonGroup>
+        <Button variant={"outline"} disabled={!!search}>
+          <LuSettings />
+          Configure
+        </Button>
 
-            {search ? (
-              <Button
-                onClick={() => {
-                  setSearchItems(null);
-                  setSearch(null);
-                }}
-                variant={"surface"}
-              >
-                <LuX /> Clear
-              </Button>
-            ) : (
-              <Button
-                onClick={() => {
-                  setSearchItems(null);
-                  setSearch({
-                    collections: [collection.id],
-                    bbox: sanitizeBbox(
-                      map?.getBounds().toArray().flat() as BBox
-                    ),
-                  });
-                }}
-              >
-                <LuSearch />
-                Search
-              </Button>
-            )}
-          </ButtonGroup>
-
-          {search && (
-            <SearchResults
-              href={href}
-              search={search}
-              listOrCard={listOrCard}
-            />
-          )}
-        </>
-      )}
-    </Section>
+        {search ? (
+          <Button
+            onClick={() => {
+              setSearchItems(null);
+              setSearch(null);
+            }}
+            variant={"surface"}
+          >
+            <LuX /> Clear
+          </Button>
+        ) : (
+          <Button
+            onClick={() => {
+              setSearchItems(null);
+              setSearch({
+                collections: [collection.id],
+                bbox: sanitizeBbox(map?.getBounds().toArray().flat() as BBox),
+              });
+            }}
+          >
+            <LuSearch />
+            Search
+          </Button>
+        )}
+      </ButtonGroup>
+      {search && <SearchResults href={href} search={search} />}
+    </>
   );
 }
 
-function SearchResults({
-  href,
-  search,
-  listOrCard,
-}: {
-  href: string;
-  search: StacSearch;
-  listOrCard: ListOrCard;
-}) {
+function SearchResults({ href, search }: { href: string; search: StacSearch }) {
   const searchItems = useStore((store) => store.searchItems);
   const setSearchItems = useStore((store) => store.setSearchItems);
   const [fetchAllItems, setFetchAllItems] = useState(false);
@@ -147,13 +115,14 @@ function SearchResults({
 
   return (
     <>
-      <Stack>
-        {searchItems && (
-          <SearchItems listOrCard={listOrCard} items={searchItems} />
-        )}
-
-        {result.isFetching && <SkeletonText />}
-      </Stack>
+      <Progress.Root
+        value={numberMatched ? searchItems?.length : null}
+        max={numberMatched}
+      >
+        <Progress.Track>
+          <Progress.Range />
+        </Progress.Track>
+      </Progress.Root>
       <ActionBar.Root open={!!searchItems}>
         <Portal>
           <ActionBar.Positioner>
@@ -192,30 +161,4 @@ function SearchResults({
       </ActionBar.Root>
     </>
   );
-}
-
-function SearchItems({
-  items,
-  listOrCard,
-}: {
-  items: StacItem[];
-  listOrCard: ListOrCard;
-}) {
-  if (listOrCard === "list") {
-    return (
-      <List.Root variant={"plain"}>
-        {items.map((item) => (
-          <ValueListItem key={item.id} value={item} />
-        ))}
-      </List.Root>
-    );
-  } else {
-    return (
-      <Stack>
-        {items.map((item) => (
-          <ValueCard key={item.id} value={item} />
-        ))}
-      </Stack>
-    );
-  }
 }

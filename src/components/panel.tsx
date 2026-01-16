@@ -47,7 +47,7 @@ function PickedItemPanel({ pickedItem }: { pickedItem: StacItem }) {
       <StacIcon value={pickedItem} /> {getStacValueId(pickedItem)}{" "}
       <Box flex={1} />
       {href && (
-        <IconButton variant={"subtle"} size={"sm"}>
+        <IconButton variant={"subtle"} size={"2xs"} m={0}>
           <LuArrowRight onClick={() => setHref(href)} />
         </IconButton>
       )}
