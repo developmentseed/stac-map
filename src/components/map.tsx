@@ -87,20 +87,10 @@ export default function Map() {
       lineWidthUnits: "pixels",
     }),
     new GeoJsonLayer({
-      id: "value",
-      data: valueGeoJson,
-      filled: !(geotiffHref || searchItems),
-      getFillColor: fillColor,
-      getLineColor: lineColor,
-      getLineWidth: lineWidth,
-      lineWidthUnits: "pixels",
-    }),
-    new GeoJsonLayer({
       id: "hovered-collection",
-      data:
-        hoveredCollection && !valueGeoJson
-          ? [bboxPolygon(getCollectionExtents(hoveredCollection) as BBox)]
-          : [],
+      data: hoveredCollection
+        ? [bboxPolygon(getCollectionExtents(hoveredCollection) as BBox)]
+        : [],
       filled: true,
       getFillColor: fillColor,
       getLineColor: lineColor,
@@ -132,6 +122,15 @@ export default function Map() {
         const href = collection && getSelfHref(collection);
         if (href) setHref(href);
       },
+    }),
+    new GeoJsonLayer({
+      id: "value",
+      data: valueGeoJson,
+      filled: !(geotiffHref || searchItems || collectionsGeoJson),
+      getFillColor: fillColor,
+      getLineColor: lineColor,
+      getLineWidth: lineWidth,
+      lineWidthUnits: "pixels",
     }),
   ];
 
