@@ -1,28 +1,10 @@
-import {
-  type Dispatch,
-  type SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  LuFilter,
-  LuFolderPlus,
-  LuForward,
-  LuPause,
-  LuPlay,
-  LuSearch,
-  LuSearchCode,
-} from "react-icons/lu";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { LuFolderPlus, LuForward, LuPause, LuPlay } from "react-icons/lu";
 import {
   ActionBar,
   Button,
   ButtonGroup,
   Center,
-  Checkbox,
-  CloseButton,
-  Input,
-  InputGroup,
   Link,
   List,
   Portal,
@@ -34,14 +16,14 @@ import {
   useInfiniteQuery,
   type UseInfiniteQueryResult,
 } from "@tanstack/react-query";
-import type { StacCollection } from "stac-ts";
+import CollectionFilter from "./collection-filter";
 import { type ListOrCard, Section } from "./section";
 import { toaster } from "./ui/toaster";
 import ValueCard from "./value-card";
 import ValueListItem from "./value-list-item";
 import { useStore } from "../store";
 import type { StacCollections } from "../types/stac";
-import { getLinkHref, isCollectionInBbox } from "../utils/stac";
+import { getLinkHref } from "../utils/stac";
 
 export default function Collections({ href }: { href: string }) {
   const setCollections = useStore((state) => state.setCollections);
@@ -103,7 +85,7 @@ export default function Collections({ href }: { href: string }) {
       >
         {(listOrCard) => (
           <>
-            <CollectionSearch />
+            <CollectionFilter />
             <CollectionValues listOrCard={listOrCard} {...result} />
           </>
         )}
@@ -115,90 +97,6 @@ export default function Collections({ href }: { href: string }) {
         {...result}
       />
     </>
-  );
-}
-
-function CollectionSearch() {
-  const collections = useStore((store) => store.collections);
-  const setFilteredCollections = useStore(
-    (store) => store.setFilteredCollections
-  );
-  const bbox = useStore((store) => store.bbox);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [searchValue, setSearchValue] = useState("");
-  const [filterViewport, setFilterViewport] = useState(true);
-  const [searchMode] = useState<
-    "filter" | "search" | "natural-language-search"
-  >("filter");
-
-  const startElement =
-    searchMode === "filter" ? (
-      <LuFilter />
-    ) : searchMode === "search" ? (
-      <LuSearch />
-    ) : (
-      <LuSearchCode />
-    );
-  const endElement = (
-    <CloseButton
-      size={"xs"}
-      me="-2"
-      onClick={() => {
-        setSearchValue("");
-        inputRef.current?.focus();
-      }}
-    />
-  );
-  const placeholder =
-    searchMode === "filter"
-      ? "Filter collections by id or title"
-      : searchMode === "search"
-        ? "Search collections"
-        : "Search collections with natural language";
-
-  useEffect(() => {
-    if (searchMode === "filter") {
-      setFilteredCollections(
-        collections?.filter(
-          (collection) =>
-            matchesFilter(collection, searchValue) &&
-            (!filterViewport || !bbox || isCollectionInBbox(collection, bbox))
-        ) || null
-      );
-    }
-  }, [
-    collections,
-    setFilteredCollections,
-    setSearchValue,
-    searchMode,
-    searchValue,
-    bbox,
-    filterViewport,
-  ]);
-
-  return (
-    <Stack gap={4}>
-      <InputGroup
-        startElement={startElement}
-        endElement={searchValue && endElement}
-      >
-        <Input
-          placeholder={placeholder}
-          ref={inputRef}
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.currentTarget.value)}
-        />
-      </InputGroup>
-      <Checkbox.Root
-        onCheckedChange={(e) => setFilterViewport(!!e.checked)}
-        checked={filterViewport}
-        size={"sm"}
-      >
-        <Checkbox.HiddenInput />
-        <Checkbox.Control />
-        <Checkbox.Label>Filter by viewport</Checkbox.Label>
-      </Checkbox.Root>
-    </Stack>
   );
 }
 
@@ -214,7 +112,7 @@ function CollectionValues({
     listOrCard === "list" ? (
       <ValueListItem key={collection.id} value={collection} />
     ) : (
-      <CollectionCard key={collection.id} collection={collection} />
+      <ValueCard key={collection.id} value={collection} />
     )
   );
   if (listOrCard === "list") {
@@ -254,22 +152,6 @@ function CollectionValues({
       </Stack>
     );
   }
-}
-
-function CollectionCard({ collection }: { collection: StacCollection }) {
-  const hoveredCollection = useStore((store) => store.hoveredCollection);
-  const setHoveredCollection = useStore((store) => store.setHoveredCollection);
-
-  return (
-    <ValueCard
-      value={collection}
-      hovered={hoveredCollection === collection}
-      onMouseEnter={() => setHoveredCollection(collection)}
-      onMouseLeave={() => {
-        if (hoveredCollection === collection) setHoveredCollection(null);
-      }}
-    />
-  );
 }
 
 function CollectionActionBar({
@@ -328,10 +210,3 @@ function CollectionActionBar({
   );
 }
 
-function matchesFilter(collection: StacCollection, filter: string) {
-  const lowerCaseFilter = filter.toLowerCase();
-  return (
-    collection.id.toLowerCase().includes(lowerCaseFilter) ||
-    collection.title?.toLowerCase().includes(lowerCaseFilter)
-  );
-}

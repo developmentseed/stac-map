@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { LuFolder } from "react-icons/lu";
 import { List, SkeletonText, Stack } from "@chakra-ui/react";
 import type { StacLink } from "stac-ts";
+import CollectionFilter from "./collection-filter";
 import { type ListOrCard, Section } from "./section";
 import SkeletonCard from "./skeleton-card";
 import ValueCard from "./value-card";
@@ -10,9 +11,22 @@ import { useStacJson } from "../hooks/stac";
 import { useStore } from "../store";
 
 export default function Children({ links }: { links: StacLink[] }) {
+  const collections = useStore((store) => store.collections);
+  const filteredCollections = useStore((store) => store.filteredCollections);
+
   return (
-    <Section icon={<LuFolder />} title="Children" count={links.length}>
-      {(listOrCard) => <ChildrenValues listOrCard={listOrCard} links={links} />}
+    <Section
+      icon={<LuFolder />}
+      title="Children"
+      count={collections?.length}
+      filteredCount={filteredCollections?.length}
+    >
+      {(listOrCard) => (
+        <>
+          <CollectionFilter />
+          <ChildrenValues listOrCard={listOrCard} links={links} />
+        </>
+      )}
     </Section>
   );
 }
@@ -46,6 +60,7 @@ function ChildrenValues({
 function ChildCard({ link }: { link: StacLink }) {
   const result = useStacJson({ href: link.href });
   const addCollection = useStore((store) => store.addCollection);
+  const filteredCollections = useStore((store) => store.filteredCollections);
 
   useEffect(() => {
     if (result.data?.type === "Collection") addCollection(result.data);
@@ -54,6 +69,13 @@ function ChildCard({ link }: { link: StacLink }) {
   if (result.isFetching) {
     return <SkeletonCard />;
   } else if (result.data) {
+    if (
+      result.data.type === "Collection" &&
+      filteredCollections &&
+      !filteredCollections.includes(result.data)
+    ) {
+      return null;
+    }
     return <ValueCard value={result.data} />;
   }
 }
@@ -61,6 +83,7 @@ function ChildCard({ link }: { link: StacLink }) {
 function ChildListItem({ link }: { link: StacLink }) {
   const result = useStacJson({ href: link.href });
   const addCollection = useStore((store) => store.addCollection);
+  const filteredCollections = useStore((store) => store.filteredCollections);
 
   useEffect(() => {
     if (result.data?.type === "Collection") addCollection(result.data);
@@ -69,6 +92,13 @@ function ChildListItem({ link }: { link: StacLink }) {
   if (result.isFetching) {
     return <SkeletonText noOfLines={1} />;
   } else if (result.data) {
-    return <ValueListItem value={result.data}></ValueListItem>;
+    if (
+      result.data.type === "Collection" &&
+      filteredCollections &&
+      !filteredCollections.includes(result.data)
+    ) {
+      return null;
+    }
+    return <ValueListItem value={result.data} />;
   }
 }

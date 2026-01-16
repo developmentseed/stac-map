@@ -1,37 +1,34 @@
 import { MarkdownHooks } from "react-markdown";
 import { Card } from "@chakra-ui/react";
+import type { StacCollection } from "stac-ts";
 import Thumbnail from "./thumbnail";
 import { Prose } from "./ui/prose";
 import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
 import { getSelfHref, getStacValueTitle, getThumbnailAsset } from "../utils/stac";
 
-interface ValueCardProps {
-  value: StacValue;
-  hovered?: boolean;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
-}
-
-export default function ValueCard({
-  value,
-  hovered,
-  onMouseEnter,
-  onMouseLeave,
-}: ValueCardProps) {
+export default function ValueCard({ value }: { value: StacValue }) {
   const href = getSelfHref(value);
   const setHref = useStore((store) => store.setHref);
+  const hoveredCollection = useStore((store) => store.hoveredCollection);
+  const setHoveredCollection = useStore((store) => store.setHoveredCollection);
   const thumbnailAsset = getThumbnailAsset(value);
   const description = "description" in value ? value.description : undefined;
 
+  const isCollection = value.type === "Collection";
+  const collection = isCollection ? (value as StacCollection) : null;
+  const hovered = isCollection && hoveredCollection === collection;
+
   return (
     <Card.Root
-      borderWidth={hovered !== undefined ? 2 : undefined}
+      borderWidth={isCollection ? 2 : undefined}
       borderColor={hovered ? "colorPalette.solid" : "transparent"}
       cursor={"pointer"}
       onClick={() => href && setHref(href)}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onMouseEnter={() => collection && setHoveredCollection(collection)}
+      onMouseLeave={() => {
+        if (hoveredCollection === collection) setHoveredCollection(null);
+      }}
     >
       <Card.Header>
         <Card.Title>{getStacValueTitle(value)}</Card.Title>
