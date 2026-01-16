@@ -17,7 +17,7 @@ import { COGLayer } from "@developmentseed/deck.gl-geotiff";
 import type { BBox, Feature, FeatureCollection } from "geojson";
 import { useColorModeValue } from "../components/ui/color-mode";
 import { useStore } from "../store";
-import type { BBox2D } from "../types/map";
+import type { BBox2D, Color } from "../types/map";
 import type { StacValue } from "../types/stac";
 import { sanitizeBbox } from "../utils/map";
 import {
@@ -39,12 +39,29 @@ export default function Map() {
   const filteredCollections = useStore((store) => store.filteredCollections);
   const hoveredCollection = useStore((store) => store.hoveredCollection);
   const setHoveredCollection = useStore((store) => store.setHoveredCollection);
+  const hoveredItem = useStore((store) => store.hoveredItem);
+  const setHoveredItem = useStore((store) => store.setHoveredItem);
+  const pickedItem = useStore((store) => store.pickedItem);
+  const setPickedItem = useStore((store) => store.setPickedItem);
   const searchItems = useStore((store) => store.searchItems);
   const geotiffHref = useStore((store) => store.geotiffHref);
   const setBbox = useStore((store) => store.setBbox);
   const fillColor = useStore((store) => store.fillColor);
   const lineColor = useStore((store) => store.lineColor);
   const lineWidth = useStore((store) => store.lineWidth);
+
+  const inverseFillColor = [
+    256 - fillColor[0],
+    256 - fillColor[1],
+    256 - fillColor[2],
+    fillColor[3],
+  ];
+  const inverseLineColor = [
+    256 - fillColor[0],
+    256 - fillColor[1],
+    256 - fillColor[2],
+    fillColor[3],
+  ];
 
   const valueGeoJson = useMemo(() => {
     if (value) {
@@ -78,14 +95,22 @@ export default function Map() {
 
   const layers: Layer[] = [
     new GeoJsonLayer({
-      id: "search-items",
-      data: searchItems ? featureCollection(searchItems as Feature[]) : [],
+      id: "picked-item",
+      data: pickedItem ? ([pickedItem] as Feature[]) : [],
+      filled: true,
+      getFillColor: inverseFillColor as Color,
+      getLineColor: inverseLineColor as Color,
+      getLineWidth: lineWidth,
+      lineWidthUnits: "pixels",
+    }),
+    new GeoJsonLayer({
+      id: "hovered-item",
+      data: hoveredItem ? ([hoveredItem] as Feature[]) : [],
       filled: true,
       getFillColor: fillColor,
       getLineColor: lineColor,
       getLineWidth: lineWidth,
       lineWidthUnits: "pixels",
-      pickable: true,
     }),
     new GeoJsonLayer({
       id: "hovered-collection",
@@ -99,10 +124,26 @@ export default function Map() {
       lineWidthUnits: "pixels",
     }),
     new GeoJsonLayer({
+      id: "search-items",
+      data: searchItems ? featureCollection(searchItems as Feature[]) : [],
+      filled: true,
+      getFillColor: geotiffHref ? [0, 0, 0, 0] : fillColor,
+      getLineColor: lineColor,
+      getLineWidth: lineWidth,
+      lineWidthUnits: "pixels",
+      pickable: true,
+      onHover: (e) => {
+        setHoveredItem(e.object);
+      },
+      onClick: (e) => {
+        setPickedItem(e.object);
+      },
+    }),
+    new GeoJsonLayer({
       id: "collections",
       data: collectionsGeoJson,
       filled: true,
-      getFillColor: [fillColor[0], fillColor[1], fillColor[2], 0],
+      getFillColor: [0, 0, 0, 0],
       getLineColor: lineColor,
       getLineWidth: lineWidth,
       lineWidthUnits: "pixels",
@@ -138,7 +179,7 @@ export default function Map() {
   if (geotiffHref) {
     layers.push(
       new COGLayer({
-        id: "cog",
+        id: "cog-" + geotiffHref,
         geotiff: geotiffHref,
       })
     );

@@ -20,6 +20,10 @@ interface State {
   setSearchItems: (items: StacItem[] | null) => void;
   hoveredCollection: StacCollection | null;
   setHoveredCollection: (collection: StacCollection | null) => void;
+  hoveredItem: StacItem | null;
+  setHoveredItem: (item: StacItem | null) => void;
+  pickedItem: StacItem | null;
+  setPickedItem: (item: StacItem | null) => void;
 
   geotiffHref: string | null;
   setGeotiffHref: (geotiffHref: string | null) => void;
@@ -46,6 +50,8 @@ export const useStore = create<State>((set, get) => ({
       collections: null,
       filteredCollections: null,
       hoveredCollection: null,
+      hoveredItem: null,
+      pickedItem: null,
       searchItems: null,
       geotiffHref: null,
     }),
@@ -66,6 +72,14 @@ export const useStore = create<State>((set, get) => ({
   setSearchItems: (items) => set({ searchItems: items }),
   hoveredCollection: null,
   setHoveredCollection: (collection) => set({ hoveredCollection: collection }),
+  hoveredItem: null,
+  setHoveredItem: (item) => set({ hoveredItem: item }),
+  pickedItem: null,
+  setPickedItem: (item) =>
+    set({
+      pickedItem: item,
+      geotiffHref: null,
+    }),
   geotiffHref: null,
   setGeotiffHref: (geotiffHref) => set({ geotiffHref }),
   bbox: null,

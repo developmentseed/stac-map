@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   LuForward,
   LuPause,
@@ -108,11 +108,13 @@ function SearchResults({
   const setSearchItems = useStore((store) => store.setSearchItems);
   const [fetchAllItems, setFetchAllItems] = useState(false);
 
-  const url = new URL(href);
+  const url = useMemo(() => {
+    return new URL(href);
+  }, [href]);
+
   if (search.collections)
     url.searchParams.set("collections", search.collections.join(","));
   if (search.bbox) url.searchParams.set("bbox", search.bbox.join(","));
-  url.searchParams.set("sortby", "-datetime");
 
   const result = useInfiniteQuery({
     queryKey: ["stac-search", href, search],

@@ -20,9 +20,16 @@ export default function Assets({
   assets: { [k: string]: StacAsset };
 }) {
   const setGeotiffHref = useStore((store) => store.setGeotiffHref);
-  const [value, setValue] = useState<string | null>(
-    Object.entries(assets).find(([, asset]) => isGeotiff(asset))?.[0] || null
-  );
+  let defaultValue = null;
+  for (const [key, asset] of Object.entries(assets)) {
+    if (!defaultValue && isGeotiff(asset)) {
+      defaultValue = key;
+    }
+    if (defaultValue && isGeotiff(asset) && asset.roles?.includes("visual")) {
+      defaultValue = key;
+    }
+  }
+  const [value, setValue] = useState<string | null>(defaultValue);
 
   useEffect(() => {
     if (value) {

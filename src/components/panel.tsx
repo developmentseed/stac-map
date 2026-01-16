@@ -1,18 +1,30 @@
 import { type ReactNode, useEffect } from "react";
-import { Box, HStack, SkeletonText, Spinner } from "@chakra-ui/react";
+import { LuArrowRight } from "react-icons/lu";
+import {
+  Box,
+  CloseButton,
+  HStack,
+  IconButton,
+  SkeletonText,
+  Spinner,
+} from "@chakra-ui/react";
+import type { StacItem } from "stac-ts";
 import Introduction from "./introduction";
 import { StacIcon } from "./stac";
 import Value from "./value";
 import { useStacJson } from "../hooks/stac";
 import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
-import { getStacValueId } from "../utils/stac";
+import { getSelfHref, getStacValueId } from "../utils/stac";
 
 export default function Panel() {
   const href = useStore((store) => store.href);
   const value = useStore((store) => store.value);
+  const pickedItem = useStore((store) => store.pickedItem);
 
-  if (value) {
+  if (pickedItem) {
+    return <PickedItemPanel pickedItem={pickedItem} />;
+  } else if (value) {
     return <ValuePanel value={value} />;
   } else if (href) {
     return <HrefPanel href={href} />;
@@ -23,6 +35,30 @@ export default function Panel() {
       </BasePanel>
     );
   }
+}
+
+function PickedItemPanel({ pickedItem }: { pickedItem: StacItem }) {
+  const setHref = useStore((store) => store.setHref);
+  const setPickedItem = useStore((store) => store.setPickedItem);
+  const href = getSelfHref(pickedItem);
+
+  const header = (
+    <HStack>
+      <StacIcon value={pickedItem} /> {getStacValueId(pickedItem)}{" "}
+      <Box flex={1} />
+      {href && (
+        <IconButton variant={"subtle"} size={"sm"}>
+          <LuArrowRight onClick={() => setHref(href)} />
+        </IconButton>
+      )}
+      <CloseButton size={"2xs"} onClick={() => setPickedItem(null)} />
+    </HStack>
+  );
+  return (
+    <BasePanel header={header}>
+      <Value value={pickedItem} />
+    </BasePanel>
+  );
 }
 
 function ValuePanel({ value }: { value: StacValue }) {

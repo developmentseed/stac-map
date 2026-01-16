@@ -116,7 +116,7 @@ export default function Value({ value }: { value: StacValue }) {
 
         {collectionsHref && <Collections href={collectionsHref} />}
 
-        {childrenLinks && childrenLinks.length > 0 && (
+        {!collectionsHref && childrenLinks && childrenLinks.length > 0 && (
           <Children links={childrenLinks} />
         )}
 
