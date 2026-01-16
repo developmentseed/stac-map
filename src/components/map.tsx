@@ -5,7 +5,7 @@ import {
   type MapRef,
   useControl,
 } from "react-map-gl/maplibre";
-import { type DeckProps } from "@deck.gl/core";
+import { type DeckProps, Layer } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import bbox from "@turf/bbox";
@@ -76,85 +76,72 @@ export default function Map() {
     }
   }, [value, isMapLoaded, collections]);
 
-  const layers = [];
+  const layers: Layer[] = [
+    new GeoJsonLayer({
+      id: "search-items",
+      data: featureCollection(searchItems as Feature[]),
+      filled: true,
+      getFillColor: fillColor,
+      getLineColor: lineColor,
+      getLineWidth: lineWidth,
+      lineWidthUnits: "pixels",
+    }),
+    new GeoJsonLayer({
+      id: "value",
+      data: valueGeoJson,
+      filled: !(geotiffHref || searchItems),
+      getFillColor: fillColor,
+      getLineColor: lineColor,
+      getLineWidth: lineWidth,
+      lineWidthUnits: "pixels",
+      updateTriggers: {
+        filled: [geotiffHref, searchItems],
+      },
+    }),
+    new GeoJsonLayer({
+      id: "hovered-collection",
+      data: hoveredCollection
+        ? [bboxPolygon(getCollectionExtents(hoveredCollection) as BBox)]
+        : [],
+      filled: true,
+      getFillColor: fillColor,
+      getLineColor: lineColor,
+      getLineWidth: lineWidth,
+      lineWidthUnits: "pixels",
+    }),
+    new GeoJsonLayer({
+      id: "collections",
+      data: collectionsGeoJson,
+      filled: true,
+      getFillColor: [fillColor[0], fillColor[1], fillColor[2], 0],
+      getLineColor: lineColor,
+      getLineWidth: lineWidth,
+      lineWidthUnits: "pixels",
+      pickable: true,
+      onHover: (e) => {
+        setHoveredCollection(
+          collections?.find(
+            (collection) =>
+              collection.id == e.object?.id && !isGlobalCollection(collection)
+          ) || null
+        );
+      },
+      onClick: (e) => {
+        const collection = collections?.find(
+          (collection) =>
+            collection.id == e.object?.id && !isGlobalCollection(collection)
+        );
+        const href = collection && getSelfHref(collection);
+        if (href) setHref(href);
+      },
+    }),
+  ];
 
   if (geotiffHref) {
     layers.push(
       new COGLayer({
         id: "cog",
         geotiff: geotiffHref,
-      })
-    );
-  }
-  if (searchItems) {
-    layers.push(
-      new GeoJsonLayer({
-        id: "search-items",
-        data: featureCollection(searchItems as Feature[]),
-        filled: true,
-        getFillColor: fillColor,
-        getLineColor: lineColor,
-        getLineWidth: lineWidth,
-        lineWidthUnits: "pixels",
-      })
-    );
-  }
-  if (valueGeoJson) {
-    layers.push(
-      new GeoJsonLayer({
-        id: "value",
-        data: valueGeoJson,
-        filled: !(geotiffHref || searchItems),
-        getFillColor: fillColor,
-        getLineColor: lineColor,
-        getLineWidth: lineWidth,
-        lineWidthUnits: "pixels",
-        updateTriggers: {
-          filled: [geotiffHref, searchItems],
-        },
-      })
-    );
-  }
-  if (hoveredCollection) {
-    layers.push(
-      new GeoJsonLayer({
-        id: "hovered-collection",
-        data: [bboxPolygon(getCollectionExtents(hoveredCollection) as BBox)],
-        filled: true,
-        getFillColor: fillColor,
-        getLineColor: lineColor,
-        getLineWidth: lineWidth,
-        lineWidthUnits: "pixels",
-      })
-    );
-  }
-  if (collectionsGeoJson) {
-    layers.push(
-      new GeoJsonLayer({
-        id: "collections",
-        data: collectionsGeoJson,
-        filled: true,
-        getFillColor: [fillColor[0], fillColor[1], fillColor[2], 0],
-        getLineColor: lineColor,
-        getLineWidth: lineWidth,
-        lineWidthUnits: "pixels",
-        pickable: true,
-        onHover: (e) => {
-          setHoveredCollection(
-            collections?.find(
-              (collection) =>
-                collection.id == e.object?.id && !isGlobalCollection(collection)
-            ) || null
-          );
-        },
-        onClick: (e) => {
-          const collection = collections?.find(
-            (collection) =>
-              collection.id == e.object?.id && !isGlobalCollection(collection)
-          );
-          const href = collection && getSelfHref(collection);
-          if (href) setHref(href);
-        },
       })
     );
   }
