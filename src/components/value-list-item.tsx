@@ -9,7 +9,9 @@ export default function ValueListItem({ value }: { value: StacValue }) {
 
   return (
     <List.Item>
-      <Link onClick={() => href && setHref(href)}>{getStacValueTitle(value)}</Link>
+      <Link onClick={() => href && setHref(href)}>
+        {getStacValueTitle(value)}
+      </Link>
     </List.Item>
   );
 }

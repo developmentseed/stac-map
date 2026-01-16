@@ -209,4 +209,3 @@ function CollectionActionBar({
     </ActionBar.Root>
   );
 }
-
