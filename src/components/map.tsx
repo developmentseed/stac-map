@@ -79,7 +79,7 @@ export default function Map() {
   const layers: Layer[] = [
     new GeoJsonLayer({
       id: "search-items",
-      data: featureCollection(searchItems as Feature[]),
+      data: searchItems ? featureCollection(searchItems as Feature[]) : [],
       filled: true,
       getFillColor: fillColor,
       getLineColor: lineColor,
@@ -94,15 +94,13 @@ export default function Map() {
       getLineColor: lineColor,
       getLineWidth: lineWidth,
       lineWidthUnits: "pixels",
-      updateTriggers: {
-        filled: [geotiffHref, searchItems],
-      },
     }),
     new GeoJsonLayer({
       id: "hovered-collection",
-      data: hoveredCollection
-        ? [bboxPolygon(getCollectionExtents(hoveredCollection) as BBox)]
-        : [],
+      data:
+        hoveredCollection && !valueGeoJson
+          ? [bboxPolygon(getCollectionExtents(hoveredCollection) as BBox)]
+          : [],
       filled: true,
       getFillColor: fillColor,
       getLineColor: lineColor,
