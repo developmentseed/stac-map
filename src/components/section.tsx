@@ -1,6 +1,14 @@
 import { type ReactNode, useState } from "react";
-import { LuList, LuSquare } from "react-icons/lu";
-import { Box, Heading, HStack, SegmentGroup, Stack } from "@chakra-ui/react";
+import { LuChevronDown, LuChevronUp, LuList, LuSquare } from "react-icons/lu";
+import {
+  Box,
+  Collapsible,
+  Heading,
+  HStack,
+  IconButton,
+  SegmentGroup,
+  Stack,
+} from "@chakra-ui/react";
 
 interface SectionProps {
   icon: ReactNode;
@@ -20,19 +28,25 @@ export function Section({
   children,
 }: SectionProps) {
   const [listOrCard, setListOrCard] = useState<ListOrCard>(defaultListOrCard);
+  const [open, setOpen] = useState(true);
 
   return (
-    <Stack gap={4}>
-      <SectionHeader
-        icon={icon}
-        title={title}
-        count={count}
-        filteredCount={filteredCount}
-        listOrCard={listOrCard}
-        setListOrCard={setListOrCard}
-      />
-      {children(listOrCard)}
-    </Stack>
+    <Collapsible.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
+      <Stack gap={4}>
+        <SectionHeader
+          icon={icon}
+          title={title}
+          count={count}
+          filteredCount={filteredCount}
+          listOrCard={listOrCard}
+          setListOrCard={setListOrCard}
+          open={open}
+        />
+        <Collapsible.Content>
+          <Stack gap={4}>{children(listOrCard)}</Stack>
+        </Collapsible.Content>
+      </Stack>
+    </Collapsible.Root>
   );
 }
 
@@ -45,6 +59,7 @@ interface SectionHeaderProps {
   filteredCount?: number;
   listOrCard: ListOrCard;
   setListOrCard: (value: ListOrCard) => void;
+  open: boolean;
 }
 
 function SectionHeader({
@@ -54,6 +69,7 @@ function SectionHeader({
   filteredCount,
   listOrCard,
   setListOrCard,
+  open,
 }: SectionHeaderProps) {
   return (
     <HStack>
@@ -78,6 +94,11 @@ function SectionHeader({
           ]}
         />
       </SegmentGroup.Root>
+      <Collapsible.Trigger asChild>
+        <IconButton variant={"ghost"} size={"xs"}>
+          {open ? <LuChevronUp /> : <LuChevronDown />}
+        </IconButton>
+      </Collapsible.Trigger>
     </HStack>
   );
 }
