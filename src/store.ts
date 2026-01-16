@@ -41,6 +41,7 @@ export const useStore = create<State>((set) => ({
     set({
       href,
       input: href || "",
+      value: null,
       collections: null,
       filteredCollections: null,
       searchItems: null,
