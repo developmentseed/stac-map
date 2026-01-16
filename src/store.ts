@@ -45,6 +45,7 @@ export const useStore = create<State>((set, get) => ({
       value: null,
       collections: null,
       filteredCollections: null,
+      hoveredCollection: null,
       searchItems: null,
       geotiffHref: null,
     }),
