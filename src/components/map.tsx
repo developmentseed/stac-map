@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { type RefObject, useEffect, useRef } from "react";
 import { useMemo, useState } from "react";
 import {
   Map as MaplibreMap,
@@ -85,6 +85,7 @@ export default function Map() {
       getLineColor: lineColor,
       getLineWidth: lineWidth,
       lineWidthUnits: "pixels",
+      pickable: true,
     }),
     new GeoJsonLayer({
       id: "hovered-collection",
@@ -160,7 +161,10 @@ export default function Map() {
           setBbox(sanitizeBbox(mapRef.current?.getBounds().toArray().flat()));
       }}
     >
-      <DeckGLOverlay layers={layers}></DeckGLOverlay>
+      <DeckGLOverlay
+        layers={layers}
+        getCursor={(props) => getCursor(mapRef, props)}
+      ></DeckGLOverlay>
     </MaplibreMap>
   );
 }
@@ -169,6 +173,28 @@ function DeckGLOverlay(props: DeckProps) {
   const control = useControl<MapboxOverlay>(() => new MapboxOverlay({}));
   control.setProps(props);
   return <></>;
+}
+
+function getCursor(
+  mapRef: RefObject<MapRef | null>,
+  {
+    isHovering,
+    isDragging,
+  }: {
+    isHovering: boolean;
+    isDragging: boolean;
+  }
+) {
+  let cursor = "grab";
+  if (isHovering) {
+    cursor = "pointer";
+  } else if (isDragging) {
+    cursor = "grabbing";
+  }
+  if (mapRef.current) {
+    mapRef.current.getCanvas().style.cursor = cursor;
+  }
+  return cursor;
 }
 
 function toGeoJson(value: StacValue) {
