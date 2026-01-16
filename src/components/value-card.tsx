@@ -17,7 +17,8 @@ export default function ValueCard({ value }: { value: StacValue }) {
   const hoveredCollection = useStore((store) => store.hoveredCollection);
   const setHoveredCollection = useStore((store) => store.setHoveredCollection);
   const thumbnailAsset = getThumbnailAsset(value);
-  const description = "description" in value ? value.description : undefined;
+  const description =
+    "description" in value ? (value.description as string) : undefined;
 
   const isCollection = value.type === "Collection";
   const collection = isCollection ? (value as StacCollection) : null;
