@@ -14,12 +14,10 @@ import {
   LuSearch,
   LuSearchCode,
 } from "react-icons/lu";
-import { MarkdownHooks } from "react-markdown";
 import {
   ActionBar,
   Button,
   ButtonGroup,
-  Card,
   Center,
   Checkbox,
   CloseButton,
@@ -37,24 +35,19 @@ import {
   type UseInfiniteQueryResult,
 } from "@tanstack/react-query";
 import type { StacCollection } from "stac-ts";
-import SectionHeader, { type ListOrCard } from "./section-header";
-import Thumbnail from "./thumbnail";
-import { Prose } from "./ui/prose";
+import { type ListOrCard, Section } from "./section";
 import { toaster } from "./ui/toaster";
+import ValueCard from "./value-card";
+import ValueListItem from "./value-list-item";
 import { useStore } from "../store";
 import type { StacCollections } from "../types/stac";
-import {
-  getLinkHref,
-  getSelfHref,
-  getStacValueTitle,
-  getThumbnailAsset,
-  isCollectionInBbox,
-} from "../utils/stac";
+import { getLinkHref, isCollectionInBbox } from "../utils/stac";
 
 export default function Collections({ href }: { href: string }) {
   const setCollections = useStore((state) => state.setCollections);
+  const collections = useStore((store) => store.collections);
+  const filteredCollections = useStore((store) => store.filteredCollections);
   const [fetchAllCollections, setFetchAllCollections] = useState(false);
-  const [listOrCard, setListOrCard] = useState<ListOrCard>("card");
 
   const result = useInfiniteQuery({
     queryKey: ["stac-collections", href],
@@ -102,14 +95,19 @@ export default function Collections({ href }: { href: string }) {
 
   return (
     <>
-      <Stack gap={4}>
-        <CollectionsHeader
-          listOrCard={listOrCard}
-          setListOrCard={setListOrCard}
-        />
-        <CollectionSearch />
-        <CollectionValues listOrCard={listOrCard} {...result} />
-      </Stack>
+      <Section
+        icon={<LuFolderPlus />}
+        title="Collections"
+        count={collections?.length}
+        filteredCount={filteredCollections?.length}
+      >
+        {(listOrCard) => (
+          <>
+            <CollectionSearch />
+            <CollectionValues listOrCard={listOrCard} {...result} />
+          </>
+        )}
+      </Section>
 
       <CollectionActionBar
         fetchAllCollections={fetchAllCollections}
@@ -117,28 +115,6 @@ export default function Collections({ href }: { href: string }) {
         {...result}
       />
     </>
-  );
-}
-
-function CollectionsHeader({
-  listOrCard,
-  setListOrCard,
-}: {
-  listOrCard: ListOrCard;
-  setListOrCard: (listOrCard: ListOrCard) => void;
-}) {
-  const collections = useStore((store) => store.collections);
-  const filteredCollections = useStore((store) => store.filteredCollections);
-
-  return (
-    <SectionHeader
-      icon={<LuFolderPlus />}
-      title="Collections"
-      count={collections?.length}
-      filteredCount={filteredCollections?.length}
-      listOrCard={listOrCard}
-      setListOrCard={setListOrCard}
-    />
   );
 }
 
@@ -236,7 +212,7 @@ function CollectionValues({
   const filteredCollections = useStore((store) => store.filteredCollections);
   const values = (filteredCollections || collections)?.map((collection) =>
     listOrCard === "list" ? (
-      <CollectionListItem key={collection.id} collection={collection} />
+      <ValueListItem key={collection.id} value={collection} />
     ) : (
       <CollectionCard key={collection.id} collection={collection} />
     )
@@ -281,51 +257,18 @@ function CollectionValues({
 }
 
 function CollectionCard({ collection }: { collection: StacCollection }) {
-  const href = getSelfHref(collection);
-  const setHref = useStore((store) => store.setHref);
   const hoveredCollection = useStore((store) => store.hoveredCollection);
   const setHoveredCollection = useStore((store) => store.setHoveredCollection);
-  const thumbnailAsset = getThumbnailAsset(collection);
-  const hovered = hoveredCollection == collection;
 
   return (
-    <Card.Root
-      borderWidth={2}
-      borderColor={hovered ? "colorPalette.solid" : "transparent"}
-      cursor={"pointer"}
-      onClick={() => href && setHref(href)}
-      onMouseEnter={() => {
-        setHoveredCollection(collection);
-      }}
+    <ValueCard
+      value={collection}
+      hovered={hoveredCollection === collection}
+      onMouseEnter={() => setHoveredCollection(collection)}
       onMouseLeave={() => {
-        if (hoveredCollection == collection) setHoveredCollection(null);
+        if (hoveredCollection === collection) setHoveredCollection(null);
       }}
-    >
-      <Card.Header>
-        <Card.Title>{getStacValueTitle(collection)}</Card.Title>
-      </Card.Header>
-      <Card.Body>
-        <Card.Description as="div">
-          {thumbnailAsset && <Thumbnail asset={thumbnailAsset} />}
-          <Prose lineClamp={5}>
-            <MarkdownHooks>{collection.description}</MarkdownHooks>
-          </Prose>
-        </Card.Description>
-      </Card.Body>
-    </Card.Root>
-  );
-}
-
-function CollectionListItem({ collection }: { collection: StacCollection }) {
-  const href = getSelfHref(collection);
-  const setHref = useStore((store) => store.setHref);
-
-  return (
-    <List.Item>
-      <Link onClick={() => href && setHref(href)}>
-        {getStacValueTitle(collection)}
-      </Link>
-    </List.Item>
+    />
   );
 }
 

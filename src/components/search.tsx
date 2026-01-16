@@ -12,8 +12,6 @@ import {
   ActionBar,
   Button,
   ButtonGroup,
-  Card,
-  Link,
   List,
   Portal,
   SkeletonText,
@@ -22,16 +20,13 @@ import {
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { StacCollection, StacItem } from "stac-ts";
 import type { BBox } from "geojson";
-import SectionHeader, { type ListOrCard } from "./section-header";
+import { type ListOrCard, Section } from "./section";
+import ValueCard from "./value-card";
+import ValueListItem from "./value-list-item";
 import { useStore } from "../store.ts";
 import type { StacItemCollection, StacSearch } from "../types/stac";
 import { sanitizeBbox } from "../utils/map.ts";
-import {
-  fetchStac,
-  getLinkHref,
-  getSelfHref,
-  getStacValueTitle,
-} from "../utils/stac.ts";
+import { fetchStac, getLinkHref } from "../utils/stac.ts";
 
 interface Props {
   href: string;
@@ -39,57 +34,64 @@ interface Props {
 }
 
 export default function Search({ href, collection }: Props) {
-  const [listOrCard, setListOrCard] = useState<ListOrCard>("list");
   const searchItems = useStore((store) => store.searchItems);
   const setSearchItems = useStore((store) => store.setSearchItems);
   const [search, setSearch] = useState<StacSearch | null>(null);
   const { map } = useMap();
 
   return (
-    <Stack gap={4}>
-      <SectionHeader
-        icon={<LuSearch />}
-        title={"Item search" + (searchItems ? ` (${searchItems?.length})` : "")}
-        listOrCard={listOrCard}
-        setListOrCard={setListOrCard}
-      />
+    <Section
+      icon={<LuSearch />}
+      title="Item search"
+      count={searchItems?.length}
+      defaultListOrCard="list"
+    >
+      {(listOrCard) => (
+        <>
+          <ButtonGroup>
+            <Button variant={"outline"} disabled={!!search}>
+              <LuSettings />
+              Configure
+            </Button>
 
-      <ButtonGroup>
-        <Button variant={"outline"} disabled={!!search}>
-          <LuSettings />
-          Configure
-        </Button>
+            {search ? (
+              <Button
+                onClick={() => {
+                  setSearchItems(null);
+                  setSearch(null);
+                }}
+                variant={"surface"}
+              >
+                <LuX /> Clear
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  setSearchItems(null);
+                  setSearch({
+                    collections: [collection.id],
+                    bbox: sanitizeBbox(
+                      map?.getBounds().toArray().flat() as BBox
+                    ),
+                  });
+                }}
+              >
+                <LuSearch />
+                Search
+              </Button>
+            )}
+          </ButtonGroup>
 
-        {search ? (
-          <Button
-            onClick={() => {
-              setSearchItems(null);
-              setSearch(null);
-            }}
-            variant={"surface"}
-          >
-            <LuX /> Clear
-          </Button>
-        ) : (
-          <Button
-            onClick={() => {
-              setSearchItems(null);
-              setSearch({
-                collections: [collection.id],
-                bbox: sanitizeBbox(map?.getBounds().toArray().flat() as BBox),
-              });
-            }}
-          >
-            <LuSearch />
-            Search
-          </Button>
-        )}
-      </ButtonGroup>
-
-      {search && (
-        <SearchResults href={href} search={search} listOrCard={listOrCard} />
+          {search && (
+            <SearchResults
+              href={href}
+              search={search}
+              listOrCard={listOrCard}
+            />
+          )}
+        </>
       )}
-    </Stack>
+    </Section>
   );
 }
 
@@ -201,7 +203,7 @@ function SearchItems({
     return (
       <List.Root variant={"plain"}>
         {items.map((item) => (
-          <ItemListItem key={item.id} item={item} />
+          <ValueListItem key={item.id} value={item} />
         ))}
       </List.Root>
     );
@@ -209,39 +211,9 @@ function SearchItems({
     return (
       <Stack>
         {items.map((item) => (
-          <ItemCard key={item.id} item={item} />
+          <ValueCard key={item.id} value={item} />
         ))}
       </Stack>
     );
   }
-}
-
-function ItemListItem({ item }: { item: StacItem }) {
-  const setHref = useStore((state) => state.setHref);
-  const selfHref = getSelfHref(item);
-
-  return (
-    <List.Item>
-      <Link onClick={() => selfHref && setHref(selfHref)}>
-        {getStacValueTitle(item)}
-      </Link>
-    </List.Item>
-  );
-}
-
-function ItemCard({ item }: { item: StacItem }) {
-  const setHref = useStore((state) => state.setHref);
-  const selfHref = getSelfHref(item);
-
-  return (
-    <Card.Root size={"sm"}>
-      <Card.Body>
-        <Card.Title>
-          <Link onClick={() => selfHref && setHref(selfHref)}>
-            {getStacValueTitle(item)}
-          </Link>
-        </Card.Title>
-      </Card.Body>
-    </Card.Root>
-  );
 }

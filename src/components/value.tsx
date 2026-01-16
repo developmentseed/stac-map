@@ -21,6 +21,7 @@ import {
 import type { StacAsset } from "stac-ts";
 import type { HighlighterGeneric } from "shiki";
 import Assets from "./assets";
+import Children from "./children";
 import Collections from "./collections";
 import Description from "./description";
 import Root from "./root";
@@ -53,6 +54,7 @@ export default function Value({ value }: { value: StacValue }) {
   const setHref = useStore((store) => store.setHref);
 
   const collectionsHref = getLinkHref(value, "data");
+  const childrenLinks = value.links?.filter((link) => link.rel === "child");
   const selfHref = getLinkHref(value, "self");
   const rootHref = getLinkHref(value, "root");
   const parentHref = getLinkHref(value, "parent");
@@ -113,6 +115,10 @@ export default function Value({ value }: { value: StacValue }) {
         {rootHref && <Root href={rootHref} />}
 
         {collectionsHref && <Collections href={collectionsHref} />}
+
+        {childrenLinks && childrenLinks.length > 0 && (
+          <Children links={childrenLinks} />
+        )}
 
         {(value.assets as { [k: string]: StacAsset }) && (
           <Assets assets={value.assets as { [k: string]: StacAsset }} />

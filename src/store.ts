@@ -13,6 +13,7 @@ interface State {
   setValue: (value: StacValue | null) => void;
   collections: StacCollection[] | null;
   setCollections: (collections: StacCollection[] | null) => void;
+  addCollection: (collection: StacCollection) => void;
   filteredCollections: StacCollection[] | null;
   setFilteredCollections: (collections: StacCollection[] | null) => void;
   searchItems: StacItem[] | null;
@@ -33,7 +34,7 @@ interface State {
 
 const initialHref = getInitialHref();
 
-export const useStore = create<State>((set) => ({
+export const useStore = create<State>((set, get) => ({
   input: initialHref || "",
   setInput: (input) => set({ input }),
   href: initialHref,
@@ -51,6 +52,12 @@ export const useStore = create<State>((set) => ({
   setValue: (value) => set({ value }),
   collections: null,
   setCollections: (collections) => set({ collections }),
+  addCollection: (collection) => {
+    const collections = get().collections;
+    if (!collections?.find((c) => c == collection)) {
+      set({ collections: [...(collections || []), collection] });
+    }
+  },
   filteredCollections: null,
   setFilteredCollections: (collections) =>
     set({ filteredCollections: collections }),
