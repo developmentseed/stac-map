@@ -12,6 +12,8 @@ import {
   ActionBar,
   Button,
   ButtonGroup,
+  HStack,
+  IconButton,
   Portal,
   Progress,
 } from "@chakra-ui/react";
@@ -115,14 +117,40 @@ function SearchResults({ href, search }: { href: string; search: StacSearch }) {
 
   return (
     <>
-      <Progress.Root
-        value={numberMatched ? searchItems?.length : null}
-        max={numberMatched}
-      >
-        <Progress.Track>
-          <Progress.Range />
-        </Progress.Track>
-      </Progress.Root>
+      <HStack mx={2}>
+        <Progress.Root
+          value={numberMatched ? searchItems?.length : null}
+          max={numberMatched}
+          width="full"
+        >
+          <Progress.Track>
+            <Progress.Range />
+          </Progress.Track>
+        </Progress.Root>
+        <ButtonGroup size="2xs" variant="plain">
+          <IconButton
+            onClick={() => result.fetchNextPage()}
+            disabled={!result.hasNextPage || result.isFetching}
+          >
+            <LuForward />
+          </IconButton>
+          {fetchAllItems ? (
+            <IconButton
+              onClick={() => setFetchAllItems(false)}
+              disabled={!result.hasNextPage}
+            >
+              <LuPause />
+            </IconButton>
+          ) : (
+            <IconButton
+              onClick={() => setFetchAllItems(true)}
+              disabled={!result.hasNextPage}
+            >
+              <LuPlay />
+            </IconButton>
+          )}
+        </ButtonGroup>
+      </HStack>
       <ActionBar.Root open={!!searchItems}>
         <Portal>
           <ActionBar.Positioner>
@@ -132,7 +160,6 @@ function SearchResults({ href, search }: { href: string; search: StacSearch }) {
                 {numberMatched && "/" + numberMatched} item
                 {searchItems?.length != 1 && "s"} fetched
               </ActionBar.SelectionTrigger>
-              <ActionBar.Separator />
               {result.hasNextPage && (
                 <>
                   <ActionBar.Separator />

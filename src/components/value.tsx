@@ -116,16 +116,16 @@ export default function Value({ value }: { value: StacValue }) {
 
         {rootHref && <Root rootHref={rootHref} value={value} />}
 
+        {(value.assets as { [k: string]: StacAsset }) && (
+          <Assets assets={value.assets as { [k: string]: StacAsset }} />
+        )}
+
         {searchItems && <SearchItems items={searchItems} />}
 
         {collectionsHref && <Collections href={collectionsHref} />}
 
         {!collectionsHref && childrenLinks && childrenLinks.length > 0 && (
           <Children links={childrenLinks} />
-        )}
-
-        {(value.assets as { [k: string]: StacAsset }) && (
-          <Assets assets={value.assets as { [k: string]: StacAsset }} />
         )}
       </Stack>
     </>
