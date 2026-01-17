@@ -1,17 +1,16 @@
-import { Link, Stack } from "@chakra-ui/react";
+import { Box, Link, Stack } from "@chakra-ui/react";
 
 export default function Introduction() {
   return (
     <Stack fontSize={"sm"} fontWeight={"lighter"}>
-      <p>
+      <Box>
         <strong>stac-map</strong> is a map-first visualization tool for{" "}
         <Link variant={"underline"} href="https://stacspec.org">
           STAC
         </Link>
         .
-      </p>
-
-      <p>
+      </Box>
+      <Box>
         Questions, issues, or feature requests? Get in touch on{" "}
         <Link asChild>
           <a href="https://github.com/developmentseed/stac-map" target="_blank">
@@ -19,7 +18,7 @@ export default function Introduction() {
           </a>
         </Link>
         .
-      </p>
+      </Box>
     </Stack>
   );
 }

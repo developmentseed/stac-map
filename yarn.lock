@@ -276,7 +276,7 @@
     jsep "^1.4.0"
     quadbin "^0.4.1-alpha.0"
 
-"@chakra-ui/react@^3.31.0":
+"@chakra-ui/react@^3.31.0", "@chakra-ui/react@^3.8.1":
   version "3.31.0"
   resolved "https://registry.yarnpkg.com/@chakra-ui/react/-/react-3.31.0.tgz#8328f6c57c22c2e8b5511927664a306f954b5ca3"
   integrity sha512-puvrZOfnfMA+DckDcz0UxO20l7TVhwsdQ9ksCv4nIUB430yuWzon0yo9fM10lEr3hd7BhjZARpMCVw5u280clw==
@@ -483,6 +483,15 @@
   resolved "https://registry.yarnpkg.com/@developmentseed/raster-reproject/-/raster-reproject-0.1.0.tgz#76bb6f1776e054640a4734fdf2942eca2e9dd89e"
   integrity sha512-ARk8IM6VPzL3ltAZNenZCAm9NkzqOnrxjEvf8m2t91bmkmloDPBkRCMxMzKrMJE79/XxcZyXDDvLOI1UKlYSBQ==
 
+"@devseed-ui/collecticons-chakra@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@devseed-ui/collecticons-chakra/-/collecticons-chakra-4.0.0.tgz#2fb5ae92af237dc34659652bb6528dac139caf78"
+  integrity sha512-M+2I/CnQlfKsCxWFVheEdHyG5aE9zjVOpZaUmx5fLwd6lUw1gJm6W/P2AtLptjsB5zHrYMDGT3GeXahBzLyung==
+  dependencies:
+    "@chakra-ui/react" "^3.8.1"
+    "@emotion/react" "^11.14.0"
+    clipboard "^2.0.11"
+
 "@duckdb/duckdb-wasm@^1.32.0":
   version "1.32.0"
   resolved "https://registry.yarnpkg.com/@duckdb/duckdb-wasm/-/duckdb-wasm-1.32.0.tgz#199ebbca6c302eba7bb0a458aacd34ccf8518335"
@@ -535,7 +544,7 @@
   resolved "https://registry.yarnpkg.com/@emotion/memoize/-/memoize-0.9.0.tgz#745969d649977776b43fc7648c556aaa462b4102"
   integrity sha512-30FAj7/EoJ5mwVPOWhAyCX+FPfMDrVecJAM+Iw9NRoSl4BBAQeqj4cApHHUXOVvIPgLVDsCFoz/hGD+5QQD1GQ==
 
-"@emotion/react@^11.13.5":
+"@emotion/react@^11.13.5", "@emotion/react@^11.14.0":
   version "11.14.0"
   resolved "https://registry.yarnpkg.com/@emotion/react/-/react-11.14.0.tgz#cfaae35ebc67dd9ef4ea2e9acc6cd29e157dd05d"
   integrity sha512-O000MLDBDdk/EohJPFUqvnp4qnHeYkVP5B0xEG0D/L7cOKP9kefu2DXn8dj74cQfsEzUqh+sr1RzFqiL1o+PpA==
@@ -4016,6 +4025,15 @@ cli-table3@^0.6.5:
   optionalDependencies:
     "@colors/colors" "1.5.0"
 
+clipboard@^2.0.11:
+  version "2.0.11"
+  resolved "https://registry.yarnpkg.com/clipboard/-/clipboard-2.0.11.tgz#62180360b97dd668b6b3a84ec226975762a70be5"
+  integrity sha512-C+0bbOqkezLIsmWSvlsXS0Q0bmkugu7jcfMIACB+RDEntIzQIkdr148we28AfSloQLRdZlYL/QYyrq05j/3Faw==
+  dependencies:
+    good-listener "^1.2.2"
+    select "^1.1.2"
+    tiny-emitter "^2.0.0"
+
 cliui@^7.0.2:
   version "7.0.4"
   resolved "https://registry.yarnpkg.com/cliui/-/cliui-7.0.4.tgz#a0265ee655476fc807aea9df3df8df7783808b4f"
@@ -4351,6 +4369,11 @@ deep-strict-equal@^0.2.0:
   integrity sha512-3daSWyvZ/zwJvuMGlzG1O+Ow0YSadGfb3jsh9xoCutv2tWyB9dA4YvR9L9/fSdDZa2dByYQe+TqapSGUrjnkoA==
   dependencies:
     core-assert "^0.2.0"
+
+delegate@^3.1.2:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/delegate/-/delegate-3.2.0.tgz#b66b71c3158522e8ab5744f720d8ca0c2af59166"
+  integrity sha512-IofjkYBZaZivn0V8nnsMJGBr4jVLxHDheKSW88PyxS5QC4Vo9ZbZVvhzlSxY87fVq3STR6r+4cGepyHkcWOQSw==
 
 dequal@^2.0.0:
   version "2.0.3"
@@ -5023,6 +5046,13 @@ globrex@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/globrex/-/globrex-0.1.2.tgz#dd5d9ec826232730cd6793a5e33a9302985e6098"
   integrity sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==
+
+good-listener@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/good-listener/-/good-listener-1.2.2.tgz#d53b30cdf9313dffb7dc9a0d477096aa6d145c50"
+  integrity sha512-goW1b+d9q/HIwbVYZzZ6SsTr4IgE+WA44A0GmPIQstuOrgsFcT7VEJ48nmr9GaRtNu0XTKacFLGnBPAM6Afouw==
+  dependencies:
+    delegate "^3.1.2"
 
 graceful-fs@4.2.10:
   version "4.2.10"
@@ -7491,6 +7521,11 @@ scheduler@^0.27.0:
   resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.27.0.tgz#0c4ef82d67d1e5c1e359e8fc76d3a87f045fe5bd"
   integrity sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==
 
+select@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/select/-/select-1.1.2.tgz#0e7350acdec80b1108528786ec1d4418d11b396d"
+  integrity sha512-OwpTSOfy6xSs1+pwcNrv0RBMOzI39Lp3qQKUTPVVPRjCdNa5JH/oPRiqsesIskK8TVgmRiHwO4KXlV2Li9dANA==
+
 semantic-release@^25.0.2:
   version "25.0.2"
   resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-25.0.2.tgz#efd4fa16ce3518a747e737baf3f69fd82979d98e"
@@ -8041,6 +8076,11 @@ time-span@^5.1.0:
   integrity sha512-75voc/9G4rDIJleOo4jPvN4/YC4GRZrY8yy1uU4lwrB3XEQbWve8zXoO5No4eFrGcTAMYyoY67p8jRQdtA1HbA==
   dependencies:
     convert-hrtime "^5.0.0"
+
+tiny-emitter@^2.0.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/tiny-emitter/-/tiny-emitter-2.1.0.tgz#1d1a56edfc51c43e863cbb5382a72330e3555423"
+  integrity sha512-NB6Dk1A9xgQPMoGqC5CVXn123gWyte215ONT5Pp5a0yt4nlEoO1ZWeCwpncaekPHXO60i47ihFnZPiRPjRMq4Q==
 
 tiny-relative-date@^2.0.2:
   version "2.0.2"

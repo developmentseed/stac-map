@@ -1,6 +1,8 @@
 import { useEffect } from "react";
+import { LuHeart } from "react-icons/lu";
 import { MapProvider } from "react-map-gl/maplibre";
-import { Box, Container } from "@chakra-ui/react";
+import { Box, Container, HStack, Link } from "@chakra-ui/react";
+import { CollecticonBrandDevelopmentSeed2 } from "@devseed-ui/collecticons-chakra";
 import Map from "./components/map";
 import Overlay from "./components/overlay";
 import { Toaster } from "./components/ui/toaster";
@@ -55,6 +57,18 @@ export default function App() {
       >
         <Overlay />
       </Container>
+      <HStack
+        position={"absolute"}
+        bottom={4}
+        left={8}
+        fontWeight={"lighter"}
+        fontSize={"small"}
+      >
+        Created with <LuHeart /> by{" "}
+        <Link href="https://developmentseed.org/">
+          Development Seed <CollecticonBrandDevelopmentSeed2 />
+        </Link>
+      </HStack>
       <Toaster />
     </MapProvider>
   );
