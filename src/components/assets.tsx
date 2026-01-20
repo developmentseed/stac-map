@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
-import { LuDownload, LuFileImage } from "react-icons/lu";
+import { LuCircle, LuCircleDot, LuDownload, LuFileImage } from "react-icons/lu";
 import {
   Badge,
   ButtonGroup,
   Clipboard,
   Group,
-  Heading,
-  HStack,
   IconButton,
   RadioCard,
-  Stack,
+  Table,
 } from "@chakra-ui/react";
 import type { StacAsset } from "stac-ts";
+import { type ListOrCard, Section } from "./section";
 import { useStore } from "../store";
 
 export default function Assets({
@@ -40,36 +39,86 @@ export default function Assets({
   }, [assets, value, setGeotiffHref]);
 
   return (
-    <Stack>
-      <Heading size={"md"}>
-        <HStack>
-          <LuFileImage /> Assets
-        </HStack>
-      </Heading>
-      <RadioCard.Root
-        value={value}
-        onValueChange={(e) => setValue(e.value)}
-        size={"sm"}
-      >
-        <Group orientation="vertical">
-          {Object.entries(assets).map(([key, asset]) => (
-            <Asset key={key} assetKey={key} asset={asset} />
-          ))}
-        </Group>
-      </RadioCard.Root>
-    </Stack>
+    <Section
+      icon={<LuFileImage />}
+      title="Assets"
+      count={Object.keys(assets).length}
+    >
+      {(listOrCard) => (
+        <AssetsList
+          assets={assets}
+          value={value}
+          setValue={setValue}
+          listOrCard={listOrCard}
+        />
+      )}
+    </Section>
   );
 }
 
-function Asset({ assetKey, asset }: { assetKey: string; asset: StacAsset }) {
+function AssetsList({
+  assets,
+  value,
+  setValue,
+  listOrCard,
+}: {
+  assets: { [k: string]: StacAsset };
+  value: string | null;
+  setValue: (value: string | null) => void;
+  listOrCard: ListOrCard;
+}) {
+  if (listOrCard === "list") {
+    return (
+      <Table.Root size="sm">
+        <Table.Header>
+          <Table.Row>
+            <Table.ColumnHeader />
+            <Table.ColumnHeader>Key</Table.ColumnHeader>
+            <Table.ColumnHeader>Type</Table.ColumnHeader>
+            <Table.ColumnHeader />
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {Object.entries(assets).map(([key, asset]) => (
+            <AssetRow
+              key={key}
+              assetKey={key}
+              asset={asset}
+              selected={value === key}
+              onSelect={() => setValue(isGeotiff(asset) ? key : null)}
+            />
+          ))}
+        </Table.Body>
+      </Table.Root>
+    );
+  }
+
+  return (
+    <RadioCard.Root
+      value={value}
+      onValueChange={(e) => setValue(e.value)}
+      size="sm"
+    >
+      <Group orientation="vertical">
+        {Object.entries(assets).map(([key, asset]) => (
+          <AssetCard key={key} assetKey={key} asset={asset} />
+        ))}
+      </Group>
+    </RadioCard.Root>
+  );
+}
+
+function AssetCard({
+  assetKey,
+  asset,
+}: {
+  assetKey: string;
+  asset: StacAsset;
+}) {
   const scheme = asset.href.split(":").at(0);
 
   return (
-    <RadioCard.Item
-      value={assetKey}
-      width={"full"}
-      disabled={!isGeotiff(asset)}
-    >
+    <RadioCard.Item value={assetKey} width="full" disabled={!isGeotiff(asset)}>
       <RadioCard.ItemHiddenInput />
       <RadioCard.ItemControl>
         <RadioCard.ItemContent>
@@ -82,24 +131,70 @@ function Asset({ assetKey, asset }: { assetKey: string; asset: StacAsset }) {
         <RadioCard.ItemIndicator />
       </RadioCard.ItemControl>
       <RadioCard.ItemAddon>
-        <ButtonGroup size={"xs"} variant={"plain"}>
-          <Clipboard.Root value={asset.href}>
-            <Clipboard.Trigger asChild>
-              <IconButton>
-                <Clipboard.Indicator />
-              </IconButton>
-            </Clipboard.Trigger>
-          </Clipboard.Root>
-          {scheme?.startsWith("http") && (
-            <IconButton asChild>
-              <a href={asset.href}>
-                <LuDownload />
-              </a>
-            </IconButton>
-          )}
-        </ButtonGroup>
+        <AssetActions asset={asset} scheme={scheme} />
       </RadioCard.ItemAddon>
     </RadioCard.Item>
+  );
+}
+
+function AssetRow({
+  assetKey,
+  asset,
+  selected,
+  onSelect,
+}: {
+  assetKey: string;
+  asset: StacAsset;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const scheme = asset.href.split(":").at(0);
+  const geotiff = isGeotiff(asset);
+
+  return (
+    <Table.Row
+      onClick={geotiff ? onSelect : undefined}
+      cursor={geotiff ? "pointer" : "default"}
+      bg={selected ? "bg.muted" : undefined}
+    >
+      <Table.Cell>
+        {geotiff && (selected ? <LuCircleDot /> : <LuCircle />)}
+      </Table.Cell>
+      <Table.Cell>{asset.title || assetKey}</Table.Cell>
+      <Table.Cell>
+        <Badge>{asset.type || scheme}</Badge>
+      </Table.Cell>
+      <Table.Cell>
+        <AssetActions asset={asset} scheme={scheme} />
+      </Table.Cell>
+    </Table.Row>
+  );
+}
+
+function AssetActions({
+  asset,
+  scheme,
+}: {
+  asset: StacAsset;
+  scheme: string | undefined;
+}) {
+  return (
+    <ButtonGroup size="xs" variant="plain">
+      <Clipboard.Root value={asset.href}>
+        <Clipboard.Trigger asChild>
+          <IconButton>
+            <Clipboard.Indicator />
+          </IconButton>
+        </Clipboard.Trigger>
+      </Clipboard.Root>
+      {scheme?.startsWith("http") && (
+        <IconButton asChild>
+          <a href={asset.href}>
+            <LuDownload />
+          </a>
+        </IconButton>
+      )}
+    </ButtonGroup>
   );
 }
 
