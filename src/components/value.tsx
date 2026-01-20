@@ -27,7 +27,7 @@ import Description from "./description";
 import Root from "./root";
 import SearchItems from "./search-items";
 import Thumbnail from "./thumbnail";
-import { useStore } from "../store";
+import { useBoundStore } from "../store";
 import type { StacValue } from "../types/stac";
 import {
   getLinkHref,
@@ -52,8 +52,8 @@ const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({
 });
 
 export default function Value({ value }: { value: StacValue }) {
-  const searchItems = useStore((store) => store.searchItems);
-  const setHref = useStore((store) => store.setHref);
+  const searchItems = useBoundStore((store) => store.searchItems);
+  const setHref = useBoundStore((store) => store.setHref);
 
   const collectionsHref = getLinkHref(value, "data");
   const childrenLinks = value.links?.filter((link) => link.rel === "child");

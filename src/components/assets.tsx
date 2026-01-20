@@ -11,14 +11,14 @@ import {
 } from "@chakra-ui/react";
 import type { StacAsset } from "stac-ts";
 import { type ListOrCard, Section } from "./section";
-import { useStore } from "../store";
+import { useBoundStore } from "../store";
 
 export default function Assets({
   assets,
 }: {
   assets: { [k: string]: StacAsset };
 }) {
-  const setGeotiffHref = useStore((store) => store.setGeotiffHref);
+  const setGeotiffHref = useBoundStore((store) => store.setGeotiffHref);
   let defaultValue = null;
   for (const [key, asset] of Object.entries(assets)) {
     if (!defaultValue && isGeotiff(asset)) {

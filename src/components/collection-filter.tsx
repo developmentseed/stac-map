@@ -8,15 +8,15 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import type { StacCollection } from "stac-ts";
-import { useStore } from "../store";
+import { useBoundStore } from "../store";
 import { isCollectionInBbox } from "../utils/stac";
 
 export default function CollectionFilter() {
-  const collections = useStore((store) => store.collections);
-  const setFilteredCollections = useStore(
+  const collections = useBoundStore((store) => store.collections);
+  const setFilteredCollections = useBoundStore(
     (store) => store.setFilteredCollections
   );
-  const bbox = useStore((store) => store.bbox);
+  const bbox = useBoundStore((store) => store.bbox);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [searchValue, setSearchValue] = useState("");
   const [filterViewport, setFilterViewport] = useState(true);

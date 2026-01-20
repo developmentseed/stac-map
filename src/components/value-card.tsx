@@ -3,7 +3,7 @@ import { Card } from "@chakra-ui/react";
 import type { StacCollection } from "stac-ts";
 import Thumbnail from "./thumbnail";
 import { Prose } from "./ui/prose";
-import { useStore } from "../store";
+import { useBoundStore } from "../store";
 import type { StacValue } from "../types/stac";
 import {
   getSelfHref,
@@ -13,9 +13,9 @@ import {
 
 export default function ValueCard({ value }: { value: StacValue }) {
   const href = getSelfHref(value);
-  const setHref = useStore((store) => store.setHref);
-  const hoveredCollection = useStore((store) => store.hoveredCollection);
-  const setHoveredCollection = useStore((store) => store.setHoveredCollection);
+  const setHref = useBoundStore((store) => store.setHref);
+  const hoveredCollection = useBoundStore((store) => store.hoveredCollection);
+  const setHoveredCollection = useBoundStore((store) => store.setHoveredCollection);
   const thumbnailAsset = getThumbnailAsset(value);
   const description =
     "description" in value ? (value.description as string) : undefined;

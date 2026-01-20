@@ -6,12 +6,12 @@ import { CollecticonBrandDevelopmentSeed2 } from "@devseed-ui/collecticons-chakr
 import Map from "./components/map";
 import Overlay from "./components/overlay";
 import { Toaster } from "./components/ui/toaster";
-import { useStore } from "./store";
+import { useBoundStore } from "./store";
 import { getCurrentHref } from "./utils/href";
 
 export default function App() {
-  const href = useStore((state) => state.href);
-  const setHref = useStore((state) => state.setHref);
+  const href = useBoundStore((state) => state.href);
+  const setHref = useBoundStore((state) => state.setHref);
 
   useEffect(() => {
     if (href && getCurrentHref() != href) {
