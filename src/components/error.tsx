@@ -1,10 +1,11 @@
+import { getErrorMessage } from "react-error-boundary";
 import { AbsoluteCenter, Alert, Box, Button, Stack } from "@chakra-ui/react";
 
 export function ErrorComponent({
   error,
   resetErrorBoundary,
 }: {
-  error: Error;
+  error: unknown;
   resetErrorBoundary: () => void;
 }) {
   return (
@@ -16,7 +17,7 @@ export function ErrorComponent({
             <Alert.Title>Unhandled application error</Alert.Title>
             <Alert.Description>
               <Stack>
-                <Box>{error.message}</Box>
+                <Box>{getErrorMessage(error)}</Box>
                 <Button
                   variant={"surface"}
                   onClick={() => resetErrorBoundary()}
