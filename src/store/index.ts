@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { type BboxState, createBboxSlice } from "./bbox";
 import { type CollectionsState, createCollectionsSlice } from "./collections";
+import { type ConnectionState, createConnectionSlice } from "./connection";
 import { createGeotiffSlice, type GeotiffState } from "./geotiff";
 import { createHoversSlice, type HoverState } from "./hover";
 import { createHrefSlice, type HrefState } from "./href";
@@ -22,7 +23,8 @@ export interface State
     ValueState,
     GeotiffState,
     BboxState,
-    UploadedFileState {
+    UploadedFileState,
+    ConnectionState {
   fillColor: [number, number, number, number];
   lineColor: [number, number, number, number];
   lineWidth: number;
@@ -38,6 +40,7 @@ export const useStore = create<State>((...a) => ({
   ...createGeotiffSlice(...a),
   ...createBboxSlice(...a),
   ...createUploadedFileSlice(...a),
+  ...createConnectionSlice(...a),
   fillColor: [207, 63, 2, 50] as [number, number, number, number],
   lineColor: [207, 63, 2, 100] as [number, number, number, number],
   lineWidth: 2,

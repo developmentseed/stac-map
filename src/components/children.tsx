@@ -7,7 +7,7 @@ import { type ListOrCard, Section } from "./section";
 import SkeletonCard from "./skeleton-card";
 import ValueCard from "./value-card";
 import ValueListItem from "./value-list-item";
-import { useStacJson } from "../hooks/stac";
+import { useStac } from "../hooks/stac";
 import { useStore } from "../store";
 
 export default function Children({ links }: { links: StacLink[] }) {
@@ -58,7 +58,7 @@ function ChildrenValues({
 }
 
 function ChildCard({ link }: { link: StacLink }) {
-  const result = useStacJson({ href: link.href });
+  const result = useStac({ href: link.href });
   const addCollection = useStore((store) => store.addCollection);
   const filteredCollections = useStore((store) => store.filteredCollections);
 
@@ -81,7 +81,7 @@ function ChildCard({ link }: { link: StacLink }) {
 }
 
 function ChildListItem({ link }: { link: StacLink }) {
-  const result = useStacJson({ href: link.href });
+  const result = useStac({ href: link.href });
   const addCollection = useStore((store) => store.addCollection);
   const filteredCollections = useStore((store) => store.filteredCollections);
 

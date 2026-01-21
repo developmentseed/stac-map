@@ -3,6 +3,7 @@ import { LuHeart } from "react-icons/lu";
 import { MapProvider } from "react-map-gl/maplibre";
 import { Box, Container, FileUpload, HStack, Link } from "@chakra-ui/react";
 import { CollecticonBrandDevelopmentSeed2 } from "@devseed-ui/collecticons-chakra";
+import { useDuckDb } from "duckdb-wasm-kit";
 import Map from "./components/map";
 import Overlay from "./components/overlay";
 import { useStore } from "./store";
@@ -12,6 +13,8 @@ export default function App() {
   const href = useStore((state) => state.href);
   const setHref = useStore((state) => state.setHref);
   const setUploadedFile = useStore((state) => state.setUploadedFile);
+  const { db } = useDuckDb();
+  const setConnection = useStore((state) => state.setConnection);
 
   useEffect(() => {
     if (href && getCurrentHref() != href) {
@@ -39,6 +42,17 @@ export default function App() {
       window.removeEventListener("popstate", handlePopState);
     };
   }, [setHref]);
+
+  useEffect(() => {
+    if (db) {
+      (async () => {
+        const connection = await db.connect();
+        await connection.query("LOAD spatial;");
+        await connection.query("LOAD icu;");
+        setConnection(connection);
+      })();
+    }
+  }, [db, setConnection]);
 
   return (
     <MapProvider>

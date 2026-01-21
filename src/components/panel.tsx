@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect } from "react";
-import { LuArrowRight, LuFileWarning } from "react-icons/lu";
+import { LuArrowRight, LuBird, LuFileWarning } from "react-icons/lu";
 import {
   Alert,
   Box,
@@ -13,7 +13,7 @@ import type { StacItem } from "stac-ts";
 import Introduction from "./introduction";
 import { StacIcon } from "./stac";
 import Value from "./value";
-import { useStacJson } from "../hooks/stac";
+import { useStac } from "../hooks/stac";
 import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
 import { getSelfHref, getStacValueId } from "../utils/stac";
@@ -76,12 +76,27 @@ function ValuePanel({ value }: { value: StacValue }) {
 }
 
 function HrefPanel({ href }: { href: string }) {
+  const connection = useStore((store) => store.connection);
   const setValue = useStore((store) => store.setValue);
-  const result = useStacJson({ href });
+  const result = useStac({ href });
   const header = (
     <HStack truncate>
-      {(result.isFetching && <Spinner size="xs" mr={1} />) || <LuFileWarning />}
-      Fetching {href}...
+      {result.error ? (
+        <>
+          <LuFileWarning /> Error loading {href}
+        </>
+      ) : result.isFetching ? (
+        <>
+          <Spinner size="xs" mr={1} /> Fetching {href}
+        </>
+      ) : !connection ? (
+        <>
+          <LuBird />
+          Loading DuckDB...
+        </>
+      ) : (
+        "stac-map"
+      )}
     </HStack>
   );
 

@@ -26,6 +26,8 @@ export function getStacValueType(value: StacValue) {
       return "Item";
     case "Catalog":
       return "Catalog";
+    case "FeatureCollection":
+      return "Item collection";
     default:
       return "unknown";
   }
