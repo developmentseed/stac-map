@@ -1,8 +1,11 @@
 import type { State } from ".";
 import type { StacItem } from "stac-ts";
 import type { StateCreator } from "zustand";
+import type { StacSearch } from "../types/stac";
 
 export interface ItemsState {
+  search: StacSearch | null;
+  setSearch: (search: StacSearch | null) => void;
   searchItems: StacItem[] | null;
   setSearchItems: (items: StacItem[] | null) => void;
   pickedItem: StacItem | null;
@@ -12,6 +15,8 @@ export interface ItemsState {
 export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
   set
 ) => ({
+  search: null,
+  setSearch: (search) => set({ search }),
   searchItems: null,
   setSearchItems: (items) => set({ searchItems: items }),
   pickedItem: null,

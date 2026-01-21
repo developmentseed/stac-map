@@ -31,8 +31,9 @@ interface Props {
 }
 
 export default function Search({ href, collection }: Props) {
+  const search = useStore((store) => store.search);
+  const setSearch = useStore((store) => store.setSearch);
   const setSearchItems = useStore((store) => store.setSearchItems);
-  const [search, setSearch] = useState<StacSearch | null>(null);
   const { map } = useMap();
 
   return (
