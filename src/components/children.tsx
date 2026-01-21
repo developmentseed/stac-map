@@ -8,11 +8,11 @@ import SkeletonCard from "./skeleton-card";
 import ValueCard from "./value-card";
 import ValueListItem from "./value-list-item";
 import { useStacJson } from "../hooks/stac";
-import { useBoundStore } from "../store";
+import { useStore } from "../store";
 
 export default function Children({ links }: { links: StacLink[] }) {
-  const collections = useBoundStore((store) => store.collections);
-  const filteredCollections = useBoundStore((store) => store.filteredCollections);
+  const collections = useStore((store) => store.collections);
+  const filteredCollections = useStore((store) => store.filteredCollections);
 
   return (
     <Section
@@ -59,8 +59,8 @@ function ChildrenValues({
 
 function ChildCard({ link }: { link: StacLink }) {
   const result = useStacJson({ href: link.href });
-  const addCollection = useBoundStore((store) => store.addCollection);
-  const filteredCollections = useBoundStore((store) => store.filteredCollections);
+  const addCollection = useStore((store) => store.addCollection);
+  const filteredCollections = useStore((store) => store.filteredCollections);
 
   useEffect(() => {
     if (result.data?.type === "Collection") addCollection(result.data);
@@ -82,8 +82,8 @@ function ChildCard({ link }: { link: StacLink }) {
 
 function ChildListItem({ link }: { link: StacLink }) {
   const result = useStacJson({ href: link.href });
-  const addCollection = useBoundStore((store) => store.addCollection);
-  const filteredCollections = useBoundStore((store) => store.filteredCollections);
+  const addCollection = useStore((store) => store.addCollection);
+  const filteredCollections = useStore((store) => store.filteredCollections);
 
   useEffect(() => {
     if (result.data?.type === "Collection") addCollection(result.data);

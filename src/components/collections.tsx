@@ -21,14 +21,14 @@ import { type ListOrCard, Section } from "./section";
 import { toaster } from "./ui/toaster";
 import ValueCard from "./value-card";
 import ValueListItem from "./value-list-item";
-import { useBoundStore } from "../store";
+import { useStore } from "../store";
 import type { StacCollections } from "../types/stac";
 import { getLinkHref } from "../utils/stac";
 
 export default function Collections({ href }: { href: string }) {
-  const setCollections = useBoundStore((state) => state.setCollections);
-  const collections = useBoundStore((store) => store.collections);
-  const filteredCollections = useBoundStore((store) => store.filteredCollections);
+  const setCollections = useStore((state) => state.setCollections);
+  const collections = useStore((store) => store.collections);
+  const filteredCollections = useStore((store) => store.filteredCollections);
   const [fetchAllCollections, setFetchAllCollections] = useState(false);
 
   const result = useInfiniteQuery({
@@ -106,8 +106,8 @@ function CollectionValues({
   fetchNextPage,
   isFetching,
 }: { listOrCard: ListOrCard } & UseInfiniteQueryResult) {
-  const collections = useBoundStore((store) => store.collections);
-  const filteredCollections = useBoundStore((store) => store.filteredCollections);
+  const collections = useStore((store) => store.collections);
+  const filteredCollections = useStore((store) => store.filteredCollections);
   const values = (filteredCollections || collections)?.map((collection) =>
     listOrCard === "list" ? (
       <ValueListItem key={collection.id} value={collection} />
@@ -165,7 +165,7 @@ function CollectionActionBar({
   fetchAllCollections: boolean;
   setFetchAllCollections: Dispatch<SetStateAction<boolean>>;
 } & UseInfiniteQueryResult<InfiniteData<StacCollections | null>>) {
-  const collections = useBoundStore((store) => store.collections);
+  const collections = useStore((store) => store.collections);
   const numberMatched = data?.pages.at(0)?.numberMatched;
 
   return (

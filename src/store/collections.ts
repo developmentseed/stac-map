@@ -1,4 +1,6 @@
+import type { State } from ".";
 import type { StacCollection } from "stac-ts";
+import type { StateCreator } from "zustand";
 
 export interface CollectionsState {
   collections: StacCollection[] | null;
@@ -8,7 +10,12 @@ export interface CollectionsState {
   setFilteredCollections: (collections: StacCollection[] | null) => void;
 }
 
-export const createCollectionsSlice = (set, get) => ({
+export const createCollectionsSlice: StateCreator<
+  State,
+  [],
+  [],
+  CollectionsState
+> = (set, get) => ({
   collections: null,
   setCollections: (collections) => set({ collections }),
   addCollection: (collection) => {

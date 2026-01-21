@@ -1,4 +1,6 @@
+import type { State } from ".";
 import type { StacItem } from "stac-ts";
+import type { StateCreator } from "zustand";
 
 export interface ItemsState {
   searchItems: StacItem[] | null;
@@ -7,7 +9,9 @@ export interface ItemsState {
   setPickedItem: (item: StacItem | null) => void;
 }
 
-export const createItemsSlice = (set) => ({
+export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
+  set
+) => ({
   searchItems: null,
   setSearchItems: (items) => set({ searchItems: items }),
   pickedItem: null,

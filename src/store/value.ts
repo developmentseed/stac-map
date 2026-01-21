@@ -1,3 +1,5 @@
+import type { State } from ".";
+import type { StateCreator } from "zustand";
 import type { StacValue } from "../types/stac";
 
 export interface ValueState {
@@ -5,7 +7,9 @@ export interface ValueState {
   setValue: (value: StacValue | null) => void;
 }
 
-export const createValueSlice = (set) => ({
+export const createValueSlice: StateCreator<State, [], [], ValueState> = (
+  set
+) => ({
   value: null,
   setValue: (value) => set({ value }),
 });

@@ -1,3 +1,5 @@
+import type { State } from ".";
+import type { StateCreator } from "zustand";
 import { getInitialHref } from "../utils/href";
 
 export interface InputState {
@@ -7,7 +9,9 @@ export interface InputState {
 
 const initialHref = getInitialHref();
 
-export const createInputSlice = (set) => ({
+export const createInputSlice: StateCreator<State, [], [], InputState> = (
+  set
+) => ({
   input: initialHref || "",
   setInput: (input) => set({ input }),
 });

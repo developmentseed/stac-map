@@ -13,14 +13,14 @@ import Introduction from "./introduction";
 import { StacIcon } from "./stac";
 import Value from "./value";
 import { useStacJson } from "../hooks/stac";
-import { useBoundStore } from "../store";
+import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
 import { getSelfHref, getStacValueId } from "../utils/stac";
 
 export default function Panel() {
-  const href = useBoundStore((store) => store.href);
-  const value = useBoundStore((store) => store.value);
-  const pickedItem = useBoundStore((store) => store.pickedItem);
+  const href = useStore((store) => store.href);
+  const value = useStore((store) => store.value);
+  const pickedItem = useStore((store) => store.pickedItem);
 
   if (pickedItem) {
     return <PickedItemPanel pickedItem={pickedItem} />;
@@ -38,8 +38,8 @@ export default function Panel() {
 }
 
 function PickedItemPanel({ pickedItem }: { pickedItem: StacItem }) {
-  const setHref = useBoundStore((store) => store.setHref);
-  const setPickedItem = useBoundStore((store) => store.setPickedItem);
+  const setHref = useStore((store) => store.setHref);
+  const setPickedItem = useStore((store) => store.setPickedItem);
   const href = getSelfHref(pickedItem);
 
   const header = (
@@ -75,7 +75,7 @@ function ValuePanel({ value }: { value: StacValue }) {
 }
 
 function HrefPanel({ href }: { href: string }) {
-  const setValue = useBoundStore((store) => store.setValue);
+  const setValue = useStore((store) => store.setValue);
   const result = useStacJson({ href });
   const header = (
     <HStack truncate>

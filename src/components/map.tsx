@@ -16,7 +16,7 @@ import type { StacCollection } from "stac-ts";
 import { COGLayer } from "@developmentseed/deck.gl-geotiff";
 import type { BBox, Feature, FeatureCollection } from "geojson";
 import { useColorModeValue } from "../components/ui/color-mode";
-import { useBoundStore } from "../store";
+import { useStore } from "../store";
 import type { BBox2D, Color } from "../types/map";
 import type { StacValue } from "../types/stac";
 import { sanitizeBbox } from "../utils/map";
@@ -33,22 +33,22 @@ export default function Map() {
     "dark-matter-gl-style"
   );
   const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const setHref = useBoundStore((store) => store.setHref);
-  const value = useBoundStore((store) => store.value);
-  const collections = useBoundStore((store) => store.collections);
-  const filteredCollections = useBoundStore((store) => store.filteredCollections);
-  const hoveredCollection = useBoundStore((store) => store.hoveredCollection);
-  const setHoveredCollection = useBoundStore((store) => store.setHoveredCollection);
-  const hoveredItem = useBoundStore((store) => store.hoveredItem);
-  const setHoveredItem = useBoundStore((store) => store.setHoveredItem);
-  const pickedItem = useBoundStore((store) => store.pickedItem);
-  const setPickedItem = useBoundStore((store) => store.setPickedItem);
-  const searchItems = useBoundStore((store) => store.searchItems);
-  const geotiffHref = useBoundStore((store) => store.geotiffHref);
-  const setBbox = useBoundStore((store) => store.setBbox);
-  const fillColor = useBoundStore((store) => store.fillColor);
-  const lineColor = useBoundStore((store) => store.lineColor);
-  const lineWidth = useBoundStore((store) => store.lineWidth);
+  const setHref = useStore((store) => store.setHref);
+  const value = useStore((store) => store.value);
+  const collections = useStore((store) => store.collections);
+  const filteredCollections = useStore((store) => store.filteredCollections);
+  const hoveredCollection = useStore((store) => store.hoveredCollection);
+  const setHoveredCollection = useStore((store) => store.setHoveredCollection);
+  const hoveredItem = useStore((store) => store.hoveredItem);
+  const setHoveredItem = useStore((store) => store.setHoveredItem);
+  const pickedItem = useStore((store) => store.pickedItem);
+  const setPickedItem = useStore((store) => store.setPickedItem);
+  const searchItems = useStore((store) => store.searchItems);
+  const geotiffHref = useStore((store) => store.geotiffHref);
+  const setBbox = useStore((store) => store.setBbox);
+  const fillColor = useStore((store) => store.fillColor);
+  const lineColor = useStore((store) => store.lineColor);
+  const lineWidth = useStore((store) => store.lineWidth);
 
   const inverseFillColor = [
     256 - fillColor[0],

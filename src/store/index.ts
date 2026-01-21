@@ -1,20 +1,29 @@
 import { create } from "zustand";
-import { createCollectionsSlice, type CollectionsState } from "./collections";
-import { createItemsSlice, type ItemsState } from "./items";
+import { type BboxState, createBboxSlice } from "./bbox";
+import { type CollectionsState, createCollectionsSlice } from "./collections";
+import { createGeotiffSlice, type GeotiffState } from "./geotiff";
 import { createHoversSlice, type HoverState } from "./hover";
 import { createHrefSlice, type HrefState } from "./href";
 import { createInputSlice, type InputState } from "./input";
-import { createGeotiffSlice, type GeotiffState } from "./geotiff";
+import { createItemsSlice, type ItemsState } from "./items";
 import { createValueSlice, type ValueState } from "./value";
-import { createBboxSlice, type BboxState } from "./bbox";
 
-interface State extends CollectionsState, ItemsState, HoverState, HrefState, InputState, ValueState, GeotiffState, BboxState {
+export interface State
+  extends
+    CollectionsState,
+    ItemsState,
+    HoverState,
+    HrefState,
+    InputState,
+    ValueState,
+    GeotiffState,
+    BboxState {
   fillColor: [number, number, number, number];
   lineColor: [number, number, number, number];
   lineWidth: number;
-};
+}
 
-export const useBoundStore = create<State>((...a) => ({
+export const useStore = create<State>((...a) => ({
   ...createHrefSlice(...a),
   ...createInputSlice(...a),
   ...createValueSlice(...a),

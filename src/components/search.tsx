@@ -20,7 +20,7 @@ import {
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { StacCollection } from "stac-ts";
 import type { BBox } from "geojson";
-import { useBoundStore } from "../store/index.ts";
+import { useStore } from "../store/index.ts";
 import type { StacItemCollection, StacSearch } from "../types/stac";
 import { sanitizeBbox } from "../utils/map.ts";
 import { fetchStac, getLinkHref } from "../utils/stac.ts";
@@ -31,7 +31,7 @@ interface Props {
 }
 
 export default function Search({ href, collection }: Props) {
-  const setSearchItems = useBoundStore((store) => store.setSearchItems);
+  const setSearchItems = useStore((store) => store.setSearchItems);
   const [search, setSearch] = useState<StacSearch | null>(null);
   const { map } = useMap();
 
@@ -74,8 +74,8 @@ export default function Search({ href, collection }: Props) {
 }
 
 function SearchResults({ href, search }: { href: string; search: StacSearch }) {
-  const searchItems = useBoundStore((store) => store.searchItems);
-  const setSearchItems = useBoundStore((store) => store.setSearchItems);
+  const searchItems = useStore((store) => store.searchItems);
+  const setSearchItems = useStore((store) => store.setSearchItems);
   const [fetchAllItems, setFetchAllItems] = useState(false);
 
   const url = useMemo(() => {
