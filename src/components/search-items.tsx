@@ -7,12 +7,11 @@ export default function SearchItems({ items }: { items: StacItem[] }) {
   return (
     <Section
       icon={<LuSearch />}
-      title="Search items"
+      title="Items"
       count={items.length}
       defaultListOrCard="list"
     >
       {(listOrCard) => <Items items={items} listOrCard={listOrCard} />}
     </Section>
   );
-  return <></>;
 }

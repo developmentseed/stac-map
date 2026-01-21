@@ -38,8 +38,8 @@ export default function ValueCard({ value }: { value: StacValue }) {
       <Card.Header>
         <Card.Title>{getStacValueTitle(value)}</Card.Title>
       </Card.Header>
-      {(thumbnailAsset || description) && (
-        <Card.Body>
+      <Card.Body>
+        {(thumbnailAsset || description) && (
           <Card.Description as="div">
             {thumbnailAsset && <Thumbnail asset={thumbnailAsset} />}
             {description && (
@@ -48,8 +48,8 @@ export default function ValueCard({ value }: { value: StacValue }) {
               </Prose>
             )}
           </Card.Description>
-        </Card.Body>
-      )}
+        )}
+      </Card.Body>
     </Card.Root>
   );
 }
