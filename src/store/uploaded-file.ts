@@ -11,8 +11,10 @@ export const createUploadedFileSlice: StateCreator<
   [],
   [],
   UploadedFileState
-> = (set) => ({
+> = (set, get) => ({
   uploadedFile: null,
-  setUploadedFile: (uploadedFile) =>
-    set({ uploadedFile, href: uploadedFile.name }),
+  setUploadedFile: (uploadedFile) => {
+    set({ uploadedFile });
+    get().setHref(uploadedFile.name);
+  },
 });

@@ -13,15 +13,15 @@ export const createValueSlice: StateCreator<State, [], [], ValueState> = (
 ) => ({
   value: null,
   setValue: (value) => {
-    const search = get().search;
     set({
       value,
-      search:
-        value?.type === "Collection" &&
-        search?.collections?.length === 1 &&
-        search.collections[0] !== value.id
-          ? null
-          : search,
     });
+    const search = get().search;
+    if (
+      value?.type === "Collection" &&
+      search?.collections?.length === 1 &&
+      search.collections[0] !== value.id
+    )
+      get().setSearch(null);
   },
 });

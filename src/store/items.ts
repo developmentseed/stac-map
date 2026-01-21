@@ -13,16 +13,18 @@ export interface ItemsState {
 }
 
 export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
-  set
+  set,
+  get
 ) => ({
   search: null,
   setSearch: (search) => set({ search }),
   searchItems: null,
   setSearchItems: (items) => set({ searchItems: items }),
   pickedItem: null,
-  setPickedItem: (item) =>
+  setPickedItem: (item) => {
     set({
       pickedItem: item,
-      geotiffHref: null,
-    }),
+    });
+    get().setGeotiffHref(null);
+  },
 });
