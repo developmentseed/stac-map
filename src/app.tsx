@@ -1,17 +1,17 @@
 import { useEffect } from "react";
 import { LuHeart } from "react-icons/lu";
 import { MapProvider } from "react-map-gl/maplibre";
-import { Box, Container, HStack, Link } from "@chakra-ui/react";
+import { Box, Container, FileUpload, HStack, Link } from "@chakra-ui/react";
 import { CollecticonBrandDevelopmentSeed2 } from "@devseed-ui/collecticons-chakra";
 import Map from "./components/map";
 import Overlay from "./components/overlay";
-import { Toaster } from "./components/ui/toaster";
 import { useStore } from "./store";
 import { getCurrentHref } from "./utils/href";
 
 export default function App() {
   const href = useStore((state) => state.href);
   const setHref = useStore((state) => state.setHref);
+  const setUploadedFile = useStore((state) => state.setUploadedFile);
 
   useEffect(() => {
     if (href && getCurrentHref() != href) {
@@ -43,7 +43,23 @@ export default function App() {
   return (
     <MapProvider>
       <Box h={"100dvh"}>
-        <Map />
+        <FileUpload.Root
+          unstyled={true}
+          onFileAccept={(details) => {
+            if (details.files.length === 1) setUploadedFile(details.files[0]);
+          }}
+        >
+          <FileUpload.HiddenInput />
+          <FileUpload.Dropzone
+            disableClick={true}
+            style={{
+              height: "100dvh",
+              width: "100dvw",
+            }}
+          >
+            <Map />
+          </FileUpload.Dropzone>
+        </FileUpload.Root>
       </Box>
       <Container
         zIndex={1}
@@ -69,7 +85,6 @@ export default function App() {
           Development Seed <CollecticonBrandDevelopmentSeed2 />
         </Link>
       </HStack>
-      <Toaster />
     </MapProvider>
   );
 }

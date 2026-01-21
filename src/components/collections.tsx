@@ -20,7 +20,6 @@ import {
 } from "@tanstack/react-query";
 import CollectionFilter from "./collection-filter";
 import { type ListOrCard, Section } from "./section";
-import { toaster } from "./ui/toaster";
 import ValueCard from "./value-card";
 import ValueListItem from "./value-list-item";
 import { useStore } from "../store";
@@ -66,16 +65,6 @@ export default function Collections({ href }: { href: string }) {
       result.fetchNextPage();
     }
   }, [fetchAllCollections, result]);
-
-  useEffect(() => {
-    if (result.error) {
-      toaster.create({
-        type: "error",
-        title: href,
-        description: result.error.message,
-      });
-    }
-  }, [result.error, href]);
 
   return (
     <>

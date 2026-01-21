@@ -6,6 +6,10 @@ import { createHoversSlice, type HoverState } from "./hover";
 import { createHrefSlice, type HrefState } from "./href";
 import { createInputSlice, type InputState } from "./input";
 import { createItemsSlice, type ItemsState } from "./items";
+import {
+  createUploadedFileSlice,
+  type UploadedFileState,
+} from "./uploaded-file";
 import { createValueSlice, type ValueState } from "./value";
 
 export interface State
@@ -17,7 +21,8 @@ export interface State
     InputState,
     ValueState,
     GeotiffState,
-    BboxState {
+    BboxState,
+    UploadedFileState {
   fillColor: [number, number, number, number];
   lineColor: [number, number, number, number];
   lineWidth: number;
@@ -32,6 +37,7 @@ export const useStore = create<State>((...a) => ({
   ...createHoversSlice(...a),
   ...createGeotiffSlice(...a),
   ...createBboxSlice(...a),
+  ...createUploadedFileSlice(...a),
   fillColor: [207, 63, 2, 50] as [number, number, number, number],
   lineColor: [207, 63, 2, 100] as [number, number, number, number],
   lineWidth: 2,

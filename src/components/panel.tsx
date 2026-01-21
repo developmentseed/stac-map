@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect } from "react";
-import { LuArrowRight } from "react-icons/lu";
+import { LuArrowRight, LuFileWarning } from "react-icons/lu";
 import {
+  Alert,
   Box,
   CloseButton,
   HStack,
@@ -79,7 +80,7 @@ function HrefPanel({ href }: { href: string }) {
   const result = useStacJson({ href });
   const header = (
     <HStack truncate>
-      <Spinner size="xs" mr={2} />
+      {(result.isFetching && <Spinner size="xs" mr={1} />) || <LuFileWarning />}
       Fetching {href}...
     </HStack>
   );
@@ -90,7 +91,15 @@ function HrefPanel({ href }: { href: string }) {
 
   return (
     <BasePanel header={header}>
-      <SkeletonText />
+      {(result.error && (
+        <Alert.Root status={"error"}>
+          <Alert.Indicator />
+          <Alert.Content>
+            <Alert.Title>{result.error.name}</Alert.Title>
+            <Alert.Description>{result.error.message}</Alert.Description>
+          </Alert.Content>
+        </Alert.Root>
+      )) || <SkeletonText />}
     </BasePanel>
   );
 }

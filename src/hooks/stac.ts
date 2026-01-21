@@ -1,6 +1,5 @@
-import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { toaster } from "../components/ui/toaster";
+import { useStore } from "../store";
 import { fetchStac } from "../utils/stac";
 
 export function useStacJson({
@@ -10,21 +9,22 @@ export function useStacJson({
   href: string;
   enabled?: boolean;
 }) {
+  const uploadedFile = useStore((store) => store.uploadedFile);
   const result = useQuery({
     queryKey: ["stac-json", href],
     enabled,
-    queryFn: async () => await fetchStac({ href }),
+    queryFn: async () => {
+      if (href.startsWith("http")) {
+        return await fetchStac({ href });
+      } else if (uploadedFile) {
+        return JSON.parse(await uploadedFile.text());
+      } else {
+        throw new Error(
+          `Cannot get STAC json from href, and no file uploaded: ${href}`
+        );
+      }
+    },
   });
-
-  useEffect(() => {
-    if (href && result.error) {
-      toaster.create({
-        type: "error",
-        title: href,
-        description: result.error.message,
-      });
-    }
-  }, [result.error, href]);
 
   return result;
 }
