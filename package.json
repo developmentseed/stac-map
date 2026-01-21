@@ -1,6 +1,6 @@
 {
   "name": "stac-map",
-  "description": "A map-first, single-page, statically-hosted STAC search and visualization tool, with stac-geoparquet support",
+  "description": "A map-first single-page STAC search and visualization tool with stac-geoparquet support",
   "author": {
     "name": "Pete Gadomski",
     "email": "pete.gadomski@gmail.com"
@@ -9,6 +9,10 @@
     {
       "name": "Indraneel Purohit",
       "email": "indraneelpurohit@gmail.com"
+    },
+    {
+      "name": "Sandra Hoang",
+      "email": "sandrahoang686@gmail.com"
     }
   ],
   "homepage": "https://github.com/developmentseed/stac-map/",
@@ -20,7 +24,8 @@
     "url": "https://github.com/developmentseed/stac-map/issues"
   },
   "license": "MIT",
-  "version": "0.0.1",
+  "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -35,11 +40,8 @@
   "dependencies": {
     "@chakra-ui/react": "^3.31.0",
     "@deck.gl/core": "^9.2.6",
-    "@deck.gl/extensions": "^9.2.6",
-    "@deck.gl/geo-layers": "^9.2.6",
     "@deck.gl/layers": "^9.2.6",
     "@deck.gl/mapbox": "^9.2.6",
-    "@deck.gl/mesh-layers": "^9.2.6",
     "@developmentseed/deck.gl-geotiff": "^0.1.0",
     "@devseed-ui/collecticons-chakra": "^4.0.0",
     "@duckdb/duckdb-wasm": "^1.32.0",
