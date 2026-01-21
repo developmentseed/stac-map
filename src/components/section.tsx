@@ -12,7 +12,7 @@ import {
 
 interface SectionProps {
   icon: ReactNode;
-  title: string;
+  title: ReactNode;
   count?: number;
   filteredCount?: number;
   defaultListOrCard?: ListOrCard;
@@ -54,7 +54,7 @@ export type ListOrCard = "list" | "card";
 
 interface SectionHeaderProps {
   icon: ReactNode;
-  title: string;
+  title: ReactNode;
   count?: number;
   filteredCount?: number;
   listOrCard: ListOrCard;

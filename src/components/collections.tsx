@@ -5,6 +5,8 @@ import {
   Button,
   ButtonGroup,
   Center,
+  HStack,
+  IconButton,
   Link,
   List,
   Portal,
@@ -79,7 +81,13 @@ export default function Collections({ href }: { href: string }) {
     <>
       <Section
         icon={<LuFolderPlus />}
-        title="Collections"
+        title={
+          <CollectionsTitle
+            fetchAllCollections={fetchAllCollections}
+            setFetchAllCollections={setFetchAllCollections}
+            {...result}
+          />
+        }
         count={collections?.length}
         filteredCount={filteredCollections?.length}
       >
@@ -98,6 +106,37 @@ export default function Collections({ href }: { href: string }) {
       />
     </>
   );
+}
+
+function CollectionsTitle({
+  setFetchAllCollections,
+  fetchAllCollections,
+  hasNextPage,
+  fetchNextPage,
+  isFetching,
+}: {
+  setFetchAllCollections: (fetchAllCollections: boolean) => void;
+  fetchAllCollections: boolean;
+} & UseInfiniteQueryResult) {
+  if (hasNextPage) {
+    return (
+      <HStack>
+        Collections
+        <ButtonGroup size={"2xs"} variant={"plain"}>
+          <IconButton disabled={isFetching} onClick={() => fetchNextPage()}>
+            <LuForward />
+          </IconButton>
+          <IconButton>
+            {(fetchAllCollections && (
+              <LuPause onClick={() => setFetchAllCollections(false)} />
+            )) || <LuPlay onClick={() => setFetchAllCollections(true)} />}
+          </IconButton>
+        </ButtonGroup>
+      </HStack>
+    );
+  } else {
+    return "Collections";
+  }
 }
 
 function CollectionValues({
