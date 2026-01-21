@@ -20,7 +20,7 @@ import {
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { StacCollection } from "stac-ts";
 import type { BBox } from "geojson";
-import { useStore } from "../store.ts";
+import { useStore } from "../store/index.ts";
 import type { StacItemCollection, StacSearch } from "../types/stac";
 import { sanitizeBbox } from "../utils/map.ts";
 import { fetchStac, getLinkHref } from "../utils/stac.ts";
