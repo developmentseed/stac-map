@@ -13,7 +13,6 @@ import {
   Alert,
   Button,
   ButtonGroup,
-  Center,
   Checkbox,
   CloseButton,
   Dialog,
@@ -41,119 +40,219 @@ interface Props {
   collection: StacCollection;
 }
 
-export default function Search({ href, collection }: Props) {
-  const search = useStore((store) => store.search);
-  const setSearch = useStore((store) => store.setSearch);
-  const [searchSettingsOpen, setSearchSettingsOpen] = useState(false);
-  const [useViewportForBbox, setUseViewportForBbox] = useState(true);
-  const [limit, setLimit] = useState<string>();
-  const { map } = useMap();
+interface SearchSettingsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  collectionId: string;
+  useViewportForBbox: boolean;
+  onUseViewportForBboxChange: (checked: boolean) => void;
+  limit: string | undefined;
+  onLimitChange: (value: string) => void;
+}
+
+function SearchSettingsDialog({
+  open,
+  onOpenChange,
+  collectionId,
+  useViewportForBbox,
+  onUseViewportForBboxChange,
+  limit,
+  onLimitChange,
+}: SearchSettingsDialogProps) {
+  return (
+    <Dialog.Root
+      lazyMount
+      unmountOnExit
+      open={open}
+      onOpenChange={(e) => onOpenChange(e.open)}
+    >
+      <Dialog.Trigger asChild>
+        <Button variant={"plain"} disabled={false}>
+          <LuSettings />
+          Configure
+        </Button>
+      </Dialog.Trigger>
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onOpenChange(false);
+            }}
+          >
+            <Dialog.Header>
+              <Dialog.Title>Search settings</Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body>
+              <Fieldset.Root>
+                <Fieldset.Content>
+                  <Field.Root>
+                    <Field.Label>Collection</Field.Label>
+                    <Input value={collectionId} disabled={true} />
+                  </Field.Root>
+
+                  <Field.Root>
+                    <Field.Label>BBox</Field.Label>
+                    <Checkbox.Root
+                      checked={useViewportForBbox}
+                      onCheckedChange={(e) =>
+                        onUseViewportForBboxChange(!!e.checked)
+                      }
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                      <Checkbox.Label>
+                        Use viewport bounding box?
+                      </Checkbox.Label>
+                    </Checkbox.Root>
+                  </Field.Root>
+
+                  <Field.Root>
+                    <Field.Label>Limit</Field.Label>
+                    <NumberInput.Root
+                      value={limit}
+                      onValueChange={(e) => onLimitChange(e.value)}
+                    >
+                      <NumberInput.Control />
+                      <NumberInput.Input />
+                    </NumberInput.Root>
+                  </Field.Root>
+                </Fieldset.Content>
+              </Fieldset.Root>
+            </Dialog.Body>
+            <Dialog.Footer>
+              <Button onClick={() => onOpenChange(false)}>Close</Button>
+            </Dialog.Footer>
+            <Dialog.CloseTrigger asChild>
+              <CloseButton size={"sm"} />
+            </Dialog.CloseTrigger>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
+  );
+}
+
+interface SearchResultsProgressProps {
+  itemCount: number | undefined;
+  numberMatched: number | undefined;
+  hasNextPage: boolean;
+  isFetching: boolean;
+  fetchAllItems: boolean;
+  onFetchNextPage: () => void;
+  onFetchAllToggle: (value: boolean) => void;
+}
+
+function SearchResultsProgress({
+  itemCount,
+  numberMatched,
+  hasNextPage,
+  isFetching,
+  fetchAllItems,
+  onFetchNextPage,
+  onFetchAllToggle,
+}: SearchResultsProgressProps) {
+  if (itemCount === 0 && !hasNextPage) {
+    return (
+      <Alert.Root status={"warning"}>
+        <Alert.Indicator />
+        <Alert.Title>No results found</Alert.Title>
+      </Alert.Root>
+    );
+  }
 
   return (
-    <Stack gap={4}>
-      <HStack>
-        <Dialog.Root
-          lazyMount
-          unmountOnExit
-          open={searchSettingsOpen}
-          onOpenChange={(e) => setSearchSettingsOpen(e.open)}
+    <HStack mx={2}>
+      {numberMatched ? (
+        <Progress.Root value={itemCount} max={numberMatched} width="full">
+          <Progress.Track>
+            <Progress.Range />
+          </Progress.Track>
+        </Progress.Root>
+      ) : (
+        <Text>
+          Found {itemCount ?? 0} item
+          {itemCount != 1 && "s"}
+        </Text>
+      )}
+      <ButtonGroup size="2xs" variant="plain">
+        <IconButton
+          onClick={onFetchNextPage}
+          disabled={!hasNextPage || isFetching}
         >
-          <Dialog.Trigger asChild>
-            <Button variant={"plain"} disabled={!!search}>
-              <LuSettings />
-              Configure
-            </Button>
-          </Dialog.Trigger>
-          <Portal>
-            <Dialog.Backdrop />
-            <Dialog.Positioner>
-              <Dialog.Content
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") setSearchSettingsOpen(false);
-                }}
-              >
-                <Dialog.Header>
-                  <Dialog.Title>Search settings</Dialog.Title>
-                </Dialog.Header>
-                <Dialog.Body>
-                  <Fieldset.Root>
-                    <Fieldset.Content>
-                      <Field.Root>
-                        <Field.Label>Collection</Field.Label>
-                        <Input value={collection.id} disabled={true} />
-                      </Field.Root>
-
-                      <Field.Root>
-                        <Field.Label>BBox</Field.Label>
-                        <Checkbox.Root
-                          checked={useViewportForBbox}
-                          onCheckedChange={(e) =>
-                            setUseViewportForBbox(!!e.checked)
-                          }
-                        >
-                          <Checkbox.HiddenInput />
-                          <Checkbox.Control />
-                          <Checkbox.Label>
-                            Use viewport bounding box?
-                          </Checkbox.Label>
-                        </Checkbox.Root>
-                      </Field.Root>
-
-                      <Field.Root>
-                        <Field.Label>Limit</Field.Label>
-                        <NumberInput.Root
-                          value={limit}
-                          onValueChange={(e) => setLimit(e.value)}
-                        >
-                          <NumberInput.Control />
-                          <NumberInput.Input />
-                        </NumberInput.Root>
-                      </Field.Root>
-                    </Fieldset.Content>
-                  </Fieldset.Root>
-                </Dialog.Body>
-                <Dialog.Footer>
-                  <Button onClick={() => setSearchSettingsOpen(false)}>
-                    Close
-                  </Button>
-                </Dialog.Footer>
-                <Dialog.CloseTrigger asChild>
-                  <CloseButton size={"sm"} />
-                </Dialog.CloseTrigger>
-              </Dialog.Content>
-            </Dialog.Positioner>
-          </Portal>
-        </Dialog.Root>
-
-        {search ? (
-          <Button
-            onClick={() => {
-              setSearch(null);
-            }}
-            variant={"surface"}
+          <LuForward />
+        </IconButton>
+        {fetchAllItems ? (
+          <IconButton
+            onClick={() => onFetchAllToggle(false)}
+            disabled={!hasNextPage}
           >
-            <LuX /> Clear
-          </Button>
+            <LuPause />
+          </IconButton>
         ) : (
-          <Button
-            onClick={() => {
-              setSearch({
-                collections: [collection.id],
-                bbox: useViewportForBbox
-                  ? sanitizeBbox(map?.getBounds().toArray().flat() as BBox)
-                  : undefined,
-                limit: Number(limit),
-              });
-            }}
+          <IconButton
+            onClick={() => onFetchAllToggle(true)}
+            disabled={!hasNextPage}
           >
-            <LuSearch />
-            Search
-          </Button>
+            <LuPlay />
+          </IconButton>
         )}
-      </HStack>
+      </ButtonGroup>
+    </HStack>
+  );
+}
 
-      {search && <SearchResults href={href} search={search} />}
-    </Stack>
+interface SearchResultsActionBarProps {
+  itemCount: number | undefined;
+  numberMatched: number | undefined;
+  hasNextPage: boolean;
+  isFetching: boolean;
+  fetchAllItems: boolean;
+  onFetchNextPage: () => void;
+  onFetchAllToggle: () => void;
+}
+
+function SearchResultsActionBar({
+  itemCount,
+  numberMatched,
+  hasNextPage,
+  isFetching,
+  fetchAllItems,
+  onFetchNextPage,
+  onFetchAllToggle,
+}: SearchResultsActionBarProps) {
+  return (
+    <ActionBar.Root open={!!itemCount}>
+      <Portal>
+        <ActionBar.Positioner>
+          <ActionBar.Content>
+            <ActionBar.SelectionTrigger>
+              {itemCount}
+              {numberMatched && "/" + numberMatched} item
+              {itemCount != 1 && "s"} fetched
+            </ActionBar.SelectionTrigger>
+            {hasNextPage && (
+              <>
+                <ActionBar.Separator />
+                <ButtonGroup variant="outline" size="sm">
+                  <Button
+                    onClick={onFetchNextPage}
+                    disabled={isFetching || fetchAllItems}
+                  >
+                    <LuForward />
+                    Fetch next page
+                  </Button>
+                  <Button onClick={onFetchAllToggle}>
+                    {fetchAllItems ? <LuPause /> : <LuPlay />}
+                    {fetchAllItems && hasNextPage ? "Pause" : "Fetch all"}
+                  </Button>
+                </ButtonGroup>
+              </>
+            )}
+          </ActionBar.Content>
+        </ActionBar.Positioner>
+      </Portal>
+    </ActionBar.Root>
   );
 }
 
@@ -201,89 +300,79 @@ function SearchResults({ href, search }: { href: string; search: StacSearch }) {
 
   return (
     <>
-      {searchItems?.length === 0 && !result.hasNextPage ? (
-        <Alert.Root status={"warning"}>
-          <Alert.Indicator />
-          <Alert.Title>No results found</Alert.Title>
-        </Alert.Root>
-      ) : (
-        <HStack mx={2}>
-          {numberMatched ? (
-            <Progress.Root
-              value={searchItems?.length}
-              max={numberMatched}
-              width="full"
-            >
-              <Progress.Track>
-                <Progress.Range />
-              </Progress.Track>
-            </Progress.Root>
-          ) : (
-            <Text>
-              Found {searchItems ? searchItems.length : 0} item
-              {searchItems?.length != 1 && "s"}
-            </Text>
-          )}
-          <ButtonGroup size="2xs" variant="plain">
-            <IconButton
-              onClick={() => result.fetchNextPage()}
-              disabled={!result.hasNextPage || result.isFetching}
-            >
-              <LuForward />
-            </IconButton>
-            {fetchAllItems ? (
-              <IconButton
-                onClick={() => setFetchAllItems(false)}
-                disabled={!result.hasNextPage}
-              >
-                <LuPause />
-              </IconButton>
-            ) : (
-              <IconButton
-                onClick={() => setFetchAllItems(true)}
-                disabled={!result.hasNextPage}
-              >
-                <LuPlay />
-              </IconButton>
-            )}
-          </ButtonGroup>
-        </HStack>
-      )}
-      <ActionBar.Root open={!!searchItems}>
-        <Portal>
-          <ActionBar.Positioner>
-            <ActionBar.Content>
-              <ActionBar.SelectionTrigger>
-                {searchItems?.length}
-                {numberMatched && "/" + numberMatched} item
-                {searchItems?.length != 1 && "s"} fetched
-              </ActionBar.SelectionTrigger>
-              {result.hasNextPage && (
-                <>
-                  <ActionBar.Separator />
-                  <ButtonGroup variant="outline" size="sm">
-                    <Button
-                      onClick={() => result.fetchNextPage()}
-                      disabled={result.isFetching || fetchAllItems}
-                    >
-                      <LuForward />
-                      Fetch next page
-                    </Button>
-                    <Button
-                      onClick={() => setFetchAllItems((previous) => !previous)}
-                    >
-                      {fetchAllItems ? <LuPause /> : <LuPlay />}
-                      {fetchAllItems && result.hasNextPage
-                        ? "Pause"
-                        : "Fetch all"}
-                    </Button>
-                  </ButtonGroup>
-                </>
-              )}
-            </ActionBar.Content>
-          </ActionBar.Positioner>
-        </Portal>
-      </ActionBar.Root>
+      <SearchResultsProgress
+        itemCount={searchItems?.length}
+        numberMatched={numberMatched}
+        hasNextPage={result.hasNextPage}
+        isFetching={result.isFetching}
+        fetchAllItems={fetchAllItems}
+        onFetchNextPage={() => result.fetchNextPage()}
+        onFetchAllToggle={setFetchAllItems}
+      />
+      <SearchResultsActionBar
+        itemCount={searchItems?.length}
+        numberMatched={numberMatched}
+        hasNextPage={result.hasNextPage}
+        isFetching={result.isFetching}
+        fetchAllItems={fetchAllItems}
+        onFetchNextPage={() => result.fetchNextPage()}
+        onFetchAllToggle={() => setFetchAllItems((previous) => !previous)}
+      />
     </>
+  );
+}
+
+export default function Search({ href, collection }: Props) {
+  const search = useStore((store) => store.search);
+  const setSearch = useStore((store) => store.setSearch);
+  const [searchSettingsOpen, setSearchSettingsOpen] = useState(false);
+  const [useViewportForBbox, setUseViewportForBbox] = useState(true);
+  const [limit, setLimit] = useState<string>();
+  const { map } = useMap();
+
+  return (
+    <Stack gap={4}>
+      <HStack>
+        {!search && (
+          <SearchSettingsDialog
+            open={searchSettingsOpen}
+            onOpenChange={setSearchSettingsOpen}
+            collectionId={collection.id}
+            useViewportForBbox={useViewportForBbox}
+            onUseViewportForBboxChange={setUseViewportForBbox}
+            limit={limit}
+            onLimitChange={setLimit}
+          />
+        )}
+
+        {search ? (
+          <Button
+            onClick={() => {
+              setSearch(null);
+            }}
+            variant={"surface"}
+          >
+            <LuX /> Clear
+          </Button>
+        ) : (
+          <Button
+            onClick={() => {
+              setSearch({
+                collections: [collection.id],
+                bbox: useViewportForBbox
+                  ? sanitizeBbox(map?.getBounds().toArray().flat() as BBox)
+                  : undefined,
+                limit: Number(limit),
+              });
+            }}
+          >
+            <LuSearch />
+            Search
+          </Button>
+        )}
+      </HStack>
+
+      {search && <SearchResults href={href} search={search} />}
+    </Stack>
   );
 }
