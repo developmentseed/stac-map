@@ -10,8 +10,10 @@ import {
 import { useMap } from "react-map-gl/maplibre";
 import {
   ActionBar,
+  Alert,
   Button,
   ButtonGroup,
+  Center,
   Checkbox,
   CloseButton,
   Dialog,
@@ -24,6 +26,7 @@ import {
   Portal,
   Progress,
   Stack,
+  Text,
 } from "@chakra-ui/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { StacCollection } from "stac-ts";
@@ -47,7 +50,7 @@ export default function Search({ href, collection }: Props) {
   const { map } = useMap();
 
   return (
-    <Stack>
+    <Stack gap={4}>
       <HStack>
         <Dialog.Root
           lazyMount
@@ -198,40 +201,54 @@ function SearchResults({ href, search }: { href: string; search: StacSearch }) {
 
   return (
     <>
-      <HStack mx={2}>
-        <Progress.Root
-          value={numberMatched ? searchItems?.length : null}
-          max={numberMatched}
-          width="full"
-        >
-          <Progress.Track>
-            <Progress.Range />
-          </Progress.Track>
-        </Progress.Root>
-        <ButtonGroup size="2xs" variant="plain">
-          <IconButton
-            onClick={() => result.fetchNextPage()}
-            disabled={!result.hasNextPage || result.isFetching}
-          >
-            <LuForward />
-          </IconButton>
-          {fetchAllItems ? (
-            <IconButton
-              onClick={() => setFetchAllItems(false)}
-              disabled={!result.hasNextPage}
+      {searchItems?.length === 0 && !result.hasNextPage ? (
+        <Alert.Root status={"warning"}>
+          <Alert.Indicator />
+          <Alert.Title>No results found</Alert.Title>
+        </Alert.Root>
+      ) : (
+        <HStack mx={2}>
+          {numberMatched ? (
+            <Progress.Root
+              value={searchItems?.length}
+              max={numberMatched}
+              width="full"
             >
-              <LuPause />
-            </IconButton>
+              <Progress.Track>
+                <Progress.Range />
+              </Progress.Track>
+            </Progress.Root>
           ) : (
-            <IconButton
-              onClick={() => setFetchAllItems(true)}
-              disabled={!result.hasNextPage}
-            >
-              <LuPlay />
-            </IconButton>
+            <Text>
+              Found {searchItems ? searchItems.length : 0} item
+              {searchItems?.length != 1 && "s"}
+            </Text>
           )}
-        </ButtonGroup>
-      </HStack>
+          <ButtonGroup size="2xs" variant="plain">
+            <IconButton
+              onClick={() => result.fetchNextPage()}
+              disabled={!result.hasNextPage || result.isFetching}
+            >
+              <LuForward />
+            </IconButton>
+            {fetchAllItems ? (
+              <IconButton
+                onClick={() => setFetchAllItems(false)}
+                disabled={!result.hasNextPage}
+              >
+                <LuPause />
+              </IconButton>
+            ) : (
+              <IconButton
+                onClick={() => setFetchAllItems(true)}
+                disabled={!result.hasNextPage}
+              >
+                <LuPlay />
+              </IconButton>
+            )}
+          </ButtonGroup>
+        </HStack>
+      )}
       <ActionBar.Root open={!!searchItems}>
         <Portal>
           <ActionBar.Positioner>
