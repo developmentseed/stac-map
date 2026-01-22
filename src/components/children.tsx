@@ -10,16 +10,8 @@ import { useStacJson } from "../hooks/stac";
 import { useStore } from "../store";
 
 export default function Children({ links }: { links: StacLink[] }) {
-  const collections = useStore((store) => store.collections);
-  const filteredCollections = useStore((store) => store.filteredCollections);
-
   return (
-    <Section
-      icon={<LuFolder />}
-      title="Children"
-      count={collections?.length}
-      filteredCount={filteredCollections?.length}
-    >
+    <Section icon={<LuFolder />} title="Children" count={links.length}>
       {(listOrCard) => (
         <>
           <ChildrenValues listOrCard={listOrCard} links={links} />

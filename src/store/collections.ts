@@ -25,6 +25,13 @@ export const createCollectionsSlice: StateCreator<
     }
   },
   filteredCollections: null,
-  setFilteredCollections: (collections) =>
-    set({ filteredCollections: collections }),
+  setFilteredCollections: (collections) => {
+    set({ filteredCollections: collections });
+    const hoveredCollection = get().hoveredCollection;
+    if (
+      hoveredCollection &&
+      !collections?.find((collection) => collection.id === hoveredCollection.id)
+    )
+      get().setHoveredCollection(null);
+  },
 });

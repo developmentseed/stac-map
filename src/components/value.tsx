@@ -22,6 +22,7 @@ import type { StacAsset } from "stac-ts";
 import type { HighlighterGeneric } from "shiki";
 import Assets from "./assets";
 import Children from "./children";
+import Collections from "./collections";
 import CollectionsHref from "./collections-href";
 import Description from "./description";
 import Root from "./root";
@@ -52,6 +53,7 @@ const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({
 });
 
 export default function Value({ value }: { value: StacValue }) {
+  const collections = useStore((store) => store.collections);
   const searchItems = useStore((store) => store.searchItems);
   const setHref = useStore((store) => store.setHref);
 
@@ -119,6 +121,8 @@ export default function Value({ value }: { value: StacValue }) {
         {searchItems && <SearchItems items={searchItems} />}
 
         {collectionsHref && <CollectionsHref href={collectionsHref} />}
+
+        {collections && <Collections collections={collections} />}
 
         {!collectionsHref && childrenLinks && childrenLinks.length > 0 && (
           <Children links={childrenLinks} />
