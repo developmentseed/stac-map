@@ -18,7 +18,7 @@ import {
   useInfiniteQuery,
   type UseInfiniteQueryResult,
 } from "@tanstack/react-query";
-import CollectionFilter from "./collection-filter";
+import CollectionSearch from "./collection-search";
 import { type ListOrCard, Section } from "./section";
 import ValueCard from "./value-card";
 import ValueListItem from "./value-list-item";
@@ -81,10 +81,10 @@ export default function Collections({ href }: { href: string }) {
         filteredCount={filteredCollections?.length}
       >
         {(listOrCard) => (
-          <>
-            <CollectionFilter />
+          <Stack gap={4}>
+            <CollectionSearch />
             <CollectionValues listOrCard={listOrCard} {...result} />
-          </>
+          </Stack>
         )}
       </Section>
 

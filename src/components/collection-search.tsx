@@ -11,7 +11,7 @@ import type { StacCollection } from "stac-ts";
 import { useStore } from "../store";
 import { isCollectionInBbox } from "../utils/stac";
 
-export default function CollectionFilter() {
+export default function CollectionSearch() {
   const collections = useStore((store) => store.collections);
   const setFilteredCollections = useStore(
     (store) => store.setFilteredCollections
