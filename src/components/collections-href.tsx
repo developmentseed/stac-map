@@ -31,11 +31,21 @@ import { getLinkHref } from "../utils/stac";
 
 export default function CollectionsHref({ href }: { href: string }) {
   const collections = useStore((state) => state.collections);
+  const collectionFreeTextSearch = useStore(
+    (store) => store.collectionFreeTextSearch
+  );
   const setCollections = useStore((state) => state.setCollections);
   const [fetchAllCollections, setFetchAllCollections] = useState(false);
 
+  const searchHref = useMemo(() => {
+    const url = new URL(href);
+    if (collectionFreeTextSearch)
+      url.searchParams.set("q", collectionFreeTextSearch);
+    return url.toString();
+  }, [href, collectionFreeTextSearch]);
+
   const result = useInfiniteQuery({
-    queryKey: ["stac-collections", href],
+    queryKey: ["stac-collections", searchHref],
     queryFn: async ({ pageParam }) => {
       if (pageParam) {
         return await fetch(pageParam).then((response) => {
@@ -49,7 +59,7 @@ export default function CollectionsHref({ href }: { href: string }) {
         return null;
       }
     },
-    initialPageParam: href,
+    initialPageParam: searchHref,
     getNextPageParam: (lastPage: StacCollections | null) =>
       lastPage ? getLinkHref(lastPage, "next") : undefined,
   });

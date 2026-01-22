@@ -15,11 +15,8 @@ The map-first, single-page, statically-hosted STAC visualizer at <https://develo
 
 Includes:
 
-- Natural language collection search
-- **stac-geoparquet** visualization, upload, and download
-
-> [!WARNING]
-> This application is in its infancy :baby: and will change significantly and/or break at any time.
+- Client-side COG rendering via [deck.gl-raster](https://github.com/developmentseed/deck.gl-raster)
+- [stac-geoparquet](https://github.com/radiantearth/stac-geoparquet-spec) visualization, upload, and download
 
 ## Development
 

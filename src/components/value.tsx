@@ -23,14 +23,16 @@ import type { StacAsset } from "stac-ts";
 import type { HighlighterGeneric } from "shiki";
 import Assets from "./assets";
 import Children from "./children";
+import CollectionSearch from "./collection-search";
 import Collections from "./collections";
 import CollectionsHref from "./collections-href";
 import Description from "./description";
-import Root from "./root";
+import RootHref from "./root-href";
 import SearchItems from "./search-items";
 import Thumbnail from "./thumbnail";
 import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
+import { conformsToFreeTextCollectionSearch } from "../utils/stac";
 import {
   getLinkHref,
   getStacValueTitle,
@@ -121,9 +123,11 @@ export default function Value({ value }: { value: StacValue }) {
           <Description description={value.description as string} />
         )}
 
-        {rootHref && <Root rootHref={rootHref} value={value} />}
+        {rootHref && <RootHref href={rootHref} value={value} />}
 
         {searchItems && <SearchItems items={searchItems} />}
+
+        {conformsToFreeTextCollectionSearch(value) && <CollectionSearch />}
 
         {collectionsHref && <CollectionsHref href={collectionsHref} />}
 

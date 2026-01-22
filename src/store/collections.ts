@@ -8,6 +8,8 @@ export interface CollectionsState {
   addCollection: (collection: StacCollection) => void;
   filteredCollections: StacCollection[] | null;
   setFilteredCollections: (collections: StacCollection[] | null) => void;
+  collectionFreeTextSearch: string | null;
+  setCollectionFreeTextSearch: (q: string | null) => void;
 }
 
 export const createCollectionsSlice: StateCreator<
@@ -34,4 +36,6 @@ export const createCollectionsSlice: StateCreator<
     )
       get().setHoveredCollection(null);
   },
+  collectionFreeTextSearch: null,
+  setCollectionFreeTextSearch: (q) => set({ collectionFreeTextSearch: q }),
 });
