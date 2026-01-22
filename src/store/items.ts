@@ -17,7 +17,10 @@ export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
   get
 ) => ({
   search: null,
-  setSearch: (search) => set({ search }),
+  setSearch: (search) => {
+    set({ search });
+    get().setSearchItems(null);
+  },
   searchItems: null,
   setSearchItems: (items) => set({ searchItems: items }),
   pickedItem: null,

@@ -12,10 +12,17 @@ import {
   ActionBar,
   Button,
   ButtonGroup,
+  Checkbox,
+  CloseButton,
+  Dialog,
+  Field,
+  Fieldset,
   HStack,
   IconButton,
+  Input,
   Portal,
   Progress,
+  Stack,
 } from "@chakra-ui/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { StacCollection } from "stac-ts";
@@ -33,21 +40,63 @@ interface Props {
 export default function Search({ href, collection }: Props) {
   const search = useStore((store) => store.search);
   const setSearch = useStore((store) => store.setSearch);
-  const setSearchItems = useStore((store) => store.setSearchItems);
+  const [useViewportForBbox, setUseViewportForBbox] = useState(true);
   const { map } = useMap();
 
   return (
-    <>
-      <ButtonGroup>
-        <Button variant={"outline"} disabled={!!search}>
-          <LuSettings />
-          Configure
-        </Button>
+    <Stack>
+      <HStack>
+        <Dialog.Root>
+          <Dialog.Trigger asChild>
+            <Button variant={"plain"} disabled={!!search}>
+              <LuSettings />
+              Configure
+            </Button>
+          </Dialog.Trigger>
+          <Portal>
+            <Dialog.Backdrop />
+            <Dialog.Positioner>
+              <Dialog.Content>
+                <Dialog.Header>
+                  <Dialog.Title>Search settings</Dialog.Title>
+                </Dialog.Header>
+                <Dialog.Body>
+                  <Fieldset.Root>
+                    <Fieldset.Content>
+                      <Field.Root>
+                        <Field.Label>Collection</Field.Label>
+                        <Input value={collection.id} disabled={true} />
+                      </Field.Root>
+
+                      <Field.Root>
+                        <Field.Label>BBox</Field.Label>
+                        <Checkbox.Root
+                          checked={useViewportForBbox}
+                          onCheckedChange={(e) =>
+                            setUseViewportForBbox(!!e.checked)
+                          }
+                        >
+                          <Checkbox.HiddenInput />
+                          <Checkbox.Control />
+                          <Checkbox.Label>
+                            Use viewport bounding box?
+                          </Checkbox.Label>
+                        </Checkbox.Root>
+                      </Field.Root>
+                    </Fieldset.Content>
+                  </Fieldset.Root>
+                </Dialog.Body>
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton size={"sm"} />
+                </Dialog.CloseTrigger>
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </Portal>
+        </Dialog.Root>
 
         {search ? (
           <Button
             onClick={() => {
-              setSearchItems(null);
               setSearch(null);
             }}
             variant={"surface"}
@@ -57,10 +106,11 @@ export default function Search({ href, collection }: Props) {
         ) : (
           <Button
             onClick={() => {
-              setSearchItems(null);
               setSearch({
                 collections: [collection.id],
-                bbox: sanitizeBbox(map?.getBounds().toArray().flat() as BBox),
+                bbox: useViewportForBbox
+                  ? sanitizeBbox(map?.getBounds().toArray().flat() as BBox)
+                  : undefined,
               });
             }}
           >
@@ -68,9 +118,10 @@ export default function Search({ href, collection }: Props) {
             Search
           </Button>
         )}
-      </ButtonGroup>
+      </HStack>
+
       {search && <SearchResults href={href} search={search} />}
-    </>
+    </Stack>
   );
 }
 
