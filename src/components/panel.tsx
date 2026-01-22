@@ -7,7 +7,6 @@ import {
   HStack,
   IconButton,
   SkeletonText,
-  Span,
   Spinner,
 } from "@chakra-ui/react";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
