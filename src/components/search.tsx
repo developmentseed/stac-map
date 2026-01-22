@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   LuForward,
   LuLoader,
-  LuLoaderCircle,
-  LuLoaderPinwheel,
   LuPause,
   LuPlay,
   LuSearch,
