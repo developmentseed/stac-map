@@ -1,0 +1,208 @@
+import { useEffect, useMemo, useState } from "react";
+import { LuForward, LuLoader, LuPause, LuPlay } from "react-icons/lu";
+import {
+  ActionBar,
+  Alert,
+  Button,
+  ButtonGroup,
+  Heading,
+  HStack,
+  IconButton,
+  Portal,
+  Progress,
+  SkeletonText,
+  Span,
+  Stack,
+} from "@chakra-ui/react";
+import {
+  useInfiniteQuery,
+  type UseInfiniteQueryResult,
+} from "@tanstack/react-query";
+import type { StacCollection } from "stac-ts";
+import { useStore } from "../store";
+import type { StacCollections } from "../types/stac";
+import { getLinkHref } from "../utils/stac";
+
+export default function CollectionsHref({ href }: { href: string }) {
+  const collections = useStore((state) => state.collections);
+  const setCollections = useStore((state) => state.setCollections);
+  const [fetchAllCollections, setFetchAllCollections] = useState(false);
+
+  const result = useInfiniteQuery({
+    queryKey: ["stac-collections", href],
+    queryFn: async ({ pageParam }) => {
+      if (pageParam) {
+        return await fetch(pageParam).then((response) => {
+          if (response.ok) return response.json();
+          else
+            throw new Error(
+              `Error while fetching collections from ${pageParam}`
+            );
+        });
+      } else {
+        return null;
+      }
+    },
+    initialPageParam: href,
+    getNextPageParam: (lastPage: StacCollections | null) =>
+      lastPage ? getLinkHref(lastPage, "next") : undefined,
+  });
+
+  useEffect(() => {
+    if (fetchAllCollections && !result.isFetching && result.hasNextPage)
+      result.fetchNextPage();
+  }, [fetchAllCollections, result]);
+
+  useEffect(() => {
+    setCollections(
+      result.data?.pages.flatMap(
+        (collections) => collections?.collections || []
+      ) || null
+    );
+  }, [result.data, setCollections]);
+
+  const numberMatched = useMemo(() => {
+    return result.data?.pages.at(0)?.numberMatched;
+  }, [result.data]);
+
+  if (result.error)
+    return (
+      <Alert.Root status={"error"}>
+        <Alert.Indicator />
+        <Alert.Content>
+          <Alert.Title>Error while fetching collections</Alert.Title>
+          <Alert.Description>{result.error.message}</Alert.Description>
+        </Alert.Content>
+      </Alert.Root>
+    );
+  else if (collections && result.hasNextPage)
+    return (
+      <PagedCollections
+        collections={collections}
+        numberMatched={numberMatched}
+        fetchAllCollections={fetchAllCollections}
+        setFetchAllCollections={setFetchAllCollections}
+        {...result}
+      />
+    );
+  else if (result.isFetching) return <SkeletonText />;
+}
+
+function PagedCollections({
+  collections,
+  numberMatched,
+  fetchAllCollections,
+  setFetchAllCollections,
+  fetchNextPage,
+  hasNextPage,
+  isFetching,
+}: {
+  collections: StacCollection[];
+  numberMatched: number | undefined;
+  fetchAllCollections: boolean;
+  setFetchAllCollections: (fetch: boolean) => void;
+} & UseInfiniteQueryResult) {
+  return (
+    <>
+      <Stack gap={2}>
+        <Heading size={"md"}>Collection pagination</Heading>
+        <HStack width={"full"}>
+          {numberMatched ? (
+            <Progress.Root
+              width={"full"}
+              value={collections.length}
+              max={numberMatched}
+              striped={hasNextPage}
+              animated={fetchAllCollections || isFetching}
+            >
+              <Progress.Track>
+                <Progress.Range />
+              </Progress.Track>
+            </Progress.Root>
+          ) : (
+            <Span width={"full"}>
+              {collections.length} collection
+              {collections.length === 1 ? "" : "s"} found
+            </Span>
+          )}
+          <ButtonGroup variant={"subtle"} size={"sm"}>
+            <IconButton onClick={() => fetchNextPage()}>
+              {isFetching ? <LuLoader /> : <LuForward />}
+            </IconButton>
+            <IconButton
+              onClick={() => setFetchAllCollections(!fetchAllCollections)}
+            >
+              {fetchAllCollections && hasNextPage ? <LuPause /> : <LuPlay />}
+            </IconButton>
+          </ButtonGroup>
+        </HStack>
+      </Stack>
+      <PagedCollectionsActionBar
+        collections={collections}
+        numberMatched={numberMatched}
+        fetchAllCollections={fetchAllCollections}
+        setFetchAllCollections={setFetchAllCollections}
+        fetchNextPage={fetchNextPage}
+        hasNextPage={hasNextPage}
+        isFetching={isFetching}
+      />
+    </>
+  );
+}
+
+function PagedCollectionsActionBar({
+  collections,
+  numberMatched,
+  fetchAllCollections,
+  setFetchAllCollections,
+  fetchNextPage,
+  hasNextPage,
+  isFetching,
+}: {
+  collections: StacCollection[];
+  numberMatched: number | undefined;
+  fetchAllCollections: boolean;
+  setFetchAllCollections: (fetch: boolean) => void;
+  fetchNextPage: () => void;
+  hasNextPage: boolean;
+  isFetching: boolean;
+}) {
+  return (
+    <ActionBar.Root open={!!collections}>
+      <Portal>
+        <ActionBar.Positioner>
+          <ActionBar.Content>
+            {collections && (
+              <ActionBar.SelectionTrigger>
+                {numberMatched && numberMatched > collections.length
+                  ? `${collections.length}/${numberMatched}`
+                  : collections.length}{" "}
+                collection{collections.length != 1 && "s"} fetched
+              </ActionBar.SelectionTrigger>
+            )}
+            {hasNextPage && (
+              <>
+                <ActionBar.Separator />
+                <ButtonGroup variant="outline" size="sm">
+                  <Button
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetching || fetchAllCollections}
+                  >
+                    <LuForward />
+                    Fetch next page
+                  </Button>
+                  <Button
+                    onClick={() => setFetchAllCollections(!fetchAllCollections)}
+                  >
+                    {fetchAllCollections ? <LuPause /> : <LuPlay />}
+                    {fetchAllCollections && hasNextPage ? "Pause" : "Fetch all"}
+                  </Button>
+                </ButtonGroup>
+              </>
+            )}
+          </ActionBar.Content>
+        </ActionBar.Positioner>
+      </Portal>
+    </ActionBar.Root>
+  );
+}

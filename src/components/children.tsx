@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { LuFolder } from "react-icons/lu";
 import { List, SkeletonText, Stack } from "@chakra-ui/react";
 import type { StacLink } from "stac-ts";
-import CollectionSearch from "./collection-search";
 import { type ListOrCard, Section } from "./section";
 import SkeletonCard from "./skeleton-card";
 import ValueCard from "./value-card";
@@ -23,7 +22,6 @@ export default function Children({ links }: { links: StacLink[] }) {
     >
       {(listOrCard) => (
         <>
-          <CollectionFilter />
           <ChildrenValues listOrCard={listOrCard} links={links} />
         </>
       )}
