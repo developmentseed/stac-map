@@ -31,8 +31,9 @@ export interface NaturalLanguageCollectionSearchResult {
 export type StacAssets = { [k: string]: StacAsset };
 
 export interface StacSearch {
-  collections?: string[];
+  collections: string[];
   bbox?: [number, number, number, number];
+  limit?: number;
 }
 
 export type DatetimeBounds = { start: Date; end: Date };

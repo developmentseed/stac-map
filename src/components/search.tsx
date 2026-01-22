@@ -20,6 +20,7 @@ import {
   HStack,
   IconButton,
   Input,
+  NumberInput,
   Portal,
   Progress,
   Stack,
@@ -40,13 +41,20 @@ interface Props {
 export default function Search({ href, collection }: Props) {
   const search = useStore((store) => store.search);
   const setSearch = useStore((store) => store.setSearch);
+  const [searchSettingsOpen, setSearchSettingsOpen] = useState(false);
   const [useViewportForBbox, setUseViewportForBbox] = useState(true);
+  const [limit, setLimit] = useState<string>();
   const { map } = useMap();
 
   return (
     <Stack>
       <HStack>
-        <Dialog.Root>
+        <Dialog.Root
+          lazyMount
+          unmountOnExit
+          open={searchSettingsOpen}
+          onOpenChange={(e) => setSearchSettingsOpen(e.open)}
+        >
           <Dialog.Trigger asChild>
             <Button variant={"plain"} disabled={!!search}>
               <LuSettings />
@@ -56,7 +64,11 @@ export default function Search({ href, collection }: Props) {
           <Portal>
             <Dialog.Backdrop />
             <Dialog.Positioner>
-              <Dialog.Content>
+              <Dialog.Content
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") setSearchSettingsOpen(false);
+                }}
+              >
                 <Dialog.Header>
                   <Dialog.Title>Search settings</Dialog.Title>
                 </Dialog.Header>
@@ -83,9 +95,25 @@ export default function Search({ href, collection }: Props) {
                           </Checkbox.Label>
                         </Checkbox.Root>
                       </Field.Root>
+
+                      <Field.Root>
+                        <Field.Label>Limit</Field.Label>
+                        <NumberInput.Root
+                          value={limit}
+                          onValueChange={(e) => setLimit(e.value)}
+                        >
+                          <NumberInput.Control />
+                          <NumberInput.Input />
+                        </NumberInput.Root>
+                      </Field.Root>
                     </Fieldset.Content>
                   </Fieldset.Root>
                 </Dialog.Body>
+                <Dialog.Footer>
+                  <Button onClick={() => setSearchSettingsOpen(false)}>
+                    Close
+                  </Button>
+                </Dialog.Footer>
                 <Dialog.CloseTrigger asChild>
                   <CloseButton size={"sm"} />
                 </Dialog.CloseTrigger>
@@ -111,6 +139,7 @@ export default function Search({ href, collection }: Props) {
                 bbox: useViewportForBbox
                   ? sanitizeBbox(map?.getBounds().toArray().flat() as BBox)
                   : undefined,
+                limit: Number(limit),
               });
             }}
           >
@@ -134,9 +163,9 @@ function SearchResults({ href, search }: { href: string; search: StacSearch }) {
     return new URL(href);
   }, [href]);
 
-  if (search.collections)
-    url.searchParams.set("collections", search.collections.join(","));
+  url.searchParams.set("collections", search.collections.join(","));
   if (search.bbox) url.searchParams.set("bbox", search.bbox.join(","));
+  if (search.limit) url.searchParams.set("limit", search.limit.toFixed(0));
 
   const result = useInfiniteQuery({
     queryKey: ["stac-search", href, search],
