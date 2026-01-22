@@ -7,6 +7,7 @@ import {
   HStack,
   IconButton,
   SkeletonText,
+  Span,
   Spinner,
 } from "@chakra-ui/react";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
@@ -60,7 +61,9 @@ function PickedItemPanel({ pickedItem }: { pickedItem: StacItem }) {
 
   const header = (
     <HStack>
-      <StacIcon value={pickedItem} /> {getStacValueId(pickedItem)}{" "}
+      <HStack truncate>
+        <StacIcon value={pickedItem} /> {getStacValueId(pickedItem)}{" "}
+      </HStack>
       <Box flex={1} />
       {href && (
         <IconButton variant={"subtle"} size={"2xs"} m={0}>

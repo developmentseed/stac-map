@@ -28,7 +28,6 @@ export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
     set({
       pickedItem: item,
     });
-    get().setSearchItems(null);
     get().setGeotiffHref(null);
   },
 });
