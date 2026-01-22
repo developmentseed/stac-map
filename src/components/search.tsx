@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   LuForward,
+  LuLoader,
+  LuLoaderCircle,
+  LuLoaderPinwheel,
   LuPause,
   LuPlay,
   LuSearch,
@@ -18,17 +21,22 @@ import {
   Dialog,
   Field,
   Fieldset,
+  Heading,
   HStack,
   IconButton,
   Input,
   NumberInput,
   Portal,
   Progress,
+  Span,
+  Spinner,
   Stack,
-  Text,
 } from "@chakra-ui/react";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import type { StacCollection } from "stac-ts";
+import {
+  useInfiniteQuery,
+  type UseInfiniteQueryResult,
+} from "@tanstack/react-query";
+import type { StacCollection, StacItem } from "stac-ts";
 import type { BBox } from "geojson";
 import { useStore } from "../store/index.ts";
 import type { StacItemCollection, StacSearch } from "../types/stac";
@@ -41,43 +49,41 @@ interface Props {
 }
 
 interface SearchSettingsDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  collectionId: string;
+  collection: StacCollection;
   useViewportForBbox: boolean;
-  onUseViewportForBboxChange: (checked: boolean) => void;
+  setUseViewportForBbox: (checked: boolean) => void;
   limit: string | undefined;
-  onLimitChange: (value: string) => void;
+  setLimit: (value: string) => void;
+  disabled: boolean;
 }
 
 function SearchSettingsDialog({
-  open,
-  onOpenChange,
-  collectionId,
+  collection,
   useViewportForBbox,
-  onUseViewportForBboxChange,
+  setUseViewportForBbox,
   limit,
-  onLimitChange,
+  setLimit,
+  disabled,
 }: SearchSettingsDialogProps) {
+  const [open, setOpen] = useState(false);
   return (
     <Dialog.Root
       lazyMount
       unmountOnExit
       open={open}
-      onOpenChange={(e) => onOpenChange(e.open)}
+      onOpenChange={(e) => setOpen(e.open)}
     >
       <Dialog.Trigger asChild>
-        <Button variant={"plain"} disabled={false}>
+        <IconButton variant={"subtle"} disabled={disabled}>
           <LuSettings />
-          Configure
-        </Button>
+        </IconButton>
       </Dialog.Trigger>
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content
             onKeyDown={(e) => {
-              if (e.key === "Enter") onOpenChange(false);
+              if (e.key === "Enter") setOpen(false);
             }}
           >
             <Dialog.Header>
@@ -88,7 +94,7 @@ function SearchSettingsDialog({
                 <Fieldset.Content>
                   <Field.Root>
                     <Field.Label>Collection</Field.Label>
-                    <Input value={collectionId} disabled={true} />
+                    <Input value={collection.id} disabled={true} />
                   </Field.Root>
 
                   <Field.Root>
@@ -96,7 +102,7 @@ function SearchSettingsDialog({
                     <Checkbox.Root
                       checked={useViewportForBbox}
                       onCheckedChange={(e) =>
-                        onUseViewportForBboxChange(!!e.checked)
+                        setUseViewportForBbox(!!e.checked)
                       }
                     >
                       <Checkbox.HiddenInput />
@@ -111,7 +117,7 @@ function SearchSettingsDialog({
                     <Field.Label>Limit</Field.Label>
                     <NumberInput.Root
                       value={limit}
-                      onValueChange={(e) => onLimitChange(e.value)}
+                      onValueChange={(e) => setLimit(e.value)}
                     >
                       <NumberInput.Control />
                       <NumberInput.Input />
@@ -121,7 +127,7 @@ function SearchSettingsDialog({
               </Fieldset.Root>
             </Dialog.Body>
             <Dialog.Footer>
-              <Button onClick={() => onOpenChange(false)}>Close</Button>
+              <Button onClick={() => setOpen(false)}>Close</Button>
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild>
               <CloseButton size={"sm"} />
@@ -134,25 +140,24 @@ function SearchSettingsDialog({
 }
 
 interface SearchResultsProgressProps {
-  itemCount: number | undefined;
+  items: StacItem[] | null;
   numberMatched: number | undefined;
-  hasNextPage: boolean;
-  isFetching: boolean;
   fetchAllItems: boolean;
-  onFetchNextPage: () => void;
-  onFetchAllToggle: (value: boolean) => void;
+  setFetchAllItems: (fetchAllItems: boolean) => void;
 }
 
 function SearchResultsProgress({
-  itemCount,
+  items,
   numberMatched,
+  fetchAllItems,
+  setFetchAllItems,
   hasNextPage,
   isFetching,
-  fetchAllItems,
-  onFetchNextPage,
-  onFetchAllToggle,
-}: SearchResultsProgressProps) {
-  if (itemCount === 0 && !hasNextPage) {
+  fetchNextPage,
+}: SearchResultsProgressProps & UseInfiniteQueryResult) {
+  const setSearch = useStore((store) => store.setSearch);
+
+  if (items?.length === 0 && !hasNextPage) {
     return (
       <Alert.Root status={"warning"}>
         <Alert.Indicator />
@@ -161,88 +166,92 @@ function SearchResultsProgress({
     );
   }
 
+  const status =
+    numberMatched || items === null ? (
+      <Progress.Root
+        width={"full"}
+        value={items?.length || null}
+        max={numberMatched}
+        striped={hasNextPage}
+        animated={isFetching || fetchAllItems}
+      >
+        <Progress.Track>
+          <Progress.Range />
+        </Progress.Track>
+      </Progress.Root>
+    ) : (
+      <Span width={"full"}>
+        {items?.length || 0} item{items?.length === 1 ? "" : "s"} items found
+        {(fetchAllItems || isFetching) && <Spinner size={"xs"} ml={4} />}
+      </Span>
+    );
+
+  const buttons = (
+    <ButtonGroup size="xs" variant={"subtle"}>
+      <IconButton
+        onClick={() => fetchNextPage()}
+        disabled={isFetching || !hasNextPage}
+      >
+        {isFetching ? <LuLoader /> : <LuForward />}
+      </IconButton>
+      <IconButton
+        onClick={() => setFetchAllItems(!fetchAllItems)}
+        disabled={!hasNextPage}
+      >
+        {fetchAllItems && hasNextPage ? <LuPause /> : <LuPlay />}
+      </IconButton>
+      <IconButton onClick={() => setSearch(null)}>
+        <LuX />
+      </IconButton>
+    </ButtonGroup>
+  );
+
   return (
-    <HStack mx={2}>
-      {numberMatched ? (
-        <Progress.Root value={itemCount} max={numberMatched} width="full">
-          <Progress.Track>
-            <Progress.Range />
-          </Progress.Track>
-        </Progress.Root>
-      ) : (
-        <Text>
-          Found {itemCount ?? 0} item
-          {itemCount != 1 && "s"}
-        </Text>
-      )}
-      <ButtonGroup size="2xs" variant="plain">
-        <IconButton
-          onClick={onFetchNextPage}
-          disabled={!hasNextPage || isFetching}
-        >
-          <LuForward />
-        </IconButton>
-        {fetchAllItems ? (
-          <IconButton
-            onClick={() => onFetchAllToggle(false)}
-            disabled={!hasNextPage}
-          >
-            <LuPause />
-          </IconButton>
-        ) : (
-          <IconButton
-            onClick={() => onFetchAllToggle(true)}
-            disabled={!hasNextPage}
-          >
-            <LuPlay />
-          </IconButton>
-        )}
-      </ButtonGroup>
+    <HStack width={"full"}>
+      {status}
+      {buttons}
     </HStack>
   );
 }
 
 interface SearchResultsActionBarProps {
-  itemCount: number | undefined;
+  items: StacItem[] | null;
   numberMatched: number | undefined;
-  hasNextPage: boolean;
-  isFetching: boolean;
   fetchAllItems: boolean;
-  onFetchNextPage: () => void;
-  onFetchAllToggle: () => void;
+  setFetchAllItems: (fetchAllItems: boolean) => void;
 }
 
 function SearchResultsActionBar({
-  itemCount,
+  items,
   numberMatched,
+  fetchAllItems,
+  setFetchAllItems,
   hasNextPage,
   isFetching,
-  fetchAllItems,
-  onFetchNextPage,
-  onFetchAllToggle,
-}: SearchResultsActionBarProps) {
+  fetchNextPage,
+}: SearchResultsActionBarProps & UseInfiniteQueryResult) {
   return (
-    <ActionBar.Root open={!!itemCount}>
+    <ActionBar.Root open={!!items}>
       <Portal>
         <ActionBar.Positioner>
           <ActionBar.Content>
             <ActionBar.SelectionTrigger>
-              {itemCount}
+              {items?.length}
               {numberMatched && "/" + numberMatched} item
-              {itemCount != 1 && "s"} fetched
+              {items?.length != 1 && "s"} fetched
             </ActionBar.SelectionTrigger>
             {hasNextPage && (
               <>
                 <ActionBar.Separator />
                 <ButtonGroup variant="outline" size="sm">
                   <Button
-                    onClick={onFetchNextPage}
+                    onClick={() => fetchNextPage()}
                     disabled={isFetching || fetchAllItems}
                   >
                     <LuForward />
                     Fetch next page
                   </Button>
-                  <Button onClick={onFetchAllToggle}>
+                  <Button onClick={() => setFetchAllItems(!fetchAllItems)}>
                     {fetchAllItems ? <LuPause /> : <LuPlay />}
                     {fetchAllItems && hasNextPage ? "Pause" : "Fetch all"}
                   </Button>
@@ -261,16 +270,16 @@ function SearchResults({ href, search }: { href: string; search: StacSearch }) {
   const setSearchItems = useStore((store) => store.setSearchItems);
   const [fetchAllItems, setFetchAllItems] = useState(false);
 
-  const url = useMemo(() => {
-    return new URL(href);
-  }, [href]);
-
-  url.searchParams.set("collections", search.collections.join(","));
-  if (search.bbox) url.searchParams.set("bbox", search.bbox.join(","));
-  if (search.limit) url.searchParams.set("limit", search.limit.toFixed(0));
+  const searchHref = useMemo(() => {
+    const url = new URL(href);
+    url.searchParams.set("collections", search.collections.join(","));
+    if (search.bbox) url.searchParams.set("bbox", search.bbox.join(","));
+    if (search.limit) url.searchParams.set("limit", search.limit.toFixed(0));
+    return url.toString();
+  }, [href, search]);
 
   const result = useInfiniteQuery({
-    queryKey: ["stac-search", href, search],
+    queryKey: ["stac-search", searchHref],
     queryFn: async ({ pageParam }) => {
       if (pageParam) {
         return (await fetchStac({
@@ -281,12 +290,10 @@ function SearchResults({ href, search }: { href: string; search: StacSearch }) {
         return null;
       }
     },
-    initialPageParam: url.toString(),
+    initialPageParam: searchHref,
     getNextPageParam: (lastPage) =>
       lastPage ? getLinkHref(lastPage, "next") : null,
   });
-
-  const numberMatched = result.data?.pages.at(0)?.numberMatched;
 
   useEffect(() => {
     if (result.data)
@@ -298,25 +305,25 @@ function SearchResults({ href, search }: { href: string; search: StacSearch }) {
       result.fetchNextPage();
   }, [fetchAllItems, result]);
 
+  const numberMatched = useMemo(() => {
+    return result.data?.pages.at(0)?.numberMatched;
+  }, [result.data]);
+
   return (
     <>
       <SearchResultsProgress
-        itemCount={searchItems?.length}
+        items={searchItems}
         numberMatched={numberMatched}
-        hasNextPage={result.hasNextPage}
-        isFetching={result.isFetching}
         fetchAllItems={fetchAllItems}
-        onFetchNextPage={() => result.fetchNextPage()}
-        onFetchAllToggle={setFetchAllItems}
+        setFetchAllItems={setFetchAllItems}
+        {...result}
       />
       <SearchResultsActionBar
-        itemCount={searchItems?.length}
+        items={searchItems}
         numberMatched={numberMatched}
-        hasNextPage={result.hasNextPage}
-        isFetching={result.isFetching}
         fetchAllItems={fetchAllItems}
-        onFetchNextPage={() => result.fetchNextPage()}
-        onFetchAllToggle={() => setFetchAllItems((previous) => !previous)}
+        setFetchAllItems={setFetchAllItems}
+        {...result}
       />
     </>
   );
@@ -325,54 +332,42 @@ function SearchResults({ href, search }: { href: string; search: StacSearch }) {
 export default function Search({ href, collection }: Props) {
   const search = useStore((store) => store.search);
   const setSearch = useStore((store) => store.setSearch);
-  const [searchSettingsOpen, setSearchSettingsOpen] = useState(false);
   const [useViewportForBbox, setUseViewportForBbox] = useState(true);
   const [limit, setLimit] = useState<string>();
   const { map } = useMap();
 
+  const onClickSearch = () => {
+    setSearch({
+      collections: [collection.id],
+      bbox: useViewportForBbox
+        ? sanitizeBbox(map?.getBounds().toArray().flat() as BBox)
+        : undefined,
+      limit: Number(limit),
+    });
+  };
+
   return (
     <Stack gap={4}>
+      <Heading size={"md"}>Item search</Heading>
       <HStack>
-        {!search && (
-          <SearchSettingsDialog
-            open={searchSettingsOpen}
-            onOpenChange={setSearchSettingsOpen}
-            collectionId={collection.id}
-            useViewportForBbox={useViewportForBbox}
-            onUseViewportForBboxChange={setUseViewportForBbox}
-            limit={limit}
-            onLimitChange={setLimit}
-          />
-        )}
+        <SearchSettingsDialog
+          collection={collection}
+          useViewportForBbox={useViewportForBbox}
+          setUseViewportForBbox={setUseViewportForBbox}
+          limit={limit}
+          setLimit={setLimit}
+          disabled={!!search}
+        />
 
         {search ? (
-          <Button
-            onClick={() => {
-              setSearch(null);
-            }}
-            variant={"surface"}
-          >
-            <LuX /> Clear
-          </Button>
+          <SearchResults href={href} search={search} />
         ) : (
-          <Button
-            onClick={() => {
-              setSearch({
-                collections: [collection.id],
-                bbox: useViewportForBbox
-                  ? sanitizeBbox(map?.getBounds().toArray().flat() as BBox)
-                  : undefined,
-                limit: Number(limit),
-              });
-            }}
-          >
+          <Button onClick={onClickSearch}>
             <LuSearch />
             Search
           </Button>
         )}
       </HStack>
-
-      {search && <SearchResults href={href} search={search} />}
     </Stack>
   );
 }
