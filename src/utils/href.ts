@@ -11,3 +11,12 @@ export function getInitialHref(): string | null {
   }
   return href;
 }
+
+export function isUrl(href: string) {
+  try {
+    new URL(href);
+  } catch {
+    return false;
+  }
+  return true;
+}

@@ -8,6 +8,7 @@ import Map from "./components/map";
 import Overlay from "./components/overlay";
 import { useStore } from "./store";
 import { getCurrentHref } from "./utils/href";
+import { uploadFile } from "./utils/upload";
 
 export default function App() {
   const href = useStore((state) => state.href);
@@ -60,8 +61,13 @@ export default function App() {
         <FileUpload.Root
           unstyled={true}
           onFileAccept={(details) => {
-            if (details.files.length === 1) setUploadedFile(details.files[0]);
+            uploadFile({
+              file: details.files[0],
+              setUploadedFile,
+              db,
+            });
           }}
+          disabled={!db}
         >
           <FileUpload.HiddenInput />
           <FileUpload.Dropzone

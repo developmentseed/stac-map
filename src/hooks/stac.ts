@@ -1,47 +1,44 @@
+import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { useQuery } from "@tanstack/react-query";
-import { useStore } from "../store";
 import { fetchStac } from "../utils/stac";
-import {
-  fetchStacGeoparquet,
-  getUploadedStacGeoparquet,
-} from "../utils/stac-geoparquet";
+import { fetchStacGeoparquet } from "../utils/stac-geoparquet";
 
-export function useStac({
+export function useStacJson({
   href,
   enabled = true,
 }: {
   href: string;
   enabled?: boolean;
 }) {
-  const uploadedFile = useStore((store) => store.uploadedFile);
-  const connection = useStore((store) => store.connection);
-  const isStacGeoparquet = href.endsWith(".parquet");
-
-  const result = useQuery({
-    queryKey: ["stac", href, !!connection],
+  return useQuery({
+    queryKey: ["stac-json", href],
     enabled,
     queryFn: async () => {
-      if (href.startsWith("http")) {
-        if (isStacGeoparquet) {
-          if (connection)
-            return await fetchStacGeoparquet({ href, connection });
-          else return null;
-        } else {
-          return await fetchStac({ href });
-        }
-      } else if (uploadedFile) {
-        if (isStacGeoparquet) {
-          return getUploadedStacGeoparquet({ href, uploadedFile });
-        } else {
-          return JSON.parse(await uploadedFile.text());
-        }
-      } else {
-        throw new Error(
-          `Cannot get STAC json from href, and no file uploaded: ${href}`
-        );
-      }
+      return await fetchStac({ href });
     },
   });
+}
 
-  return result;
+export function useStacJsonFromFile({ file }: { file: File }) {
+  return useQuery({
+    queryKey: ["stac-json-from-file", file.name],
+    queryFn: async () => {
+      return JSON.parse(await file.text());
+    },
+  });
+}
+
+export function useStacGeoparquet({
+  href,
+  connection,
+}: {
+  href: string;
+  connection: AsyncDuckDBConnection;
+}) {
+  return useQuery({
+    queryKey: ["stac-geoparquet", href],
+    queryFn: async () => {
+      return await fetchStacGeoparquet({ href, connection });
+    },
+  });
 }

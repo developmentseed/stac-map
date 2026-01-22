@@ -7,14 +7,17 @@ import {
   IconButton,
   SimpleGrid,
 } from "@chakra-ui/react";
+import { useDuckDb } from "duckdb-wasm-kit";
 import { Examples } from "./examples";
 import HrefInput from "./href-input";
 import Panel from "./panel";
 import { ColorModeButton } from "./ui/color-mode";
 import { useStore } from "../store";
+import { uploadFile } from "../utils/upload";
 
 export default function Overlay() {
   const setUploadedFile = useStore((store) => store.setUploadedFile);
+  const { db } = useDuckDb();
 
   return (
     <SimpleGrid columns={3} gap={4}>
@@ -26,11 +29,17 @@ export default function Overlay() {
           <HrefInput />
           <FileUpload.Root
             flex={0}
-            onFileAccept={(details) => setUploadedFile(details.files[0])}
+            onFileAccept={(details) =>
+              uploadFile({
+                file: details.files[0],
+                setUploadedFile,
+                db,
+              })
+            }
           >
             <FileUpload.HiddenInput />
             <FileUpload.Trigger asChild>
-              <IconButton bg={"bg.muted/90"} variant={"outline"}>
+              <IconButton bg={"bg.muted/90"} variant={"outline"} disabled={!db}>
                 <LuUpload />
               </IconButton>
             </FileUpload.Trigger>

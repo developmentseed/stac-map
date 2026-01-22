@@ -9,13 +9,20 @@ import {
   SkeletonText,
   Spinner,
 } from "@chakra-ui/react";
+import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
+import type { UseQueryResult } from "@tanstack/react-query";
 import type { StacItem } from "stac-ts";
 import Introduction from "./introduction";
 import { StacIcon } from "./stac";
 import Value from "./value";
-import { useStac } from "../hooks/stac";
+import {
+  useStacGeoparquet,
+  useStacJson,
+  useStacJsonFromFile,
+} from "../hooks/stac";
 import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
+import { isUrl } from "../utils/href";
 import { getSelfHref, getStacValueId } from "../utils/stac";
 
 export default function Panel() {
@@ -28,7 +35,15 @@ export default function Panel() {
   } else if (value) {
     return <ValuePanel value={value} />;
   } else if (href) {
-    return <HrefPanel href={href} />;
+    const hrefIsUrl = isUrl(href);
+    const hrefIsParquet = href.endsWith(".parquet");
+    return hrefIsParquet ? (
+      <StacGeoparquetHrefPanel href={href} />
+    ) : hrefIsUrl ? (
+      <HrefPanel href={href} />
+    ) : (
+      <LocalHrefPanel href={href} />
+    );
   } else {
     return (
       <BasePanel header="stac-map">
@@ -76,23 +91,97 @@ function ValuePanel({ value }: { value: StacValue }) {
 }
 
 function HrefPanel({ href }: { href: string }) {
-  const connection = useStore((store) => store.connection);
   const setValue = useStore((store) => store.setValue);
-  const result = useStac({ href });
+  const result = useStacJson({ href });
+  useEffect(() => {
+    if (result.data) setValue(result.data);
+  }, [result.data, setValue]);
+
+  return <LoadingPanel href={href} {...result} />;
+}
+
+function LocalHrefPanel({ href }: { href: string }) {
+  const uploadedFile = useStore((store) => store.uploadedFile);
+  return uploadedFile ? (
+    <LocalFilePanel file={uploadedFile} />
+  ) : (
+    <BasePanel
+      header={
+        <HStack>
+          <LuFileWarning /> Could not load {href}
+        </HStack>
+      }
+    >
+      <Alert.Root status={"error"}>
+        <Alert.Indicator />
+        <Alert.Content>
+          <Alert.Title>Error</Alert.Title>
+          <Alert.Description>
+            {href} is a local file path, but no file was uploaded
+          </Alert.Description>
+        </Alert.Content>
+      </Alert.Root>
+    </BasePanel>
+  );
+}
+
+function LocalFilePanel({ file }: { file: File }) {
+  const setValue = useStore((store) => store.setValue);
+  const result = useStacJsonFromFile({ file });
+  useEffect(() => {
+    if (result.data) setValue(result.data);
+  }, [result.data, setValue]);
+
+  return <LoadingPanel href={file.name} {...result} />;
+}
+
+function StacGeoparquetHrefPanel({ href }: { href: string }) {
+  const connection = useStore((store) => store.connection);
+  return connection ? (
+    <StacGeoparquetHrefConnectionPanel href={href} connection={connection} />
+  ) : (
+    <BasePanel
+      header={
+        <HStack>
+          <LuBird /> Initializing DuckDB
+        </HStack>
+      }
+    >
+      <SkeletonText />
+    </BasePanel>
+  );
+}
+
+function StacGeoparquetHrefConnectionPanel({
+  href,
+  connection,
+}: {
+  href: string;
+  connection: AsyncDuckDBConnection;
+}) {
+  const setValue = useStore((store) => store.setValue);
+  const result = useStacGeoparquet({ href, connection });
+  useEffect(() => {
+    if (result.data) setValue(result.data);
+  }, [result.data, setValue]);
+
+  return <LoadingPanel href={href} {...result} />;
+}
+
+function LoadingPanel({
+  href,
+  isFetching,
+  error,
+}: { href: string } & UseQueryResult) {
   const header = (
     <HStack truncate>
-      {result.error ? (
+      {error ? (
         <>
           <LuFileWarning /> Error loading {href}
         </>
-      ) : result.isFetching ? (
+      ) : isFetching ? (
         <>
           <Spinner size="xs" mr={1} /> Fetching {href}
-        </>
-      ) : !connection ? (
-        <>
-          <LuBird />
-          Loading DuckDB...
         </>
       ) : (
         "stac-map"
@@ -100,18 +189,14 @@ function HrefPanel({ href }: { href: string }) {
     </HStack>
   );
 
-  useEffect(() => {
-    if (result.data) setValue(result.data);
-  }, [result.data, setValue]);
-
   return (
     <BasePanel header={header}>
-      {(result.error && (
+      {(error && (
         <Alert.Root status={"error"}>
           <Alert.Indicator />
           <Alert.Content>
-            <Alert.Title>{result.error.name}</Alert.Title>
-            <Alert.Description>{result.error.message}</Alert.Description>
+            <Alert.Title>{error.name}</Alert.Title>
+            <Alert.Description>{error.message}</Alert.Description>
           </Alert.Content>
         </Alert.Root>
       )) || <SkeletonText />}
