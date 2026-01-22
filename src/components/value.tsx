@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import {
-  LuArrowUp,
-  LuArrowUpLeft,
   LuExternalLink,
   LuFileJson,
+  LuFolder,
+  LuFolderPlus,
 } from "react-icons/lu";
 import {
   Badge,
+  Breadcrumb,
   Button,
   ButtonGroup,
   CloseButton,
@@ -29,6 +30,7 @@ import CollectionsHref from "./collections-href";
 import Description from "./description";
 import RootHref from "./root-href";
 import SearchItems from "./search-items";
+import { StacIcon } from "./stac";
 import Thumbnail from "./thumbnail";
 import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
@@ -65,6 +67,7 @@ export default function Value({ value }: { value: StacValue }) {
   const selfHref = getLinkHref(value, "self");
   const rootHref = getLinkHref(value, "root");
   const parentHref = getLinkHref(value, "parent");
+  const collectionHref = getLinkHref(value, "collection");
   const version = value.stac_version as string | undefined;
   const thumbnailAsset = getThumbnailAsset(value);
 
@@ -74,30 +77,76 @@ export default function Value({ value }: { value: StacValue }) {
 
   return (
     <>
-      <Stack gap={6}>
-        <Heading>{getStacValueTitle(value)}</Heading>
+      <Stack gap={4}>
+        <Heading>
+          <HStack gap={4}>
+            {getStacValueTitle(value)}
+            {version && <Badge variant={"surface"}>{version}</Badge>}
+          </HStack>
+        </Heading>
 
-        <HStack>
-          {value.id && (
-            <Badge variant={"surface"}>{getStacValueType(value)}</Badge>
-          )}
-          {version && <Badge variant={"surface"}>{version}</Badge>}
-        </HStack>
-
-        <HStack>
-          <ButtonGroup variant={"outline"} size="xs">
+        <Breadcrumb.Root size={"sm"}>
+          <Breadcrumb.List>
             {rootHref && rootHref !== selfHref && (
-              <Button onClick={() => setHref(rootHref)}>
-                <LuArrowUpLeft />
-                Root
-              </Button>
+              <>
+                <Breadcrumb.Item>
+                  <Breadcrumb.Link
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setHref(rootHref);
+                    }}
+                    href="#"
+                  >
+                    Root
+                  </Breadcrumb.Link>
+                </Breadcrumb.Item>
+                <Breadcrumb.Separator />
+              </>
             )}
-            {parentHref && parentHref !== rootHref && (
-              <Button onClick={() => setHref(parentHref)}>
-                <LuArrowUp />
-                Parent
-              </Button>
+            {parentHref &&
+              parentHref !== rootHref &&
+              parentHref !== collectionHref && (
+                <>
+                  <Breadcrumb.Item>
+                    <Breadcrumb.Link
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setHref(parentHref);
+                      }}
+                      href="#"
+                    >
+                      Parent
+                    </Breadcrumb.Link>
+                  </Breadcrumb.Item>
+                  <Breadcrumb.Separator />
+                </>
+              )}
+            {collectionHref && collectionHref !== rootHref && (
+              <>
+                <Breadcrumb.Item>
+                  <Breadcrumb.Link
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setHref(collectionHref);
+                    }}
+                    href="#"
+                  >
+                    Collection
+                  </Breadcrumb.Link>
+                </Breadcrumb.Item>
+                <Breadcrumb.Separator />
+              </>
             )}
+            <Breadcrumb.Item>
+              <Breadcrumb.CurrentLink>
+                <HStack>{getStacValueType(value)}</HStack>
+              </Breadcrumb.CurrentLink>
+            </Breadcrumb.Item>
+          </Breadcrumb.List>
+        </Breadcrumb.Root>
+
+        <HStack>
+          <ButtonGroup variant={"subtle"} size="xs">
             {selfHref && (
               <Button asChild>
                 <a
@@ -125,7 +174,9 @@ export default function Value({ value }: { value: StacValue }) {
 
         {rootHref && <RootHref href={rootHref} value={value} />}
 
-        {searchItems && <SearchItems items={searchItems} />}
+        {searchItems && value.type === "Collection" && (
+          <SearchItems items={searchItems} />
+        )}
 
         {conformsToFreeTextCollectionSearch(value) && <CollectionSearch />}
 
