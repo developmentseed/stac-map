@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { LuForward, LuLoader, LuPause, LuPlay } from "react-icons/lu";
+import {
+  LuFolderSymlink,
+  LuForward,
+  LuLoader,
+  LuPause,
+  LuPlay,
+} from "react-icons/lu";
 import {
   ActionBar,
   Alert,
@@ -105,7 +111,11 @@ function PagedCollections({
   return (
     <>
       <Stack gap={2}>
-        <Heading size={"md"}>Collection pagination</Heading>
+        <Heading size={"md"}>
+          <HStack>
+            <LuFolderSymlink /> Collection pagination
+          </HStack>
+        </Heading>
         <HStack width={"full"}>
           {numberMatched ? (
             <Progress.Root
@@ -126,7 +136,10 @@ function PagedCollections({
             </Span>
           )}
           <ButtonGroup variant={"subtle"} size={"sm"}>
-            <IconButton onClick={() => fetchNextPage()}>
+            <IconButton
+              onClick={() => fetchNextPage()}
+              disabled={isFetching || fetchAllCollections}
+            >
               {isFetching ? <LuLoader /> : <LuForward />}
             </IconButton>
             <IconButton

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   LuArrowUp,
   LuArrowUpLeft,
@@ -64,6 +65,10 @@ export default function Value({ value }: { value: StacValue }) {
   const parentHref = getLinkHref(value, "parent");
   const version = value.stac_version as string | undefined;
   const thumbnailAsset = getThumbnailAsset(value);
+
+  useEffect(() => {
+    document.title = "stac-map | " + getStacValueTitle(value);
+  }, [value]);
 
   return (
     <>

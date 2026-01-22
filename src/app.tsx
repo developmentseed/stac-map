@@ -18,11 +18,10 @@ export default function App() {
   const setConnection = useStore((state) => state.setConnection);
 
   useEffect(() => {
-    if (href && getCurrentHref() != href) {
+    if (href && getCurrentHref() != href)
       history.pushState(null, "", "?href=" + href);
-    } else if (href === "") {
-      history.pushState(null, "", location.pathname);
-    }
+    else history.pushState(null, "", location.pathname);
+    document.title = "stac-map";
   }, [href]);
 
   useEffect(() => {
