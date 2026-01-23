@@ -1,10 +1,5 @@
 import { useEffect } from "react";
-import {
-  LuExternalLink,
-  LuFileJson,
-  LuFolder,
-  LuFolderPlus,
-} from "react-icons/lu";
+import { LuExternalLink, LuFileJson } from "react-icons/lu";
 import {
   Badge,
   Breadcrumb,
@@ -30,7 +25,6 @@ import CollectionsHref from "./collections-href";
 import Description from "./description";
 import RootHref from "./root-href";
 import SearchItems from "./search-items";
-import { StacIcon } from "./stac";
 import Thumbnail from "./thumbnail";
 import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
