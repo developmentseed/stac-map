@@ -28,5 +28,7 @@ export const createHrefSlice: StateCreator<State, [], [], HrefState> = (
       pickedItem: null,
       searchItems: null,
       geotiffHref: null,
+      stacGeoparquetTable: null,
+      stacGeoparquetItemId: null,
     }),
 });
