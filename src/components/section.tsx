@@ -49,7 +49,7 @@ export function Section({
 
   if (!collapsible) {
     return (
-      <Stack gap={4}>
+      <Stack>
         <SectionHeader
           icon={icon}
           title={title}
@@ -61,14 +61,14 @@ export function Section({
           showCollapse={false}
           open={true}
         />
-        <Stack gap={4}>{content}</Stack>
+        {content}
       </Stack>
     );
   }
 
   return (
     <Collapsible.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
-      <Stack gap={4}>
+      <Stack>
         <SectionHeader
           icon={icon}
           title={title}
@@ -80,9 +80,7 @@ export function Section({
           showCollapse={true}
           open={open}
         />
-        <Collapsible.Content>
-          <Stack gap={4}>{content}</Stack>
-        </Collapsible.Content>
+        <Collapsible.Content>{content}</Collapsible.Content>
       </Stack>
     </Collapsible.Root>
   );
