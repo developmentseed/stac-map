@@ -27,7 +27,6 @@ import Description from "./description";
 import ItemLinks from "./item-links";
 import Items from "./items";
 import RootHref from "./root-href";
-import SearchItems from "./search-items";
 import { Section } from "./section";
 import StacGeoparquetHref from "./stac-geoparquet-href";
 import Thumbnail from "./thumbnail";
@@ -58,8 +57,7 @@ const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({
 export default function Value({ value }: { value: StacValue }) {
   const catalogs = useStore((store) => store.catalogs);
   const collections = useStore((store) => store.collections);
-  const items = useStore((store) => store.items);
-  const searchItems = useStore((store) => store.searchItems);
+  const items = useStore((store) => store.searchItems || store.items);
   const href = useStore((store) => store.href);
   const hrefIsParquet = useStore((store) => store.hrefIsParquet);
   const connection = useStore((store) => store.connection);
@@ -116,10 +114,6 @@ export default function Value({ value }: { value: StacValue }) {
         )}
 
         {rootHref && <RootHref href={rootHref} value={value} />}
-
-        {searchItems && value.type === "Collection" && (
-          <SearchItems items={searchItems} />
-        )}
 
         {conformsToFreeTextCollectionSearch(value) && <CollectionSearch />}
 

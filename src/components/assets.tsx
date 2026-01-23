@@ -45,16 +45,9 @@ export default function Assets({
   assets: { [k: string]: StacAsset };
 }) {
   const setGeotiffHref = useStore((store) => store.setGeotiffHref);
-  let defaultValue = null;
-  for (const [key, asset] of Object.entries(assets)) {
-    if (!defaultValue && isGeotiff(asset)) {
-      defaultValue = key;
-    }
-    if (defaultValue && isGeotiff(asset) && asset.roles?.includes("visual")) {
-      defaultValue = key;
-    }
-  }
-  const [value, setValue] = useState<string | null>(defaultValue);
+  const [value, setValue] = useState<string | null>(
+    getBestAssetKey(assets as { [k: string]: AssetWithAlternates })
+  );
 
   useEffect(() => {
     if (value) {
@@ -273,6 +266,41 @@ function AssetActions({
 function getBandCount(asset: AssetWithAlternates): number | null {
   const bands = asset.bands || asset["eo:bands"];
   return bands ? bands.length : null;
+}
+
+function getBestAssetKey(assets: {
+  [k: string]: AssetWithAlternates;
+}): string | null {
+  let bestKey: string | null = null;
+  let bestScore = 0;
+
+  for (const [key, asset] of Object.entries(assets)) {
+    const score = getAssetScore(asset);
+    if (score > 0 && score > bestScore) {
+      bestScore = score;
+      bestKey = key;
+    }
+  }
+
+  return bestKey;
+}
+
+function getAssetScore(asset: AssetWithAlternates): number {
+  const geotiff = isGeotiff(asset);
+  const hasVisualRole = asset.roles?.includes("visual") ?? false;
+  const bandCount = getBandCount(asset);
+  const hasThreeOrFourBands = bandCount === 3 || bandCount === 4;
+
+  if (!geotiff && !hasVisualRole && !hasThreeOrFourBands) {
+    return 0;
+  }
+
+  let score = 0;
+  if (geotiff) score += 1;
+  if (hasVisualRole) score += 2;
+  if (hasThreeOrFourBands) score += 1;
+
+  return score;
 }
 
 function hasValidBandCount(asset: AssetWithAlternates): boolean {

@@ -19,7 +19,6 @@ import {
   Dialog,
   Field,
   Fieldset,
-  Heading,
   HStack,
   IconButton,
   Input,
@@ -28,7 +27,6 @@ import {
   Progress,
   Span,
   Spinner,
-  Stack,
 } from "@chakra-ui/react";
 import {
   useInfiniteQuery,
@@ -36,6 +34,7 @@ import {
 } from "@tanstack/react-query";
 import type { StacCollection, StacItem } from "stac-ts";
 import type { BBox } from "geojson";
+import { Section } from "./section";
 import { useStore } from "../store/index.ts";
 import type { StacItemCollection, StacSearch } from "../types/stac";
 import { sanitizeBbox } from "../utils/map.ts";
@@ -345,8 +344,7 @@ export default function Search({ href, collection }: Props) {
   };
 
   return (
-    <Stack gap={4}>
-      <Heading size={"md"}>Item search</Heading>
+    <Section icon={<LuSearch />} title="Item search">
       <HStack>
         <SearchSettingsDialog
           collection={collection}
@@ -366,6 +364,6 @@ export default function Search({ href, collection }: Props) {
           </Button>
         )}
       </HStack>
-    </Stack>
+    </Section>
   );
 }
