@@ -106,8 +106,12 @@ function matchesFilter(collection: StacCollection, filter: string) {
 }
 
 function CollectionDatetimeSlider({ start, end }: { start: Date; end: Date }) {
-  const [value, setValue] = useState([start.getTime(), end.getTime()]);
+  const [userValue, setUserValue] = useState<[number, number] | null>(null);
+  const datetimeFilter = useStore((store) => store.datetimeFilter);
   const setDatetimeFilter = useStore((store) => store.setDatetimeFilter);
+
+  const value =
+    datetimeFilter && userValue ? userValue : [start.getTime(), end.getTime()];
 
   return (
     <Slider.Root
@@ -115,14 +119,13 @@ function CollectionDatetimeSlider({ start, end }: { start: Date; end: Date }) {
       min={start.getTime()}
       max={end.getTime()}
       onValueChange={(e) => {
-        setValue(e.value);
-      }}
-      onValueChangeEnd={() => {
+        setUserValue(e.value as [number, number]);
         setDatetimeFilter({
           start: new Date(value[0]),
           end: new Date(value[1]),
         });
       }}
+      onValueChangeEnd={() => {}}
     >
       <HStack>
         <Slider.Label>Filter by datetime</Slider.Label>
