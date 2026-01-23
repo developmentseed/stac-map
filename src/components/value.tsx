@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { LuExternalLink, LuFileJson } from "react-icons/lu";
 import {
   Badge,
-  Breadcrumb,
   Button,
   ButtonGroup,
   CloseButton,
@@ -18,6 +17,7 @@ import {
 import type { StacAsset } from "stac-ts";
 import type { HighlighterGeneric } from "shiki";
 import Assets from "./assets";
+import Breadcrumbs from "./breadcrumbs";
 import Children from "./children";
 import CollectionSearch from "./collection-search";
 import Collections from "./collections";
@@ -32,7 +32,6 @@ import { conformsToFreeTextCollectionSearch } from "../utils/stac";
 import {
   getLinkHref,
   getStacValueTitle,
-  getStacValueType,
   getThumbnailAsset,
 } from "../utils/stac";
 
@@ -54,14 +53,11 @@ const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({
 export default function Value({ value }: { value: StacValue }) {
   const collections = useStore((store) => store.collections);
   const searchItems = useStore((store) => store.searchItems);
-  const setHref = useStore((store) => store.setHref);
 
   const collectionsHref = getLinkHref(value, "data");
   const childrenLinks = value.links?.filter((link) => link.rel === "child");
   const selfHref = getLinkHref(value, "self");
   const rootHref = getLinkHref(value, "root");
-  const parentHref = getLinkHref(value, "parent");
-  const collectionHref = getLinkHref(value, "collection");
   const version = value.stac_version as string | undefined;
   const thumbnailAsset = getThumbnailAsset(value);
 
@@ -79,65 +75,7 @@ export default function Value({ value }: { value: StacValue }) {
           </HStack>
         </Heading>
 
-        <Breadcrumb.Root size={"sm"}>
-          <Breadcrumb.List>
-            {rootHref && rootHref !== selfHref && (
-              <>
-                <Breadcrumb.Item>
-                  <Breadcrumb.Link
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setHref(rootHref);
-                    }}
-                    href="#"
-                  >
-                    Root
-                  </Breadcrumb.Link>
-                </Breadcrumb.Item>
-                <Breadcrumb.Separator />
-              </>
-            )}
-            {parentHref &&
-              parentHref !== rootHref &&
-              parentHref !== collectionHref && (
-                <>
-                  <Breadcrumb.Item>
-                    <Breadcrumb.Link
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setHref(parentHref);
-                      }}
-                      href="#"
-                    >
-                      Parent
-                    </Breadcrumb.Link>
-                  </Breadcrumb.Item>
-                  <Breadcrumb.Separator />
-                </>
-              )}
-            {collectionHref && collectionHref !== rootHref && (
-              <>
-                <Breadcrumb.Item>
-                  <Breadcrumb.Link
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setHref(collectionHref);
-                    }}
-                    href="#"
-                  >
-                    Collection
-                  </Breadcrumb.Link>
-                </Breadcrumb.Item>
-                <Breadcrumb.Separator />
-              </>
-            )}
-            <Breadcrumb.Item>
-              <Breadcrumb.CurrentLink>
-                <HStack>{getStacValueType(value)}</HStack>
-              </Breadcrumb.CurrentLink>
-            </Breadcrumb.Item>
-          </Breadcrumb.List>
-        </Breadcrumb.Root>
+        <Breadcrumbs value={value} />
 
         <HStack>
           <ButtonGroup variant={"surface"} size="xs">
