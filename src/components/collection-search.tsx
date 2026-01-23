@@ -1,5 +1,3 @@
-import { useRef, useState } from "react";
-import { LuFolderSearch, LuSearch } from "react-icons/lu";
 import {
   Button,
   CloseButton,
@@ -7,8 +5,10 @@ import {
   Input,
   InputGroup,
 } from "@chakra-ui/react";
-import { Section } from "./section";
+import { useRef, useState } from "react";
+import { LuFolderSearch, LuSearch } from "react-icons/lu";
 import { useStore } from "../store";
+import { Section } from "./section";
 
 export default function CollectionSearch() {
   const [input, setInput] = useState("");

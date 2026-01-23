@@ -1,16 +1,16 @@
+import { List, Stack } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { LuFolderPlus } from "react-icons/lu";
-import { List, Stack } from "@chakra-ui/react";
 import type { StacCollection } from "stac-ts";
-import CollectionFilter from "./collection-filter";
-import { Section } from "./section";
-import ValueCard from "./value-card";
-import ValueListItem from "./value-list-item";
 import { useStore } from "../store";
 import {
   getCollectionEndDatetime,
   getCollectionStartDatetime,
 } from "../utils/stac";
+import CollectionFilter from "./collection-filter";
+import { Section } from "./section";
+import ValueCard from "./value-card";
+import ValueListItem from "./value-list-item";
 
 export default function Collections({
   collections,

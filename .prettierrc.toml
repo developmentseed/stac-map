@@ -3,32 +3,4 @@ semi = true
 singleQuote = false
 trailingComma = "es5"
 printWidth = 80
-plugins = ["@trivago/prettier-plugin-sort-imports"]
-
-# Import sorting configuration
-importOrder = [
-  "^react$",
-  "^react-dom$",
-  "^react/",
-  "^react-",
-  "^@chakra-ui/",
-  "^@deck\\.gl/",
-  "^@geoarrow/",
-  "^@duckdb/",
-  "^@tanstack/",
-  "^@turf/",
-  "^@types/",
-  "^maplibre-gl",
-  "^deck\\.gl",
-  "^apache-arrow",
-  "^stac-ts",
-  "^stac-wasm",
-  "^next-themes",
-  "^@",
-  "^[a-z]",
-  "^\\./",
-  "^\\.\\./"
-]
-importOrderSeparation = false
-importOrderSortSpecifiers = true
-importOrderCaseInsensitive = true
+plugins = ["prettier-plugin-organize-imports"]

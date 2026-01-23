@@ -1,6 +1,6 @@
-import type { State } from ".";
 import type { StacCatalog } from "stac-ts";
 import type { StateCreator } from "zustand";
+import type { State } from ".";
 
 export interface CatalogsState {
   catalogs: StacCatalog[] | null;

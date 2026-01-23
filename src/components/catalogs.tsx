@@ -1,5 +1,5 @@
-import { LuFolder } from "react-icons/lu";
 import { List, Stack } from "@chakra-ui/react";
+import { LuFolder } from "react-icons/lu";
 import type { StacCatalog } from "stac-ts";
 import { Section } from "./section";
 import ValueCard from "./value-card";

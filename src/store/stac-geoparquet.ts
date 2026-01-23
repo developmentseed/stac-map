@@ -1,6 +1,6 @@
-import type { State } from ".";
 import type { Table } from "apache-arrow";
 import type { StateCreator } from "zustand";
+import type { State } from ".";
 import type { SupportedGeometryType } from "../utils/stac-geoparquet";
 
 export interface StacGeoparquetTable {

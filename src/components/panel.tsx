@@ -1,5 +1,3 @@
-import { type ReactNode, useEffect } from "react";
-import { LuArrowRight, LuBird, LuFileWarning } from "react-icons/lu";
 import {
   Alert,
   Box,
@@ -12,10 +10,9 @@ import {
 } from "@chakra-ui/react";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { UseQueryResult } from "@tanstack/react-query";
+import { type ReactNode, useEffect } from "react";
+import { LuArrowRight, LuBird, LuFileWarning } from "react-icons/lu";
 import type { StacItem } from "stac-ts";
-import Introduction from "./introduction";
-import { StacIcon } from "./stac";
-import Value from "./value";
 import {
   useStacGeoparquet,
   useStacJson,
@@ -25,6 +22,9 @@ import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
 import { isUrl } from "../utils/href";
 import { getSelfHref, getStacValueId } from "../utils/stac";
+import Introduction from "./introduction";
+import { StacIcon } from "./stac";
+import Value from "./value";
 
 export default function Panel() {
   const href = useStore((store) => store.href);

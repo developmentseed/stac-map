@@ -1,8 +1,12 @@
-import type { StacAsset, StacCollection, StacLink } from "stac-ts";
-import type { SpatialExtent } from "stac-ts";
-import { sanitizeBbox } from "./map";
+import type {
+  SpatialExtent,
+  StacAsset,
+  StacCollection,
+  StacLink,
+} from "stac-ts";
 import type { BBox2D } from "../types/map";
 import type { StacValue } from "../types/stac";
+import { sanitizeBbox } from "./map";
 
 export function getStacValueTitle(value: StacValue) {
   if ("title" in value && value.title) {

@@ -1,5 +1,5 @@
-import type { State } from ".";
 import type { StateCreator } from "zustand";
+import type { State } from ".";
 import type { BBox2D } from "../types/map";
 
 export interface BboxState {

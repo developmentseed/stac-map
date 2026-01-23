@@ -1,8 +1,6 @@
-import { MarkdownHooks } from "react-markdown";
 import { Card } from "@chakra-ui/react";
+import { MarkdownHooks } from "react-markdown";
 import type { StacCollection } from "stac-ts";
-import Thumbnail from "./thumbnail";
-import { Prose } from "./ui/prose";
 import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
 import {
@@ -10,6 +8,8 @@ import {
   getStacValueTitle,
   getThumbnailAsset,
 } from "../utils/stac";
+import Thumbnail from "./thumbnail";
+import { Prose } from "./ui/prose";
 
 export default function ValueCard({ value }: { value: StacValue }) {
   const href = getSelfHref(value);

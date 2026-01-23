@@ -1,11 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  LuChevronDown,
-  LuCircle,
-  LuCircleDot,
-  LuDownload,
-  LuFileImage,
-} from "react-icons/lu";
 import {
   Badge,
   Button,
@@ -18,10 +10,18 @@ import {
   RadioCard,
   Table,
 } from "@chakra-ui/react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  LuChevronDown,
+  LuCircle,
+  LuCircleDot,
+  LuDownload,
+  LuFileImage,
+} from "react-icons/lu";
 import type { StacAsset } from "stac-ts";
-import { type ListOrCard, Section } from "./section";
 import { useStore } from "../store";
 import { fetchPlanetaryComputerSignedHref } from "../utils/planetary-computer";
+import { type ListOrCard, Section } from "./section";
 
 interface AlternateAsset {
   href: string;

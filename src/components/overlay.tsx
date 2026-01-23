@@ -1,4 +1,3 @@
-import { LuUpload } from "react-icons/lu";
 import {
   Button,
   FileUpload,
@@ -8,12 +7,13 @@ import {
   SimpleGrid,
 } from "@chakra-ui/react";
 import { useDuckDb } from "duckdb-wasm-kit";
+import { LuUpload } from "react-icons/lu";
+import { useStore } from "../store";
+import { uploadFile } from "../utils/upload";
 import { Examples } from "./examples";
 import HrefInput from "./href-input";
 import Panel from "./panel";
 import { ColorModeButton } from "./ui/color-mode";
-import { useStore } from "../store";
-import { uploadFile } from "../utils/upload";
 
 export default function Overlay() {
   const setUploadedFile = useStore((store) => store.setUploadedFile);

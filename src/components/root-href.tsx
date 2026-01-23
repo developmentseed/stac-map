@@ -1,8 +1,8 @@
 import { SkeletonText } from "@chakra-ui/react";
-import Search from "./search";
 import { useStacJson } from "../hooks/stac";
 import type { StacValue } from "../types/stac";
 import { getLinkHref } from "../utils/stac";
+import Search from "./search";
 
 export default function RootHref({
   href,

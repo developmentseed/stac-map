@@ -1,6 +1,6 @@
-import type { State } from ".";
 import type { StacCollection, StacItem } from "stac-ts";
 import type { StateCreator } from "zustand";
+import type { State } from ".";
 
 export interface HoverState {
   hoveredCollection: StacCollection | null;

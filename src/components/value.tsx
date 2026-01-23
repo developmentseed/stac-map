@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-import { LuExternalLink, LuFileJson, LuFiles } from "react-icons/lu";
 import {
   Badge,
   Button,
@@ -14,8 +12,18 @@ import {
   Portal,
   Stack,
 } from "@chakra-ui/react";
-import type { StacAsset } from "stac-ts";
+import { useEffect } from "react";
+import { LuExternalLink, LuFileJson, LuFiles } from "react-icons/lu";
 import type { HighlighterGeneric } from "shiki";
+import type { StacAsset } from "stac-ts";
+import { useStore } from "../store";
+import type { StacValue } from "../types/stac";
+import {
+  conformsToFreeTextCollectionSearch,
+  getLinkHref,
+  getStacValueTitle,
+  getThumbnailAsset,
+} from "../utils/stac";
 import Assets from "./assets";
 import Breadcrumbs from "./breadcrumbs";
 import Catalogs from "./catalogs";
@@ -31,14 +39,6 @@ import { Section } from "./section";
 import StacGeoparquetHref from "./stac-geoparquet-href";
 import StacGeoparquetItemId from "./stac-geoparquet-item-id";
 import Thumbnail from "./thumbnail";
-import { useStore } from "../store";
-import type { StacValue } from "../types/stac";
-import { conformsToFreeTextCollectionSearch } from "../utils/stac";
-import {
-  getLinkHref,
-  getStacValueTitle,
-  getThumbnailAsset,
-} from "../utils/stac";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({

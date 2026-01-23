@@ -1,8 +1,8 @@
-import { useEffect } from "react";
 import { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
-import { ResultError } from "./result-error";
+import { useEffect } from "react";
 import { useStacGeoparquetItem } from "../hooks/stac";
 import { useStore } from "../store";
+import { ResultError } from "./result-error";
 
 export default function StacGeoparquetItemId({
   id,

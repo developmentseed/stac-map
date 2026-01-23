@@ -1,11 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  LuFolderSymlink,
-  LuForward,
-  LuLoader,
-  LuPause,
-  LuPlay,
-} from "react-icons/lu";
 import {
   ActionBar,
   Button,
@@ -23,11 +15,19 @@ import {
   useInfiniteQuery,
   type UseInfiniteQueryResult,
 } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import {
+  LuFolderSymlink,
+  LuForward,
+  LuLoader,
+  LuPause,
+  LuPlay,
+} from "react-icons/lu";
 import type { StacCollection } from "stac-ts";
-import { ResultError } from "./result-error";
 import { useStore } from "../store";
 import type { StacCollections } from "../types/stac";
 import { getLinkHref } from "../utils/stac";
+import { ResultError } from "./result-error";
 
 export default function CollectionsHref({ href }: { href: string }) {
   const collections = useStore((state) => state.collections);

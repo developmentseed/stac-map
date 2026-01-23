@@ -1,5 +1,5 @@
-import type { State } from ".";
 import type { StateCreator } from "zustand";
+import type { State } from ".";
 
 export interface DatetimeFilter {
   start: Date;

@@ -1,13 +1,7 @@
-import { type RefObject, useEffect, useRef } from "react";
-import { useMemo, useState } from "react";
-import {
-  Map as MaplibreMap,
-  type MapRef,
-  useControl,
-} from "react-map-gl/maplibre";
 import { type DeckProps, Layer } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
+import { COGLayer } from "@developmentseed/deck.gl-geotiff";
 import {
   GeoArrowPolygonLayer,
   GeoArrowScatterplotLayer,
@@ -15,10 +9,15 @@ import {
 import bbox from "@turf/bbox";
 import bboxPolygon from "@turf/bbox-polygon";
 import { featureCollection } from "@turf/helpers";
-import "maplibre-gl/dist/maplibre-gl.css";
-import type { StacCollection } from "stac-ts";
-import { COGLayer } from "@developmentseed/deck.gl-geotiff";
 import type { BBox, Feature, FeatureCollection } from "geojson";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Map as MaplibreMap,
+  type MapRef,
+  useControl,
+} from "react-map-gl/maplibre";
+import type { StacCollection } from "stac-ts";
 import { useColorModeValue } from "../components/ui/color-mode";
 import { useStore } from "../store";
 import type { BBox2D, Color } from "../types/map";

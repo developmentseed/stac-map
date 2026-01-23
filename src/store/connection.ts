@@ -1,6 +1,6 @@
-import type { State } from ".";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import type { StateCreator } from "zustand";
+import type { State } from ".";
 
 export interface ConnectionState {
   connection: AsyncDuckDBConnection | null;

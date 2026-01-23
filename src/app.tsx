@@ -1,8 +1,8 @@
-import { useEffect } from "react";
-import { LuHeart } from "react-icons/lu";
 import { Box, Container, FileUpload, HStack, Link } from "@chakra-ui/react";
 import { CollecticonBrandDevelopmentSeed2 } from "@devseed-ui/collecticons-chakra";
 import { useDuckDb } from "duckdb-wasm-kit";
+import { useEffect } from "react";
+import { LuHeart } from "react-icons/lu";
 import Map from "./components/map";
 import Overlay from "./components/overlay";
 import { useStore } from "./store";

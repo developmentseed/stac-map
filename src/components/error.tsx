@@ -1,5 +1,5 @@
-import { getErrorMessage } from "react-error-boundary";
 import { AbsoluteCenter, Alert, Box, Button, Stack } from "@chakra-ui/react";
+import { getErrorMessage } from "react-error-boundary";
 
 export function ErrorComponent({
   error,

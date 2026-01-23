@@ -1,5 +1,3 @@
-import { type ReactNode, useState } from "react";
-import { LuChevronDown, LuChevronUp, LuList, LuSquare } from "react-icons/lu";
 import {
   Box,
   Collapsible,
@@ -9,6 +7,8 @@ import {
   SegmentGroup,
   Stack,
 } from "@chakra-ui/react";
+import { type ReactNode, useState } from "react";
+import { LuChevronDown, LuChevronUp, LuList, LuSquare } from "react-icons/lu";
 
 export type ListOrCard = "list" | "card";
 

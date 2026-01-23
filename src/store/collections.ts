@@ -1,6 +1,6 @@
-import type { State } from ".";
 import type { StacCollection } from "stac-ts";
 import type { StateCreator } from "zustand";
+import type { State } from ".";
 import type { DatetimeBounds } from "../types/stac";
 
 export interface CollectionsState {

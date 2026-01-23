@@ -1,5 +1,5 @@
-import { data, io } from "@geoarrow/geoarrow-js";
 import { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
+import { data, io } from "@geoarrow/geoarrow-js";
 import {
   Binary,
   Data,

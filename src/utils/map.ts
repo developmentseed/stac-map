@@ -1,5 +1,5 @@
-import type { SpatialExtent } from "stac-ts";
 import type { BBox } from "geojson";
+import type { SpatialExtent } from "stac-ts";
 import type { BBox2D } from "../types/map";
 
 export function sanitizeBbox(bbox: BBox | SpatialExtent): BBox2D {

@@ -1,5 +1,3 @@
-import { useEffect, useRef, useState } from "react";
-import { LuFilter } from "react-icons/lu";
 import {
   Checkbox,
   CloseButton,
@@ -7,10 +5,12 @@ import {
   InputGroup,
   Stack,
 } from "@chakra-ui/react";
+import { useEffect, useRef, useState } from "react";
+import { LuFilter } from "react-icons/lu";
 import type { StacCollection } from "stac-ts";
-import DatetimeSlider from "./datetime-slider";
 import { useStore } from "../store";
 import { isCollectionInBbox, isCollectionInDatetimes } from "../utils/stac";
+import DatetimeSlider from "./datetime-slider";
 
 export default function CollectionFilter({
   collections,

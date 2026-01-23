@@ -1,5 +1,5 @@
-import { type ReactNode } from "react";
 import { Badge, Menu, Portal, Span } from "@chakra-ui/react";
+import { type ReactNode } from "react";
 import { EXAMPLES } from "../constants";
 import { useStore } from "../store";
 

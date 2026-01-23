@@ -1,12 +1,11 @@
-import { useMemo } from "react";
 import { Breadcrumb, HStack } from "@chakra-ui/react";
+import { useMemo } from "react";
 import type { StacLink } from "stac-ts";
-import { StacIcon } from "./stac";
 import { useStacJson } from "../hooks/stac";
 import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
-import { getStacValueTitle, getStacValueType } from "../utils/stac";
-import { getLink } from "../utils/stac";
+import { getLink, getStacValueTitle, getStacValueType } from "../utils/stac";
+import { StacIcon } from "./stac";
 
 export default function Breadcrumbs({ value }: { value: StacValue }) {
   return (

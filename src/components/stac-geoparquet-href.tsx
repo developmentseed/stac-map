@@ -1,12 +1,12 @@
-import { useEffect } from "react";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
-import DatetimeSlider from "./datetime-slider";
-import { ResultError } from "./result-error";
+import { useEffect } from "react";
 import {
   useStacGeoparquetDatetimeBounds,
   useStacGeoparquetTable,
 } from "../hooks/stac";
 import { useStore } from "../store";
+import DatetimeSlider from "./datetime-slider";
+import { ResultError } from "./result-error";
 
 interface Props {
   href: string;

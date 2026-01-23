@@ -1,6 +1,6 @@
-import type { State } from ".";
 import type { StacItem } from "stac-ts";
 import type { StateCreator } from "zustand";
+import type { State } from ".";
 import type { StacSearch } from "../types/stac";
 
 export interface ItemsState {

@@ -1,14 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  LuForward,
-  LuLoader,
-  LuPause,
-  LuPlay,
-  LuSearch,
-  LuSettings,
-  LuX,
-} from "react-icons/lu";
-import { useMap } from "react-map-gl/maplibre";
 import {
   ActionBar,
   Alert,
@@ -32,13 +21,24 @@ import {
   useInfiniteQuery,
   type UseInfiniteQueryResult,
 } from "@tanstack/react-query";
-import type { StacCollection, StacItem } from "stac-ts";
 import type { BBox } from "geojson";
-import { Section } from "./section";
+import { useEffect, useMemo, useState } from "react";
+import {
+  LuForward,
+  LuLoader,
+  LuPause,
+  LuPlay,
+  LuSearch,
+  LuSettings,
+  LuX,
+} from "react-icons/lu";
+import { useMap } from "react-map-gl/maplibre";
+import type { StacCollection, StacItem } from "stac-ts";
 import { useStore } from "../store/index.ts";
 import type { StacItemCollection, StacSearch } from "../types/stac";
 import { sanitizeBbox } from "../utils/map.ts";
 import { fetchStac, getLinkHref } from "../utils/stac.ts";
+import { Section } from "./section";
 
 interface Props {
   href: string;
