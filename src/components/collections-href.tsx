@@ -24,7 +24,7 @@ import {
   type UseInfiniteQueryResult,
 } from "@tanstack/react-query";
 import type { StacCollection } from "stac-ts";
-import { ResultError } from "./ui/result-error";
+import { ResultError } from "./result-error";
 import { useStore } from "../store";
 import type { StacCollections } from "../types/stac";
 import { getLinkHref } from "../utils/stac";

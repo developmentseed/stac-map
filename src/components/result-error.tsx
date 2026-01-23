@@ -1,12 +1,6 @@
 import { Alert } from "@chakra-ui/react";
 
-export function ResultError({
-  title,
-  error,
-}: {
-  title: string;
-  error: Error;
-}) {
+export function ResultError({ title, error }: { title: string; error: Error }) {
   return (
     <Alert.Root status="error">
       <Alert.Indicator />

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
-import { ResultError } from "./ui/result-error";
+import { ResultError } from "./result-error";
 import { useStacGeoparquetItem, useStacGeoparquetTable } from "../hooks/stac";
 import { useStore } from "../store";
 
