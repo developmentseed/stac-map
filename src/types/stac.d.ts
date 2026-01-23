@@ -36,4 +36,4 @@ export interface StacSearch {
   limit?: number;
 }
 
-export type DatetimeBounds = { start: Date; end: Date };
+export type DatetimeBounds = { start: Date | null; end: Date | null };

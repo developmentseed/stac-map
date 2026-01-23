@@ -3,13 +3,16 @@ import { LuFilter } from "react-icons/lu";
 import {
   Checkbox,
   CloseButton,
+  HStack,
   Input,
   InputGroup,
+  Slider,
+  Span,
   Stack,
 } from "@chakra-ui/react";
 import type { StacCollection } from "stac-ts";
 import { useStore } from "../store";
-import { isCollectionInBbox } from "../utils/stac";
+import { isCollectionInBbox, isCollectionInDatetimes } from "../utils/stac";
 
 export default function CollectionFilter({
   collections,
@@ -17,6 +20,10 @@ export default function CollectionFilter({
   collections: StacCollection[];
 }) {
   const bbox = useStore((store) => store.bbox);
+  const datetimeFilter = useStore((store) => store.datetimeFilter);
+  const collectionDatetimeBounds = useStore(
+    (store) => store.collectionDatetimeBounds
+  );
   const setFilteredCollections = useStore(
     (store) => store.setFilteredCollections
   );
@@ -29,10 +36,23 @@ export default function CollectionFilter({
       collections?.filter(
         (collection) =>
           matchesFilter(collection, searchValue) &&
-          (!filterViewport || !bbox || isCollectionInBbox(collection, bbox))
+          (!filterViewport || !bbox || isCollectionInBbox(collection, bbox)) &&
+          (!datetimeFilter ||
+            isCollectionInDatetimes(
+              collection,
+              datetimeFilter.start,
+              datetimeFilter.end
+            ))
       ) || null
     );
-  }, [collections, setFilteredCollections, searchValue, bbox, filterViewport]);
+  }, [
+    collections,
+    setFilteredCollections,
+    searchValue,
+    bbox,
+    filterViewport,
+    datetimeFilter,
+  ]);
 
   return (
     <Stack gap={4}>
@@ -64,9 +84,15 @@ export default function CollectionFilter({
         size={"sm"}
       >
         <Checkbox.HiddenInput />
-        <Checkbox.Control />
         <Checkbox.Label>Filter by viewport</Checkbox.Label>
+        <Checkbox.Control />
       </Checkbox.Root>
+      {collectionDatetimeBounds?.start && collectionDatetimeBounds?.end && (
+        <CollectionDatetimeSlider
+          start={collectionDatetimeBounds.start}
+          end={collectionDatetimeBounds.end}
+        />
+      )}
     </Stack>
   );
 }
@@ -76,5 +102,41 @@ function matchesFilter(collection: StacCollection, filter: string) {
   return (
     collection.id.toLowerCase().includes(lowerCaseFilter) ||
     collection.title?.toLowerCase().includes(lowerCaseFilter)
+  );
+}
+
+function CollectionDatetimeSlider({ start, end }: { start: Date; end: Date }) {
+  const [value, setValue] = useState([start.getTime(), end.getTime()]);
+  const setDatetimeFilter = useStore((store) => store.setDatetimeFilter);
+
+  return (
+    <Slider.Root
+      value={value}
+      min={start.getTime()}
+      max={end.getTime()}
+      onValueChange={(e) => {
+        setValue(e.value);
+      }}
+      onValueChangeEnd={() => {
+        setDatetimeFilter({
+          start: new Date(value[0]),
+          end: new Date(value[1]),
+        });
+      }}
+    >
+      <HStack>
+        <Slider.Label>Filter by datetime</Slider.Label>
+      </HStack>
+      <Slider.Control>
+        <Slider.Track>
+          <Slider.Range />
+        </Slider.Track>
+        <Slider.Thumbs />
+      </Slider.Control>
+      <HStack justify={"space-between"}>
+        <Span>{new Date(value[0]).toLocaleDateString()}</Span>
+        <Span>{new Date(value[1]).toLocaleDateString()}</Span>
+      </HStack>
+    </Slider.Root>
   );
 }

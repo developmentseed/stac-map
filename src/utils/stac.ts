@@ -191,3 +191,27 @@ export function conformsToFreeTextCollectionSearch(value: StacValue) {
     );
   });
 }
+
+export function getCollectionStartDatetime(collection: StacCollection) {
+  const start = collection.extent?.temporal?.interval[0]?.[0];
+  return start ? new Date(start) : null;
+}
+
+export function getCollectionEndDatetime(collection: StacCollection) {
+  const end = collection.extent?.temporal?.interval[0]?.[1];
+  return end ? new Date(end) : null;
+}
+
+export function isCollectionInDatetimes(
+  collection: StacCollection,
+  start: Date,
+  end: Date
+) {
+  const collectionStart = getCollectionStartDatetime(collection);
+  const collectionEnd = getCollectionEndDatetime(collection);
+
+  return !(
+    (collectionEnd && collectionEnd < start) ||
+    (collectionStart && collectionStart > end)
+  );
+}
