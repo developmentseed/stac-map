@@ -81,7 +81,7 @@ function PickedItemPanel({ pickedItem }: { pickedItem: StacItem }) {
 
 function ValuePanel({ value }: { value: StacValue }) {
   const header = (
-    <HStack>
+    <HStack truncate>
       <StacIcon value={value} /> {getStacValueId(value)}{" "}
     </HStack>
   );
@@ -109,7 +109,7 @@ function LocalHrefPanel({ href }: { href: string }) {
   ) : (
     <BasePanel
       header={
-        <HStack>
+        <HStack truncate>
           <LuFileWarning /> Could not load {href}
         </HStack>
       }

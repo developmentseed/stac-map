@@ -1,69 +1,18 @@
+import { useMemo } from "react";
 import { Breadcrumb, HStack } from "@chakra-ui/react";
+import type { StacLink } from "stac-ts";
+import { StacIcon } from "./stac";
+import { useStacJson } from "../hooks/stac";
 import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
-import { getStacValueType } from "../utils/stac";
-import { getLinkHref } from "../utils/stac";
+import { getStacValueTitle, getStacValueType } from "../utils/stac";
+import { getLink } from "../utils/stac";
 
 export default function Breadcrumbs({ value }: { value: StacValue }) {
-  const setHref = useStore((store) => store.setHref);
-  const selfHref = getLinkHref(value, "self");
-  const rootHref = getLinkHref(value, "root");
-  const parentHref = getLinkHref(value, "parent");
-  const collectionHref = getLinkHref(value, "collection");
-
   return (
     <Breadcrumb.Root size={"sm"}>
       <Breadcrumb.List>
-        {rootHref && rootHref !== selfHref && (
-          <>
-            <Breadcrumb.Item>
-              <Breadcrumb.Link
-                onClick={(e) => {
-                  e.preventDefault();
-                  setHref(rootHref);
-                }}
-                href="#"
-              >
-                Root
-              </Breadcrumb.Link>
-            </Breadcrumb.Item>
-            <Breadcrumb.Separator />
-          </>
-        )}
-        {parentHref &&
-          parentHref !== rootHref &&
-          parentHref !== collectionHref && (
-            <>
-              <Breadcrumb.Item>
-                <Breadcrumb.Link
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setHref(parentHref);
-                  }}
-                  href="#"
-                >
-                  Parent
-                </Breadcrumb.Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Separator />
-            </>
-          )}
-        {collectionHref && collectionHref !== rootHref && (
-          <>
-            <Breadcrumb.Item>
-              <Breadcrumb.Link
-                onClick={(e) => {
-                  e.preventDefault();
-                  setHref(collectionHref);
-                }}
-                href="#"
-              >
-                Collection
-              </Breadcrumb.Link>
-            </Breadcrumb.Item>
-            <Breadcrumb.Separator />
-          </>
-        )}
+        {getBreadcrumbLink(value)}
         <Breadcrumb.Item>
           <Breadcrumb.CurrentLink>
             <HStack>{getStacValueType(value)}</HStack>
@@ -71,5 +20,54 @@ export default function Breadcrumbs({ value }: { value: StacValue }) {
         </Breadcrumb.Item>
       </Breadcrumb.List>
     </Breadcrumb.Root>
+  );
+}
+
+function BreadcrumbLink({ link }: { link: StacLink }) {
+  const setHref = useStore((store) => store.setHref);
+  const result = useStacJson({ href: link.href });
+  const text = useMemo(() => {
+    return result.data ? (
+      <HStack gap={1}>
+        <StacIcon value={result.data} />
+        {getStacValueTitle(result.data)}
+      </HStack>
+    ) : (
+      link.rel.charAt(0).toUpperCase() + link.rel.slice(1)
+    );
+  }, [result.data, link.rel]);
+
+  return (
+    <>
+      {result.data && getBreadcrumbLink(result.data)}
+      <Breadcrumb.Item>
+        <Breadcrumb.Link
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            setHref(link.href);
+          }}
+        >
+          {text}
+        </Breadcrumb.Link>
+      </Breadcrumb.Item>
+      <Breadcrumb.Separator />
+    </>
+  );
+}
+
+function getBreadcrumbLink(value: StacValue) {
+  const selfLink = getLink(value, "self");
+  const rootLink = getLink(value, "root");
+  const parentLink = getLink(value, "parent");
+  const collectionLink = getLink(value, "collection");
+
+  return collectionLink ? (
+    <BreadcrumbLink link={collectionLink} />
+  ) : parentLink && parentLink.href !== rootLink?.href ? (
+    <BreadcrumbLink link={parentLink} />
+  ) : (
+    rootLink &&
+    rootLink.href !== selfLink?.href && <BreadcrumbLink link={rootLink} />
   );
 }
