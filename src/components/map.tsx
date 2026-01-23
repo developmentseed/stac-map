@@ -51,6 +51,7 @@ export default function Map() {
   const searchItems = useStore((store) => store.searchItems);
   const geotiffHref = useStore((store) => store.geotiffHref);
   const stacGeoparquetTable = useStore((store) => store.stacGeoparquetTable);
+  const stacGeoparquetItemId = useStore((store) => store.stacGeoparquetItemId);
   const setStacGeoparquetItemId = useStore(
     (store) => store.setStacGeoparquetItemId
   );
@@ -92,17 +93,32 @@ export default function Map() {
   }, [collections, filteredCollections]);
 
   useEffect(() => {
-    if (value && mapRef.current && isMapLoaded) {
+    if (mapRef.current && isMapLoaded) {
       const padding = {
         top: window.innerHeight / 10,
         bottom: window.innerHeight / 20,
         right: window.innerWidth / 20,
         left: window.innerWidth / 20 + window.innerWidth / 3,
       };
-      const bbox = getBbox(value, collections);
-      if (bbox) mapRef.current.fitBounds(bbox, { linear: true, padding });
+      const bounds = getBbox(
+        value,
+        collections,
+        pickedItem as Feature | null,
+        searchItems as Feature[] | null,
+        items as Feature[] | null,
+        stacGeoparquetItemId
+      );
+      if (bounds) mapRef.current.fitBounds(bounds, { linear: true, padding });
     }
-  }, [value, isMapLoaded, collections]);
+  }, [
+    value,
+    isMapLoaded,
+    collections,
+    pickedItem,
+    searchItems,
+    items,
+    stacGeoparquetItemId,
+  ]);
 
   const itemsFillColor = [0, 0, 0, 0] as [number, number, number, number];
 
@@ -324,9 +340,25 @@ function toGeoJson(value: StacValue) {
 }
 
 function getBbox(
-  value: StacValue,
-  collections: StacCollection[] | null
+  value: StacValue | null,
+  collections: StacCollection[] | null,
+  pickedItem: Feature | null,
+  searchItems: Feature[] | null,
+  items: Feature[] | null,
+  stacGeoparquetItemId: string | null
 ): BBox2D | undefined {
+  if (pickedItem) {
+    return sanitizeBbox(bbox(pickedItem) as BBox2D);
+  }
+  if (searchItems && searchItems.length > 0) {
+    return sanitizeBbox(bbox(featureCollection(searchItems)) as BBox2D);
+  }
+  if (items && items.length > 0) {
+    return sanitizeBbox(bbox(featureCollection(items)) as BBox2D);
+  }
+  if (!value || stacGeoparquetItemId) {
+    return undefined;
+  }
   let valueBbox;
   switch (value.type) {
     case "Catalog":

@@ -79,7 +79,7 @@ export default function Value({ value }: { value: StacValue }) {
   return (
     <>
       <Stack gap={4}>
-        <Heading>
+        <Heading wordBreak={"break-all"}>
           <HStack gap={4}>
             {getStacValueTitle(value)}
             {version && <Badge variant={"surface"}>{version}</Badge>}

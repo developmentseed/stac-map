@@ -18,7 +18,7 @@ function ItemLink({ link }: { link: StacLink }) {
   const result = useStacJson({ href: link.href });
 
   useEffect(() => {
-    if (result.data) addItem(result.data);
+    if (result.data?.type === "Feature") addItem(result.data);
   }, [result.data, addItem]);
 
   return null;
