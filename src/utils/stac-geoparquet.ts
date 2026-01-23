@@ -9,7 +9,7 @@ import {
   vectorFromArray,
 } from "apache-arrow";
 import * as stacWasm from "stac-wasm";
-import type { DatetimeFilter, DatetimeState } from "../store/datetime";
+import type { DatetimeFilter } from "../store/datetime";
 import type { StacItemCollection } from "../types/stac";
 
 export const SUPPORTED_GEOMETRY_TYPES = ["point", "polygon"] as const;
