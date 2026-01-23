@@ -1,7 +1,7 @@
 import type { State } from ".";
 import type { StateCreator } from "zustand";
 
-interface DatetimeFilter {
+export interface DatetimeFilter {
   start: Date;
   end: Date;
 }

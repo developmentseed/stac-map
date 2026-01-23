@@ -9,6 +9,7 @@ import {
   vectorFromArray,
 } from "apache-arrow";
 import * as stacWasm from "stac-wasm";
+import type { DatetimeFilter, DatetimeState } from "../store/datetime";
 import type { StacItemCollection } from "../types/stac";
 
 export const SUPPORTED_GEOMETRY_TYPES = ["point", "polygon"] as const;
@@ -39,14 +40,42 @@ export async function fetchStacGeoparquet({
   };
 }
 
-export async function fetchStacGeoparquetTable({
+export async function fetchStacGeoparquetDatetimeBounds({
   href,
   connection,
 }: {
   href: string;
   connection: AsyncDuckDBConnection;
+}): Promise<{ start: Date; end: Date } | null> {
+  const { startDatetimeColumnName, endDatetimeColumnName } =
+    await fetchStacGeoparquetDatetimeColumns(href, connection);
+  if (!startDatetimeColumnName || !endDatetimeColumnName) return null;
+  const query = `SELECT MIN(${startDatetimeColumnName}) as start, MAX(${endDatetimeColumnName}) as end FROM read_parquet('${href}')`;
+  const result = await connection.query(query);
+  const row = result.toArray().map((row) => row.toJSON())[0];
+  return {
+    start: new Date(row.start),
+    end: new Date(row.end),
+  };
+}
+
+export async function fetchStacGeoparquetTable({
+  href,
+  connection,
+  datetimeFilter,
+}: {
+  href: string;
+  connection: AsyncDuckDBConnection;
+  datetimeFilter: DatetimeFilter | null;
 }) {
-  const query = `SELECT ST_AsWKB(geometry) AS geometry, ST_GeometryType(geometry) AS geometry_type, id FROM read_parquet('${href}')`;
+  let query = `SELECT ST_AsWKB(geometry) AS geometry, ST_GeometryType(geometry) AS geometry_type, id FROM read_parquet('${href}')`;
+  if (datetimeFilter) {
+    const { startDatetimeColumnName, endDatetimeColumnName } =
+      await fetchStacGeoparquetDatetimeColumns(href, connection);
+    if (!startDatetimeColumnName || !endDatetimeColumnName) return null;
+    const { start, end } = datetimeFilter;
+    query += ` WHERE ${startDatetimeColumnName} >= '${start.toISOString()}' AND ${endDatetimeColumnName} <= '${end.toISOString()}'`;
+  }
   const result = await connection.query(query);
   const geometry: Uint8Array[] = result.getChildAt(0)?.toArray();
   const geometryType = result.getChildAt(1)?.toArray()[0]?.toLowerCase() as
@@ -119,4 +148,32 @@ export async function fetchStacGeoparquetItem({
   item.geometry = JSON.parse(item.geometry);
   return item;
   return null;
+}
+
+async function fetchStacGeoparquetDatetimeColumns(
+  href: string,
+  connection: AsyncDuckDBConnection
+) {
+  const describeResult = await connection.query(
+    `DESCRIBE SELECT * FROM read_parquet('${href}')`
+  );
+  const describe = describeResult.toArray().map((row) => row.toJSON());
+  const columnNames = describe.map((row) => row.column_name);
+  const containsDates: boolean = columnNames.some((columnName: string) => {
+    return columnName.includes("date");
+  });
+
+  if (!containsDates)
+    return {
+      startDatetimeColumnName: null,
+      endDatetimeColumnName: null,
+    };
+
+  const startDatetimeColumnName = columnNames.includes("start_datetime")
+    ? "start_datetime"
+    : "datetime";
+  const endDatetimeColumnName = columnNames.includes("end_datetime")
+    ? "start_datetime"
+    : "datetime";
+  return { startDatetimeColumnName, endDatetimeColumnName };
 }

@@ -1,8 +1,10 @@
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { useQuery } from "@tanstack/react-query";
+import { type DatetimeFilter } from "../store/datetime";
 import { fetchStac } from "../utils/stac";
 import {
   fetchStacGeoparquet,
+  fetchStacGeoparquetDatetimeBounds,
   fetchStacGeoparquetItem,
   fetchStacGeoparquetTable,
 } from "../utils/stac-geoparquet";
@@ -47,7 +49,7 @@ export function useStacGeoparquet({
   });
 }
 
-export function useStacGeoparquetTable({
+export function useStacGeoparquetDatetimeBounds({
   href,
   connection,
 }: {
@@ -55,10 +57,32 @@ export function useStacGeoparquetTable({
   connection: AsyncDuckDBConnection;
 }) {
   return useQuery({
-    queryKey: ["stac-geoparquet-table", href],
+    queryKey: ["stac-geoparquet-datetime-bounds", href],
     queryFn: async () => {
-      return await fetchStacGeoparquetTable({ href, connection });
+      return await fetchStacGeoparquetDatetimeBounds({ href, connection });
     },
+  });
+}
+
+export function useStacGeoparquetTable({
+  href,
+  connection,
+  datetimeFilter,
+}: {
+  href: string;
+  connection: AsyncDuckDBConnection;
+  datetimeFilter: DatetimeFilter | null;
+}) {
+  return useQuery({
+    queryKey: ["stac-geoparquet-table", href, datetimeFilter],
+    queryFn: async () => {
+      return await fetchStacGeoparquetTable({
+        href,
+        connection,
+        datetimeFilter,
+      });
+    },
+    placeholderData: (previousData) => previousData,
   });
 }
 

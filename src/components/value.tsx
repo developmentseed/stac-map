@@ -29,6 +29,7 @@ import Items from "./items";
 import RootHref from "./root-href";
 import { Section } from "./section";
 import StacGeoparquetHref from "./stac-geoparquet-href";
+import StacGeoparquetItemId from "./stac-geoparquet-item-id";
 import Thumbnail from "./thumbnail";
 import { useStore } from "../store";
 import type { StacValue } from "../types/stac";
@@ -61,6 +62,7 @@ export default function Value({ value }: { value: StacValue }) {
   const href = useStore((store) => store.href);
   const hrefIsParquet = useStore((store) => store.hrefIsParquet);
   const connection = useStore((store) => store.connection);
+  const stacGeoparquetItemId = useStore((store) => store.stacGeoparquetItemId);
 
   const collectionsHref = getLinkHref(value, "data");
   const childrenLinks = value.links?.filter((link) => link.rel === "child");
@@ -142,6 +144,14 @@ export default function Value({ value }: { value: StacValue }) {
 
         {href && hrefIsParquet && connection && (
           <StacGeoparquetHref href={href} connection={connection} />
+        )}
+
+        {stacGeoparquetItemId && connection && href && (
+          <StacGeoparquetItemId
+            id={stacGeoparquetItemId}
+            href={href}
+            connection={connection}
+          />
         )}
 
         {(value.assets as { [k: string]: StacAsset }) && (
