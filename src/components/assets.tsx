@@ -1,17 +1,43 @@
 import { useEffect, useState } from "react";
-import { LuCircle, LuCircleDot, LuDownload, LuFileImage } from "react-icons/lu";
+import {
+  LuChevronDown,
+  LuCircle,
+  LuCircleDot,
+  LuDownload,
+  LuFileImage,
+} from "react-icons/lu";
 import {
   Badge,
+  Button,
   ButtonGroup,
   Clipboard,
   Group,
   IconButton,
+  Menu,
+  Portal,
   RadioCard,
   Table,
 } from "@chakra-ui/react";
 import type { StacAsset } from "stac-ts";
 import { type ListOrCard, Section } from "./section";
 import { useStore } from "../store";
+
+interface AlternateAsset {
+  href: string;
+  title?: string;
+}
+
+interface Band {
+  name?: string;
+  common_name?: string;
+  description?: string;
+}
+
+type AssetWithAlternates = StacAsset & {
+  alternate?: { [key: string]: AlternateAsset };
+  bands?: Band[];
+  "eo:bands"?: Band[];
+};
 
 export default function Assets({
   assets,
@@ -32,7 +58,8 @@ export default function Assets({
 
   useEffect(() => {
     if (value) {
-      setGeotiffHref(assets[value]?.href);
+      const asset = assets[value] as AssetWithAlternates | undefined;
+      setGeotiffHref(asset ? getGeotiffHref(asset) : null);
     } else {
       setGeotiffHref(null);
     }
@@ -113,9 +140,10 @@ function AssetCard({
   asset,
 }: {
   assetKey: string;
-  asset: StacAsset;
+  asset: AssetWithAlternates;
 }) {
   const scheme = asset.href.split(":").at(0);
+  const bandCount = getBandCount(asset);
 
   return (
     <RadioCard.Item value={assetKey} width="full" disabled={!isGeotiff(asset)}>
@@ -125,6 +153,11 @@ function AssetCard({
           <RadioCard.ItemText>{asset.title || assetKey}</RadioCard.ItemText>
           <RadioCard.ItemDescription>
             <Badge>{scheme}</Badge>
+            {bandCount !== null && (
+              <Badge>
+                {bandCount} band{bandCount === 1 ? "" : "s"}
+              </Badge>
+            )}
             {asset.type && <Badge>{asset.type}</Badge>}
           </RadioCard.ItemDescription>
         </RadioCard.ItemContent>
@@ -144,12 +177,13 @@ function AssetRow({
   onSelect,
 }: {
   assetKey: string;
-  asset: StacAsset;
+  asset: AssetWithAlternates;
   selected: boolean;
   onSelect: () => void;
 }) {
   const scheme = asset.href.split(":").at(0);
   const geotiff = isGeotiff(asset);
+  const bandCount = getBandCount(asset);
 
   return (
     <Table.Row
@@ -163,6 +197,11 @@ function AssetRow({
       <Table.Cell>{asset.title || assetKey}</Table.Cell>
       <Table.Cell>
         <Badge>{asset.type || scheme}</Badge>
+        {bandCount !== null && (
+          <Badge ml={1}>
+            {bandCount} band{bandCount === 1 ? "" : "s"}
+          </Badge>
+        )}
       </Table.Cell>
       <Table.Cell>
         <AssetActions asset={asset} scheme={scheme} />
@@ -175,9 +214,11 @@ function AssetActions({
   asset,
   scheme,
 }: {
-  asset: StacAsset;
+  asset: AssetWithAlternates;
   scheme: string | undefined;
 }) {
+  const alternates = asset.alternate ? Object.entries(asset.alternate) : [];
+
   return (
     <ButtonGroup size="xs" variant="plain">
       <Clipboard.Root value={asset.href}>
@@ -194,13 +235,90 @@ function AssetActions({
           </a>
         </IconButton>
       )}
+      {alternates.length > 0 && (
+        <Menu.Root>
+          <Menu.Trigger asChild>
+            <Button size="xs" variant="plain">
+              Alternates
+              <LuChevronDown />
+            </Button>
+          </Menu.Trigger>
+          <Portal>
+            <Menu.Positioner>
+              <Menu.Content>
+                {alternates.map(([key, alternate]) => {
+                  const altScheme = alternate.href.split(":").at(0);
+                  return (
+                    <Menu.Item key={key} value={key} asChild>
+                      <a
+                        href={alternate.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {alternate.title || key}
+                        {altScheme && <Badge ml={2}>{altScheme}</Badge>}
+                      </a>
+                    </Menu.Item>
+                  );
+                })}
+              </Menu.Content>
+            </Menu.Positioner>
+          </Portal>
+        </Menu.Root>
+      )}
     </ButtonGroup>
   );
 }
 
-function isGeotiff(asset: StacAsset) {
-  return (
-    asset.type?.startsWith("image/tiff; application=geotiff") &&
-    asset.href.startsWith("http")
-  );
+function getBandCount(asset: AssetWithAlternates): number | null {
+  const bands = asset.bands || asset["eo:bands"];
+  return bands ? bands.length : null;
+}
+
+function hasValidBandCount(asset: AssetWithAlternates): boolean {
+  const bandCount = getBandCount(asset);
+  if (bandCount === null) {
+    return true;
+  }
+  return bandCount === 3 || bandCount === 4;
+}
+
+function hasHttpHref(asset: AssetWithAlternates): boolean {
+  if (asset.href.startsWith("http")) {
+    return true;
+  }
+  if (asset.alternate) {
+    return Object.values(asset.alternate).some((alt) =>
+      alt.href.startsWith("http")
+    );
+  }
+  return false;
+}
+
+function isGeotiff(asset: AssetWithAlternates) {
+  if (!asset.type?.startsWith("image/tiff; application=geotiff")) {
+    return false;
+  }
+  if (!hasValidBandCount(asset)) {
+    return false;
+  }
+  return hasHttpHref(asset);
+}
+
+function getGeotiffHref(asset: AssetWithAlternates): string | null {
+  if (!isGeotiff(asset)) {
+    return null;
+  }
+  if (asset.href.startsWith("http")) {
+    return asset.href;
+  }
+  if (asset.alternate) {
+    const httpAlternate = Object.values(asset.alternate).find((alt) =>
+      alt.href.startsWith("http")
+    );
+    if (httpAlternate) {
+      return httpAlternate.href;
+    }
+  }
+  return null;
 }

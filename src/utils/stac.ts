@@ -53,7 +53,8 @@ export function getSelfHref(value: StacValue) {
 
 export function getThumbnailAsset(value: StacValue) {
   if ("assets" in value) {
-    return (value.assets as { [key: string]: StacAsset })["thumbnail"];
+    const asset = (value.assets as { [key: string]: StacAsset })["thumbnail"];
+    return asset?.href.startsWith("http") && asset;
   }
 }
 
