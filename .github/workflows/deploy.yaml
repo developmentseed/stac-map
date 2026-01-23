@@ -12,7 +12,6 @@ concurrency:
 jobs:
   build:
     name: Build
-    needs: ci
     runs-on: ubuntu-latest
     permissions:
       contents: read
