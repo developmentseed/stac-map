@@ -1,6 +1,6 @@
 import { StacItem } from "stac-ts";
 import { expect, test } from "vitest";
-import { makeHrefsAbsolute, toAbsoluteUrl } from "../src/utils/stac";
+import { makeHrefsAbsolute, toAbsoluteUrl } from "../../src/utils/stac";
 
 test("should preserve UTF8 characters while making URLS absolute", async () => {
   expect(toAbsoluteUrl("🦄.tiff", new URL("s3://some-bucket"))).equals(
