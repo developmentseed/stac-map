@@ -50,6 +50,7 @@ export default function Map() {
   const searchItems = useStore((store) => store.searchItems);
   const geotiffHref = useStore((store) => store.geotiffHref);
   const stacGeoparquetTable = useStore((store) => store.stacGeoparquetTable);
+  const stacGeoparquetItemId = useStore((store) => store.stacGeoparquetItemId);
   const setStacGeoparquetItemId = useStore(
     (store) => store.setStacGeoparquetItemId
   );
@@ -57,6 +58,8 @@ export default function Map() {
   const fillColor = useStore((store) => store.fillColor);
   const lineColor = useStore((store) => store.lineColor);
   const lineWidth = useStore((store) => store.lineWidth);
+  const [hoveredStacGeoparquetItemId, setHoveredStacGeoparquetItemId] =
+    useState<string | null>(null);
 
   const inverseFillColor = [
     256 - fillColor[0],
@@ -101,6 +104,8 @@ export default function Map() {
     }
   }, [value, isMapLoaded, collections]);
 
+  const itemsFillColor = [0, 0, 0, 0] as [number, number, number, number];
+
   const layers: Layer[] = [
     new GeoJsonLayer({
       id: "picked-item",
@@ -135,7 +140,7 @@ export default function Map() {
       id: "search-items",
       data: searchItems ? featureCollection(searchItems as Feature[]) : [],
       filled: true,
-      getFillColor: geotiffHref ? [0, 0, 0, 0] : fillColor,
+      getFillColor: itemsFillColor,
       getLineColor: lineColor,
       getLineWidth: lineWidth,
       lineWidthUnits: "pixels",
@@ -203,13 +208,24 @@ export default function Map() {
             id: "stac-geoparquet-polygon",
             data: stacGeoparquetTable.table,
             filled: true,
-            getFillColor: fillColor,
+            getFillColor: ({ index, data }) => {
+              return data.data.get(index)?.["id"] ===
+                hoveredStacGeoparquetItemId
+                ? fillColor
+                : itemsFillColor;
+            },
             getLineColor: lineColor,
             getLineWidth: 2,
             lineWidthUnits: "pixels",
             pickable: true,
             onClick: (info) => {
               setStacGeoparquetItemId(info.object?.id);
+            },
+            onHover: (info) => {
+              setHoveredStacGeoparquetItemId(info.object?.id);
+            },
+            updateTriggers: {
+              getFillColor: [hoveredStacGeoparquetItemId],
             },
           })
     );
