@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { LuHeart } from "react-icons/lu";
-import { MapProvider } from "react-map-gl/maplibre";
 import { Box, Container, FileUpload, HStack, Link } from "@chakra-ui/react";
 import { CollecticonBrandDevelopmentSeed2 } from "@devseed-ui/collecticons-chakra";
 import { useDuckDb } from "duckdb-wasm-kit";
@@ -55,7 +54,7 @@ export default function App() {
   }, [db, setConnection]);
 
   return (
-    <MapProvider>
+    <>
       <Box h={"100dvh"}>
         <FileUpload.Root
           unstyled={true}
@@ -104,6 +103,6 @@ export default function App() {
           Development Seed <CollecticonBrandDevelopmentSeed2 />
         </Link>
       </HStack>
-    </MapProvider>
+    </>
   );
 }
