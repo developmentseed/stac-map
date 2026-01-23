@@ -13,8 +13,8 @@ export default function App() {
   const href = useStore((state) => state.href);
   const setHref = useStore((state) => state.setHref);
   const setUploadedFile = useStore((state) => state.setUploadedFile);
-  const { db } = useDuckDb();
   const setConnection = useStore((state) => state.setConnection);
+  const { db } = useDuckDb();
 
   useEffect(() => {
     if (href && getCurrentHref() != href)
