@@ -356,7 +356,7 @@ function getBbox(
   if (items && items.length > 0) {
     return sanitizeBbox(bbox(featureCollection(items)) as BBox2D);
   }
-  if (!value) {
+  if (!value || stacGeoparquetItemId) {
     return undefined;
   }
   let valueBbox;
