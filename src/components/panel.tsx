@@ -60,19 +60,25 @@ function PickedItemPanel({ pickedItem }: { pickedItem: StacItem }) {
   const href = getSelfHref(pickedItem);
 
   const header = (
-    <HStack>
-      <HStack>
-        <StacIcon value={pickedItem} />{" "}
-        <Span truncate>{getStacValueId(pickedItem)} </Span>
-      </HStack>
-      <Box flex={1} />
-      {href && (
-        <IconButton variant={"subtle"} size={"2xs"} m={0}>
-          <LuArrowRight onClick={() => setHref(href)} />
-        </IconButton>
-      )}
-      <CloseButton size={"2xs"} onClick={() => clearPickedItem()} />
-    </HStack>
+    <PanelHeader
+      icon={<StacIcon value={pickedItem} />}
+      actions={
+        <>
+          {href && (
+            <IconButton
+              variant="subtle"
+              size="2xs"
+              onClick={() => setHref(href)}
+            >
+              <LuArrowRight />
+            </IconButton>
+          )}
+          <CloseButton size="2xs" onClick={() => clearPickedItem()} />
+        </>
+      }
+    >
+      {getStacValueId(pickedItem)}
+    </PanelHeader>
   );
   return (
     <BasePanel header={header}>
@@ -83,9 +89,9 @@ function PickedItemPanel({ pickedItem }: { pickedItem: StacItem }) {
 
 function ValuePanel({ value }: { value: StacValue }) {
   const header = (
-    <HStack truncate>
-      <StacIcon value={value} /> {getStacValueId(value)}{" "}
-    </HStack>
+    <PanelHeader icon={<StacIcon value={value} />}>
+      {getStacValueId(value)}
+    </PanelHeader>
   );
   return (
     <BasePanel header={header}>
@@ -111,9 +117,9 @@ function LocalHrefPanel({ href }: { href: string }) {
   ) : (
     <BasePanel
       header={
-        <HStack truncate>
-          <LuFileWarning /> Could not load {href}
-        </HStack>
+        <PanelHeader icon={<LuFileWarning />}>
+          Could not load {href}
+        </PanelHeader>
       }
     >
       <Alert.Root status={"error"}>
@@ -145,11 +151,7 @@ function StacGeoparquetHrefPanel({ href }: { href: string }) {
     <StacGeoparquetHrefConnectionPanel href={href} connection={connection} />
   ) : (
     <BasePanel
-      header={
-        <HStack>
-          <LuBird /> Initializing DuckDB
-        </HStack>
-      }
+      header={<PanelHeader icon={<LuBird />}>Initializing DuckDB</PanelHeader>}
     >
       <SkeletonText />
     </BasePanel>
@@ -178,19 +180,21 @@ function LoadingPanel({
   error,
 }: { href: string } & UseQueryResult) {
   const header = (
-    <HStack truncate>
-      {error ? (
-        <>
-          <LuFileWarning /> Error loading {href}
-        </>
-      ) : isFetching ? (
-        <>
-          <Spinner size="xs" mr={1} /> Fetching {href}
-        </>
-      ) : (
-        "stac-map"
-      )}
-    </HStack>
+    <PanelHeader
+      icon={
+        error ? (
+          <LuFileWarning />
+        ) : isFetching ? (
+          <Spinner size="xs" />
+        ) : undefined
+      }
+    >
+      {error
+        ? `Error loading ${href}`
+        : isFetching
+          ? `Fetching ${href}`
+          : "stac-map"}
+    </PanelHeader>
   );
 
   return (
@@ -205,6 +209,26 @@ function LoadingPanel({
         </Alert.Root>
       )) || <SkeletonText />}
     </BasePanel>
+  );
+}
+
+function PanelHeader({
+  icon,
+  children,
+  actions,
+}: {
+  icon?: ReactNode;
+  children: ReactNode;
+  actions?: ReactNode;
+}) {
+  return (
+    <HStack>
+      {icon}
+      <Span flex={1} truncate>
+        {children}
+      </Span>
+      {actions}
+    </HStack>
   );
 }
 

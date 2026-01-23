@@ -63,7 +63,10 @@ export default function Assets({
       if (new URL(geotiffHref).hostname.endsWith("blob.core.windows.net")) {
         // Assume it's the planetary computer and try to get a SAS token
         (async () => {
-          setGeotiffHref(await fetchPlanetaryComputerSignedHref(geotiffHref));
+          const signedHref =
+            await fetchPlanetaryComputerSignedHref(geotiffHref);
+          if (signedHref) setGeotiffHref(signedHref);
+          else setGeotiffHref(geotiffHref);
         })();
       } else {
         setGeotiffHref(geotiffHref);
