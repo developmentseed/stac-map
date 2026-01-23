@@ -140,7 +140,7 @@ export default function Value({ value }: { value: StacValue }) {
         </Breadcrumb.Root>
 
         <HStack>
-          <ButtonGroup variant={"subtle"} size="xs">
+          <ButtonGroup variant={"surface"} size="xs">
             {selfHref && (
               <Button asChild>
                 <a
