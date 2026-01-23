@@ -47,6 +47,7 @@ export default function Map() {
   const setHoveredItem = useStore((store) => store.setHoveredItem);
   const pickedItem = useStore((store) => store.pickedItem);
   const setPickedItem = useStore((store) => store.setPickedItem);
+  const items = useStore((store) => store.items);
   const searchItems = useStore((store) => store.searchItems);
   const geotiffHref = useStore((store) => store.geotiffHref);
   const stacGeoparquetTable = useStore((store) => store.stacGeoparquetTable);
@@ -152,6 +153,22 @@ export default function Map() {
       },
     }),
     new GeoJsonLayer({
+      id: "items",
+      data: items ? featureCollection(items as Feature[]) : [],
+      filled: true,
+      getFillColor: itemsFillColor,
+      getLineColor: lineColor,
+      getLineWidth: lineWidth,
+      lineWidthUnits: "pixels",
+      pickable: true,
+      onHover: (e) => {
+        setHoveredItem(e.object);
+      },
+      onClick: (e) => {
+        setPickedItem(e.object);
+      },
+    }),
+    new GeoJsonLayer({
       id: "collections",
       data: collectionsGeoJson,
       filled: true,
@@ -180,7 +197,7 @@ export default function Map() {
     new GeoJsonLayer({
       id: "value",
       data: valueGeoJson,
-      filled: !(geotiffHref || searchItems || collectionsGeoJson),
+      filled: !(geotiffHref || items || searchItems || collectionsGeoJson),
       getFillColor: fillColor,
       getLineColor: lineColor,
       getLineWidth: lineWidth,

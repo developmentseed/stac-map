@@ -26,6 +26,7 @@ export const createHrefSlice: StateCreator<State, [], [], HrefState> = (
       hoveredCollection: null,
       hoveredItem: null,
       pickedItem: null,
+      items: null,
       searchItems: null,
       geotiffHref: null,
       stacGeoparquetTable: null,

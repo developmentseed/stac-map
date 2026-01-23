@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { LuExternalLink, LuFileJson } from "react-icons/lu";
+import { LuExternalLink, LuFileJson, LuFiles } from "react-icons/lu";
 import {
   Badge,
   Button,
@@ -24,8 +24,11 @@ import CollectionSearch from "./collection-search";
 import Collections from "./collections";
 import CollectionsHref from "./collections-href";
 import Description from "./description";
+import ItemLinks from "./item-links";
+import Items from "./items";
 import RootHref from "./root-href";
 import SearchItems from "./search-items";
+import { Section } from "./section";
 import StacGeoparquetHref from "./stac-geoparquet-href";
 import Thumbnail from "./thumbnail";
 import { useStore } from "../store";
@@ -55,6 +58,7 @@ const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({
 export default function Value({ value }: { value: StacValue }) {
   const catalogs = useStore((store) => store.catalogs);
   const collections = useStore((store) => store.collections);
+  const items = useStore((store) => store.items);
   const searchItems = useStore((store) => store.searchItems);
   const href = useStore((store) => store.href);
   const hrefIsParquet = useStore((store) => store.hrefIsParquet);
@@ -62,6 +66,7 @@ export default function Value({ value }: { value: StacValue }) {
 
   const collectionsHref = getLinkHref(value, "data");
   const childrenLinks = value.links?.filter((link) => link.rel === "child");
+  const itemLinks = value.links?.filter((link) => link.rel === "item");
   const selfHref = getLinkHref(value, "self");
   const rootHref = getLinkHref(value, "root");
   const version = value.stac_version as string | undefined;
@@ -126,6 +131,19 @@ export default function Value({ value }: { value: StacValue }) {
 
         {!collectionsHref && childrenLinks && childrenLinks.length > 0 && (
           <Children links={childrenLinks} />
+        )}
+
+        {itemLinks && <ItemLinks links={itemLinks} />}
+
+        {items && value.type === "Collection" && (
+          <Section
+            icon={<LuFiles />}
+            title="Items"
+            count={items.length}
+            defaultListOrCard="list"
+          >
+            {(listOrCard) => <Items items={items} listOrCard={listOrCard} />}
+          </Section>
         )}
 
         {href && hrefIsParquet && connection && (

@@ -22,9 +22,8 @@ export const createCollectionsSlice: StateCreator<
   setCollections: (collections) => set({ collections }),
   addCollection: (collection) => {
     const collections = get().collections;
-    if (!collections?.find((c) => c.id == collection.id)) {
+    if (!collections?.find((c) => c.id == collection.id))
       set({ collections: [...(collections || []), collection] });
-    }
   },
   filteredCollections: null,
   setFilteredCollections: (collections) => {
