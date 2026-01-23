@@ -8,6 +8,7 @@ import {
   Table,
   vectorFromArray,
 } from "apache-arrow";
+import * as stacWasm from "stac-wasm";
 import type { StacItemCollection } from "../types/stac";
 
 export const SUPPORTED_GEOMETRY_TYPES = ["point", "polygon"] as const;
@@ -100,4 +101,22 @@ export async function fetchStacGeoparquetTable({
     table,
     geometryType: geometryType as SupportedGeometryType | undefined,
   };
+}
+
+export async function fetchStacGeoparquetItem({
+  id,
+  href,
+  connection,
+}: {
+  id: string;
+  href: string;
+  connection: AsyncDuckDBConnection;
+}) {
+  const result = await connection.query(
+    `SELECT * REPLACE ST_AsGeoJSON(geometry) as geometry FROM read_parquet('${href}') WHERE id = '${id}'`
+  );
+  const item = stacWasm.arrowToStacJson(result)[0];
+  item.geometry = JSON.parse(item.geometry);
+  return item;
+  return null;
 }

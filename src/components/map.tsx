@@ -50,6 +50,9 @@ export default function Map() {
   const searchItems = useStore((store) => store.searchItems);
   const geotiffHref = useStore((store) => store.geotiffHref);
   const stacGeoparquetTable = useStore((store) => store.stacGeoparquetTable);
+  const setStacGeoparquetItemId = useStore(
+    (store) => store.setStacGeoparquetItemId
+  );
   const setBbox = useStore((store) => store.setBbox);
   const fillColor = useStore((store) => store.fillColor);
   const lineColor = useStore((store) => store.lineColor);
@@ -192,6 +195,9 @@ export default function Map() {
             getPosition: stacGeoparquetTable.table.getChild("geometry")!,
             radiusUnits: "pixels",
             pickable: true,
+            onClick: (info) => {
+              setStacGeoparquetItemId(info.object?.id);
+            },
           })
         : new GeoArrowPolygonLayer({
             id: "stac-geoparquet-polygon",
@@ -202,6 +208,9 @@ export default function Map() {
             getLineWidth: 2,
             lineWidthUnits: "pixels",
             pickable: true,
+            onClick: (info) => {
+              setStacGeoparquetItemId(info.object?.id);
+            },
           })
     );
 

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchStac } from "../utils/stac";
 import {
   fetchStacGeoparquet,
+  fetchStacGeoparquetItem,
   fetchStacGeoparquetTable,
 } from "../utils/stac-geoparquet";
 
@@ -57,6 +58,23 @@ export function useStacGeoparquetTable({
     queryKey: ["stac-geoparquet-table", href],
     queryFn: async () => {
       return await fetchStacGeoparquetTable({ href, connection });
+    },
+  });
+}
+
+export function useStacGeoparquetItem({
+  id,
+  href,
+  connection,
+}: {
+  id: string;
+  href: string;
+  connection: AsyncDuckDBConnection;
+}) {
+  return useQuery({
+    queryKey: ["stac-geoparquet-item", id, href],
+    queryFn: async () => {
+      return await fetchStacGeoparquetItem({ id, href, connection });
     },
   });
 }

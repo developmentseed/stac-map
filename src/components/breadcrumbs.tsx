@@ -11,11 +11,11 @@ import { getLink } from "../utils/stac";
 export default function Breadcrumbs({ value }: { value: StacValue }) {
   return (
     <Breadcrumb.Root size={"sm"}>
-      <Breadcrumb.List>
+      <Breadcrumb.List flexWrap="wrap">
         {getBreadcrumbLink(value)}
         <Breadcrumb.Item>
           <Breadcrumb.CurrentLink>
-            <HStack>{getStacValueType(value)}</HStack>
+            <HStack whiteSpace="nowrap">{getStacValueType(value)}</HStack>
           </Breadcrumb.CurrentLink>
         </Breadcrumb.Item>
       </Breadcrumb.List>
@@ -28,9 +28,11 @@ function BreadcrumbLink({ link }: { link: StacLink }) {
   const result = useStacJson({ href: link.href });
   const text = useMemo(() => {
     return result.data ? (
-      <HStack gap={1}>
+      <HStack gap={1} whiteSpace="nowrap">
         <StacIcon value={result.data} />
-        {getStacValueTitle(result.data)}
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+          {getStacValueTitle(result.data)}
+        </span>
       </HStack>
     ) : (
       link.rel.charAt(0).toUpperCase() + link.rel.slice(1)
