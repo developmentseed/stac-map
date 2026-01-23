@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   LuChevronDown,
   LuCircle,
@@ -21,6 +21,7 @@ import {
 import type { StacAsset } from "stac-ts";
 import { type ListOrCard, Section } from "./section";
 import { useStore } from "../store";
+import { fetchPlanetaryComputerSignedHref } from "../utils/planetary-computer";
 
 interface AlternateAsset {
   href: string;
@@ -49,14 +50,26 @@ export default function Assets({
     getBestAssetKey(assets as { [k: string]: AssetWithAlternates })
   );
 
-  useEffect(() => {
-    if (value) {
-      const asset = assets[value] as AssetWithAlternates | undefined;
-      setGeotiffHref(asset ? getGeotiffHref(asset) : null);
-    } else {
-      setGeotiffHref(null);
+  const geotiffHref = useMemo(() => {
+    if (!value) {
+      return null;
     }
-  }, [assets, value, setGeotiffHref]);
+    const asset = assets[value] as AssetWithAlternates | undefined;
+    return asset ? getGeotiffHref(asset) : null;
+  }, [assets, value]);
+
+  useEffect(() => {
+    if (geotiffHref) {
+      if (new URL(geotiffHref).hostname.endsWith("blob.core.windows.net")) {
+        // Assume it's the planetary computer and try to get a SAS token
+        (async () => {
+          setGeotiffHref(await fetchPlanetaryComputerSignedHref(geotiffHref));
+        })();
+      } else {
+        setGeotiffHref(geotiffHref);
+      }
+    }
+  }, [geotiffHref, setGeotiffHref]);
 
   return (
     <Section
