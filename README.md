@@ -84,8 +84,3 @@ VITE_DEFAULT_HREF=https://my-stac-api.com
 
 Then run `yarn build` and deploy the `dist/` directory to your static hosting provider.
 For an example of white-labeling **stac-map**, see https://github.com/gadomski/eoapi.stac-map.io.
-
-## Versioning
-
-For now, we use a form of [Sentimental Versioning](https://github.com/dominictarr/sentimental-versioning#readme), where we use MAJOR, MINOR, and PATCH versions to communicate the "weight" of changes.
-We may formalize our releases into a stricter form of [Semantic Versioning](https://semver.org/) at some point in the future.
