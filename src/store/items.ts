@@ -9,17 +9,16 @@ export interface ItemsState {
   searchItems: StacItem[] | null;
   setSearchItems: (items: StacItem[] | null) => void;
   pickedItem: StacItem | null;
-  setPickedItem: (item: StacItem | null) => void;
+  setPickedItem: (item: StacItem) => void;
+  clearPickedItem: () => void;
 }
 
 export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
-  set,
-  get
+  set
 ) => ({
   search: null,
   setSearch: (search) => {
-    set({ search });
-    get().setSearchItems(null);
+    set({ search, searchItems: null });
   },
   searchItems: null,
   setSearchItems: (items) => set({ searchItems: items }),
@@ -27,7 +26,14 @@ export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
   setPickedItem: (item) => {
     set({
       pickedItem: item,
+      geotiffHref: null,
     });
-    get().setGeotiffHref(null);
+  },
+  clearPickedItem: () => {
+    set({
+      pickedItem: null,
+      geotiffHref: null,
+      stacGeoparquetItemId: null,
+    });
   },
 });

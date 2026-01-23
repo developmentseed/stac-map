@@ -55,7 +55,7 @@ export default function Panel() {
 
 function PickedItemPanel({ pickedItem }: { pickedItem: StacItem }) {
   const setHref = useStore((store) => store.setHref);
-  const setPickedItem = useStore((store) => store.setPickedItem);
+  const clearPickedItem = useStore((store) => store.clearPickedItem);
   const href = getSelfHref(pickedItem);
 
   const header = (
@@ -69,7 +69,7 @@ function PickedItemPanel({ pickedItem }: { pickedItem: StacItem }) {
           <LuArrowRight onClick={() => setHref(href)} />
         </IconButton>
       )}
-      <CloseButton size={"2xs"} onClick={() => setPickedItem(null)} />
+      <CloseButton size={"2xs"} onClick={() => clearPickedItem()} />
     </HStack>
   );
   return (

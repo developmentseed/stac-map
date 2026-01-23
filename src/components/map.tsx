@@ -50,7 +50,6 @@ export default function Map() {
   const searchItems = useStore((store) => store.searchItems);
   const geotiffHref = useStore((store) => store.geotiffHref);
   const stacGeoparquetTable = useStore((store) => store.stacGeoparquetTable);
-  const stacGeoparquetItemId = useStore((store) => store.stacGeoparquetItemId);
   const setStacGeoparquetItemId = useStore(
     (store) => store.setStacGeoparquetItemId
   );
