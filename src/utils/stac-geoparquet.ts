@@ -20,6 +20,7 @@ export async function fetchStacGeoparquet({
     assets: {
       data: {
         href: href,
+        type: "application/vnd.apache.parquet",
       },
     },
   };
