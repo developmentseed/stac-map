@@ -8,6 +8,10 @@ import { createHrefSlice, type HrefState } from "./href";
 import { createInputSlice, type InputState } from "./input";
 import { createItemsSlice, type ItemsState } from "./items";
 import {
+  createStacGeoparquetState,
+  type StacGeoparquetState,
+} from "./stac-geoparquet";
+import {
   createUploadedFileSlice,
   type UploadedFileState,
 } from "./uploaded-file";
@@ -24,7 +28,8 @@ export interface State
     GeotiffState,
     BboxState,
     UploadedFileState,
-    ConnectionState {
+    ConnectionState,
+    StacGeoparquetState {
   fillColor: [number, number, number, number];
   lineColor: [number, number, number, number];
   lineWidth: number;
@@ -41,6 +46,7 @@ export const useStore = create<State>((...a) => ({
   ...createBboxSlice(...a),
   ...createUploadedFileSlice(...a),
   ...createConnectionSlice(...a),
+  ...createStacGeoparquetState(...a),
   fillColor: [207, 63, 2, 50] as [number, number, number, number],
   lineColor: [207, 63, 2, 100] as [number, number, number, number],
   lineWidth: 2,

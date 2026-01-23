@@ -4,6 +4,7 @@ import { getInitialHref } from "../utils/href";
 
 export interface HrefState {
   href: string | null;
+  hrefIsParquet: boolean;
   setHref: (href: string | null) => void;
 }
 
@@ -13,9 +14,11 @@ export const createHrefSlice: StateCreator<State, [], [], HrefState> = (
   set
 ) => ({
   href: initialHref,
+  hrefIsParquet: !!initialHref?.endsWith(".parquet"),
   setHref: (href) =>
     set({
       href,
+      hrefIsParquet: !!href?.endsWith(".parquet"),
       input: href || "",
       value: null,
       collections: null,

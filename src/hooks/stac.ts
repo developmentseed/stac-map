@@ -1,7 +1,10 @@
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { useQuery } from "@tanstack/react-query";
 import { fetchStac } from "../utils/stac";
-import { fetchStacGeoparquet } from "../utils/stac-geoparquet";
+import {
+  fetchStacGeoparquet,
+  fetchStacGeoparquetTable,
+} from "../utils/stac-geoparquet";
 
 export function useStacJson({
   href,
@@ -39,6 +42,21 @@ export function useStacGeoparquet({
     queryKey: ["stac-geoparquet", href],
     queryFn: async () => {
       return await fetchStacGeoparquet({ href, connection });
+    },
+  });
+}
+
+export function useStacGeoparquetTable({
+  href,
+  connection,
+}: {
+  href: string;
+  connection: AsyncDuckDBConnection;
+}) {
+  return useQuery({
+    queryKey: ["stac-geoparquet-table", href],
+    queryFn: async () => {
+      return await fetchStacGeoparquetTable({ href, connection });
     },
   });
 }

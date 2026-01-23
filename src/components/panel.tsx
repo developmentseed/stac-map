@@ -27,6 +27,7 @@ import { getSelfHref, getStacValueId } from "../utils/stac";
 
 export default function Panel() {
   const href = useStore((store) => store.href);
+  const hrefIsParquet = useStore((store) => store.hrefIsParquet);
   const value = useStore((store) => store.value);
   const pickedItem = useStore((store) => store.pickedItem);
 
@@ -36,7 +37,6 @@ export default function Panel() {
     return <ValuePanel value={value} />;
   } else if (href) {
     const hrefIsUrl = isUrl(href);
-    const hrefIsParquet = href.endsWith(".parquet");
     return hrefIsParquet ? (
       <StacGeoparquetHrefPanel href={href} />
     ) : hrefIsUrl ? (

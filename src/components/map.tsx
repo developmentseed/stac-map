@@ -8,6 +8,10 @@ import {
 import { type DeckProps, Layer } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
+import {
+  GeoArrowPolygonLayer,
+  GeoArrowScatterplotLayer,
+} from "@geoarrow/deck.gl-layers";
 import bbox from "@turf/bbox";
 import bboxPolygon from "@turf/bbox-polygon";
 import { featureCollection } from "@turf/helpers";
@@ -45,6 +49,7 @@ export default function Map() {
   const setPickedItem = useStore((store) => store.setPickedItem);
   const searchItems = useStore((store) => store.searchItems);
   const geotiffHref = useStore((store) => store.geotiffHref);
+  const stacGeoparquetTable = useStore((store) => store.stacGeoparquetTable);
   const setBbox = useStore((store) => store.setBbox);
   const fillColor = useStore((store) => store.fillColor);
   const lineColor = useStore((store) => store.lineColor);
@@ -176,14 +181,37 @@ export default function Map() {
     }),
   ];
 
-  if (geotiffHref) {
+  if (stacGeoparquetTable)
+    layers.push(
+      stacGeoparquetTable.geometryType === "point"
+        ? new GeoArrowScatterplotLayer({
+            id: "stac-geoparquet-point",
+            data: stacGeoparquetTable.table,
+            getColor: lineColor,
+            getRadius: 2,
+            getPosition: stacGeoparquetTable.table.getChild("geometry")!,
+            radiusUnits: "pixels",
+            pickable: true,
+          })
+        : new GeoArrowPolygonLayer({
+            id: "stac-geoparquet-polygon",
+            data: stacGeoparquetTable.table,
+            filled: true,
+            getFillColor: fillColor,
+            getLineColor: lineColor,
+            getLineWidth: 2,
+            lineWidthUnits: "pixels",
+            pickable: true,
+          })
+    );
+
+  if (geotiffHref)
     layers.push(
       new COGLayer({
         id: "cog-" + geotiffHref,
         geotiff: geotiffHref,
       })
     );
-  }
 
   return (
     <MaplibreMap

@@ -1,0 +1,28 @@
+import type { State } from ".";
+import type { Table } from "apache-arrow";
+import type { StateCreator } from "zustand";
+import type { SupportedGeometryType } from "../utils/stac-geoparquet";
+
+export interface StacGeoparquetTable {
+  table: Table;
+  geometryType: SupportedGeometryType;
+}
+
+export interface StacGeoparquetState {
+  stacGeoparquetTable: StacGeoparquetTable | null;
+  setStacGeoparquetTable: (table: StacGeoparquetTable | null) => void;
+}
+
+export const createStacGeoparquetState: StateCreator<
+  State,
+  [],
+  [],
+  StacGeoparquetState
+> = (set) => ({
+  stacGeoparquetTable: null,
+  stacGeoparquetGeometryType: null,
+  setStacGeoparquetTable: (table) =>
+    set({
+      stacGeoparquetTable: table,
+    }),
+});

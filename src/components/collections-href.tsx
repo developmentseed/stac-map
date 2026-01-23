@@ -8,7 +8,6 @@ import {
 } from "react-icons/lu";
 import {
   ActionBar,
-  Alert,
   Button,
   ButtonGroup,
   Heading,
@@ -25,6 +24,7 @@ import {
   type UseInfiniteQueryResult,
 } from "@tanstack/react-query";
 import type { StacCollection } from "stac-ts";
+import { ResultError } from "./ui/result-error";
 import { useStore } from "../store";
 import type { StacCollections } from "../types/stac";
 import { getLinkHref } from "../utils/stac";
@@ -83,13 +83,10 @@ export default function CollectionsHref({ href }: { href: string }) {
 
   if (result.error)
     return (
-      <Alert.Root status={"error"}>
-        <Alert.Indicator />
-        <Alert.Content>
-          <Alert.Title>Error while fetching collections</Alert.Title>
-          <Alert.Description>{result.error.message}</Alert.Description>
-        </Alert.Content>
-      </Alert.Root>
+      <ResultError
+        title="Error while fetching collections"
+        error={result.error}
+      />
     );
   else if (collections && result.hasNextPage)
     return (

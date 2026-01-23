@@ -1,5 +1,17 @@
+import { data, io } from "@geoarrow/geoarrow-js";
 import { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
+import {
+  Binary,
+  Data,
+  makeData,
+  makeVector,
+  Table,
+  vectorFromArray,
+} from "apache-arrow";
 import type { StacItemCollection } from "../types/stac";
+
+export const SUPPORTED_GEOMETRY_TYPES = ["point", "polygon"] as const;
+export type SupportedGeometryType = (typeof SUPPORTED_GEOMETRY_TYPES)[number];
 
 export async function fetchStacGeoparquet({
   href,
@@ -23,5 +35,69 @@ export async function fetchStacGeoparquet({
         type: "application/vnd.apache.parquet",
       },
     },
+  };
+}
+
+export async function fetchStacGeoparquetTable({
+  href,
+  connection,
+}: {
+  href: string;
+  connection: AsyncDuckDBConnection;
+}) {
+  const query = `SELECT ST_AsWKB(geometry) AS geometry, ST_GeometryType(geometry) AS geometry_type, id FROM read_parquet('${href}')`;
+  const result = await connection.query(query);
+  const geometry: Uint8Array[] = result.getChildAt(0)?.toArray();
+  const geometryType = result.getChildAt(1)?.toArray()[0]?.toLowerCase() as
+    | string
+    | undefined;
+  if (
+    !geometryType ||
+    !SUPPORTED_GEOMETRY_TYPES.includes(geometryType as SupportedGeometryType)
+  ) {
+    throw new Error(
+      `Unsupported geometry type: ${geometryType}. Supported types: ${SUPPORTED_GEOMETRY_TYPES.join(", ")}`
+    );
+  }
+  const wkb = new Uint8Array(geometry?.flatMap((array) => [...array]));
+  const valueOffsets = new Int32Array(geometry.length + 1);
+  for (let i = 0, len = geometry.length; i < len; i++) {
+    const current = valueOffsets[i];
+    valueOffsets[i + 1] = current + geometry[i].length;
+  }
+  const wkbData: Data<Binary> = makeData({
+    type: new Binary(),
+    data: wkb,
+    valueOffsets,
+  });
+  let table: Table | undefined = undefined;
+  if (geometryType === "polygon") {
+    const polygons = io.parseWkb(
+      wkbData,
+      io.WKBType.Polygon,
+      2
+    ) as data.PolygonData;
+    table = new Table({
+      geometry: makeVector(polygons),
+      id: vectorFromArray(result.getChild("id")?.toArray()),
+    });
+    table.schema.fields[0].metadata.set(
+      "ARROW:extension:name",
+      "geoarrow.polygon"
+    );
+  } else if (geometryType === "point") {
+    const points = io.parseWkb(wkbData, io.WKBType.Point, 2) as data.PointData;
+    table = new Table({
+      geometry: makeVector(points),
+      id: vectorFromArray(result.getChild("id")?.toArray()),
+    });
+    table.schema.fields[0].metadata.set(
+      "ARROW:extension:name",
+      "geoarrow.point"
+    );
+  }
+  return {
+    table,
+    geometryType: geometryType as SupportedGeometryType | undefined,
   };
 }
