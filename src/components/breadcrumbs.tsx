@@ -65,7 +65,9 @@ function getBreadcrumbLink(value: StacValue) {
 
   return collectionLink && collectionLink.href !== selfLink?.href ? (
     <BreadcrumbLink link={collectionLink} />
-  ) : parentLink && parentLink.href !== rootLink?.href && parentLink.href !== selfLink?.href ? (
+  ) : parentLink &&
+    parentLink.href !== rootLink?.href &&
+    parentLink.href !== selfLink?.href ? (
     <BreadcrumbLink link={parentLink} />
   ) : (
     rootLink &&
