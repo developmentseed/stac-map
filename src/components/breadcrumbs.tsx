@@ -40,7 +40,7 @@ function BreadcrumbLink({ link }: { link: StacLink }) {
 
   return (
     <>
-      {result.data && getBreadcrumbLink(result.data)}
+      {/*{result.data && getBreadcrumbLink(result.data)}*/}
       <Breadcrumb.Item>
         <Breadcrumb.Link
           href="#"
@@ -63,9 +63,9 @@ function getBreadcrumbLink(value: StacValue) {
   const parentLink = getLink(value, "parent");
   const collectionLink = getLink(value, "collection");
 
-  return collectionLink ? (
+  return collectionLink && collectionLink.href !== selfLink?.href ? (
     <BreadcrumbLink link={collectionLink} />
-  ) : parentLink && parentLink.href !== rootLink?.href ? (
+  ) : parentLink && parentLink.href !== rootLink?.href && parentLink.href !== selfLink?.href ? (
     <BreadcrumbLink link={parentLink} />
   ) : (
     rootLink &&
