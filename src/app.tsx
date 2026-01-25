@@ -16,10 +16,13 @@ export default function App() {
   const { db } = useDuckDb();
 
   useEffect(() => {
-    if (href && getCurrentHref() != href)
+    if (href && getCurrentHref() != href) {
       history.pushState(null, "", "?href=" + href);
-    else history.pushState(null, "", location.pathname);
-    document.title = "stac-map";
+      document.title = "stac-map | " + href;
+    } else {
+      history.pushState(null, "", location.pathname);
+      document.title = "stac-map";
+    }
   }, [href]);
 
   useEffect(() => {
