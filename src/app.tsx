@@ -1,8 +1,7 @@
-import { Box, Container, FileUpload, HStack, Link } from "@chakra-ui/react";
-import { CollecticonBrandDevelopmentSeed2 } from "@devseed-ui/collecticons-chakra";
+import { Box, FileUpload } from "@chakra-ui/react";
 import { useDuckDb } from "duckdb-wasm-kit";
 import { useEffect } from "react";
-import { LuHeart } from "react-icons/lu";
+import Footer from "./components/footer";
 import Map from "./components/map";
 import Overlay from "./components/overlay";
 import { useStore } from "./store";
@@ -79,30 +78,8 @@ export default function App() {
           </FileUpload.Dropzone>
         </FileUpload.Root>
       </Box>
-      <Container
-        zIndex={1}
-        fluid
-        h="100dvh"
-        pointerEvents={"none"}
-        position={"absolute"}
-        top={0}
-        left={0}
-        pt={4}
-      >
-        <Overlay />
-      </Container>
-      <HStack
-        position={"absolute"}
-        bottom={4}
-        left={8}
-        fontWeight={"lighter"}
-        fontSize={"small"}
-      >
-        Created with <LuHeart /> by{" "}
-        <Link href="https://developmentseed.org/">
-          Development Seed <CollecticonBrandDevelopmentSeed2 />
-        </Link>
-      </HStack>
+      <Overlay />
+      <Footer />
     </>
   );
 }
