@@ -58,7 +58,11 @@ export default function Assets({ assets }: { assets: StacAssets }) {
   }, [bestAssetKey, bestAsset, setAsset]);
 
   return (
-    <Section icon={<LuFileImage />} title="Assets" defaultListOrCard="list">
+    <Section
+      icon={<LuFileImage />}
+      title="Assets"
+      defaultListOrCard={Object.keys(assets).length > 3 ? "list" : "card"}
+    >
       {(listOrCard) =>
         listOrCard === "list" ? (
           <AssetsList assets={sortedAssets} />
