@@ -94,6 +94,7 @@ function AssetListItem({
         {asset.title || assetKey}
         <Span flex={1} />
         <AssetActions asset={asset} scheme={scheme} />
+        <AssetVisibility asset={asset} assetKey={assetKey} />
       </HStack>
     </List.Item>
   );
@@ -116,13 +117,7 @@ function AssetCard({
   assetKey: string;
   asset: StacAsset;
 }) {
-  const storeAssetKey = useStore((store) => store.assetKey);
-  const setAsset = useStore((store) => store.setAsset);
   const scheme = asset.href.split(":").at(0);
-  const isVisible = storeAssetKey === assetKey;
-  const score = useMemo(() => {
-    return getAssetScore(asset);
-  }, [asset]);
 
   return (
     <Card.Root size={"sm"} variant={"subtle"}>
@@ -139,17 +134,7 @@ function AssetCard({
       <Card.Footer>
         <AssetActions asset={asset} scheme={scheme} />
         <Span flex={1} />
-        <IconButton
-          size={"xs"}
-          variant={"plain"}
-          disabled={score === 0}
-          onClick={() => {
-            if (isVisible) setAsset(null, null);
-            else setAsset(assetKey, asset);
-          }}
-        >
-          {score === 0 ? <LuEyeOff /> : isVisible ? <LuEye /> : <LuEyeClosed />}
-        </IconButton>
+        <AssetVisibility assetKey={assetKey} asset={asset} />
       </Card.Footer>
     </Card.Root>
   );
@@ -234,4 +219,33 @@ function getAssetScore(asset: AssetWithAlternates): number {
   if (hasThreeOrFourBands) score += 1;
 
   return score;
+}
+
+function AssetVisibility({
+  asset,
+  assetKey,
+}: {
+  asset: StacAsset;
+  assetKey: string;
+}) {
+  const storeAssetKey = useStore((store) => store.assetKey);
+  const setAsset = useStore((store) => store.setAsset);
+  const isVisible = storeAssetKey === assetKey;
+  const score = useMemo(() => {
+    return getAssetScore(asset);
+  }, [asset]);
+
+  return (
+    <IconButton
+      size={"xs"}
+      variant={"plain"}
+      disabled={score === 0}
+      onClick={() => {
+        if (isVisible) setAsset(null, null);
+        else setAsset(assetKey, asset);
+      }}
+    >
+      {score === 0 ? <LuEyeOff /> : isVisible ? <LuEye /> : <LuEyeClosed />}
+    </IconButton>
+  );
 }
