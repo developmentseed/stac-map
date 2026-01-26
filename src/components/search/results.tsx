@@ -44,12 +44,6 @@ export default function SearchResults({
     url.searchParams.set("collections", search.collections.join(","));
     if (search.bbox) url.searchParams.set("bbox", search.bbox.join(","));
     if (search.limit) url.searchParams.set("limit", search.limit.toFixed(0));
-    if (search.queryables)
-      Object.entries(search.queryables)
-        .filter((_, value) => !!value)
-        .forEach(([key, value]) => {
-          url.searchParams.set(key, String(value));
-        });
     return url.toString();
   }, [href, search]);
 

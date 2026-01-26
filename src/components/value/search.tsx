@@ -11,23 +11,20 @@ import SearchSettings from "../search/settings";
 interface Props {
   href: string;
   collection: StacCollection;
-  queryablesHref: string | undefined;
 }
 
-export default function Search({ href, collection, queryablesHref }: Props) {
+export default function Search({ href, collection }: Props) {
   const bbox = useStore((store) => store.bbox);
   const search = useStore((store) => store.search);
   const setSearch = useStore((store) => store.setSearch);
   const [useViewportForBbox, setUseViewportForBbox] = useState(true);
   const [limit, setLimit] = useState<string>();
-  const [queryables, setQueryables] = useState(null);
 
   const onClickSearch = () => {
     setSearch({
       collections: [collection.id],
       bbox: useViewportForBbox && bbox ? bbox : undefined,
       limit: Number(limit),
-      queryables,
     });
   };
 
@@ -49,9 +46,6 @@ export default function Search({ href, collection, queryablesHref }: Props) {
               limit={limit}
               setLimit={setLimit}
               disabled={!!search}
-              queryablesHref={queryablesHref}
-              queryables={queryables}
-              setQueryables={setQueryables}
             />
           </HStack>
           <DataList.Root
@@ -69,13 +63,6 @@ export default function Search({ href, collection, queryablesHref }: Props) {
               <DataList.ItemLabel>limit</DataList.ItemLabel>
               <DataList.ItemValue>{limit || "—"}</DataList.ItemValue>
             </DataList.Item>
-            {queryables &&
-              Object.entries(queryables).map(([key, value]) => (
-                <DataList.Item key={key}>
-                  <DataList.ItemLabel>{key}</DataList.ItemLabel>
-                  <DataList.ItemValue>{String(value)}</DataList.ItemValue>
-                </DataList.Item>
-              ))}
           </DataList.Root>
         </Stack>
       )}
