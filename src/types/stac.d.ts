@@ -37,3 +37,20 @@ export interface StacSearch {
 }
 
 export type DatetimeBounds = { start: Date | null; end: Date | null };
+
+type AssetWithAlternates = StacAsset & {
+  alternate?: { [key: string]: AlternateAsset };
+  bands?: Band[];
+  "eo:bands"?: Band[];
+};
+
+interface AlternateAsset {
+  href: string;
+  title?: string;
+}
+
+interface Band {
+  name?: string;
+  common_name?: string;
+  description?: string;
+}

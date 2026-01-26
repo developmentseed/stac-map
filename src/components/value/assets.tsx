@@ -1,142 +1,82 @@
 import { useStore } from "@/store";
-import { fetchPlanetaryComputerSignedHref } from "@/utils/planetary-computer";
+import type { AssetWithAlternates } from "@/types/stac";
+import { getBandCount, isGeotiff } from "@/utils/stac";
 import {
   Badge,
+  Box,
   Button,
   ButtonGroup,
+  Card,
   Clipboard,
-  Group,
   IconButton,
   Menu,
   Portal,
-  RadioCard,
-  Table,
+  Span,
+  Stack,
 } from "@chakra-ui/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import {
   LuChevronDown,
-  LuCircle,
-  LuCircleDot,
   LuDownload,
+  LuEye,
+  LuEyeClosed,
+  LuEyeOff,
   LuFileImage,
 } from "react-icons/lu";
 import type { StacAsset } from "stac-ts";
-import { type ListOrCard, Section } from "../section";
+import { Section } from "../section";
 
-interface AlternateAsset {
-  href: string;
-  title?: string;
+interface StacAssets {
+  [k: string]: StacAsset;
 }
 
-interface Band {
-  name?: string;
-  common_name?: string;
-  description?: string;
-}
+type SortedAssets = [string, StacAsset][];
 
-type AssetWithAlternates = StacAsset & {
-  alternate?: { [key: string]: AlternateAsset };
-  bands?: Band[];
-  "eo:bands"?: Band[];
-};
-
-export default function Assets({
-  assets,
-}: {
-  assets: { [k: string]: StacAsset };
-}) {
-  const setGeotiffHref = useStore((store) => store.setGeotiffHref);
-  const [value, setValue] = useState<string | null>(
-    getBestAssetKey(assets as { [k: string]: AssetWithAlternates })
-  );
-
-  const geotiffHref = useMemo(() => {
-    if (!value) {
-      return null;
+export default function Assets({ assets }: { assets: StacAssets }) {
+  const setAsset = useStore((store) => store.setAsset);
+  const sortedAssets = useMemo(() => {
+    return Object.entries(assets).sort(
+      ([, a], [, b]) =>
+        getAssetScore(b as AssetWithAlternates) -
+        getAssetScore(a as AssetWithAlternates)
+    );
+  }, [assets]);
+  const [bestAssetKey, bestAsset] = useMemo(() => {
+    const first = sortedAssets[0];
+    if (first && getAssetScore(first[1] as AssetWithAlternates) > 0) {
+      return [first[0], first[1]];
     }
-    const asset = assets[value] as AssetWithAlternates | undefined;
-    return asset ? getGeotiffHref(asset) : null;
-  }, [assets, value]);
+    return [null, null];
+  }, [sortedAssets]);
 
   useEffect(() => {
-    if (geotiffHref) {
-      if (new URL(geotiffHref).hostname.endsWith("blob.core.windows.net")) {
-        // Assume it's the planetary computer and try to get a SAS token
-        (async () => {
-          const signedHref =
-            await fetchPlanetaryComputerSignedHref(geotiffHref);
-          if (signedHref) setGeotiffHref(signedHref);
-          else setGeotiffHref(geotiffHref);
-        })();
-      } else {
-        setGeotiffHref(geotiffHref);
-      }
-    }
-  }, [geotiffHref, setGeotiffHref]);
+    if (bestAssetKey) setAsset(bestAssetKey, bestAsset);
+  }, [bestAssetKey, bestAsset, setAsset]);
 
   return (
     <Section icon={<LuFileImage />} title="Assets">
-      {(listOrCard) => (
-        <AssetsList
-          assets={assets}
-          value={value}
-          setValue={setValue}
-          listOrCard={listOrCard}
-        />
-      )}
+      {(listOrCard) =>
+        listOrCard === "list" ? (
+          <AssetsList assets={sortedAssets} />
+        ) : (
+          <AssetCards assets={sortedAssets} />
+        )
+      }
     </Section>
   );
 }
 
-function AssetsList({
-  assets,
-  value,
-  setValue,
-  listOrCard,
-}: {
-  assets: { [k: string]: StacAsset };
-  value: string | null;
-  setValue: (value: string | null) => void;
-  listOrCard: ListOrCard;
-}) {
-  if (listOrCard === "list") {
-    return (
-      <Table.Root size="sm">
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeader />
-            <Table.ColumnHeader>Key</Table.ColumnHeader>
-            <Table.ColumnHeader>Type</Table.ColumnHeader>
-            <Table.ColumnHeader />
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {Object.entries(assets).map(([key, asset]) => (
-            <AssetRow
-              key={key}
-              assetKey={key}
-              asset={asset}
-              selected={value === key}
-              onSelect={() => setValue(isGeotiff(asset) ? key : null)}
-            />
-          ))}
-        </Table.Body>
-      </Table.Root>
-    );
-  }
+function AssetsList({ assets }: { assets: SortedAssets }) {
+  return <></>;
+}
 
+function AssetCards({ assets }: { assets: SortedAssets }) {
   return (
-    <RadioCard.Root
-      value={value}
-      onValueChange={(e) => setValue(e.value)}
-      size="sm"
-    >
-      <Group orientation="vertical">
-        {Object.entries(assets).map(([key, asset]) => (
-          <AssetCard key={key} assetKey={key} asset={asset} />
-        ))}
-      </Group>
-    </RadioCard.Root>
+    <Stack>
+      {assets.map(([key, asset]) => (
+        <AssetCard key={key} assetKey={key} asset={asset} />
+      ))}
+    </Stack>
   );
 }
 
@@ -145,73 +85,44 @@ function AssetCard({
   asset,
 }: {
   assetKey: string;
-  asset: AssetWithAlternates;
+  asset: StacAsset;
 }) {
+  const storeAssetKey = useStore((store) => store.assetKey);
+  const setAsset = useStore((store) => store.setAsset);
   const scheme = asset.href.split(":").at(0);
-  const bandCount = getBandCount(asset);
+  const isVisible = storeAssetKey === assetKey;
+  const score = useMemo(() => {
+    return getAssetScore(asset);
+  }, [asset]);
 
   return (
-    <RadioCard.Item value={assetKey} width="full" disabled={!isGeotiff(asset)}>
-      <RadioCard.ItemHiddenInput />
-      <RadioCard.ItemControl>
-        <RadioCard.ItemContent>
-          <RadioCard.ItemText>{asset.title || assetKey}</RadioCard.ItemText>
-          <RadioCard.ItemDescription>
-            <Badge>{scheme}</Badge>
-            {bandCount !== null && (
-              <Badge>
-                {bandCount} band{bandCount === 1 ? "" : "s"}
-              </Badge>
-            )}
-            {asset.type && <Badge>{asset.type}</Badge>}
-          </RadioCard.ItemDescription>
-        </RadioCard.ItemContent>
-        <RadioCard.ItemIndicator />
-      </RadioCard.ItemControl>
-      <RadioCard.ItemAddon>
+    <Card.Root size={"sm"} variant={"subtle"}>
+      <Card.Body gap={4}>
+        <Card.Title>{asset.title || assetKey}</Card.Title>
+        <Box>
+          {scheme && <Badge>{scheme}</Badge>}
+          {asset.roles?.map((role) => (
+            <Badge key={role}>{role}</Badge>
+          ))}
+          {asset.type && <Badge>{asset.type}</Badge>}
+        </Box>
+      </Card.Body>
+      <Card.Footer>
         <AssetActions asset={asset} scheme={scheme} />
-      </RadioCard.ItemAddon>
-    </RadioCard.Item>
-  );
-}
-
-function AssetRow({
-  assetKey,
-  asset,
-  selected,
-  onSelect,
-}: {
-  assetKey: string;
-  asset: AssetWithAlternates;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  const scheme = asset.href.split(":").at(0);
-  const geotiff = isGeotiff(asset);
-  const bandCount = getBandCount(asset);
-
-  return (
-    <Table.Row
-      onClick={geotiff ? onSelect : undefined}
-      cursor={geotiff ? "pointer" : "default"}
-      bg={selected ? "bg.muted" : undefined}
-    >
-      <Table.Cell>
-        {geotiff && (selected ? <LuCircleDot /> : <LuCircle />)}
-      </Table.Cell>
-      <Table.Cell>{asset.title || assetKey}</Table.Cell>
-      <Table.Cell>
-        <Badge>{asset.type || scheme}</Badge>
-        {bandCount !== null && (
-          <Badge ml={1}>
-            {bandCount} band{bandCount === 1 ? "" : "s"}
-          </Badge>
-        )}
-      </Table.Cell>
-      <Table.Cell>
-        <AssetActions asset={asset} scheme={scheme} />
-      </Table.Cell>
-    </Table.Row>
+        <Span flex={1} />
+        <IconButton
+          size={"xs"}
+          variant={"plain"}
+          disabled={score === 0}
+          onClick={() => {
+            if (isVisible) setAsset(null, null);
+            else setAsset(assetKey, asset);
+          }}
+        >
+          {score === 0 ? <LuEyeOff /> : isVisible ? <LuEye /> : <LuEyeClosed />}
+        </IconButton>
+      </Card.Footer>
+    </Card.Root>
   );
 }
 
@@ -275,28 +186,6 @@ function AssetActions({
   );
 }
 
-function getBandCount(asset: AssetWithAlternates): number | null {
-  const bands = asset.bands || asset["eo:bands"];
-  return bands ? bands.length : null;
-}
-
-function getBestAssetKey(assets: {
-  [k: string]: AssetWithAlternates;
-}): string | null {
-  let bestKey: string | null = null;
-  let bestScore = 0;
-
-  for (const [key, asset] of Object.entries(assets)) {
-    const score = getAssetScore(asset);
-    if (score > 0 && score > bestScore) {
-      bestScore = score;
-      bestKey = key;
-    }
-  }
-
-  return bestKey;
-}
-
 function getAssetScore(asset: AssetWithAlternates): number {
   const geotiff = isGeotiff(asset);
   const hasVisualRole = asset.roles?.includes("visual") ?? false;
@@ -313,52 +202,4 @@ function getAssetScore(asset: AssetWithAlternates): number {
   if (hasThreeOrFourBands) score += 1;
 
   return score;
-}
-
-function hasValidBandCount(asset: AssetWithAlternates): boolean {
-  const bandCount = getBandCount(asset);
-  if (bandCount === null) {
-    return true;
-  }
-  return bandCount === 3 || bandCount === 4;
-}
-
-function hasHttpHref(asset: AssetWithAlternates): boolean {
-  if (asset.href.startsWith("http")) {
-    return true;
-  }
-  if (asset.alternate) {
-    return Object.values(asset.alternate).some((alt) =>
-      alt.href.startsWith("http")
-    );
-  }
-  return false;
-}
-
-function isGeotiff(asset: AssetWithAlternates) {
-  if (!asset.type?.startsWith("image/tiff; application=geotiff")) {
-    return false;
-  }
-  if (!hasValidBandCount(asset)) {
-    return false;
-  }
-  return hasHttpHref(asset);
-}
-
-function getGeotiffHref(asset: AssetWithAlternates): string | null {
-  if (!isGeotiff(asset)) {
-    return null;
-  }
-  if (asset.href.startsWith("http")) {
-    return asset.href;
-  }
-  if (asset.alternate) {
-    const httpAlternate = Object.values(asset.alternate).find((alt) =>
-      alt.href.startsWith("http")
-    );
-    if (httpAlternate) {
-      return httpAlternate.href;
-    }
-  }
-  return null;
 }

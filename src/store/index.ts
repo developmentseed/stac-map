@@ -1,10 +1,10 @@
 import { create } from "zustand";
+import { type AssetsState, createAssetsSlice } from "./assets";
 import { type BboxState, createBboxSlice } from "./bbox";
 import { type CatalogsState, createCatalogsSlice } from "./catalogs";
 import { type CollectionsState, createCollectionsSlice } from "./collections";
 import { type ConnectionState, createConnectionSlice } from "./connection";
 import { createDatetimeSlice, type DatetimeState } from "./datetime";
-import { createGeotiffSlice, type GeotiffState } from "./geotiff";
 import { createHrefSlice, type HrefState } from "./href";
 import { createInputSlice, type InputState } from "./input";
 import { createItemsSlice, type ItemsState } from "./items";
@@ -26,7 +26,7 @@ export interface State
     HrefState,
     InputState,
     ValueState,
-    GeotiffState,
+    AssetsState,
     BboxState,
     UploadedFileState,
     ConnectionState,
@@ -43,7 +43,7 @@ export const useStore = create<State>((...a) => ({
   ...createValueSlice(...a),
   ...createCollectionsSlice(...a),
   ...createItemsSlice(...a),
-  ...createGeotiffSlice(...a),
+  ...createAssetsSlice(...a),
   ...createBboxSlice(...a),
   ...createUploadedFileSlice(...a),
   ...createConnectionSlice(...a),

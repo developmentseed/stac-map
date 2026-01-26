@@ -5,8 +5,9 @@ import type {
   StacLink,
 } from "stac-ts";
 import type { BBox2D } from "../types/map";
-import type { StacValue } from "../types/stac";
+import type { AssetWithAlternates, StacValue } from "../types/stac";
 import { sanitizeBbox } from "./map";
+import { fetchPlanetaryComputerSignedHref } from "./planetary-computer";
 
 export function getStacValueTitle(value: StacValue) {
   if ("title" in value && value.title) {
@@ -218,4 +219,67 @@ export function isCollectionInDatetimes(
     (collectionEnd && collectionEnd < start) ||
     (collectionStart && collectionStart > end)
   );
+}
+
+export async function getGeotiffHref(
+  asset: AssetWithAlternates
+): Promise<string | null> {
+  if (!isGeotiff(asset)) {
+    return null;
+  }
+  let geotiffHref = null;
+  if (asset.href.startsWith("http")) {
+    geotiffHref = asset.href;
+  } else if (asset.alternate) {
+    const httpAlternate = Object.values(asset.alternate).find((alt) =>
+      alt.href.startsWith("http")
+    );
+    if (httpAlternate) {
+      geotiffHref = httpAlternate.href;
+    }
+  }
+  if (geotiffHref === null) return null;
+
+  if (new URL(geotiffHref).hostname.endsWith("blob.core.windows.net")) {
+    // Assume it's the planetary computer and try to get a SAS token
+    const signedHref = await fetchPlanetaryComputerSignedHref(geotiffHref);
+    if (signedHref) geotiffHref = signedHref;
+  }
+
+  return geotiffHref;
+}
+
+export function isGeotiff(asset: AssetWithAlternates) {
+  if (!asset.type?.startsWith("image/tiff; application=geotiff")) {
+    return false;
+  }
+  if (!hasValidBandCount(asset)) {
+    return false;
+  }
+  return hasHttpHref(asset);
+}
+
+function hasValidBandCount(asset: AssetWithAlternates): boolean {
+  const bandCount = getBandCount(asset);
+  if (bandCount === null) {
+    return true;
+  }
+  return bandCount === 3 || bandCount === 4;
+}
+
+function hasHttpHref(asset: AssetWithAlternates): boolean {
+  if (asset.href.startsWith("http")) {
+    return true;
+  }
+  if (asset.alternate) {
+    return Object.values(asset.alternate).some((alt) =>
+      alt.href.startsWith("http")
+    );
+  }
+  return false;
+}
+
+export function getBandCount(asset: AssetWithAlternates): number | null {
+  const bands = asset.bands || asset["eo:bands"];
+  return bands ? bands.length : null;
 }
