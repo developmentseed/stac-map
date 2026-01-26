@@ -1,3 +1,4 @@
+import { useStore } from "@/store";
 import { ButtonGroup, HStack, IconButton, List, Span } from "@chakra-ui/react";
 import { LuArrowRight, LuExternalLink, LuLink } from "react-icons/lu";
 import type { StacLink } from "stac-ts";
@@ -25,13 +26,15 @@ export default function Links({ links }: { links: StacLink[] }) {
 }
 
 function LinkListItem({ link }: { link: StacLink }) {
+  const setHref = useStore((store) => store.setHref);
+
   return (
     <List.Item display={"block"}>
       <HStack>
         <Span flex={1}>{link.title || link.rel}</Span>
         <ButtonGroup variant={"plain"} size="2xs">
           {HIERARCHICAL_LINKS.includes(link.rel) && (
-            <IconButton>
+            <IconButton onClick={() => setHref(link.href)}>
               <LuArrowRight />
             </IconButton>
           )}

@@ -31,6 +31,7 @@ export default function Items({ items }: { items: StacItem[] }) {
                       features: items,
                     })
                   }
+                  asChild
                 >
                   <Button disabled={items.length === 0}>
                     <LuDownload /> JSON
@@ -42,6 +43,7 @@ export default function Items({ items }: { items: StacItem[] }) {
                   data={() =>
                     new Blob([stac_wasm.stacJsonToParquet(items) as BlobPart])
                   }
+                  asChild
                 >
                   <Button disabled={items.length === 0}>
                     <LuDownload /> STAC GeoParquet
