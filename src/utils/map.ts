@@ -19,3 +19,7 @@ export function sanitizeBbox(bbox: BBox | SpatialExtent): BBox2D {
     ];
   }
 }
+
+export function formatBbox(bbox: BBox2D): string {
+  return `${bbox[0].toFixed(2)}, ${bbox[1].toFixed(2)}, ${bbox[2].toFixed(2)}, ${bbox[3].toFixed(2)}`;
+}

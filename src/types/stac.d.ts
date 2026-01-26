@@ -34,6 +34,8 @@ export interface StacSearch {
   collections: string[];
   bbox?: [number, number, number, number];
   limit?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  queryables: any;
 }
 
 export type DatetimeBounds = { start: Date | null; end: Date | null };
