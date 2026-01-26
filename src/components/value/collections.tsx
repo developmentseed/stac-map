@@ -74,7 +74,7 @@ export default function Collections({
           <Stack gap={4}>
             {collections.length > 1 && (
               <Popover.Root>
-                <Popover.Trigger>
+                <Popover.Trigger asChild>
                   <Button variant={"outline"} size={"sm"}>
                     <LuFilter /> Filter
                   </Button>

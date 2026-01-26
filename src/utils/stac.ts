@@ -5,7 +5,7 @@ import type {
   StacLink,
 } from "stac-ts";
 import type { BBox2D } from "../types/map";
-import type { AssetWithAlternates, StacValue } from "../types/stac";
+import type { AssetWithAlternates, StacAssets, StacValue } from "../types/stac";
 import { sanitizeBbox } from "./map";
 import { maybeSignPlanetaryComputerHref } from "./planetary-computer";
 
@@ -279,4 +279,35 @@ function hasHttpHref(asset: AssetWithAlternates): boolean {
 export function getBandCount(asset: AssetWithAlternates): number | null {
   const bands = asset.bands || asset["eo:bands"];
   return bands ? bands.length : null;
+}
+
+export function sortAssets(assets: StacAssets) {
+  return Object.entries(assets).sort(
+    ([, a], [, b]) =>
+      getAssetScore(b as AssetWithAlternates) -
+      getAssetScore(a as AssetWithAlternates)
+  );
+}
+
+export function getBestAsset(sortedAssets: [string, AssetWithAlternates][]) {
+  const first = sortedAssets[0];
+  if (first && getAssetScore(first[1] as AssetWithAlternates) > 0) {
+    return first;
+  }
+  return [null, null];
+}
+
+export function getAssetScore(asset: AssetWithAlternates): number {
+  const geotiff = isGeotiff(asset);
+  if (!geotiff) return 0;
+
+  const hasVisualRole = asset.roles?.includes("visual") ?? false;
+  const bandCount = getBandCount(asset);
+  const hasThreeOrFourBands = bandCount === 3 || bandCount === 4;
+
+  let score = 1;
+  if (hasVisualRole) score += 2;
+  if (hasThreeOrFourBands) score += 1;
+
+  return score;
 }

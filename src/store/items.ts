@@ -25,11 +25,13 @@ export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
     set({ search, items: null });
   },
   items: null,
-  setItems: (items) => set({ items }),
+  setItems: (items) => {
+    set({ items });
+  },
   addItem: (item) => {
     const items = get().items;
     if (!items?.find((i) => i.id === item.id))
-      set({ items: [...(get().items || []), item] });
+      get().setItems([...(get().items || []), item]);
   },
   hoveredItem: null,
   setHoveredItem: (item) => set({ hoveredItem: item }),

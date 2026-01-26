@@ -1,7 +1,7 @@
 import { type DeckProps, Layer } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
-import { COGLayer } from "@developmentseed/deck.gl-geotiff";
+import { COGLayer, MosaicLayer } from "@developmentseed/deck.gl-geotiff";
 import {
   GeoArrowPolygonLayer,
   GeoArrowScatterplotLayer,
@@ -17,17 +17,24 @@ import {
   type MapRef,
   useControl,
 } from "react-map-gl/maplibre";
-import type { StacCollection } from "stac-ts";
+import type { StacCollection, StacItem } from "stac-ts";
 import { useColorModeValue } from "../components/ui/color-mode";
 import { useStore } from "../store";
 import type { BBox2D, Color } from "../types/map";
 import type { StacValue } from "../types/stac";
 import { sanitizeBbox } from "../utils/map";
 import {
+  getBestAsset,
   getCollectionExtents,
+  getGeotiffHref,
   getSelfHref,
   isGlobalCollection,
+  sortAssets,
 } from "../utils/stac";
+
+interface ItemWithBbox extends StacItem {
+  bbox: BBox2D;
+}
 
 export default function Map() {
   const mapRef = useRef<MapRef>(null);
@@ -89,6 +96,9 @@ export default function Map() {
       )
       .filter((feature) => !!feature);
   }, [collections, filteredCollections]);
+  const itemsWithBboxes = useMemo(() => {
+    return items?.filter((item) => !!item.bbox) as ItemWithBbox[] | undefined;
+  }, [items]);
 
   useEffect(() => {
     if (mapRef.current && isMapLoaded) {
@@ -245,8 +255,28 @@ export default function Map() {
   if (geotiffHref)
     layers.push(
       new COGLayer({
-        id: "cog-" + geotiffHref,
+        id: "cog",
         geotiff: geotiffHref,
+      })
+    );
+
+  if (itemsWithBboxes)
+    layers.push(
+      new MosaicLayer<ItemWithBbox>({
+        id: "cog-mosaic",
+        sources: itemsWithBboxes,
+        getSource: async (source) => {
+          const sortedAssets = sortAssets(source.assets);
+          const [, bestAsset] = getBestAsset(sortedAssets);
+          if (bestAsset) return getGeotiffHref(bestAsset);
+        },
+        renderSource: (source, { data, signal }) => {
+          return new COGLayer({
+            id: `cog-${source.id}`,
+            geotiff: data,
+            signal,
+          });
+        },
       })
     );
 

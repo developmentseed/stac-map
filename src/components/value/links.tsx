@@ -17,8 +17,8 @@ export default function Links({ links }: { links: StacLink[] }) {
   return (
     <Section icon={<LuLink />} title={"Links"} open={false}>
       <List.Root variant={"plain"}>
-        {links.map((link) => (
-          <LinkListItem link={link} key={link.rel + link.href} />
+        {links.map((link, i) => (
+          <LinkListItem link={link} key={"link-" + i} />
         ))}
       </List.Root>
     </Section>

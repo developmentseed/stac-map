@@ -1,7 +1,7 @@
 import { useStore } from "@/store";
 import type { AssetWithAlternates } from "@/types/stac";
 import { isPlanetaryComputerHref } from "@/utils/planetary-computer";
-import { getBandCount, isGeotiff } from "@/utils/stac";
+import { getAssetScore, getBestAsset, sortAssets } from "@/utils/stac";
 import {
   Badge,
   Box,
@@ -39,18 +39,10 @@ type SortedAssets = [string, StacAsset][];
 export default function Assets({ assets }: { assets: StacAssets }) {
   const setAsset = useStore((store) => store.setAsset);
   const sortedAssets = useMemo(() => {
-    return Object.entries(assets).sort(
-      ([, a], [, b]) =>
-        getAssetScore(b as AssetWithAlternates) -
-        getAssetScore(a as AssetWithAlternates)
-    );
+    return sortAssets(assets);
   }, [assets]);
   const [bestAssetKey, bestAsset] = useMemo(() => {
-    const first = sortedAssets[0];
-    if (first && getAssetScore(first[1] as AssetWithAlternates) > 0) {
-      return [first[0], first[1]];
-    }
-    return [null, null];
+    return getBestAsset(sortedAssets);
   }, [sortedAssets]);
 
   useEffect(() => {
@@ -205,21 +197,6 @@ function AssetActions({
       )}
     </ButtonGroup>
   );
-}
-
-function getAssetScore(asset: AssetWithAlternates): number {
-  const geotiff = isGeotiff(asset);
-  if (!geotiff) return 0;
-
-  const hasVisualRole = asset.roles?.includes("visual") ?? false;
-  const bandCount = getBandCount(asset);
-  const hasThreeOrFourBands = bandCount === 3 || bandCount === 4;
-
-  let score = 1;
-  if (hasVisualRole) score += 2;
-  if (hasThreeOrFourBands) score += 1;
-
-  return score;
 }
 
 function AssetVisibility({
