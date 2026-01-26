@@ -13,3 +13,18 @@ export async function fetchPlanetaryComputerSignedHref(
   const { href: signedHref } = await response.json();
   return signedHref;
 }
+
+export async function maybeSignPlanetaryComputerHref(
+  href: string
+): Promise<string | null> {
+  if (isPlanetaryComputerHref(href)) {
+    // Assume it's the planetary computer and try to get a SAS token
+    const signedHref = await fetchPlanetaryComputerSignedHref(href);
+    if (signedHref) return signedHref;
+  }
+  return href;
+}
+
+export function isPlanetaryComputerHref(href: string): boolean {
+  return new URL(href).hostname.endsWith("blob.core.windows.net");
+}

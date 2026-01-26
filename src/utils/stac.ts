@@ -7,7 +7,7 @@ import type {
 import type { BBox2D } from "../types/map";
 import type { AssetWithAlternates, StacValue } from "../types/stac";
 import { sanitizeBbox } from "./map";
-import { fetchPlanetaryComputerSignedHref } from "./planetary-computer";
+import { maybeSignPlanetaryComputerHref } from "./planetary-computer";
 
 export function getStacValueTitle(value: StacValue) {
   if ("title" in value && value.title) {
@@ -240,11 +240,8 @@ export async function getGeotiffHref(
   }
   if (geotiffHref === null) return null;
 
-  if (new URL(geotiffHref).hostname.endsWith("blob.core.windows.net")) {
-    // Assume it's the planetary computer and try to get a SAS token
-    const signedHref = await fetchPlanetaryComputerSignedHref(geotiffHref);
-    if (signedHref) geotiffHref = signedHref;
-  }
+  const signedHref = await maybeSignPlanetaryComputerHref(geotiffHref);
+  if (signedHref) return signedHref;
 
   return geotiffHref;
 }

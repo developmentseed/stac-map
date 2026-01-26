@@ -1,5 +1,6 @@
 import { useStore } from "@/store";
 import type { AssetWithAlternates } from "@/types/stac";
+import { isPlanetaryComputerHref } from "@/utils/planetary-computer";
 import { getBandCount, isGeotiff } from "@/utils/stac";
 import {
   Badge,
@@ -8,7 +9,9 @@ import {
   ButtonGroup,
   Card,
   Clipboard,
+  HStack,
   IconButton,
+  List,
   Menu,
   Portal,
   Span,
@@ -25,6 +28,7 @@ import {
 } from "react-icons/lu";
 import type { StacAsset } from "stac-ts";
 import { Section } from "../section";
+import { PlanetaryComputerDownload } from "../ui/planetary-computer";
 
 interface StacAssets {
   [k: string]: StacAsset;
@@ -67,7 +71,32 @@ export default function Assets({ assets }: { assets: StacAssets }) {
 }
 
 function AssetsList({ assets }: { assets: SortedAssets }) {
-  return <></>;
+  return (
+    <List.Root variant={"plain"}>
+      {assets.map(([key, asset]) => (
+        <AssetListItem key={key} assetKey={key} asset={asset} />
+      ))}
+    </List.Root>
+  );
+}
+
+function AssetListItem({
+  assetKey,
+  asset,
+}: {
+  assetKey: string;
+  asset: StacAsset;
+}) {
+  const scheme = asset.href.split(":").at(0);
+  return (
+    <List.Item display={"block"}>
+      <HStack>
+        {asset.title || assetKey}
+        <Span flex={1} />
+        <AssetActions asset={asset} scheme={scheme} />
+      </HStack>
+    </List.Item>
+  );
 }
 
 function AssetCards({ assets }: { assets: SortedAssets }) {
@@ -136,7 +165,7 @@ function AssetActions({
   const alternates = asset.alternate ? Object.entries(asset.alternate) : [];
 
   return (
-    <ButtonGroup size="xs" variant="plain">
+    <ButtonGroup size="xs" variant="plain" attached>
       <Clipboard.Root value={asset.href}>
         <Clipboard.Trigger asChild>
           <IconButton>
@@ -144,13 +173,16 @@ function AssetActions({
           </IconButton>
         </Clipboard.Trigger>
       </Clipboard.Root>
-      {scheme?.startsWith("http") && (
-        <IconButton asChild>
-          <a href={asset.href}>
-            <LuDownload />
-          </a>
-        </IconButton>
-      )}
+      {scheme?.startsWith("http") &&
+        (isPlanetaryComputerHref(asset.href) ? (
+          <PlanetaryComputerDownload href={asset.href} />
+        ) : (
+          <IconButton asChild>
+            <a href={asset.href}>
+              <LuDownload />
+            </a>
+          </IconButton>
+        ))}
       {alternates.length > 0 && (
         <Menu.Root>
           <Menu.Trigger asChild>
