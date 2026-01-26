@@ -21,6 +21,7 @@ import CollectionsHref from "./collections-href";
 import Description from "./description";
 import ItemLinks from "./item-links";
 import Items from "./items";
+import Links from "./links";
 import Properties from "./properties";
 import RootHref from "./root-href";
 import StacGeoparquetHref from "./stac-geoparquet-href";
@@ -92,6 +93,7 @@ export default function Value({ value }: { value: StacValue }) {
         {(value.assets as { [k: string]: StacAsset }) && (
           <Assets assets={value.assets as { [k: string]: StacAsset }} />
         )}
+        {value.links && <Links links={value.links} />}
         {value.type === "Feature" && (
           <Properties properties={value.properties} />
         )}
