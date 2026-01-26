@@ -35,6 +35,7 @@ export default function Value({ value }: { value: StacValue }) {
   const collections = useStore((store) => store.collections);
   const catalogs = useStore((store) => store.catalogs);
   const items = useStore((store) => store.items);
+  const setItems = useStore((store) => store.setItems);
   const version = value.stac_version as string | undefined;
   const description = value.description as string | undefined;
   const rootHref = getLinkHref(value, "root");
@@ -52,6 +53,10 @@ export default function Value({ value }: { value: StacValue }) {
   useEffect(() => {
     document.title = "stac-map | " + getStacValueTitle(value);
   }, [value]);
+
+  useEffect(() => {
+    if (value.type === "FeatureCollection") setItems(value.features);
+  }, [value, setItems]);
 
   return (
     <Stack gap={8}>
@@ -89,7 +94,9 @@ export default function Value({ value }: { value: StacValue }) {
         {itemLinks && <ItemLinks links={itemLinks} />}
         {collections && <Collections collections={collections} />}
         {catalogs && <Catalogs catalogs={catalogs} />}
-        {value.type === "Collection" && items && <Items items={items} />}
+        {(value.type === "Collection" || value.type === "FeatureCollection") &&
+          items &&
+          items?.length > 0 && <Items items={items} />}
         {(value.assets as { [k: string]: StacAsset }) && (
           <Assets assets={value.assets as { [k: string]: StacAsset }} />
         )}
