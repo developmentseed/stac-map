@@ -380,7 +380,7 @@ describe("assets.ts - setAsset", () => {
   test("setting asset calls getGeotiffHref and updates state", async () => {
     const asset = { href: "https://example.com/asset.tiff" };
 
-    useStore.getState().setAsset("visual", asset);
+    await useStore.getState().setAsset("visual", asset);
 
     expect(useStore.getState().asset).toBe(asset);
     expect(useStore.getState().assetKey).toBe("visual");
