@@ -1,6 +1,14 @@
-import { List, Stack } from "@chakra-ui/react";
-import { LuFiles } from "react-icons/lu";
+import {
+  Button,
+  ButtonGroup,
+  Center,
+  DownloadTrigger,
+  List,
+  Stack,
+} from "@chakra-ui/react";
+import { LuDownload, LuFiles } from "react-icons/lu";
 import type { StacItem } from "stac-ts";
+import * as stac_wasm from "stac-wasm";
 import ItemCard from "../cards/item";
 import ItemListItem from "../list-items/item";
 import { Section } from "../section";
@@ -10,17 +18,50 @@ export default function Items({ items }: { items: StacItem[] }) {
   return (
     <Section defaultListOrCard="list" title={title} icon={<LuFiles />}>
       {(listOrCard) => {
-        return listOrCard === "list" ? (
-          <List.Root variant={"plain"}>
-            {items.map((item) => (
-              <ItemListItem key={item.id} item={item} />
-            ))}
-          </List.Root>
-        ) : (
+        return (
           <Stack>
-            {items.map((item) => (
-              <ItemCard key={item.id} item={item} />
-            ))}
+            <Center>
+              <ButtonGroup size="2xs" variant={"subtle"}>
+                <DownloadTrigger
+                  fileName="items.geojson"
+                  mimeType="application/json"
+                  data={() =>
+                    JSON.stringify({
+                      type: "FeatureCollection",
+                      features: items,
+                    })
+                  }
+                >
+                  <Button disabled={items.length === 0}>
+                    <LuDownload /> JSON
+                  </Button>
+                </DownloadTrigger>
+                <DownloadTrigger
+                  fileName="items.parquet"
+                  mimeType="application/vnd.apache.parquet"
+                  data={() =>
+                    new Blob([stac_wasm.stacJsonToParquet(items) as BlobPart])
+                  }
+                >
+                  <Button disabled={items.length === 0}>
+                    <LuDownload /> STAC GeoParquet
+                  </Button>
+                </DownloadTrigger>
+              </ButtonGroup>
+            </Center>
+            {listOrCard === "list" ? (
+              <List.Root variant={"plain"}>
+                {items.map((item) => (
+                  <ItemListItem key={item.id} item={item} />
+                ))}
+              </List.Root>
+            ) : (
+              <Stack>
+                {items.map((item) => (
+                  <ItemCard key={item.id} item={item} />
+                ))}
+              </Stack>
+            )}
           </Stack>
         );
       }}
