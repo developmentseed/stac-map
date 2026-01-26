@@ -42,7 +42,7 @@
     "@deck.gl/core": "^9.2.6",
     "@deck.gl/layers": "^9.2.6",
     "@deck.gl/mapbox": "^9.2.6",
-    "@developmentseed/deck.gl-geotiff": "^0.1.0",
+    "@developmentseed/deck.gl-geotiff": "^0.2.0",
     "@devseed-ui/collecticons-chakra": "^4.0.0",
     "@duckdb/duckdb-wasm": "^1.32.0",
     "@emotion/react": "^11.13.5",
