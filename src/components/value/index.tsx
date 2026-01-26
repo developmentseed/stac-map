@@ -82,11 +82,11 @@ export default function Value({ value }: { value: StacValue }) {
             connection={connection}
           />
         )}
+        {conformsToFreeTextCollectionSearch(value) && <CollectionSearch />}
         {rootHref && <RootHref value={value} href={rootHref} />}
         {collectionsHref && <CollectionsHref href={collectionsHref} />}
         {!collectionsHref && childLinks && <ChildLinks links={childLinks} />}
         {itemLinks && <ItemLinks links={itemLinks} />}
-        {conformsToFreeTextCollectionSearch(value) && <CollectionSearch />}
         {collections && <Collections collections={collections} />}
         {catalogs && <Catalogs catalogs={catalogs} />}
         {value.type === "Collection" && items && <Items items={items} />}
