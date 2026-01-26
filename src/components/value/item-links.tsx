@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import type { StacLink } from "stac-ts";
-import { useStacJson } from "../hooks/stac";
-import { useStore } from "../store";
+import { useStacJson } from "../../hooks/stac";
+import { useStore } from "../../store";
 
 export default function ItemLinks({ links }: { links: StacLink[] }) {
   return (
@@ -14,7 +14,7 @@ export default function ItemLinks({ links }: { links: StacLink[] }) {
 }
 
 function ItemLink({ link }: { link: StacLink }) {
-  const addItem = useStore((store) => store.addItem);
+  const addItem = useStore((state) => state.addItem);
   const result = useStacJson({ href: link.href });
 
   useEffect(() => {

@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import type { StacLink } from "stac-ts";
-import { useStacJson } from "../hooks/stac";
-import { useStore } from "../store";
+import { useStacJson } from "../../hooks/stac";
+import { useStore } from "../../store";
 
-export default function Children({ links }: { links: StacLink[] }) {
+export default function ChildLinks({ links }: { links: StacLink[] }) {
   return (
     <>
       {links.map((link) => (

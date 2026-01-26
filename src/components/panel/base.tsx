@@ -35,7 +35,14 @@ export function BasePanel({
       rounded={4}
       borderColor={"bg.emphasized"}
     >
-      <Box borderBottomWidth={1} borderColor={"border.subtle"} py={2} px={4}>
+      <Box
+        borderBottomWidth={1}
+        borderColor={"border.subtle"}
+        py={2}
+        px={4}
+        fontWeight={"lighter"}
+        fontSize={"sm"}
+      >
         {header}
       </Box>
       <Box p={4} overflow={"scroll"} maxH={"80dvh"}>

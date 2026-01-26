@@ -1,0 +1,97 @@
+import { useStore } from "@/store";
+import type { StacValue } from "@/types/stac";
+import {
+  conformsToFreeTextCollectionSearch,
+  getLinkHref,
+  getStacValueTitle,
+  getThumbnailAsset,
+} from "@/utils/stac";
+import { Badge, Heading, HStack, Stack } from "@chakra-ui/react";
+import { useEffect, useMemo } from "react";
+import type { StacAsset } from "stac-ts";
+import Thumbnail from "../ui/thumbnail";
+import Assets from "./assets";
+import Breadcrumbs from "./breadcrumbs";
+import Buttons from "./buttons";
+import Catalogs from "./catalogs";
+import ChildLinks from "./child-links";
+import CollectionSearch from "./collection-search";
+import Collections from "./collections";
+import CollectionsHref from "./collections-href";
+import Description from "./description";
+import ItemLinks from "./item-links";
+import Items from "./items";
+import RootHref from "./root-href";
+import StacGeoparquetHref from "./stac-geoparquet-href";
+import StacGeoparquetItemId from "./stac-geoparquet-item-id";
+
+export default function Value({ value }: { value: StacValue }) {
+  const href = useStore((store) => store.href);
+  const hrefIsParquet = useStore((store) => store.hrefIsParquet);
+  const stacGeoparquetItemId = useStore((store) => store.stacGeoparquetItemId);
+  const connection = useStore((store) => store.connection);
+  const collections = useStore((store) => store.collections);
+  const catalogs = useStore((store) => store.catalogs);
+  const items = useStore((store) => store.items);
+  const version = value.stac_version as string | undefined;
+  const description = value.description as string | undefined;
+  const rootHref = getLinkHref(value, "root");
+  const collectionsHref = getLinkHref(value, "data");
+  const thumbnailAsset = getThumbnailAsset(value);
+
+  const childLinks = useMemo(() => {
+    return value.links?.filter((link) => link.rel === "child");
+  }, [value]);
+
+  const itemLinks = useMemo(() => {
+    return value.links?.filter((link) => link.rel === "item");
+  }, [value]);
+
+  useEffect(() => {
+    document.title = "stac-map | " + getStacValueTitle(value);
+  }, [value]);
+
+  return (
+    <Stack gap={8}>
+      <Stack gap={4}>
+        <Heading wordBreak={"break-all"}>
+          <HStack gap={4}>
+            {getStacValueTitle(value)}
+            {version && <Badge variant={"surface"}>{version}</Badge>}
+          </HStack>
+        </Heading>
+        <Breadcrumbs value={value} />
+        {thumbnailAsset && <Thumbnail asset={thumbnailAsset} />}
+        {description && <Description description={description} />}
+        <Buttons value={value} />
+      </Stack>
+
+      <Stack>
+        {hrefIsParquet &&
+          href &&
+          connection &&
+          value.type === "FeatureCollection" && (
+            <StacGeoparquetHref href={href} connection={connection} />
+          )}
+        {stacGeoparquetItemId && connection && href && (
+          <StacGeoparquetItemId
+            id={stacGeoparquetItemId}
+            href={href}
+            connection={connection}
+          />
+        )}
+        {rootHref && <RootHref value={value} href={rootHref} />}
+        {collectionsHref && <CollectionsHref href={collectionsHref} />}
+        {!collectionsHref && childLinks && <ChildLinks links={childLinks} />}
+        {itemLinks && <ItemLinks links={itemLinks} />}
+        {conformsToFreeTextCollectionSearch(value) && <CollectionSearch />}
+        {collections && <Collections collections={collections} />}
+        {catalogs && <Catalogs catalogs={catalogs} />}
+        {value.type === "Collection" && items && <Items items={items} />}
+        {(value.assets as { [k: string]: StacAsset }) && (
+          <Assets assets={value.assets as { [k: string]: StacAsset }} />
+        )}
+      </Stack>
+    </Stack>
+  );
+}

@@ -1,14 +1,13 @@
 import type { StacCollection } from "stac-ts";
 import type { StateCreator } from "zustand";
 import type { State } from ".";
-import type { DatetimeBounds } from "../types/stac";
 
 export interface CollectionsState {
   collections: StacCollection[] | null;
   setCollections: (collections: StacCollection[] | null) => void;
   addCollection: (collection: StacCollection) => void;
-  collectionDatetimeBounds: DatetimeBounds | null;
-  setCollectionDatetimeBounds: (bounds: DatetimeBounds | null) => void;
+  hoveredCollection: StacCollection | null;
+  setHoveredCollection: (collection: StacCollection | null) => void;
   filteredCollections: StacCollection[] | null;
   setFilteredCollections: (collections: StacCollection[] | null) => void;
   collectionFreeTextSearch: string | null;
@@ -22,15 +21,15 @@ export const createCollectionsSlice: StateCreator<
   CollectionsState
 > = (set, get) => ({
   collections: null,
-  setCollections: (collections) => set({ collections }),
+  setCollections: (collections) =>
+    set({ collections, filteredCollections: null }),
   addCollection: (collection) => {
     const collections = get().collections;
     if (!collections?.find((c) => c.id == collection.id))
       set({ collections: [...(collections || []), collection] });
   },
-  collectionDatetimeBounds: null,
-  setCollectionDatetimeBounds: (bounds) =>
-    set({ collectionDatetimeBounds: bounds }),
+  hoveredCollection: null,
+  setHoveredCollection: (collection) => set({ hoveredCollection: collection }),
   filteredCollections: null,
   setFilteredCollections: (collections) => {
     set({ filteredCollections: collections });

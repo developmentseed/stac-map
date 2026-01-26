@@ -16,7 +16,7 @@ export default function App() {
   const { db } = useDuckDb();
 
   useEffect(() => {
-    if (href && getCurrentHref() != href) {
+    if (href) {
       history.pushState(null, "", "?href=" + href);
       document.title = "stac-map | " + href;
     } else {

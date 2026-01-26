@@ -1,7 +1,7 @@
+import { Prose } from "@/components/ui/prose";
 import { Button, Center, Stack } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
-import { Prose } from "./ui/prose";
 
 export default function Description({ description }: { description: string }) {
   const [lineClamp, setLineClamp] = useState(true);

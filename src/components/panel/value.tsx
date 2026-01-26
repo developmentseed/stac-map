@@ -1,6 +1,6 @@
 import type { StacValue } from "../../types/stac";
 import { getStacValueId } from "../../utils/stac";
-import { StacIcon } from "../stac";
+import { StacIcon } from "../ui/stac";
 import Value from "../value";
 import { BasePanel, PanelHeader } from "./base";
 

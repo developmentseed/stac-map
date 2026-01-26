@@ -1,15 +1,14 @@
+import { Section } from "@/components/section";
 import {
   ActionBar,
   Button,
   ButtonGroup,
-  Heading,
   HStack,
   IconButton,
   Portal,
   Progress,
   SkeletonText,
   Span,
-  Stack,
 } from "@chakra-ui/react";
 import {
   useInfiniteQuery,
@@ -24,10 +23,10 @@ import {
   LuPlay,
 } from "react-icons/lu";
 import type { StacCollection } from "stac-ts";
-import { useStore } from "../store";
-import type { StacCollections } from "../types/stac";
-import { getLinkHref } from "../utils/stac";
-import { ResultError } from "./result-error";
+import { useStore } from "../../store";
+import type { StacCollections } from "../../types/stac";
+import { getLinkHref } from "../../utils/stac";
+import { ErrorAlert } from "../ui/error-alert";
 
 export default function CollectionsHref({ href }: { href: string }) {
   const collections = useStore((state) => state.collections);
@@ -83,7 +82,7 @@ export default function CollectionsHref({ href }: { href: string }) {
 
   if (result.error)
     return (
-      <ResultError
+      <ErrorAlert
         title="Error while fetching collections"
         error={result.error}
       />
@@ -117,12 +116,7 @@ function PagedCollections({
 } & UseInfiniteQueryResult) {
   return (
     <>
-      <Stack gap={2}>
-        <Heading size={"md"}>
-          <HStack>
-            <LuFolderSymlink /> Collection pagination
-          </HStack>
-        </Heading>
+      <Section icon={<LuFolderSymlink />} title="Collection pagination">
         <HStack width={"full"}>
           {numberMatched ? (
             <Progress.Root
@@ -156,7 +150,7 @@ function PagedCollections({
             </IconButton>
           </ButtonGroup>
         </HStack>
-      </Stack>
+      </Section>
       <PagedCollectionsActionBar
         collections={collections}
         numberMatched={numberMatched}

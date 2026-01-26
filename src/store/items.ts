@@ -9,8 +9,8 @@ export interface ItemsState {
   items: StacItem[] | null;
   setItems: (items: StacItem[] | null) => void;
   addItem: (item: StacItem) => void;
-  searchItems: StacItem[] | null;
-  setSearchItems: (items: StacItem[] | null) => void;
+  hoveredItem: StacItem | null;
+  setHoveredItem: (item: StacItem | null) => void;
   pickedItem: StacItem | null;
   setPickedItem: (item: StacItem) => void;
   clearPickedItem: () => void;
@@ -22,10 +22,8 @@ export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
 ) => ({
   search: null,
   setSearch: (search) => {
-    set({ search, searchItems: null });
+    set({ search, items: null });
   },
-  searchItems: null,
-  setSearchItems: (items) => set({ searchItems: items }),
   items: null,
   setItems: (items) => set({ items }),
   addItem: (item) => {
@@ -33,6 +31,8 @@ export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
     if (!items?.find((i) => i.id === item.id))
       set({ items: [...(get().items || []), item] });
   },
+  hoveredItem: null,
+  setHoveredItem: (item) => set({ hoveredItem: item }),
   pickedItem: null,
   setPickedItem: (item) => {
     set({

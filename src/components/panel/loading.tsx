@@ -2,7 +2,7 @@ import { SkeletonText, Spinner } from "@chakra-ui/react";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { LuFileWarning } from "react-icons/lu";
 
-import { ResultError } from "../result-error";
+import { ErrorAlert } from "../ui/error-alert";
 import { BasePanel, PanelHeader } from "./base";
 
 export function LoadingPanel({
@@ -31,7 +31,7 @@ export function LoadingPanel({
   return (
     <BasePanel header={header}>
       {error ? (
-        <ResultError title={error.name} error={error} />
+        <ErrorAlert title={error.name} error={error} />
       ) : (
         <SkeletonText />
       )}

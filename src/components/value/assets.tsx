@@ -1,3 +1,5 @@
+import { useStore } from "@/store";
+import { fetchPlanetaryComputerSignedHref } from "@/utils/planetary-computer";
 import {
   Badge,
   Button,
@@ -19,9 +21,7 @@ import {
   LuFileImage,
 } from "react-icons/lu";
 import type { StacAsset } from "stac-ts";
-import { useStore } from "../store";
-import { fetchPlanetaryComputerSignedHref } from "../utils/planetary-computer";
-import { type ListOrCard, Section } from "./section";
+import { type ListOrCard, Section } from "../section";
 
 interface AlternateAsset {
   href: string;
@@ -75,11 +75,7 @@ export default function Assets({
   }, [geotiffHref, setGeotiffHref]);
 
   return (
-    <Section
-      icon={<LuFileImage />}
-      title="Assets"
-      count={Object.keys(assets).length}
-    >
+    <Section icon={<LuFileImage />} title="Assets">
       {(listOrCard) => (
         <AssetsList
           assets={assets}

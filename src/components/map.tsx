@@ -47,7 +47,6 @@ export default function Map() {
   const pickedItem = useStore((store) => store.pickedItem);
   const setPickedItem = useStore((store) => store.setPickedItem);
   const items = useStore((store) => store.items);
-  const searchItems = useStore((store) => store.searchItems);
   const geotiffHref = useStore((store) => store.geotiffHref);
   const stacGeoparquetTable = useStore((store) => store.stacGeoparquetTable);
   const stacGeoparquetItemId = useStore((store) => store.stacGeoparquetItemId);
@@ -103,7 +102,6 @@ export default function Map() {
         value,
         collections,
         pickedItem as Feature | null,
-        searchItems as Feature[] | null,
         items as Feature[] | null,
         stacGeoparquetItemId
       );
@@ -114,7 +112,6 @@ export default function Map() {
     isMapLoaded,
     collections,
     pickedItem,
-    searchItems,
     items,
     stacGeoparquetItemId,
   ]);
@@ -150,22 +147,6 @@ export default function Map() {
       getLineColor: lineColor,
       getLineWidth: lineWidth,
       lineWidthUnits: "pixels",
-    }),
-    new GeoJsonLayer({
-      id: "search-items",
-      data: searchItems ? featureCollection(searchItems as Feature[]) : [],
-      filled: true,
-      getFillColor: itemsFillColor,
-      getLineColor: lineColor,
-      getLineWidth: lineWidth,
-      lineWidthUnits: "pixels",
-      pickable: true,
-      onHover: (e) => {
-        setHoveredItem(e.object);
-      },
-      onClick: (e) => {
-        setPickedItem(e.object);
-      },
     }),
     new GeoJsonLayer({
       id: "items",
@@ -212,7 +193,7 @@ export default function Map() {
     new GeoJsonLayer({
       id: "value",
       data: valueGeoJson,
-      filled: !(geotiffHref || items || searchItems || collectionsGeoJson),
+      filled: !(geotiffHref || items || collectionsGeoJson),
       getFillColor: fillColor,
       getLineColor: lineColor,
       getLineWidth: lineWidth,
@@ -342,15 +323,11 @@ function getBbox(
   value: StacValue | null,
   collections: StacCollection[] | null,
   pickedItem: Feature | null,
-  searchItems: Feature[] | null,
   items: Feature[] | null,
   stacGeoparquetItemId: string | null
 ): BBox2D | undefined {
   if (pickedItem) {
     return sanitizeBbox(bbox(pickedItem) as BBox2D);
-  }
-  if (searchItems && searchItems.length > 0) {
-    return sanitizeBbox(bbox(featureCollection(searchItems)) as BBox2D);
   }
   if (items && items.length > 0) {
     return sanitizeBbox(bbox(featureCollection(items)) as BBox2D);

@@ -1,6 +1,6 @@
+import { useStore } from "@/store";
 import { HStack, Slider, Span } from "@chakra-ui/react";
 import { useState } from "react";
-import { useStore } from "../store";
 
 export default function DatetimeSlider({
   start,

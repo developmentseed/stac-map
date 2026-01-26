@@ -1,3 +1,8 @@
+import { Section } from "@/components/section";
+import { useStore } from "@/store/index.ts";
+import type { StacItemCollection, StacSearch } from "@/types/stac";
+import { sanitizeBbox } from "@/utils/map.ts";
+import { fetchStac, getLinkHref } from "@/utils/stac.ts";
 import {
   ActionBar,
   Alert,
@@ -34,11 +39,6 @@ import {
 } from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
 import type { StacCollection, StacItem } from "stac-ts";
-import { useStore } from "../store/index.ts";
-import type { StacItemCollection, StacSearch } from "../types/stac";
-import { sanitizeBbox } from "../utils/map.ts";
-import { fetchStac, getLinkHref } from "../utils/stac.ts";
-import { Section } from "./section";
 
 interface Props {
   href: string;
@@ -71,9 +71,9 @@ function SearchSettingsDialog({
       onOpenChange={(e) => setOpen(e.open)}
     >
       <Dialog.Trigger asChild>
-        <IconButton variant={"subtle"} disabled={disabled}>
-          <LuSettings />
-        </IconButton>
+        <Button variant={"subtle"} disabled={disabled}>
+          <LuSettings /> Configure
+        </Button>
       </Dialog.Trigger>
       <Portal>
         <Dialog.Backdrop />
@@ -263,8 +263,8 @@ function SearchResultsActionBar({
 }
 
 function SearchResults({ href, search }: { href: string; search: StacSearch }) {
-  const searchItems = useStore((store) => store.searchItems);
-  const setSearchItems = useStore((store) => store.setSearchItems);
+  const items = useStore((store) => store.items);
+  const setItems = useStore((store) => store.setItems);
   const [fetchAllItems, setFetchAllItems] = useState(false);
 
   const searchHref = useMemo(() => {
@@ -294,8 +294,8 @@ function SearchResults({ href, search }: { href: string; search: StacSearch }) {
 
   useEffect(() => {
     if (result.data)
-      setSearchItems(result.data.pages.flatMap((page) => page?.features || []));
-  }, [result.data, setSearchItems]);
+      setItems(result.data.pages.flatMap((page) => page?.features || []));
+  }, [result.data, setItems]);
 
   useEffect(() => {
     if (fetchAllItems && !result.isFetching && result.hasNextPage)
@@ -309,14 +309,14 @@ function SearchResults({ href, search }: { href: string; search: StacSearch }) {
   return (
     <>
       <SearchResultsProgress
-        items={searchItems}
+        items={items}
         numberMatched={numberMatched}
         fetchAllItems={fetchAllItems}
         setFetchAllItems={setFetchAllItems}
         {...result}
       />
       <SearchResultsActionBar
-        items={searchItems}
+        items={items}
         numberMatched={numberMatched}
         fetchAllItems={fetchAllItems}
         setFetchAllItems={setFetchAllItems}
@@ -345,25 +345,24 @@ export default function Search({ href, collection }: Props) {
 
   return (
     <Section icon={<LuSearch />} title="Item search">
-      <HStack>
-        <SearchSettingsDialog
-          collection={collection}
-          useViewportForBbox={useViewportForBbox}
-          setUseViewportForBbox={setUseViewportForBbox}
-          limit={limit}
-          setLimit={setLimit}
-          disabled={!!search}
-        />
-
-        {search ? (
-          <SearchResults href={href} search={search} />
-        ) : (
+      {search ? (
+        <SearchResults href={href} search={search} />
+      ) : (
+        <HStack>
           <Button onClick={onClickSearch}>
             <LuSearch />
             Search
           </Button>
-        )}
-      </HStack>
+          <SearchSettingsDialog
+            collection={collection}
+            useViewportForBbox={useViewportForBbox}
+            setUseViewportForBbox={setUseViewportForBbox}
+            limit={limit}
+            setLimit={setLimit}
+            disabled={!!search}
+          />
+        </HStack>
+      )}
     </Section>
   );
 }

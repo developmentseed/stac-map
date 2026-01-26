@@ -1,7 +1,6 @@
-import { SkeletonText } from "@chakra-ui/react";
-import { useStacJson } from "../hooks/stac";
-import type { StacValue } from "../types/stac";
-import { getLinkHref } from "../utils/stac";
+import { useStacJson } from "@/hooks/stac";
+import type { StacValue } from "@/types/stac";
+import { getLinkHref } from "@/utils/stac";
 import Search from "./search";
 
 export default function RootHref({
@@ -14,7 +13,6 @@ export default function RootHref({
   const result = useStacJson({ href });
   const searchHref = result.data ? getLinkHref(result.data, "search") : null;
 
-  if (result.isFetching) return <SkeletonText />;
-  else if (searchHref && value.type === "Collection")
+  if (searchHref && value.type === "Collection")
     return <Search href={searchHref} collection={value} />;
 }

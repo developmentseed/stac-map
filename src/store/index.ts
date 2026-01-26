@@ -5,7 +5,6 @@ import { type CollectionsState, createCollectionsSlice } from "./collections";
 import { type ConnectionState, createConnectionSlice } from "./connection";
 import { createDatetimeSlice, type DatetimeState } from "./datetime";
 import { createGeotiffSlice, type GeotiffState } from "./geotiff";
-import { createHoversSlice, type HoverState } from "./hover";
 import { createHrefSlice, type HrefState } from "./href";
 import { createInputSlice, type InputState } from "./input";
 import { createItemsSlice, type ItemsState } from "./items";
@@ -24,7 +23,6 @@ export interface State
     CatalogsState,
     CollectionsState,
     ItemsState,
-    HoverState,
     HrefState,
     InputState,
     ValueState,
@@ -45,7 +43,6 @@ export const useStore = create<State>((...a) => ({
   ...createValueSlice(...a),
   ...createCollectionsSlice(...a),
   ...createItemsSlice(...a),
-  ...createHoversSlice(...a),
   ...createGeotiffSlice(...a),
   ...createBboxSlice(...a),
   ...createUploadedFileSlice(...a),

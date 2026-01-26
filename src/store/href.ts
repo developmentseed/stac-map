@@ -15,7 +15,7 @@ export const createHrefSlice: StateCreator<State, [], [], HrefState> = (
 ) => ({
   href: initialHref,
   hrefIsParquet: !!initialHref?.endsWith(".parquet"),
-  setHref: (href) =>
+  setHref: (href) => {
     set({
       href,
       hrefIsParquet: !!href?.endsWith(".parquet"),
@@ -27,9 +27,9 @@ export const createHrefSlice: StateCreator<State, [], [], HrefState> = (
       hoveredItem: null,
       pickedItem: null,
       items: null,
-      searchItems: null,
       geotiffHref: null,
       stacGeoparquetTable: null,
       stacGeoparquetItemId: null,
-    }),
+    });
+  },
 });
