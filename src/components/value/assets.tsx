@@ -58,7 +58,7 @@ export default function Assets({ assets }: { assets: StacAssets }) {
   }, [bestAssetKey, bestAsset, setAsset]);
 
   return (
-    <Section icon={<LuFileImage />} title="Assets">
+    <Section icon={<LuFileImage />} title="Assets" defaultListOrCard="list">
       {(listOrCard) =>
         listOrCard === "list" ? (
           <AssetsList assets={sortedAssets} />
@@ -205,16 +205,13 @@ function AssetActions({
 
 function getAssetScore(asset: AssetWithAlternates): number {
   const geotiff = isGeotiff(asset);
+  if (!geotiff) return 0;
+
   const hasVisualRole = asset.roles?.includes("visual") ?? false;
   const bandCount = getBandCount(asset);
   const hasThreeOrFourBands = bandCount === 3 || bandCount === 4;
 
-  if (!geotiff && !hasVisualRole && !hasThreeOrFourBands) {
-    return 0;
-  }
-
-  let score = 0;
-  if (geotiff) score += 1;
+  let score = 1;
   if (hasVisualRole) score += 2;
   if (hasThreeOrFourBands) score += 1;
 
