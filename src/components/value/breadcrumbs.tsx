@@ -22,7 +22,13 @@ export default function Breadcrumbs({ value }: { value: StacValue }) {
   );
 }
 
-function BreadcrumbLink({ link }: { link: StacLink }) {
+function BreadcrumbLink({
+  link,
+  root = false,
+}: {
+  link: StacLink;
+  root?: boolean;
+}) {
   const setHref = useStore((store) => store.setHref);
   const result = useStacJson({ href: link.href });
   const text = useMemo(() => {
@@ -40,7 +46,7 @@ function BreadcrumbLink({ link }: { link: StacLink }) {
 
   return (
     <>
-      {/*{result.data && getBreadcrumbLink(result.data)}*/}
+      {result.data && !root && getBreadcrumbLink(result.data)}
       <Breadcrumb.Item>
         <Breadcrumb.Link
           href="#"
@@ -71,6 +77,6 @@ function getBreadcrumbLink(value: StacValue) {
     <BreadcrumbLink link={parentLink} />
   ) : (
     rootLink &&
-    rootLink.href !== selfLink?.href && <BreadcrumbLink link={rootLink} />
+    rootLink.href !== selfLink?.href && <BreadcrumbLink link={rootLink} root />
   );
 }
