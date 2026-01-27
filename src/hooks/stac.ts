@@ -1,7 +1,8 @@
+import type { StacItemCollection, StacSearch } from "@/types/stac";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { type DatetimeFilter } from "../store/datetime";
-import { fetchStac } from "../utils/stac";
+import { fetchStac, getLinkHref } from "../utils/stac";
 import {
   fetchStacGeoparquet,
   fetchStacGeoparquetDatetimeBounds,
@@ -100,5 +101,36 @@ export function useStacGeoparquetItem({
     queryFn: async () => {
       return await fetchStacGeoparquetItem({ id, href, connection });
     },
+  });
+}
+
+export function useStacSearch({
+  href,
+  search,
+}: {
+  href: string;
+  search: StacSearch;
+}) {
+  const url = new URL(href);
+  url.searchParams.set("collections", search.collections.join(","));
+  if (search.bbox) url.searchParams.set("bbox", search.bbox.join(","));
+  if (search.limit) url.searchParams.set("limit", search.limit.toFixed(0));
+  const searchHref = url.toString();
+
+  return useInfiniteQuery({
+    queryKey: ["stac-search", searchHref],
+    queryFn: async ({ pageParam }) => {
+      if (pageParam) {
+        return (await fetchStac({
+          href: pageParam,
+          method: "GET",
+        })) as StacItemCollection;
+      } else {
+        return null;
+      }
+    },
+    initialPageParam: searchHref,
+    getNextPageParam: (lastPage) =>
+      lastPage ? getLinkHref(lastPage, "next") : null,
   });
 }

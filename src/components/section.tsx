@@ -27,7 +27,10 @@ export function Section({
   return (
     <Card.Root size={"sm"} variant={"outline"}>
       <Card.Body gap={4}>
-        <Card.Title>
+        <Card.Title
+          onClick={() => setIsOpen((isOpen) => !isOpen)}
+          cursor={"pointer"}
+        >
           <HStack>
             {icon}
             {title}
@@ -38,11 +41,7 @@ export function Section({
                 setListOrCard={setListOrCard}
               />
             )}
-            <IconButton
-              size={"2xs"}
-              variant={"ghost"}
-              onClick={() => setIsOpen((isOpen) => !isOpen)}
-            >
+            <IconButton size={"2xs"} variant={"ghost"}>
               {isOpen ? <LuChevronUp /> : <LuChevronDown />}
             </IconButton>
           </HStack>

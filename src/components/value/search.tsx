@@ -1,26 +1,11 @@
 import { Section } from "@/components/section";
+import { useStacSearch } from "@/hooks/stac";
 import { useItems } from "@/hooks/store";
 import { useStore } from "@/store/index.ts";
-import type { StacItemCollection } from "@/types/stac";
-import { fetchStac, getLinkHref } from "@/utils/stac";
-import {
-  ActionBar,
-  Alert,
-  Button,
-  ButtonGroup,
-  DataList,
-  HStack,
-  IconButton,
-  Portal,
-  Progress,
-  Span,
-  Spinner,
-  Stack,
-} from "@chakra-ui/react";
-import {
-  useInfiniteQuery,
-  type UseInfiniteQueryResult,
-} from "@tanstack/react-query";
+import type { StacSearch } from "@/types/stac";
+import { paddedBbox } from "@/utils/bbox";
+import { Button, ButtonGroup, HStack, Progress, Stack } from "@chakra-ui/react";
+import type { UseInfiniteQueryResult } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import {
   LuFocus,
@@ -29,254 +14,131 @@ import {
   LuPause,
   LuPlay,
   LuSearch,
-  LuUndo,
+  LuX,
 } from "react-icons/lu";
-import type { StacCollection, StacItem } from "stac-ts";
-import { Tooltip } from "../ui/tooltip";
+import type { StacCollection } from "stac-ts";
+import { Json } from "../json";
 
 interface Props {
   href: string;
   collection: StacCollection;
 }
 
+interface SetSearchParams {
+  bbox?: [number, number, number, number];
+}
+
 export default function Search({ href, collection }: Props) {
+  const search = useStore((store) => store.search);
   const setSearch = useStore((store) => store.setSearch);
+  const setPagedItems = useStore((store) => store.setPagedItems);
+  const result = useStacSearch({ href, search });
+
+  const numberMatched = useMemo(() => {
+    if (result.data) return result.data.pages.at(0)?.numberMatched;
+  }, [result.data]);
 
   useEffect(() => {
     setSearch({ collections: [collection.id] });
   }, [collection, setSearch]);
-
-  return (
-    <Section icon={<LuSearch />} title="Item search">
-      <Stack gap={4}>
-        <SearchResults href={href} />
-        <SearchDetails />
-      </Stack>
-    </Section>
-  );
-}
-
-function SearchResults({ href }: { href: string }) {
-  const search = useStore((store) => store.search);
-  const setPagedItems = useStore((store) => store.setPagedItems);
-  const [fetchAllItems, setFetchAllItems] = useState(false);
-  const items = useItems();
-
-  const searchHref = useMemo(() => {
-    const url = new URL(href);
-    url.searchParams.set("collections", search.collections.join(","));
-    if (search.bbox) url.searchParams.set("bbox", search.bbox.join(","));
-    if (search.limit) url.searchParams.set("limit", search.limit.toFixed(0));
-    return url.toString();
-  }, [href, search]);
-
-  const result = useInfiniteQuery({
-    queryKey: ["stac-search", searchHref],
-    queryFn: async ({ pageParam }) => {
-      if (pageParam) {
-        return (await fetchStac({
-          href: pageParam,
-          method: "GET",
-        })) as StacItemCollection;
-      } else {
-        return null;
-      }
-    },
-    initialPageParam: searchHref,
-    getNextPageParam: (lastPage) =>
-      lastPage ? getLinkHref(lastPage, "next") : null,
-  });
 
   useEffect(() => {
     if (result.data)
       setPagedItems(result.data.pages.map((page) => page?.features || []));
   }, [result.data, setPagedItems]);
 
-  useEffect(() => {
-    if (fetchAllItems && !result.isFetching && result.hasNextPage)
-      result.fetchNextPage();
-  }, [fetchAllItems, result]);
-
-  const numberMatched = useMemo(() => {
-    return result.data?.pages.at(0)?.numberMatched;
-  }, [result.data]);
-
   return (
-    <>
-      <SearchResultsProgress
-        items={items}
-        numberMatched={numberMatched}
-        fetchAllItems={fetchAllItems}
-        setFetchAllItems={setFetchAllItems}
-        {...result}
-      />
-      <SearchResultsActionBar
-        items={items}
-        numberMatched={numberMatched}
-        fetchAllItems={fetchAllItems}
-        setFetchAllItems={setFetchAllItems}
-        {...result}
-      />
-    </>
+    <Section icon={<LuSearch />} title="Item search">
+      <Stack gap={4}>
+        <SearchControls
+          setSearch={(params: SetSearchParams) =>
+            setSearch({ ...search, collections: [collection.id], ...params })
+          }
+          resetSearch={() => setSearch({ collections: [collection.id] })}
+          {...result}
+        />
+        {numberMatched && (
+          <SearchProgress numberMatched={numberMatched} {...result} />
+        )}
+        <SearchDetails search={search} />
+      </Stack>
+    </Section>
   );
 }
 
-function SearchDetails() {
-  const search = useStore((state) => state.search);
-
-  return (
-    <DataList.Root size={"sm"} orientation={"horizontal"}>
-      <DataList.Item>
-        <DataList.ItemLabel>Collection</DataList.ItemLabel>
-        <DataList.ItemValue>{search.collections.join(", ")}</DataList.ItemValue>
-      </DataList.Item>
-    </DataList.Root>
-  );
-}
-
-interface SearchResultsProgressProps {
-  items: StacItem[] | null;
-  numberMatched: number | undefined;
-  fetchAllItems: boolean;
-  setFetchAllItems: (fetchAllItems: boolean) => void;
-}
-
-function SearchResultsProgress({
-  items,
-  numberMatched,
-  fetchAllItems,
-  setFetchAllItems,
-  hasNextPage,
+function SearchControls({
+  setSearch,
+  resetSearch,
   isFetching,
   fetchNextPage,
-}: SearchResultsProgressProps & UseInfiniteQueryResult) {
-  const search = useStore((state) => state.search);
-  const setSearch = useStore((state) => state.setSearch);
-  const bbox = useStore((state) => state.bbox);
+  hasNextPage,
+}: {
+  setSearch: (params: SetSearchParams) => void;
+  resetSearch: () => void;
+} & UseInfiniteQueryResult) {
+  const [fetchAll, setFetchAll] = useState(false);
+  const bbox = useStore((store) => store.bbox);
 
-  if (items?.length === 0 && !hasNextPage) {
-    return (
-      <Alert.Root status={"warning"}>
-        <Alert.Indicator />
-        <Alert.Title>No results found</Alert.Title>
-      </Alert.Root>
-    );
-  }
+  useEffect(() => {
+    if (fetchAll && !isFetching && hasNextPage) fetchNextPage();
+  }, [fetchAll, isFetching, hasNextPage, fetchNextPage]);
 
-  const status =
-    numberMatched || items === null ? (
-      <Progress.Root
-        width={"full"}
-        value={items?.length || null}
-        max={numberMatched}
-        striped={hasNextPage}
-        animated={isFetching || fetchAllItems}
-      >
-        <Progress.Track>
-          <Progress.Range />
-        </Progress.Track>
-      </Progress.Root>
-    ) : (
-      <Span width={"full"}>
-        {((fetchAllItems || isFetching) && <Spinner size={"xs"} ml={4} />) ||
-          `${items?.length || 0} item${items?.length === 1 ? "" : "s"} items found`}
-      </Span>
-    );
-
-  const buttons = (
-    <ButtonGroup size="xs" variant={"subtle"} attached>
-      <Tooltip content="Fetch next page">
-        <IconButton
+  return (
+    <Stack>
+      <ButtonGroup size={"xs"} variant={"surface"} attached>
+        <Button
+          disabled={isFetching || fetchAll}
           onClick={() => fetchNextPage()}
-          disabled={isFetching || !hasNextPage}
         >
           {isFetching ? <LuLoader /> : <LuForward />}
-        </IconButton>
-      </Tooltip>
-      <Tooltip content={fetchAllItems && hasNextPage ? "Pause" : "Fetch all"}>
-        <IconButton
-          onClick={() => setFetchAllItems(!fetchAllItems)}
-          disabled={!hasNextPage}
-        >
-          {fetchAllItems && hasNextPage ? <LuPause /> : <LuPlay />}
-        </IconButton>
-      </Tooltip>
-      <Tooltip content="Set bbox to current viewport">
-        <IconButton
-          onClick={() => {
-            setSearch({ ...search, bbox: bbox || undefined });
-          }}
+          Next page
+        </Button>
+        <Button onClick={() => setFetchAll((previous) => !previous)}>
+          {fetchAll ? <LuPause /> : <LuPlay />}
+          {fetchAll ? "Pause" : "Fetch all"}
+        </Button>
+      </ButtonGroup>
+
+      <ButtonGroup size={"xs"} variant={"outline"} attached>
+        <Button
+          onClick={() =>
+            setSearch({ bbox: bbox ? paddedBbox(bbox) : undefined })
+          }
         >
           <LuFocus />
-        </IconButton>
-      </Tooltip>
-      <Tooltip content="Reset search">
-        <IconButton
-          onClick={() => {
-            setSearch({ collections: search.collections });
-          }}
-        >
-          <LuUndo />
-        </IconButton>
-      </Tooltip>
-    </ButtonGroup>
-  );
-
-  return (
-    <HStack width={"full"}>
-      {status}
-      {buttons}
-    </HStack>
+          Set bbox to viewport
+        </Button>
+        <Button onClick={() => resetSearch()}>
+          <LuX />
+          Reset
+        </Button>
+      </ButtonGroup>
+    </Stack>
   );
 }
 
-interface SearchResultsActionBarProps {
-  items: StacItem[] | null;
-  numberMatched: number | undefined;
-  fetchAllItems: boolean;
-  setFetchAllItems: (fetchAllItems: boolean) => void;
-}
-
-function SearchResultsActionBar({
-  items,
+function SearchProgress({
   numberMatched,
-  fetchAllItems,
-  setFetchAllItems,
-  hasNextPage,
   isFetching,
-  fetchNextPage,
-}: SearchResultsActionBarProps & UseInfiniteQueryResult) {
+}: { numberMatched: number } & UseInfiniteQueryResult) {
+  const items = useItems();
+
   return (
-    <ActionBar.Root open={!!items}>
-      <Portal>
-        <ActionBar.Positioner>
-          <ActionBar.Content>
-            <ActionBar.SelectionTrigger>
-              {items?.length}
-              {numberMatched && "/" + numberMatched} item
-              {items?.length != 1 && "s"} fetched
-            </ActionBar.SelectionTrigger>
-            {hasNextPage && (
-              <>
-                <ActionBar.Separator />
-                <ButtonGroup variant="outline" size="sm">
-                  <Button
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetching || fetchAllItems}
-                  >
-                    <LuForward />
-                    Fetch next page
-                  </Button>
-                  <Button onClick={() => setFetchAllItems(!fetchAllItems)}>
-                    {fetchAllItems ? <LuPause /> : <LuPlay />}
-                    {fetchAllItems && hasNextPage ? "Pause" : "Fetch all"}
-                  </Button>
-                </ButtonGroup>
-              </>
-            )}
-          </ActionBar.Content>
-        </ActionBar.Positioner>
-      </Portal>
-    </ActionBar.Root>
+    <Progress.Root
+      value={items?.length}
+      max={numberMatched}
+      animated={isFetching}
+    >
+      <HStack>
+        <Progress.Track flex={1}>
+          <Progress.Range />
+        </Progress.Track>
+        <Progress.ValueText />
+      </HStack>
+    </Progress.Root>
   );
+}
+
+function SearchDetails({ search }: { search: StacSearch }) {
+  return <Json value={search}></Json>;
 }

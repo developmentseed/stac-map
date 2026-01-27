@@ -54,3 +54,7 @@ interface Band {
   common_name?: string;
   description?: string;
 }
+
+interface ItemWithBbox extends StacItem {
+  bbox: BBox2D;
+}

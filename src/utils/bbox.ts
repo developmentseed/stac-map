@@ -23,3 +23,23 @@ export function sanitizeBbox(bbox: BBox | SpatialExtent): BBox2D {
 export function formatBbox(bbox: BBox2D): string {
   return `${bbox[0].toFixed(2)}, ${bbox[1].toFixed(2)}, ${bbox[2].toFixed(2)}, ${bbox[3].toFixed(2)}`;
 }
+
+export function paddedBbox(bbox: BBox2D): BBox2D {
+  const width = bbox[2] - bbox[0];
+  const height = bbox[3] - bbox[1];
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  const basePadding = 20;
+  const leftPadding = basePadding + viewportWidth / 3;
+
+  const degreesPerPixelX = width / viewportWidth;
+  const degreesPerPixelY = height / viewportHeight;
+
+  return sanitizeBbox([
+    bbox[0] + leftPadding * degreesPerPixelX,
+    bbox[1] + basePadding * degreesPerPixelY,
+    bbox[2] - basePadding * degreesPerPixelX,
+    bbox[3] - basePadding * degreesPerPixelY,
+  ]);
+}

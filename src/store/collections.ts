@@ -1,3 +1,4 @@
+import { getSelfHref } from "@/utils/stac";
 import type { StacCollection } from "stac-ts";
 import type { StateCreator } from "zustand";
 import type { State } from ".";
@@ -12,6 +13,8 @@ export interface CollectionsState {
   setFilteredCollections: (collections: StacCollection[] | null) => void;
   collectionFreeTextSearch: string | null;
   setCollectionFreeTextSearch: (q: string | null) => void;
+  setHrefFromCollectionId: (id: string) => void;
+  setHoveredCollectionFromId: (id: string) => void;
 }
 
 export const createCollectionsSlice: StateCreator<
@@ -42,4 +45,18 @@ export const createCollectionsSlice: StateCreator<
   },
   collectionFreeTextSearch: null,
   setCollectionFreeTextSearch: (q) => set({ collectionFreeTextSearch: q }),
+  setHrefFromCollectionId: (id: string) => {
+    const collection = get().collections?.find((c) => c.id === id);
+    if (collection) {
+      const href = getSelfHref(collection);
+      if (href) get().setHref(href);
+    }
+  },
+  setHoveredCollectionFromId: (id: string) => {
+    const collection = get().collections?.find((c) => c.id === id);
+    if (collection) {
+      const href = getSelfHref(collection);
+      if (href) get().setHoveredCollection(collection);
+    }
+  },
 });

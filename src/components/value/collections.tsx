@@ -120,15 +120,17 @@ function Filter({ collections }: { collections: StacCollection[] }) {
     (store) => store.setFilteredCollections
   );
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [includeGlobalCollections, setIncludeGlobalCollections] =
+    useState(true);
   const [searchValue, setSearchValue] = useState("");
-  const [filterViewport, setFilterViewport] = useState(true);
 
   useEffect(() => {
     setFilteredCollections(
       collections?.filter(
         (collection) =>
           matchesFilter(collection, searchValue) &&
-          (!filterViewport || !bbox || isCollectionInBbox(collection, bbox)) &&
+          (!bbox ||
+            isCollectionInBbox(collection, bbox, includeGlobalCollections)) &&
           (!datetimeFilter ||
             isCollectionInDatetimes(
               collection,
@@ -142,8 +144,8 @@ function Filter({ collections }: { collections: StacCollection[] }) {
     setFilteredCollections,
     searchValue,
     bbox,
-    filterViewport,
     datetimeFilter,
+    includeGlobalCollections,
   ]);
 
   return (
@@ -174,12 +176,12 @@ function Filter({ collections }: { collections: StacCollection[] }) {
         <DatetimeSlider start={datetimeBounds.start} end={datetimeBounds.end} />
       )}
       <Checkbox.Root
-        onCheckedChange={(e) => setFilterViewport(!!e.checked)}
-        checked={filterViewport}
+        onCheckedChange={(e) => setIncludeGlobalCollections(!!e.checked)}
+        checked={includeGlobalCollections}
         size={"sm"}
       >
         <Checkbox.HiddenInput />
-        <Checkbox.Label>Filter by viewport</Checkbox.Label>
+        <Checkbox.Label>Include global collections</Checkbox.Label>
         <Checkbox.Control />
       </Checkbox.Root>
     </Stack>

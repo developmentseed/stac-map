@@ -1,3 +1,6 @@
+import bbox from "@turf/bbox";
+import bboxPolygon from "@turf/bbox-polygon";
+import type { FeatureCollection } from "geojson";
 import type {
   SpatialExtent,
   StacAsset,
@@ -122,9 +125,16 @@ export function makeHrefsAbsolute<T extends StacValue>(
   return value;
 }
 
-export function isCollectionInBbox(collection: StacCollection, bbox: BBox2D) {
+export function isCollectionInBbox(
+  collection: StacCollection,
+  bbox: BBox2D,
+  includeGlobalCollections: boolean
+) {
   if (bbox[2] - bbox[0] >= 360) {
     // A global bbox always contains every collection
+    return true;
+  } else if (includeGlobalCollections && isGlobalCollection(collection)) {
+    // A global collection is always there
     return true;
   }
   const collectionBbox = collection?.extent?.spatial?.bbox?.[0];
@@ -149,8 +159,18 @@ export function isCollectionInBbox(collection: StacCollection, bbox: BBox2D) {
 }
 
 export function isGlobalCollection(collection: StacCollection) {
-  const bbox = sanitizeBbox(getCollectionExtents(collection));
-  return bbox[0] == -180 && bbox[1] == -90 && bbox[2] == 180 && bbox[3] == 90;
+  const bbox = getCollectionExtents(collection);
+  return isGlobalBbox(bbox);
+}
+
+export function isGlobalBbox(bbox: BBox2D | SpatialExtent) {
+  const sanitizedBbox = sanitizeBbox(bbox);
+  return (
+    sanitizedBbox[0] == -180 &&
+    sanitizedBbox[1] == -90 &&
+    sanitizedBbox[2] == 180 &&
+    sanitizedBbox[3] == 90
+  );
 }
 
 export function getCollectionExtents(
@@ -294,4 +314,43 @@ export function getAssetScore(asset: AssetWithAlternates): number {
   if (hasThreeOrFourBands) score += 1;
 
   return score;
+}
+
+export function collectionToFeature(collection: StacCollection) {
+  const bbox = sanitizeBbox(getCollectionExtents(collection));
+  return bboxPolygon(bbox, {
+    id: collection.id,
+  });
+}
+
+export function getBbox(
+  value: StacValue,
+  collections: StacCollection[] | null
+): BBox2D | undefined {
+  switch (value.type) {
+    case "Catalog":
+      return (collections && getCollectionsBbox(collections)) || undefined;
+    case "Collection":
+      return sanitizeBbox(getCollectionExtents(value));
+    case "Feature":
+      return value.bbox && sanitizeBbox(value.bbox);
+    case "FeatureCollection":
+      return bbox(value as FeatureCollection) as BBox2D;
+  }
+}
+
+function getCollectionsBbox(collections: StacCollection[]) {
+  return sanitizeBbox(
+    collections
+      .map((collection) => getCollectionExtents(collection))
+      .filter((extents) => !!extents)
+      .reduce((accumulator, currentValue) => {
+        return [
+          Math.min(accumulator[0], currentValue[0]),
+          Math.min(accumulator[1], currentValue[1]),
+          Math.max(accumulator[2], currentValue[2]),
+          Math.max(accumulator[3], currentValue[3]),
+        ];
+      })
+  );
 }
