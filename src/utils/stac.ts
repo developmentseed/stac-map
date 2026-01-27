@@ -7,6 +7,7 @@ import type {
 import type { BBox2D } from "../types/map";
 import type { AssetWithAlternates, StacAssets, StacValue } from "../types/stac";
 import { sanitizeBbox } from "./bbox";
+import { toAbsoluteUrl } from "./href";
 import { maybeSignPlanetaryComputerHref } from "./planetary-computer";
 
 export function getStacValueTitle(value: StacValue) {
@@ -118,29 +119,6 @@ export function makeHrefsAbsolute<T extends StacValue>(
     }
   }
   return value;
-}
-
-export function toAbsoluteUrl(href: string, baseUrl: URL): string {
-  if (isAbsolute(href)) return href;
-
-  const targetUrl = new URL(href, baseUrl);
-
-  if (targetUrl.protocol === "http:" || targetUrl.protocol === "https:") {
-    return targetUrl.toString();
-  } else if (targetUrl.protocol === "s3:") {
-    return decodeURI(targetUrl.toString());
-  } else {
-    return targetUrl.toString();
-  }
-}
-
-function isAbsolute(url: string) {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 export function isCollectionInBbox(collection: StacCollection, bbox: BBox2D) {
