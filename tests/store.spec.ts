@@ -59,10 +59,11 @@ function resetStore() {
     filteredCollections: null,
     hoveredCollection: null,
     catalogs: null,
-    items: null,
+    unpagedItems: null,
+    pagedItems: null,
     hoveredItem: null,
     pickedItem: null,
-    search: null,
+    search: { collections: [] },
     asset: null,
     assetKey: null,
     geotiffHref: null,
@@ -102,7 +103,8 @@ describe("href.ts - setHref", () => {
       hoveredCollection: makeCollection("col1"),
       hoveredItem: makeItem("item1"),
       pickedItem: makeItem("item1"),
-      items: [makeItem("item1")],
+      unpagedItems: [makeItem("item1")],
+      pagedItems: [[makeItem("item1")]],
       geotiffHref: "https://example.com/test.tiff",
       stacGeoparquetTable: {} as never,
       stacGeoparquetItemId: "item1",
@@ -117,7 +119,8 @@ describe("href.ts - setHref", () => {
     expect(state.hoveredCollection).toBeNull();
     expect(state.hoveredItem).toBeNull();
     expect(state.pickedItem).toBeNull();
-    expect(state.items).toBeNull();
+    expect(state.unpagedItems).toBeNull();
+    expect(state.pagedItems).toBeNull();
     expect(state.geotiffHref).toBeNull();
     expect(state.stacGeoparquetTable).toBeNull();
     expect(state.stacGeoparquetItemId).toBeNull();
@@ -140,16 +143,6 @@ describe("value.ts - setValue", () => {
     const collection = makeCollection("test");
     useStore.getState().setValue(collection);
     expect(useStore.getState().value).toBe(collection);
-  });
-
-  test("clears search when value is Collection and search has 1 different collection", () => {
-    const search: StacSearch = { collections: ["other-collection"] };
-    useStore.setState({ search });
-
-    const collection = makeCollection("test");
-    useStore.getState().setValue(collection);
-
-    expect(useStore.getState().search).toBeNull();
   });
 
   test("does not clear search when value is not a Collection", () => {
@@ -295,46 +288,34 @@ describe("catalogs.ts - addCatalog", () => {
   });
 });
 
-describe("items.ts - setSearch", () => {
-  test("sets search and clears items", () => {
-    useStore.setState({ items: [makeItem("item1")] });
-
-    const search: StacSearch = { collections: ["col1"] };
-    useStore.getState().setSearch(search);
-
-    expect(useStore.getState().search).toBe(search);
-    expect(useStore.getState().items).toBeNull();
-  });
-});
-
 describe("items.ts - addItem", () => {
   test("adds to empty items", () => {
-    useStore.setState({ items: [] });
+    useStore.setState({ unpagedItems: [] });
 
     const item = makeItem("test");
     useStore.getState().addItem(item);
 
-    expect(useStore.getState().items).toHaveLength(1);
-    expect(useStore.getState().items?.[0]).toBe(item);
+    expect(useStore.getState().unpagedItems).toHaveLength(1);
+    expect(useStore.getState().unpagedItems?.[0]).toBe(item);
   });
 
   test("adds to null items", () => {
     const item = makeItem("test");
     useStore.getState().addItem(item);
 
-    expect(useStore.getState().items).toHaveLength(1);
-    expect(useStore.getState().items?.[0]).toBe(item);
+    expect(useStore.getState().unpagedItems).toHaveLength(1);
+    expect(useStore.getState().unpagedItems?.[0]).toBe(item);
   });
 
   test("does not add duplicate", () => {
     const item1 = makeItem("test");
     const item2 = makeItem("test");
-    useStore.setState({ items: [item1] });
+    useStore.setState({ unpagedItems: [item1] });
 
     useStore.getState().addItem(item2);
 
-    expect(useStore.getState().items).toHaveLength(1);
-    expect(useStore.getState().items?.[0]).toBe(item1);
+    expect(useStore.getState().unpagedItems).toHaveLength(1);
+    expect(useStore.getState().unpagedItems?.[0]).toBe(item1);
   });
 });
 
