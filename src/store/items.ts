@@ -6,9 +6,11 @@ import type { StacSearch } from "../types/stac";
 export interface ItemsState {
   search: StacSearch | null;
   setSearch: (search: StacSearch | null) => void;
-  items: StacItem[] | null;
-  setItems: (items: StacItem[] | null) => void;
+  unpagedItems: StacItem[] | null;
+  setUnpagedItems: (items: StacItem[] | null) => void;
   addItem: (item: StacItem) => void;
+  pagedItems: StacItem[][] | null;
+  setPagedItems: (items: StacItem[][] | null) => void;
   hoveredItem: StacItem | null;
   setHoveredItem: (item: StacItem | null) => void;
   pickedItem: StacItem | null;
@@ -22,16 +24,20 @@ export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
 ) => ({
   search: null,
   setSearch: (search) => {
-    set({ search, items: null });
+    set({ search, pagedItems: null });
   },
-  items: null,
-  setItems: (items) => {
-    set({ items });
+  unpagedItems: null,
+  setUnpagedItems: (items) => {
+    set({ unpagedItems: items });
   },
   addItem: (item) => {
-    const items = get().items;
+    const items = get().unpagedItems;
     if (!items?.find((i) => i.id === item.id))
-      get().setItems([...(get().items || []), item]);
+      set({ unpagedItems: [...(items || []), item] });
+  },
+  pagedItems: null,
+  setPagedItems: (items) => {
+    set({ pagedItems: items });
   },
   hoveredItem: null,
   setHoveredItem: (item) => set({ hoveredItem: item }),

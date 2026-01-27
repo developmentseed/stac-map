@@ -1,3 +1,4 @@
+import { useItems } from "@/hooks/store";
 import { useStore } from "@/store";
 import type { StacValue } from "@/types/stac";
 import {
@@ -34,12 +35,12 @@ export default function Value({ value }: { value: StacValue }) {
   const connection = useStore((store) => store.connection);
   const collections = useStore((store) => store.collections);
   const catalogs = useStore((store) => store.catalogs);
-  const items = useStore((store) => store.items);
-  const setItems = useStore((store) => store.setItems);
+  const setUnpagedItems = useStore((store) => store.setUnpagedItems);
   const version = value.stac_version as string | undefined;
   const description = value.description as string | undefined;
   const rootHref = getLinkHref(value, "root");
   const collectionsHref = getLinkHref(value, "data");
+  const items = useItems();
   const thumbnailAsset = getThumbnailAsset(value);
 
   const childLinks = useMemo(() => {
@@ -55,8 +56,8 @@ export default function Value({ value }: { value: StacValue }) {
   }, [value]);
 
   useEffect(() => {
-    if (value.type === "FeatureCollection") setItems(value.features);
-  }, [value, setItems]);
+    if (value.type === "FeatureCollection") setUnpagedItems(value.features);
+  }, [value, setUnpagedItems]);
 
   return (
     <Stack gap={8}>

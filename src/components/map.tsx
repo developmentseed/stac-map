@@ -1,3 +1,4 @@
+import { useItems } from "@/hooks/store";
 import { type DeckProps, Layer } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
@@ -49,11 +50,12 @@ export default function Map() {
   const filteredCollections = useStore((store) => store.filteredCollections);
   const hoveredCollection = useStore((store) => store.hoveredCollection);
   const setHoveredCollection = useStore((store) => store.setHoveredCollection);
+  const pagedItems = useStore((store) => store.pagedItems);
+  const unpagedItems = useStore((store) => store.unpagedItems);
   const hoveredItem = useStore((store) => store.hoveredItem);
   const setHoveredItem = useStore((store) => store.setHoveredItem);
   const pickedItem = useStore((store) => store.pickedItem);
   const setPickedItem = useStore((store) => store.setPickedItem);
-  const items = useStore((store) => store.items);
   const geotiffHref = useStore((store) => store.geotiffHref);
   const stacGeoparquetTable = useStore((store) => store.stacGeoparquetTable);
   const stacGeoparquetItemId = useStore((store) => store.stacGeoparquetItemId);
@@ -64,6 +66,7 @@ export default function Map() {
   const fillColor = useStore((store) => store.fillColor);
   const lineColor = useStore((store) => store.lineColor);
   const lineWidth = useStore((store) => store.lineWidth);
+  const items = useItems();
   const [hoveredStacGeoparquetItemId, setHoveredStacGeoparquetItemId] =
     useState<string | null>(null);
 
@@ -96,9 +99,11 @@ export default function Map() {
       )
       .filter((feature) => !!feature);
   }, [collections, filteredCollections]);
-  const itemsWithBboxes = useMemo(() => {
-    return items?.filter((item) => !!item.bbox) as ItemWithBbox[] | undefined;
-  }, [items]);
+  const pagedItemsWithBboxes = useMemo(() => {
+    return (pagedItems || [unpagedItems]).map(
+      (page) => page?.filter((item) => item.bbox) as ItemWithBbox[] | undefined
+    );
+  }, [pagedItems, unpagedItems]);
 
   useEffect(() => {
     if (mapRef.current && isMapLoaded) {
@@ -259,25 +264,28 @@ export default function Map() {
         geotiff: geotiffHref,
       })
     );
-  else if (itemsWithBboxes)
-    layers.push(
-      new MosaicLayer<ItemWithBbox>({
-        id: "cog-mosaic",
-        sources: itemsWithBboxes,
-        getSource: async (source) => {
-          const sortedAssets = sortAssets(source.assets);
-          const [, bestAsset] = getBestAsset(sortedAssets);
-          if (bestAsset) return getGeotiffHref(bestAsset);
-        },
-        renderSource: (source, { data, signal }) => {
-          return new COGLayer({
-            id: `cog-${source.id}`,
-            geotiff: data,
-            signal,
-          });
-        },
-      })
-    );
+  else if (pagedItemsWithBboxes)
+    pagedItemsWithBboxes.forEach((page, i) => {
+      if (page)
+        layers.push(
+          new MosaicLayer<ItemWithBbox>({
+            id: "cog-mosaic-" + i,
+            sources: page,
+            getSource: async (source) => {
+              const sortedAssets = sortAssets(source.assets);
+              const [, bestAsset] = getBestAsset(sortedAssets);
+              if (bestAsset) return getGeotiffHref(bestAsset);
+            },
+            renderSource: (source, { data, signal }) => {
+              return new COGLayer({
+                id: `cog-${source.id}`,
+                geotiff: data,
+                signal,
+              });
+            },
+          })
+        );
+    });
 
   return (
     <MaplibreMap

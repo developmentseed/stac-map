@@ -1,3 +1,4 @@
+import { useItems } from "@/hooks/store";
 import { useStore } from "@/store";
 import type { StacItemCollection, StacSearch } from "@/types/stac";
 import { fetchStac, getLinkHref } from "@/utils/stac";
@@ -35,9 +36,9 @@ export default function SearchResults({
   href: string;
   search: StacSearch;
 }) {
-  const items = useStore((store) => store.items);
-  const setItems = useStore((store) => store.setItems);
+  const setPagedItems = useStore((store) => store.setPagedItems);
   const [fetchAllItems, setFetchAllItems] = useState(false);
+  const items = useItems();
 
   const searchHref = useMemo(() => {
     const url = new URL(href);
@@ -66,8 +67,8 @@ export default function SearchResults({
 
   useEffect(() => {
     if (result.data)
-      setItems(result.data.pages.flatMap((page) => page?.features || []));
-  }, [result.data, setItems]);
+      setPagedItems(result.data.pages.map((page) => page?.features || []));
+  }, [result.data, setPagedItems]);
 
   useEffect(() => {
     if (fetchAllItems && !result.isFetching && result.hasNextPage)
