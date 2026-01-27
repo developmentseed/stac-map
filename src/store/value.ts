@@ -8,20 +8,12 @@ export interface ValueState {
 }
 
 export const createValueSlice: StateCreator<State, [], [], ValueState> = (
-  set,
-  get
+  set
 ) => ({
   value: null,
   setValue: (value) => {
     set({
       value,
     });
-    const search = get().search;
-    if (
-      value?.type === "Collection" &&
-      search?.collections?.length === 1 &&
-      search.collections[0] !== value.id
-    )
-      get().setSearch(null);
   },
 });

@@ -22,7 +22,7 @@ import type { StacCollection, StacItem } from "stac-ts";
 import { useColorModeValue } from "../components/ui/color-mode";
 import { useStore } from "../store";
 import type { BBox2D, Color } from "../types/map";
-import type { StacValue } from "../types/stac";
+import type { StacSearch, StacValue } from "../types/stac";
 import { sanitizeBbox } from "../utils/map";
 import {
   getBestAsset,
@@ -46,6 +46,7 @@ export default function Map() {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const setHref = useStore((store) => store.setHref);
   const value = useStore((store) => store.value);
+  const search = useStore((store) => store.search);
   const collections = useStore((store) => store.collections);
   const filteredCollections = useStore((store) => store.filteredCollections);
   const hoveredCollection = useStore((store) => store.hoveredCollection);
@@ -118,7 +119,8 @@ export default function Map() {
         collections,
         pickedItem as Feature | null,
         items as Feature[] | null,
-        stacGeoparquetItemId
+        stacGeoparquetItemId,
+        search
       );
       if (bounds) mapRef.current.fitBounds(bounds, { linear: true, padding });
     }
@@ -129,6 +131,7 @@ export default function Map() {
     pickedItem,
     items,
     stacGeoparquetItemId,
+    search,
   ]);
 
   const itemsFillColor = [0, 0, 0, 0] as [number, number, number, number];
@@ -361,15 +364,14 @@ function getBbox(
   collections: StacCollection[] | null,
   pickedItem: Feature | null,
   items: Feature[] | null,
-  stacGeoparquetItemId: string | null
+  stacGeoparquetItemId: string | null,
+  search: StacSearch
 ): BBox2D | undefined {
   if (pickedItem) {
     return sanitizeBbox(bbox(pickedItem) as BBox2D);
-  }
-  if (items && items.length > 0) {
-    return sanitizeBbox(bbox(featureCollection(items)) as BBox2D);
-  }
-  if (!value || stacGeoparquetItemId) {
+  } else if (search.bbox) {
+    return sanitizeBbox(search.bbox);
+  } else if (!value || stacGeoparquetItemId) {
     return undefined;
   }
   let valueBbox;
@@ -399,6 +401,9 @@ function getBbox(
       valueBbox = value.bbox;
       break;
     case "FeatureCollection":
+      if (items && items.length > 0) {
+        return sanitizeBbox(bbox(featureCollection(items)) as BBox2D);
+      }
       valueBbox = bbox(value as FeatureCollection) as BBox2D;
       break;
   }

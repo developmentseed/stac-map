@@ -4,8 +4,8 @@ import type { State } from ".";
 import type { StacSearch } from "../types/stac";
 
 export interface ItemsState {
-  search: StacSearch | null;
-  setSearch: (search: StacSearch | null) => void;
+  search: StacSearch;
+  setSearch: (search: StacSearch) => void;
   unpagedItems: StacItem[] | null;
   setUnpagedItems: (items: StacItem[] | null) => void;
   addItem: (item: StacItem) => void;
@@ -22,9 +22,11 @@ export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
   set,
   get
 ) => ({
-  search: null,
+  search: {
+    collections: [],
+  },
   setSearch: (search) => {
-    set({ search, pagedItems: null });
+    set({ search });
   },
   unpagedItems: null,
   setUnpagedItems: (items) => {
