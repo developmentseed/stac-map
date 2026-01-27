@@ -33,6 +33,7 @@ export type StacAssets = { [k: string]: StacAsset };
 export interface StacSearch {
   collections: string[];
   bbox?: [number, number, number, number];
+  datetime?: string;
   limit?: number;
 }
 

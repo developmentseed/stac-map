@@ -114,6 +114,7 @@ export function useStacSearch({
   const url = new URL(href);
   url.searchParams.set("collections", search.collections.join(","));
   if (search.bbox) url.searchParams.set("bbox", search.bbox.join(","));
+  if (search.datetime) url.searchParams.set("datetime", search.datetime);
   if (search.limit) url.searchParams.set("limit", search.limit.toFixed(0));
   const searchHref = url.toString();
 
