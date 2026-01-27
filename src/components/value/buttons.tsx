@@ -1,4 +1,5 @@
 import type { StacValue } from "@/types/stac";
+import { fitBounds } from "@/utils/map";
 import { getSelfHref } from "@/utils/stac";
 import {
   Button,
@@ -10,7 +11,8 @@ import {
   Portal,
   createShikiAdapter,
 } from "@chakra-ui/react";
-import { LuExternalLink, LuFileJson } from "react-icons/lu";
+import { LuExternalLink, LuFileJson, LuFocus } from "react-icons/lu";
+import { useMap } from "react-map-gl/maplibre";
 import type { HighlighterGeneric } from "shiki";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,9 +32,14 @@ const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({
 
 export default function Buttons({ value }: { value: StacValue }) {
   const selfHref = getSelfHref(value);
+  const { map } = useMap();
 
   return (
     <ButtonGroup variant={"surface"} size="xs">
+      <Button onClick={() => map && fitBounds(map, value, null)}>
+        <LuFocus />
+        Zoom to extents
+      </Button>
       {selfHref && (
         <Button asChild>
           <a
