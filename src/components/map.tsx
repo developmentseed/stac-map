@@ -1,4 +1,4 @@
-import { useCollectionBounds, useItems } from "@/hooks/store";
+import { useCollectionBounds, useGeotiffHref, useItems } from "@/hooks/store";
 import type { StacValue } from "@/types/stac";
 import { sanitizeBbox } from "@/utils/bbox";
 import { fitBounds } from "@/utils/map";
@@ -6,6 +6,7 @@ import { collectionToFeature, isGlobalBbox } from "@/utils/stac";
 import { type DeckProps, Layer } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
+import { COGLayer } from "@developmentseed/deck.gl-geotiff";
 import {
   GeoArrowPolygonLayer,
   GeoArrowScatterplotLayer,
@@ -55,6 +56,7 @@ export default function Map() {
   const items = useItems();
   const [hoveredStacGeoparquetItemId, setHoveredStacGeoparquetItemId] =
     useState<string | null>(null);
+  const geotiffHref = useGeotiffHref();
 
   const inverseFillColor = [
     256 - fillColor[0],
@@ -163,6 +165,14 @@ export default function Map() {
               getFillColor: [hoveredStacGeoparquetItemId],
             },
           })
+    );
+
+  if (geotiffHref)
+    layers.push(
+      new COGLayer({
+        id: "cog",
+        geotiff: geotiffHref,
+      })
     );
 
   return (

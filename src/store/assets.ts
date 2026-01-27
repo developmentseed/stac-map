@@ -11,7 +11,8 @@ export interface AssetsState {
 }
 
 export const createAssetsSlice: StateCreator<State, [], [], AssetsState> = (
-  set
+  set,
+  get
 ) => ({
   asset: null,
   assetKey: null,
@@ -20,8 +21,13 @@ export const createAssetsSlice: StateCreator<State, [], [], AssetsState> = (
     {
       set({ assetKey, asset });
       if (asset) {
-        const geotiffHref = await getGeotiffHref(asset);
-        set({ geotiffHref });
+        let geotiffHref = getGeotiffHref(asset);
+        if (geotiffHref) {
+          geotiffHref = await get().maybeSignPlanetaryComputerHref(geotiffHref);
+          set({ geotiffHref });
+        } else {
+          set({ geotiffHref: null });
+        }
       } else set({ geotiffHref: null });
     }
   },
