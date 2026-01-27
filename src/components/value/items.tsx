@@ -1,3 +1,4 @@
+import { useStore } from "@/store";
 import { fitBounds } from "@/utils/map";
 import {
   Button,
@@ -7,7 +8,13 @@ import {
   List,
   Stack,
 } from "@chakra-ui/react";
-import { LuDownload, LuFiles, LuFocus } from "react-icons/lu";
+import {
+  LuDownload,
+  LuEye,
+  LuEyeClosed,
+  LuFiles,
+  LuFocus,
+} from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
 import type { StacItem } from "stac-ts";
 import * as stac_wasm from "stac-wasm";
@@ -16,6 +23,8 @@ import ItemListItem from "../list-items/item";
 import { Section } from "../section";
 
 export default function Items({ items }: { items: StacItem[] }) {
+  const visualizeItems = useStore((store) => store.visualizeItems);
+  const setVisualizeItems = useStore((store) => store.setVisualizeItems);
   const title = `Items (${items.length})`;
   const { map } = useMap();
 
@@ -26,6 +35,10 @@ export default function Items({ items }: { items: StacItem[] }) {
           <Stack>
             <Center>
               <ButtonGroup size="2xs" variant={"subtle"} attached>
+                <Button onClick={() => setVisualizeItems(!visualizeItems)}>
+                  {visualizeItems ? <LuEye /> : <LuEyeClosed />}
+                  {visualizeItems ? "Hide" : "Show"}
+                </Button>
                 <Button
                   onClick={() =>
                     map &&

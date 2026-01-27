@@ -23,6 +23,7 @@ import Description from "./description";
 import ItemLinks from "./item-links";
 import Items from "./items";
 import Links from "./links";
+import PlanetaryComputer from "./planetary-computer";
 import Properties from "./properties";
 import RootHref from "./root-href";
 import StacGeoparquetHref from "./stac-geoparquet-href";
@@ -104,6 +105,12 @@ export default function Value({ value }: { value: StacValue }) {
         {value.links && <Links links={value.links} />}
         {value.type === "Feature" && (
           <Properties properties={value.properties} />
+        )}
+        {<PlanetaryComputer value={value} />}
+        {items && (
+          <PlanetaryComputer
+            value={{ type: "FeatureCollection", features: items }}
+          />
         )}
       </Stack>
     </Stack>

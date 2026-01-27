@@ -40,12 +40,8 @@ type SortedAssets = [string, StacAsset][];
 
 export default function Assets({ assets }: { assets: StacAssets }) {
   const setAsset = useStore((store) => store.setAsset);
-  const sortedAssets = useMemo(() => {
-    return sortAssets(assets);
-  }, [assets]);
-  const [bestAssetKey, bestAsset] = useMemo(() => {
-    return getBestAssetFromSortedList(sortedAssets);
-  }, [sortedAssets]);
+  const sortedAssets = sortAssets(assets);
+  const [bestAssetKey, bestAsset] = getBestAssetFromSortedList(sortedAssets);
 
   useEffect(() => {
     if (bestAssetKey) setAsset(bestAssetKey, bestAsset);
@@ -72,7 +68,7 @@ function AssetsList({ assets }: { assets: SortedAssets }) {
   return (
     <List.Root variant={"plain"}>
       {assets.map(([key, asset]) => (
-        <AssetListItem key={key} assetKey={key} asset={asset} />
+        <AssetListItem key={asset.href} assetKey={key} asset={asset} />
       ))}
     </List.Root>
   );
@@ -102,7 +98,7 @@ function AssetCards({ assets }: { assets: SortedAssets }) {
   return (
     <Stack>
       {assets.map(([key, asset]) => (
-        <AssetCard key={key} assetKey={key} asset={asset} />
+        <AssetCard key={asset.href} assetKey={key} asset={asset} />
       ))}
     </Stack>
   );

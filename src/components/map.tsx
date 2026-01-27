@@ -1,24 +1,35 @@
 import { useCollectionBounds, useGeotiffHref, useItems } from "@/hooks/store";
-import type { StacValue } from "@/types/stac";
+import type { Tokens } from "@/types/planetary-computer";
+import type { SignedItem, StacValue } from "@/types/stac";
 import { sanitizeBbox } from "@/utils/bbox";
 import { fitBounds } from "@/utils/map";
-import { collectionToFeature, isGlobalBbox } from "@/utils/stac";
+import {
+  parsePlanetaryComputerContainer,
+  signPlanetaryComputerHref,
+} from "@/utils/planetary-computer";
+import {
+  collectionToFeature,
+  getBestAsset,
+  getGeotiffHref,
+  isGlobalBbox,
+} from "@/utils/stac";
 import { type DeckProps, Layer } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
-import { COGLayer } from "@developmentseed/deck.gl-geotiff";
+import { COGLayer, MosaicLayer } from "@developmentseed/deck.gl-geotiff";
 import {
   GeoArrowPolygonLayer,
   GeoArrowScatterplotLayer,
 } from "@geoarrow/deck.gl-layers";
 import type { Feature, FeatureCollection } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { type RefObject, useEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import {
   Map as MaplibreMap,
   type MapRef,
   useControl,
 } from "react-map-gl/maplibre";
+import type { StacItem } from "stac-ts";
 import { useColorModeValue } from "../components/ui/color-mode";
 import { useStore } from "../store";
 
@@ -34,11 +45,16 @@ export default function Map() {
   const collections = useStore((store) => store.collections);
   const setBbox = useStore((store) => store.setBbox);
   const hoveredItem = useStore((store) => store.hoveredItem);
+  const planetaryComputerTokens = useStore(
+    (store) => store.planetaryComputerTokens
+  );
   const pickedItem = useStore((store) => store.pickedItem);
   const setPickedItem = useStore((store) => store.setPickedItem);
   const setHoveredItem = useStore((store) => store.setHoveredItem);
+  const pagedItems = useStore((store) => store.pagedItems);
   const hoveredCollection = useStore((store) => store.hoveredCollection);
   const stacGeoparquetTable = useStore((store) => store.stacGeoparquetTable);
+  const visualizeItems = useStore((store) => store.visualizeItems);
   const setStacGeoparquetItemId = useStore(
     (store) => store.setStacGeoparquetItemId
   );
@@ -71,6 +87,32 @@ export default function Map() {
     fillColor[3],
   ] as Color;
   const transparent = [0, 0, 0, 0] as Color;
+
+  const signedGeotiffHref = useMemo(() => {
+    if (geotiffHref) {
+      const container = parsePlanetaryComputerContainer(geotiffHref);
+      if (container) {
+        return signPlanetaryComputerHref(
+          geotiffHref,
+          container,
+          planetaryComputerTokens
+        );
+      } else {
+        return geotiffHref;
+      }
+    }
+  }, [geotiffHref, planetaryComputerTokens]);
+
+  const signedPagedItems = useMemo(() => {
+    return (
+      visualizeItems &&
+      pagedItems?.map((page) =>
+        page
+          .map((item) => signItem(item, planetaryComputerTokens))
+          .filter((item) => !!item)
+      )
+    );
+  }, [visualizeItems, pagedItems, planetaryComputerTokens]);
 
   useEffect(() => {
     if (mapRef?.current && value) fitBounds(mapRef.current, value, collections);
@@ -167,13 +209,33 @@ export default function Map() {
           })
     );
 
-  if (geotiffHref)
+  if (signedGeotiffHref)
     layers.push(
       new COGLayer({
-        id: "cog",
-        geotiff: geotiffHref,
+        id: "cog-" + signedGeotiffHref,
+        geotiff: signedGeotiffHref,
       })
     );
+  else if (signedPagedItems)
+    signedPagedItems.forEach((page, i) => {
+      if (page)
+        layers.push(
+          new MosaicLayer({
+            id: "cog-mosaic-" + i,
+            sources: page,
+            getSource: async (source) => {
+              return source.assets.data.href;
+            },
+            renderSource: (source, { data, signal }) => {
+              return new COGLayer({
+                id: `cog-${source.id}`,
+                geotiff: data,
+                signal,
+              });
+            },
+          })
+        );
+    });
 
   return (
     <MaplibreMap
@@ -239,4 +301,24 @@ function toGeoJson(value: StacValue) {
     case "FeatureCollection":
       return value as FeatureCollection;
   }
+}
+
+function signItem(item: StacItem, planetaryComputerTokens: Tokens) {
+  if (!item.bbox) return null;
+  const [, asset] = getBestAsset(item);
+  if (!asset) return null;
+  let geotiffHref = getGeotiffHref(asset);
+  if (!geotiffHref) return null;
+  const container = parsePlanetaryComputerContainer(geotiffHref);
+  if (container)
+    geotiffHref = signPlanetaryComputerHref(
+      geotiffHref,
+      container,
+      planetaryComputerTokens
+    );
+  if (!geotiffHref) return null;
+
+  asset.href = geotiffHref;
+  item.assets = { data: asset };
+  return item as SignedItem;
 }

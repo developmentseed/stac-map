@@ -55,6 +55,7 @@ interface Band {
   description?: string;
 }
 
-interface ItemWithBbox extends StacItem {
+interface SignedItem extends StacItem {
   bbox: BBox2D;
+  assets: { data: StacAsset };
 }

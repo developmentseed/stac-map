@@ -16,6 +16,8 @@ export interface ItemsState {
   pickedItem: StacItem | null;
   setPickedItem: (item: StacItem) => void;
   clearPickedItem: () => void;
+  visualizeItems: boolean;
+  setVisualizeItems: (visualizeItems: boolean) => void;
 }
 
 export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
@@ -56,5 +58,9 @@ export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
       geotiffHref: null,
       stacGeoparquetItemId: null,
     });
+  },
+  visualizeItems: false,
+  setVisualizeItems: (visualizeItems) => {
+    set({ visualizeItems });
   },
 });

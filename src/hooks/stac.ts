@@ -119,6 +119,7 @@ export function useStacSearch({
 
   return useInfiniteQuery({
     queryKey: ["stac-search", searchHref],
+    enabled: search.collections.length > 0,
     queryFn: async ({ pageParam }) => {
       if (pageParam) {
         return (await fetchStac({
