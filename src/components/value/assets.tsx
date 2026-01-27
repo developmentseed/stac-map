@@ -1,7 +1,11 @@
 import { useStore } from "@/store";
 import type { AssetWithAlternates } from "@/types/stac";
 import { isPlanetaryComputerHref } from "@/utils/planetary-computer";
-import { getAssetScore, getBestAsset, sortAssets } from "@/utils/stac";
+import {
+  getAssetScore,
+  getBestAssetFromSortedList,
+  sortAssets,
+} from "@/utils/stac";
 import {
   Badge,
   Box,
@@ -42,7 +46,7 @@ export default function Assets({ assets }: { assets: StacAssets }) {
     return sortAssets(assets);
   }, [assets]);
   const [bestAssetKey, bestAsset] = useMemo(() => {
-    return getBestAsset(sortedAssets);
+    return getBestAssetFromSortedList(sortedAssets);
   }, [sortedAssets]);
 
   useEffect(() => {

@@ -2,6 +2,7 @@ import type {
   SpatialExtent,
   StacAsset,
   StacCollection,
+  StacItem,
   StacLink,
 } from "stac-ts";
 import type { BBox2D } from "../types/map";
@@ -265,12 +266,19 @@ export function sortAssets(assets: StacAssets) {
   );
 }
 
-export function getBestAsset(sortedAssets: [string, AssetWithAlternates][]) {
+export function getBestAssetFromSortedList(
+  sortedAssets: [string, AssetWithAlternates][]
+) {
   const first = sortedAssets[0];
   if (first && getAssetScore(first[1] as AssetWithAlternates) > 0) {
     return first;
   }
   return [null, null];
+}
+
+export function getBestAsset(item: StacItem) {
+  const sortedAssets = sortAssets(item.assets);
+  return getBestAssetFromSortedList(sortedAssets);
 }
 
 export function getAssetScore(asset: AssetWithAlternates): number {

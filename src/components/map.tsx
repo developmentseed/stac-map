@@ -30,7 +30,6 @@ import {
   getGeotiffHref,
   getSelfHref,
   isGlobalCollection,
-  sortAssets,
 } from "../utils/stac";
 
 interface ItemWithBbox extends StacItem {
@@ -275,8 +274,7 @@ export default function Map() {
             id: "cog-mosaic-" + i,
             sources: page,
             getSource: async (source) => {
-              const sortedAssets = sortAssets(source.assets);
-              const [, bestAsset] = getBestAsset(sortedAssets);
+              const [, bestAsset] = getBestAsset(source);
               if (bestAsset) return getGeotiffHref(bestAsset);
             },
             renderSource: (source, { data, signal }) => {
