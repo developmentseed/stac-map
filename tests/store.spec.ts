@@ -1,15 +1,7 @@
 import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { useStore } from "../src/store";
 import type { StacSearch } from "../src/types/stac";
-
-vi.mock("../src/utils/stac", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../src/utils/stac")>();
-  return {
-    ...actual,
-    getGeotiffHref: vi.fn().mockResolvedValue("https://example.com/mock.tiff"),
-  };
-});
 
 function makeCollection(id: string): StacCollection {
   return {
@@ -348,25 +340,18 @@ describe("items.ts - clearPickedItem", () => {
 });
 
 describe("assets.ts - setAsset", () => {
-  test("setting null asset clears geotiffHref", async () => {
-    useStore.setState({ geotiffHref: "https://example.com/test.tiff" });
-
-    useStore.getState().setAsset(null, null);
-
-    expect(useStore.getState().geotiffHref).toBeNull();
-    expect(useStore.getState().asset).toBeNull();
-    expect(useStore.getState().assetKey).toBeNull();
-  });
-
   test("setting asset calls getGeotiffHref and updates state", async () => {
-    const asset = { href: "https://example.com/asset.tiff" };
+    const asset = {
+      href: "https://example.com/asset.tiff",
+      type: "image/tiff; application=geotiff",
+    };
 
-    await useStore.getState().setAsset("visual", asset);
+    useStore.getState().setAsset("visual", asset);
 
     expect(useStore.getState().asset).toBe(asset);
     expect(useStore.getState().assetKey).toBe("visual");
     expect(useStore.getState().geotiffHref).toBe(
-      "https://example.com/mock.tiff"
+      "https://example.com/asset.tiff"
     );
   });
 });

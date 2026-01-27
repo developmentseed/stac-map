@@ -16,7 +16,7 @@ export const createAssetsSlice: StateCreator<State, [], [], AssetsState> = (
   asset: null,
   assetKey: null,
   geotiffHref: null,
-  setAsset: async (assetKey, asset) => {
+  setAsset: (assetKey, asset) => {
     {
       set({ assetKey, asset });
       if (asset) {
