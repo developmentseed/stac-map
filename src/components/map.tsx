@@ -259,8 +259,7 @@ export default function Map() {
         geotiff: geotiffHref,
       })
     );
-
-  if (itemsWithBboxes)
+  else if (itemsWithBboxes)
     layers.push(
       new MosaicLayer<ItemWithBbox>({
         id: "cog-mosaic",
