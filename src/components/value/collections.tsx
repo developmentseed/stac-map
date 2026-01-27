@@ -4,8 +4,7 @@ import { Section } from "@/components/section";
 import DatetimeSlider from "@/components/ui/datetime-slider";
 import { useStore } from "@/store";
 import {
-  getCollectionEndDatetime,
-  getCollectionStartDatetime,
+  getCollectionDatetimes,
   isCollectionInBbox,
   isCollectionInDatetimes,
 } from "@/utils/stac";
@@ -44,8 +43,7 @@ export default function Collections({
   useEffect(() => {
     const bounds = collections.reduce(
       (acc, collection) => {
-        const start = getCollectionStartDatetime(collection);
-        const end = getCollectionEndDatetime(collection);
+        const { start, end } = getCollectionDatetimes(collection);
         return {
           start: start
             ? acc.start

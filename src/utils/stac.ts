@@ -175,14 +175,12 @@ export function conformsToFreeTextCollectionSearch(value: StacValue) {
   });
 }
 
-export function getCollectionStartDatetime(collection: StacCollection) {
-  const start = collection.extent?.temporal?.interval[0]?.[0];
-  return start ? new Date(start) : null;
-}
-
-export function getCollectionEndDatetime(collection: StacCollection) {
-  const end = collection.extent?.temporal?.interval[0]?.[1];
-  return end ? new Date(end) : null;
+export function getCollectionDatetimes(collection: StacCollection) {
+  const interval = collection.extent?.temporal?.interval[0];
+  return {
+    start: interval?.[0] ? new Date(interval[0]) : null,
+    end: interval?.[1] ? new Date(interval[1]) : null,
+  };
 }
 
 export function isCollectionInDatetimes(
@@ -190,8 +188,8 @@ export function isCollectionInDatetimes(
   start: Date,
   end: Date
 ) {
-  const collectionStart = getCollectionStartDatetime(collection);
-  const collectionEnd = getCollectionEndDatetime(collection);
+  const { start: collectionStart, end: collectionEnd } =
+    getCollectionDatetimes(collection);
 
   return !(
     (collectionEnd && collectionEnd < start) ||
