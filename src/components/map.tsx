@@ -6,9 +6,13 @@ import { collectionToFeature, isGlobalBbox } from "@/utils/stac";
 import { type DeckProps, Layer } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
+import {
+  GeoArrowPolygonLayer,
+  GeoArrowScatterplotLayer,
+} from "@geoarrow/deck.gl-layers";
 import type { Feature, FeatureCollection } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { type RefObject, useEffect, useRef } from "react";
+import { type RefObject, useEffect, useRef, useState } from "react";
 import {
   Map as MaplibreMap,
   type MapRef,
@@ -33,6 +37,10 @@ export default function Map() {
   const setPickedItem = useStore((store) => store.setPickedItem);
   const setHoveredItem = useStore((store) => store.setHoveredItem);
   const hoveredCollection = useStore((store) => store.hoveredCollection);
+  const stacGeoparquetTable = useStore((store) => store.stacGeoparquetTable);
+  const setStacGeoparquetItemId = useStore(
+    (store) => store.setStacGeoparquetItemId
+  );
   const setHoveredCollection = useStore((store) => store.setHoveredCollection);
   const setHrefFromCollectionId = useStore(
     (store) => store.setHrefFromCollectionId
@@ -45,6 +53,8 @@ export default function Map() {
   const lineWidth = useStore((store) => store.lineWidth);
   const collectionBounds = useCollectionBounds();
   const items = useItems();
+  const [hoveredStacGeoparquetItemId, setHoveredStacGeoparquetItemId] =
+    useState<string | null>(null);
 
   const inverseFillColor = [
     256 - fillColor[0],
@@ -113,6 +123,47 @@ export default function Map() {
       },
     }),
   ];
+
+  if (stacGeoparquetTable)
+    layers.push(
+      stacGeoparquetTable.geometryType === "point"
+        ? new GeoArrowScatterplotLayer({
+            id: "stac-geoparquet-point",
+            data: stacGeoparquetTable.table,
+            getColor: lineColor,
+            getRadius: 2,
+            getPosition: stacGeoparquetTable.table.getChild("geometry")!,
+            radiusUnits: "pixels",
+            pickable: true,
+            onClick: (info) => {
+              setStacGeoparquetItemId(info.object?.id);
+            },
+          })
+        : new GeoArrowPolygonLayer({
+            id: "stac-geoparquet-polygon",
+            data: stacGeoparquetTable.table,
+            filled: true,
+            getFillColor: ({ index, data }) => {
+              return data.data.get(index)?.["id"] ===
+                hoveredStacGeoparquetItemId
+                ? fillColor
+                : transparent;
+            },
+            getLineColor: lineColor,
+            getLineWidth: 2,
+            lineWidthUnits: "pixels",
+            pickable: true,
+            onClick: (info) => {
+              setStacGeoparquetItemId(info.object?.id);
+            },
+            onHover: (info) => {
+              setHoveredStacGeoparquetItemId(info.object?.id);
+            },
+            updateTriggers: {
+              getFillColor: [hoveredStacGeoparquetItemId],
+            },
+          })
+    );
 
   return (
     <MaplibreMap

@@ -9,6 +9,10 @@ import { createHrefSlice, type HrefState } from "./href";
 import { createInputSlice, type InputState } from "./input";
 import { createItemsSlice, type ItemsState } from "./items";
 import {
+  createPlanetaryComputerSlice,
+  type PlanetaryComputerState,
+} from "./planetary-computer";
+import {
   createStacGeoparquetState,
   type StacGeoparquetState,
 } from "./stac-geoparquet";
@@ -31,7 +35,8 @@ export interface State
     UploadedFileState,
     ConnectionState,
     DatetimeState,
-    StacGeoparquetState {
+    StacGeoparquetState,
+    PlanetaryComputerState {
   fillColor: [number, number, number, number];
   lineColor: [number, number, number, number];
   lineWidth: number;
@@ -50,6 +55,7 @@ export const useStore = create<State>((...a) => ({
   ...createStacGeoparquetState(...a),
   ...createCatalogsSlice(...a),
   ...createDatetimeSlice(...a),
+  ...createPlanetaryComputerSlice(...a),
   fillColor: [207, 63, 2, 50] as [number, number, number, number],
   lineColor: [207, 63, 2, 100] as [number, number, number, number],
   lineWidth: 2,

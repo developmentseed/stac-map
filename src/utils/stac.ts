@@ -12,7 +12,6 @@ import type { BBox2D } from "../types/map";
 import type { AssetWithAlternates, StacAssets, StacValue } from "../types/stac";
 import { sanitizeBbox } from "./bbox";
 import { toAbsoluteUrl } from "./href";
-import { maybeSignPlanetaryComputerHref } from "./planetary-computer";
 
 export function getStacValueTitle(value: StacValue) {
   if ("title" in value && value.title) {
@@ -218,9 +217,7 @@ export function isCollectionInDatetimes(
   );
 }
 
-export async function getGeotiffHref(
-  asset: AssetWithAlternates
-): Promise<string | null> {
+export function getGeotiffHref(asset: AssetWithAlternates): string | null {
   if (!isGeotiff(asset)) {
     return null;
   }
@@ -235,11 +232,6 @@ export async function getGeotiffHref(
       geotiffHref = httpAlternate.href;
     }
   }
-  if (geotiffHref === null) return null;
-
-  const signedHref = await maybeSignPlanetaryComputerHref(geotiffHref);
-  if (signedHref) return signedHref;
-
   return geotiffHref;
 }
 

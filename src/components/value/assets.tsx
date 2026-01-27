@@ -1,6 +1,5 @@
 import { useStore } from "@/store";
 import type { AssetWithAlternates } from "@/types/stac";
-import { isPlanetaryComputerHref } from "@/utils/planetary-computer";
 import {
   getAssetScore,
   getBestAssetFromSortedList,
@@ -32,7 +31,6 @@ import {
 } from "react-icons/lu";
 import type { StacAsset } from "stac-ts";
 import { Section } from "../section";
-import { PlanetaryComputerDownload } from "../ui/planetary-computer";
 
 interface StacAssets {
   [k: string]: StacAsset;
@@ -158,16 +156,13 @@ function AssetActions({
           </IconButton>
         </Clipboard.Trigger>
       </Clipboard.Root>
-      {scheme?.startsWith("http") &&
-        (isPlanetaryComputerHref(asset.href) ? (
-          <PlanetaryComputerDownload href={asset.href} />
-        ) : (
-          <IconButton asChild>
-            <a href={asset.href}>
-              <LuDownload />
-            </a>
-          </IconButton>
-        ))}
+      {scheme?.startsWith("http") && (
+        <IconButton asChild>
+          <a href={asset.href}>
+            <LuDownload />
+          </a>
+        </IconButton>
+      )}
       {alternates.length > 0 && (
         <Menu.Root>
           <Menu.Trigger asChild>
