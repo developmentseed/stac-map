@@ -1,3 +1,4 @@
+import { fitBounds } from "@/utils/map";
 import {
   Button,
   ButtonGroup,
@@ -6,7 +7,8 @@ import {
   List,
   Stack,
 } from "@chakra-ui/react";
-import { LuDownload, LuFiles } from "react-icons/lu";
+import { LuDownload, LuFiles, LuFocus } from "react-icons/lu";
+import { useMap } from "react-map-gl/maplibre";
 import type { StacItem } from "stac-ts";
 import * as stac_wasm from "stac-wasm";
 import ItemCard from "../cards/item";
@@ -15,13 +17,28 @@ import { Section } from "../section";
 
 export default function Items({ items }: { items: StacItem[] }) {
   const title = `Items (${items.length})`;
+  const { map } = useMap();
+
   return (
     <Section defaultListOrCard="list" title={title} icon={<LuFiles />}>
       {(listOrCard) => {
         return (
           <Stack>
             <Center>
-              <ButtonGroup size="2xs" variant={"subtle"}>
+              <ButtonGroup size="2xs" variant={"subtle"} attached>
+                <Button
+                  onClick={() =>
+                    map &&
+                    fitBounds(
+                      map,
+                      { type: "FeatureCollection", features: items },
+                      null
+                    )
+                  }
+                >
+                  <LuFocus />
+                  Zoom to extents
+                </Button>
                 <DownloadTrigger
                   fileName="items.geojson"
                   mimeType="application/json"

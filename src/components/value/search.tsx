@@ -8,8 +8,8 @@ import { Button, ButtonGroup, HStack, Progress, Stack } from "@chakra-ui/react";
 import type { UseInfiniteQueryResult } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import {
-  LuFocus,
   LuForward,
+  LuFrame,
   LuLoader,
   LuPause,
   LuPlay,
@@ -39,8 +39,9 @@ export default function Search({ href, collection }: Props) {
   }, [result.data]);
 
   useEffect(() => {
-    setSearch({ collections: [collection.id] });
-  }, [collection, setSearch]);
+    if (search.collections.at(0) !== collection.id)
+      setSearch({ collections: [collection.id] });
+  }, [collection, setSearch, search]);
 
   useEffect(() => {
     if (result.data)
@@ -105,7 +106,7 @@ function SearchControls({
             setSearch({ bbox: bbox ? paddedBbox(bbox) : undefined })
           }
         >
-          <LuFocus />
+          <LuFrame />
           Set bbox to viewport
         </Button>
         <Button onClick={() => resetSearch()}>

@@ -1,8 +1,8 @@
 import { useCollectionBounds, useItems } from "@/hooks/store";
-import type { BBox2D } from "@/types/map";
 import type { StacValue } from "@/types/stac";
 import { sanitizeBbox } from "@/utils/bbox";
-import { collectionToFeature, getBbox, isGlobalBbox } from "@/utils/stac";
+import { fitBounds } from "@/utils/map";
+import { collectionToFeature, isGlobalBbox } from "@/utils/stac";
 import { type DeckProps, Layer } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
@@ -10,12 +10,10 @@ import type { Feature, FeatureCollection } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { type RefObject, useEffect, useRef } from "react";
 import {
-  type LngLatLike,
   Map as MaplibreMap,
   type MapRef,
   useControl,
 } from "react-map-gl/maplibre";
-import type { StacCollection } from "stac-ts";
 import { useColorModeValue } from "../components/ui/color-mode";
 import { useStore } from "../store";
 
@@ -169,28 +167,6 @@ function getCursor(
     mapRef.current.getCanvas().style.cursor = cursor;
   }
   return cursor;
-}
-
-function fitBounds(
-  map: MapRef,
-  value: StacValue,
-  collections: StacCollection[] | null
-) {
-  const padding = {
-    top: window.innerHeight / 10,
-    bottom: window.innerHeight / 20,
-    right: window.innerWidth / 20,
-    left: window.innerWidth / 20 + window.innerWidth / 3,
-  };
-  const bbox = getBbox(value, collections);
-  if (bbox) map.fitBounds(bboxToBounds(bbox), { padding });
-}
-
-function bboxToBounds(bbox: BBox2D): [LngLatLike, LngLatLike] {
-  return [
-    [bbox[0], bbox[1]],
-    [bbox[2], bbox[3]],
-  ];
 }
 
 function toGeoJson(value: StacValue) {
