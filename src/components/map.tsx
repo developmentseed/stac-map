@@ -23,7 +23,7 @@ import { useColorModeValue } from "../components/ui/color-mode";
 import { useStore } from "../store";
 import type { BBox2D, Color } from "../types/map";
 import type { StacSearch, StacValue } from "../types/stac";
-import { sanitizeBbox } from "../utils/map";
+import { sanitizeBbox } from "../utils/bbox";
 import {
   getBestAsset,
   getCollectionExtents,

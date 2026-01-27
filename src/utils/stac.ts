@@ -6,7 +6,7 @@ import type {
 } from "stac-ts";
 import type { BBox2D } from "../types/map";
 import type { AssetWithAlternates, StacAssets, StacValue } from "../types/stac";
-import { sanitizeBbox } from "./map";
+import { sanitizeBbox } from "./bbox";
 import { maybeSignPlanetaryComputerHref } from "./planetary-computer";
 
 export function getStacValueTitle(value: StacValue) {
