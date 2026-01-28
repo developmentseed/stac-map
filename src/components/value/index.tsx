@@ -16,6 +16,7 @@ import Breadcrumbs from "./breadcrumbs";
 import Buttons from "./buttons";
 import Catalogs from "./catalogs";
 import ChildLinks from "./child-links";
+import { CogHref, PagedCogSources } from "./cogs";
 import CollectionSearch from "./collection-search";
 import Collections from "./collections";
 import CollectionsHref from "./collections-href";
@@ -23,7 +24,6 @@ import Description from "./description";
 import ItemLinks from "./item-links";
 import Items from "./items";
 import Links from "./links";
-import PlanetaryComputer from "./planetary-computer";
 import Properties from "./properties";
 import RootHref from "./root-href";
 import StacGeoparquetHref from "./stac-geoparquet-href";
@@ -37,6 +37,8 @@ export default function Value({ value }: { value: StacValue }) {
   const collections = useStore((store) => store.collections);
   const catalogs = useStore((store) => store.catalogs);
   const setUnpagedItems = useStore((store) => store.setUnpagedItems);
+  const asset = useStore((store) => store.asset);
+  const pagedItems = useStore((store) => store.pagedItems);
   const version = value.stac_version as string | undefined;
   const description = value.description as string | undefined;
   const rootHref = getLinkHref(value, "root");
@@ -106,12 +108,8 @@ export default function Value({ value }: { value: StacValue }) {
         {value.type === "Feature" && (
           <Properties properties={value.properties} />
         )}
-        {<PlanetaryComputer value={value} />}
-        {items && (
-          <PlanetaryComputer
-            value={{ type: "FeatureCollection", features: items }}
-          />
-        )}
+        {asset && <CogHref asset={asset} />}
+        {pagedItems && <PagedCogSources pages={pagedItems} />}
       </Stack>
     </Stack>
   );

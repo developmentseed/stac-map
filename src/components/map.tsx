@@ -1,18 +1,8 @@
-import { useCollectionBounds, useGeotiffHref, useItems } from "@/hooks/store";
-import type { Tokens } from "@/types/planetary-computer";
-import type { SignedItem, StacValue } from "@/types/stac";
+import { useCollectionBounds, useItems } from "@/hooks/store";
+import type { StacValue } from "@/types/stac";
 import { sanitizeBbox } from "@/utils/bbox";
 import { fitBounds } from "@/utils/map";
-import {
-  parsePlanetaryComputerContainer,
-  signPlanetaryComputerHref,
-} from "@/utils/planetary-computer";
-import {
-  collectionToFeature,
-  getBestAsset,
-  getGeotiffHref,
-  isGlobalBbox,
-} from "@/utils/stac";
+import { collectionToFeature, isGlobalBbox } from "@/utils/stac";
 import { type DeckProps, Layer } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
@@ -24,13 +14,12 @@ import {
 import type { Feature, FeatureCollection } from "geojson";
 import { toProj4 } from "geotiff-geokeys-to-proj4";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
+import { type RefObject, useEffect, useRef, useState } from "react";
 import {
   Map as MaplibreMap,
   type MapRef,
   useControl,
 } from "react-map-gl/maplibre";
-import type { StacItem } from "stac-ts";
 import { useColorModeValue } from "../components/ui/color-mode";
 import { useStore } from "../store";
 
@@ -45,14 +34,12 @@ export default function Map() {
   const value = useStore((store) => store.value);
   const collections = useStore((store) => store.collections);
   const setBbox = useStore((store) => store.setBbox);
+  const cogHref = useStore((store) => store.cogHref);
+  const pagedCogSources = useStore((store) => store.pagedCogSources);
   const hoveredItem = useStore((store) => store.hoveredItem);
-  const planetaryComputerTokens = useStore(
-    (store) => store.planetaryComputerTokens
-  );
   const pickedItem = useStore((store) => store.pickedItem);
   const setPickedItem = useStore((store) => store.setPickedItem);
   const setHoveredItem = useStore((store) => store.setHoveredItem);
-  const pagedItems = useStore((store) => store.pagedItems);
   const hoveredCollection = useStore((store) => store.hoveredCollection);
   const stacGeoparquetTable = useStore((store) => store.stacGeoparquetTable);
   const visualizeItems = useStore((store) => store.visualizeItems);
@@ -73,7 +60,6 @@ export default function Map() {
   const items = useItems();
   const [hoveredStacGeoparquetItemId, setHoveredStacGeoparquetItemId] =
     useState<string | null>(null);
-  const geotiffHref = useGeotiffHref();
 
   const inverseFillColor = [
     256 - fillColor[0],
@@ -89,32 +75,6 @@ export default function Map() {
   ] as Color;
   const transparent = [0, 0, 0, 0] as Color;
 
-  const signedGeotiffHref = useMemo(() => {
-    if (geotiffHref) {
-      const container = parsePlanetaryComputerContainer(geotiffHref);
-      if (container) {
-        return signPlanetaryComputerHref(
-          geotiffHref,
-          container,
-          planetaryComputerTokens
-        );
-      } else {
-        return geotiffHref;
-      }
-    }
-  }, [geotiffHref, planetaryComputerTokens]);
-
-  const signedPagedItems = useMemo(() => {
-    return (
-      visualizeItems &&
-      pagedItems?.map((page) =>
-        page
-          .map((item) => signItem(item, planetaryComputerTokens))
-          .filter((item) => !!item)
-      )
-    );
-  }, [visualizeItems, pagedItems, planetaryComputerTokens]);
-
   useEffect(() => {
     if (mapRef?.current && value) fitBounds(mapRef.current, value, collections);
   }, [value, collections]);
@@ -123,7 +83,7 @@ export default function Map() {
     new GeoJsonLayer({
       id: "picked-item",
       data: (pickedItem as Feature) || undefined,
-      filled: true,
+      filled: !cogHref,
       getFillColor: inverseFillColor,
       getLineColor: inverseLineColor,
       getLineWidth: 2 * lineWidth,
@@ -144,7 +104,7 @@ export default function Map() {
     new GeoJsonLayer({
       id: "value",
       data: (value && toGeoJson(value)) || undefined,
-      filled: !items,
+      filled: !(items || cogHref),
       getFillColor: fillColor,
       getLineColor: lineColor,
       getLineWidth: lineWidth,
@@ -210,16 +170,16 @@ export default function Map() {
           })
     );
 
-  if (signedGeotiffHref)
+  if (cogHref)
     layers.push(
       new COGLayer({
-        id: "cog-" + signedGeotiffHref,
-        geotiff: signedGeotiffHref,
+        id: "cog-" + cogHref,
+        geotiff: cogHref,
         geoKeysParser,
       })
     );
-  else if (signedPagedItems)
-    signedPagedItems.forEach((page, i) => {
+  else if (visualizeItems && pagedCogSources)
+    pagedCogSources.forEach((page, i) => {
       if (page)
         layers.push(
           new MosaicLayer({
@@ -304,26 +264,6 @@ function toGeoJson(value: StacValue) {
     case "FeatureCollection":
       return value as FeatureCollection;
   }
-}
-
-function signItem(item: StacItem, planetaryComputerTokens: Tokens) {
-  if (!item.bbox) return null;
-  const [, asset] = getBestAsset(item);
-  if (!asset) return null;
-  let geotiffHref = getGeotiffHref(asset);
-  if (!geotiffHref) return null;
-  const container = parsePlanetaryComputerContainer(geotiffHref);
-  if (container)
-    geotiffHref = signPlanetaryComputerHref(
-      geotiffHref,
-      container,
-      planetaryComputerTokens
-    );
-  if (!geotiffHref) return null;
-
-  asset.href = geotiffHref;
-  item.assets = { data: asset };
-  return item as SignedItem;
 }
 
 async function geoKeysParser(

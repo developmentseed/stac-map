@@ -1,13 +1,13 @@
-export interface Token {
+export interface PlanetaryComputerToken {
   "msft:expiry": string;
   token: string;
 }
 
-export interface Container {
+export interface AzureBlobStorageContainer {
   storageAccount: string;
   container: string;
 }
 
-export interface Tokens {
-  [storageAccount: string]: { [container: string]: Token };
+export interface PlanetaryComputerTokens {
+  [storageAccount: string]: { [container: string]: PlanetaryComputerToken };
 }
