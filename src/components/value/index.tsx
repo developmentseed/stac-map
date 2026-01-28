@@ -16,7 +16,7 @@ import Breadcrumbs from "./breadcrumbs";
 import Buttons from "./buttons";
 import Catalogs from "./catalogs";
 import ChildLinks from "./child-links";
-import { CogHref, PagedCogSources } from "./cogs";
+import { CogHref, CogSources, PagedCogSources } from "./cogs";
 import CollectionSearch from "./collection-search";
 import Collections from "./collections";
 import CollectionsHref from "./collections-href";
@@ -38,6 +38,7 @@ export default function Value({ value }: { value: StacValue }) {
   const catalogs = useStore((store) => store.catalogs);
   const setUnpagedItems = useStore((store) => store.setUnpagedItems);
   const asset = useStore((store) => store.asset);
+  const unpagedItems = useStore((store) => store.unpagedItems);
   const pagedItems = useStore((store) => store.pagedItems);
   const version = value.stac_version as string | undefined;
   const description = value.description as string | undefined;
@@ -109,6 +110,7 @@ export default function Value({ value }: { value: StacValue }) {
           <Properties properties={value.properties} />
         )}
         {asset && <CogHref asset={asset} />}
+        {unpagedItems && <CogSources items={unpagedItems} />}
         {pagedItems && <PagedCogSources pages={pagedItems} />}
       </Stack>
     </Stack>

@@ -33,6 +33,9 @@ export const createHrefSlice: StateCreator<State, [], [], HrefState> = (
       geotiffHref: null,
       stacGeoparquetTable: null,
       stacGeoparquetItemId: null,
+      cogHref: null,
+      cogSources: null,
+      pagedCogSources: null,
     });
   },
 });

@@ -49,6 +49,79 @@ function SetCogHref({ href }: { href: string }) {
   return <></>;
 }
 
+export function CogSources({ items }: { items: StacItem[] }) {
+  const sources = items
+    .map((item) => itemToSource(item))
+    .filter((source) => !!source);
+  const planetaryComputerContainerNames = [
+    ...new Set(
+      sources
+        .map((source) => {
+          const container = parsePlanetaryComputerContainer(
+            source.assets.data.href
+          );
+          return container ? toContainerName(container) : null;
+        })
+        .filter((name): name is string => !!name)
+    ),
+  ];
+  return planetaryComputerContainerNames.length > 0 ? (
+    <PlanetaryComputerCogSources
+      containerNames={planetaryComputerContainerNames}
+      sources={sources}
+    />
+  ) : (
+    <SetCogSources sources={sources} />
+  );
+}
+
+function PlanetaryComputerCogSources({
+  containerNames,
+  sources,
+}: {
+  containerNames: string[];
+  sources: CogSource[];
+}) {
+  const containers = useMemo(() => {
+    return containerNames.map(toContainer);
+  }, [containerNames]);
+  const { data, isComplete } = usePlanetaryComputerTokens({
+    containers,
+  });
+  if (isComplete) {
+    const tokens: PlanetaryComputerTokens = {};
+    for (let i = 0; i < containers.length; i++) {
+      const container = containers[i];
+      tokens[container.storageAccount] ??= {};
+      tokens[container.storageAccount][container.container] = data[i];
+    }
+    return (
+      <SetCogSources
+        sources={sources.map((source) => ({
+          ...source,
+          assets: {
+            data: {
+              href:
+                signPlanetaryComputerHrefFromTokens(
+                  source.assets.data.href,
+                  tokens
+                ) || source.assets.data.href,
+            },
+          },
+        }))}
+      />
+    );
+  }
+}
+
+function SetCogSources({ sources }: { sources: CogSource[] }) {
+  const setCogSources = useStore((store) => store.setCogSources);
+  useEffect(() => {
+    setCogSources(sources);
+  }, [sources, setCogSources]);
+  return <></>;
+}
+
 export function PagedCogSources({ pages }: { pages: StacItem[][] }) {
   const pagedSources = pages.map((page) =>
     page.map((item) => itemToSource(item)).filter((source) => !!source)
