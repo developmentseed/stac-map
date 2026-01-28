@@ -6,6 +6,7 @@ import type { StacSearch } from "@/types/stac";
 import { paddedBbox } from "@/utils/bbox";
 import { getCollectionDatetimes } from "@/utils/stac";
 import {
+  Alert,
   Button,
   ButtonGroup,
   Checkbox,
@@ -14,7 +15,6 @@ import {
   Popover,
   Portal,
   Progress,
-  Slider,
   Stack,
   Text,
 } from "@chakra-ui/react";
@@ -72,6 +72,7 @@ export default function Search({ href, collection }: Props) {
     <Section icon={<LuSearch />} title="Item search">
       <Stack gap={4}>
         <SearchControls
+          collection={collection}
           setSearch={(params: SetSearchParams) =>
             setSearch({ ...search, collections: [collection.id], ...params })
           }
@@ -88,18 +89,20 @@ export default function Search({ href, collection }: Props) {
 }
 
 function SearchControls({
+  collection,
   setSearch,
   resetSearch,
   isFetching,
   fetchNextPage,
   hasNextPage,
 }: {
+  collection: StacCollection;
   setSearch: (params: SetSearchParams) => void;
   resetSearch: () => void;
 } & UseInfiniteQueryResult) {
   const [fetchAll, setFetchAll] = useState(false);
   const bbox = useStore((store) => store.bbox);
-  const datetimeBounds = useStore((store) => store.datetimeBounds);
+  const { start, end } = getCollectionDatetimes(collection);
 
   useEffect(() => {
     if (fetchAll && !isFetching && hasNextPage) fetchNextPage();
@@ -134,8 +137,9 @@ function SearchControls({
           Set bbox to viewport
         </Button>
         <DatetimePopover
-          datetimeBounds={datetimeBounds}
-          onApply={(datetime) => setSearch({ datetime })}
+          start={start}
+          end={end}
+          setDatetime={(datetime) => setSearch({ datetime })}
         />
         <Button onClick={() => resetSearch()}>
           <LuX />
@@ -146,70 +150,34 @@ function SearchControls({
   );
 }
 
-function toDateInputValue(timestamp: number): string {
-  return new Date(timestamp).toISOString().split("T")[0];
-}
-
 function DatetimePopover({
-  datetimeBounds,
-  onApply,
+  start,
+  end,
+  setDatetime,
 }: {
-  datetimeBounds: { start: Date | null; end: Date | null } | null;
-  onApply: (datetime: string | undefined) => void;
+  start: Date | null;
+  end: Date | null;
+  setDatetime: (datetime: string) => void;
 }) {
-  const [now] = useState(() => Date.now());
-  const [prevBounds, setPrevBounds] = useState(datetimeBounds);
-  const [startUnbounded, setStartUnbounded] = useState(!datetimeBounds?.start);
-  const [endUnbounded, setEndUnbounded] = useState(!datetimeBounds?.end);
-  const [sliderValue, setSliderValue] = useState<[number, number] | null>(null);
+  const [startUnbounded, setStartUnbounded] = useState(!start);
+  const [endUnbounded, setEndUnbounded] = useState(!end);
+  const [startInput, setStartInput] = useState(start?.getTime());
+  const [endInput, setEndInput] = useState(end?.getTime());
 
-  if (datetimeBounds !== prevBounds) {
-    setPrevBounds(datetimeBounds);
-    setStartUnbounded(!datetimeBounds?.start);
-    setEndUnbounded(!datetimeBounds?.end);
-    setSliderValue(null);
-  }
+  const searchStart = startUnbounded ? undefined : startInput;
+  const searchEnd = endUnbounded ? undefined : endInput;
 
-  const minTime =
-    datetimeBounds?.start?.getTime() ?? now - 365 * 24 * 60 * 60 * 1000;
-  const maxTime = datetimeBounds?.end?.getTime() ?? now;
-
-  const currentValue: [number, number] = sliderValue ?? [minTime, maxTime];
-
-  const formatDatetime = (date: Date) => date.toISOString();
-
-  const handleOpenChange = (details: { open: boolean }) => {
-    if (!details.open) {
-      const start = startUnbounded
-        ? ".."
-        : formatDatetime(new Date(currentValue[0]));
-      const end = endUnbounded
-        ? ".."
-        : formatDatetime(new Date(currentValue[1]));
-      if (start === ".." && end === "..") {
-        onApply(undefined);
-      } else {
-        onApply(`${start}/${end}`);
-      }
-    }
-  };
-
-  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = new Date(e.target.value);
-    if (!isNaN(date.getTime())) {
-      setSliderValue([date.getTime(), currentValue[1]]);
-    }
-  };
-
-  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = new Date(e.target.value);
-    if (!isNaN(date.getTime())) {
-      setSliderValue([currentValue[0], date.getTime()]);
-    }
-  };
+  let error: string | undefined;
+  if (startInput && endInput && startInput > endInput)
+    error = "Start datetime is after end datetime";
 
   return (
-    <Popover.Root onOpenChange={handleOpenChange}>
+    <Popover.Root
+      onOpenChange={(e) => {
+        if (!e.open && !error)
+          setDatetime(toSearchDatetime(searchStart, searchEnd));
+      }}
+    >
       <Popover.Trigger asChild>
         <Button>
           <LuCalendar />
@@ -218,30 +186,19 @@ function DatetimePopover({
       </Popover.Trigger>
       <Portal>
         <Popover.Positioner>
-          <Popover.Content width="320px">
+          <Popover.Content>
             <Popover.Arrow />
             <Popover.Body>
               <Stack gap={4}>
-                <Slider.Root
-                  value={currentValue}
-                  min={minTime}
-                  max={maxTime}
-                  onValueChange={(e) =>
-                    setSliderValue(e.value as [number, number])
-                  }
-                  disabled={startUnbounded && endUnbounded}
-                >
-                  <HStack>
-                    <Slider.Label>Datetime range</Slider.Label>
-                  </HStack>
-                  <Slider.Control>
-                    <Slider.Track>
-                      <Slider.Range />
-                    </Slider.Track>
-                    <Slider.Thumbs />
-                  </Slider.Control>
-                </Slider.Root>
-
+                <HStack>
+                  <Text fontSize={"sm"} flex="1">
+                    Collection extent
+                  </Text>
+                  <Text>
+                    {start?.toLocaleDateString() || "unbounded"} to{" "}
+                    {end?.toLocaleDateString() || "now"}
+                  </Text>
+                </HStack>
                 <Stack gap={2}>
                   <HStack>
                     <Text fontSize="sm" flex="1">
@@ -251,12 +208,21 @@ function DatetimePopover({
                       type="date"
                       size="sm"
                       width="auto"
-                      value={
-                        startUnbounded ? "" : toDateInputValue(currentValue[0])
-                      }
-                      onChange={handleStartDateChange}
+                      value={startInput ? toDateInputValue(startInput) : ""}
+                      onChange={(e) => {
+                        const time = new Date(e.target.value).getTime();
+                        if (time) setStartInput(time);
+                      }}
                       disabled={startUnbounded}
                     />
+                    <Checkbox.Root
+                      size="sm"
+                      checked={!startUnbounded}
+                      onCheckedChange={(e) => setStartUnbounded(!e.checked)}
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                    </Checkbox.Root>
                   </HStack>
                   <HStack>
                     <Text fontSize="sm" flex="1">
@@ -266,36 +232,33 @@ function DatetimePopover({
                       type="date"
                       size="sm"
                       width="auto"
-                      value={
-                        endUnbounded ? "" : toDateInputValue(currentValue[1])
-                      }
-                      onChange={handleEndDateChange}
+                      value={endInput ? toDateInputValue(endInput) : ""}
+                      onChange={(e) => {
+                        const time = new Date(e.target.value).getTime();
+                        if (time) setEndInput(time);
+                      }}
                       disabled={endUnbounded}
                     />
+                    <Checkbox.Root
+                      size="sm"
+                      checked={!endUnbounded}
+                      onCheckedChange={(e) => setEndUnbounded(!e.checked)}
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                    </Checkbox.Root>
                   </HStack>
                 </Stack>
-
-                <HStack justify="space-between">
-                  <Checkbox.Root
-                    checked={startUnbounded}
-                    onCheckedChange={(e) => setStartUnbounded(!!e.checked)}
-                    size="sm"
-                  >
-                    <Checkbox.HiddenInput />
-                    <Checkbox.Control />
-                    <Checkbox.Label>Start unbounded</Checkbox.Label>
-                  </Checkbox.Root>
-
-                  <Checkbox.Root
-                    checked={endUnbounded}
-                    onCheckedChange={(e) => setEndUnbounded(!!e.checked)}
-                    size="sm"
-                  >
-                    <Checkbox.HiddenInput />
-                    <Checkbox.Control />
-                    <Checkbox.Label>End unbounded</Checkbox.Label>
-                  </Checkbox.Root>
-                </HStack>
+                <Text fontSize={"2xs"}>
+                  {toSearchDatetime(searchStart, searchEnd)}
+                </Text>
+                {error && (
+                  <Alert.Root status={"error"}>
+                    <Alert.Content>
+                      <Alert.Description>{error}</Alert.Description>
+                    </Alert.Content>
+                  </Alert.Root>
+                )}
               </Stack>
             </Popover.Body>
           </Popover.Content>
@@ -329,4 +292,15 @@ function SearchProgress({
 
 function SearchDetails({ search }: { search: StacSearch }) {
   return <Json value={search}></Json>;
+}
+
+function toDateInputValue(timestamp: number): string {
+  return new Date(timestamp).toISOString().split("T")[0];
+}
+
+function toSearchDatetime(
+  start: number | undefined,
+  end: number | undefined
+): string {
+  return `${start ? new Date(start).toISOString() : ".."}/${end ? new Date(end).toISOString() : ".."}`;
 }
