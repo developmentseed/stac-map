@@ -1,12 +1,50 @@
-import { Box, FileUpload } from "@chakra-ui/react";
+import { Alert, Box, FileUpload } from "@chakra-ui/react";
 import { useDuckDb } from "duckdb-wasm-kit";
 import { useEffect } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import Footer from "./components/footer";
 import Map from "./components/map";
 import Overlay from "./components/overlay";
 import { useStore } from "./store";
 import { getCurrentHref } from "./utils/href";
 import { uploadFile } from "./utils/upload";
+
+function MapFallback({ error }: { error: unknown }) {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    <Box
+      h="100%"
+      w="100%"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      bg="gray.100"
+    >
+      <Alert.Root status="error">
+        <Alert.Indicator />
+        <Alert.Content>
+          <Alert.Title>Map failed to load</Alert.Title>
+          <Alert.Description>{message}</Alert.Description>
+        </Alert.Content>
+      </Alert.Root>
+    </Box>
+  );
+}
+
+function OverlayFallback({ error }: { error: unknown }) {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    <Box position="absolute" top={4} left={4}>
+      <Alert.Root status="error">
+        <Alert.Indicator />
+        <Alert.Content>
+          <Alert.Title>Overlay failed to load</Alert.Title>
+          <Alert.Description>{message}</Alert.Description>
+        </Alert.Content>
+      </Alert.Root>
+    </Box>
+  );
+}
 
 export default function App() {
   const href = useStore((state) => state.href);
@@ -77,11 +115,15 @@ export default function App() {
               width: "100dvw",
             }}
           >
-            <Map />
+            <ErrorBoundary FallbackComponent={MapFallback}>
+              <Map />
+            </ErrorBoundary>
           </FileUpload.Dropzone>
         </FileUpload.Root>
       </Box>
-      <Overlay />
+      <ErrorBoundary FallbackComponent={OverlayFallback}>
+        <Overlay />
+      </ErrorBoundary>
       <Footer />
     </>
   );
