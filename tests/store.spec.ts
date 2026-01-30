@@ -51,8 +51,9 @@ function resetStore() {
     filteredCollections: null,
     hoveredCollection: null,
     catalogs: null,
-    unpagedItems: null,
-    pagedItems: null,
+    staticItems: null,
+    searchedItems: null,
+    itemSource: "static",
     hoveredItem: null,
     pickedItem: null,
     search: { collections: [] },
@@ -95,8 +96,8 @@ describe("href.ts - setHref", () => {
       hoveredCollection: makeCollection("col1"),
       hoveredItem: makeItem("item1"),
       pickedItem: makeItem("item1"),
-      unpagedItems: [makeItem("item1")],
-      pagedItems: [[makeItem("item1")]],
+      staticItems: [makeItem("item1")],
+      searchedItems: [[makeItem("item1")]],
       geotiffHref: "https://example.com/test.tiff",
       stacGeoparquetTable: {} as never,
       stacGeoparquetItemId: "item1",
@@ -111,8 +112,8 @@ describe("href.ts - setHref", () => {
     expect(state.hoveredCollection).toBeNull();
     expect(state.hoveredItem).toBeNull();
     expect(state.pickedItem).toBeNull();
-    expect(state.unpagedItems).toBeNull();
-    expect(state.pagedItems).toBeNull();
+    expect(state.staticItems).toBeNull();
+    expect(state.searchedItems).toBeNull();
     expect(state.geotiffHref).toBeNull();
     expect(state.stacGeoparquetTable).toBeNull();
     expect(state.stacGeoparquetItemId).toBeNull();
@@ -282,32 +283,32 @@ describe("catalogs.ts - addCatalog", () => {
 
 describe("items.ts - addItem", () => {
   test("adds to empty items", () => {
-    useStore.setState({ unpagedItems: [] });
+    useStore.setState({ staticItems: [] });
 
     const item = makeItem("test");
     useStore.getState().addItem(item);
 
-    expect(useStore.getState().unpagedItems).toHaveLength(1);
-    expect(useStore.getState().unpagedItems?.[0]).toBe(item);
+    expect(useStore.getState().staticItems).toHaveLength(1);
+    expect(useStore.getState().staticItems?.[0]).toBe(item);
   });
 
   test("adds to null items", () => {
     const item = makeItem("test");
     useStore.getState().addItem(item);
 
-    expect(useStore.getState().unpagedItems).toHaveLength(1);
-    expect(useStore.getState().unpagedItems?.[0]).toBe(item);
+    expect(useStore.getState().staticItems).toHaveLength(1);
+    expect(useStore.getState().staticItems?.[0]).toBe(item);
   });
 
   test("does not add duplicate", () => {
     const item1 = makeItem("test");
     const item2 = makeItem("test");
-    useStore.setState({ unpagedItems: [item1] });
+    useStore.setState({ staticItems: [item1] });
 
     useStore.getState().addItem(item2);
 
-    expect(useStore.getState().unpagedItems).toHaveLength(1);
-    expect(useStore.getState().unpagedItems?.[0]).toBe(item1);
+    expect(useStore.getState().staticItems).toHaveLength(1);
+    expect(useStore.getState().staticItems?.[0]).toBe(item1);
   });
 });
 

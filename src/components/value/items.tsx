@@ -1,4 +1,5 @@
 import { useStore } from "@/store";
+import type { ItemSource } from "@/store/items";
 import { fitBounds } from "@/utils/map";
 import {
   Button,
@@ -6,6 +7,7 @@ import {
   Center,
   DownloadTrigger,
   List,
+  SegmentGroup,
   Stack,
 } from "@chakra-ui/react";
 import {
@@ -25,6 +27,15 @@ import { Section } from "../section";
 export default function Items({ items }: { items: StacItem[] }) {
   const visualizeItems = useStore((store) => store.visualizeItems);
   const setVisualizeItems = useStore((store) => store.setVisualizeItems);
+  const staticItems = useStore((store) => store.staticItems);
+  const searchedItems = useStore((store) => store.searchedItems);
+  const itemSource = useStore((store) => store.itemSource);
+  const setItemSource = useStore((store) => store.setItemSource);
+
+  const hasStatic = staticItems && staticItems.length > 0;
+  const hasSearched = searchedItems && searchedItems.length > 0;
+  const hasBoth = hasStatic && hasSearched;
+
   const title = `Items (${items.length})`;
   const { map } = useMap();
 
@@ -33,6 +44,25 @@ export default function Items({ items }: { items: StacItem[] }) {
       {(listOrCard) => {
         return (
           <Stack>
+            {hasBoth && (
+              <Center>
+                <SegmentGroup.Root
+                  size="xs"
+                  value={itemSource}
+                  onValueChange={(e) => setItemSource(e.value as ItemSource)}
+                >
+                  <SegmentGroup.Indicator />
+                  <SegmentGroup.Item value="static">
+                    <SegmentGroup.ItemText>Static</SegmentGroup.ItemText>
+                    <SegmentGroup.ItemHiddenInput />
+                  </SegmentGroup.Item>
+                  <SegmentGroup.Item value="searched">
+                    <SegmentGroup.ItemText>Searched</SegmentGroup.ItemText>
+                    <SegmentGroup.ItemHiddenInput />
+                  </SegmentGroup.Item>
+                </SegmentGroup.Root>
+              </Center>
+            )}
             <Center>
               <ButtonGroup size="2xs" variant={"subtle"} attached>
                 <Button onClick={() => setVisualizeItems(!visualizeItems)}>

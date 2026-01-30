@@ -46,7 +46,7 @@ interface SetSearchParams {
 export default function Search({ href, collection }: Props) {
   const search = useStore((store) => store.search);
   const setSearch = useStore((store) => store.setSearch);
-  const setPagedItems = useStore((store) => store.setPagedItems);
+  const setSearchedItems = useStore((store) => store.setSearchedItems);
   const result = useStacSearch({ href, search });
   const setDatetimeBounds = useStore((store) => store.setDatetimeBounds);
 
@@ -61,8 +61,8 @@ export default function Search({ href, collection }: Props) {
 
   useEffect(() => {
     if (result.data)
-      setPagedItems(result.data.pages.map((page) => page?.features || []));
-  }, [result.data, setPagedItems]);
+      setSearchedItems(result.data.pages.map((page) => page?.features || []));
+  }, [result.data, setSearchedItems]);
 
   useEffect(() => {
     setDatetimeBounds(getCollectionDatetimes(collection));

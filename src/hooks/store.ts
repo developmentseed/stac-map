@@ -2,9 +2,14 @@ import { useStore } from "@/store";
 import { collectionToFeature } from "@/utils/stac";
 
 export function useItems() {
-  const unpagedItems = useStore((store) => store.unpagedItems);
-  const pagedItems = useStore((store) => store.pagedItems);
-  return unpagedItems || pagedItems?.flatMap((items) => items) || null;
+  const staticItems = useStore((store) => store.staticItems);
+  const searchedItems = useStore((store) => store.searchedItems);
+  const itemSource = useStore((store) => store.itemSource);
+
+  if (itemSource === "static" && staticItems) return staticItems;
+  if (itemSource === "searched" && searchedItems)
+    return searchedItems.flatMap((items) => items);
+  return staticItems || searchedItems?.flatMap((items) => items) || null;
 }
 
 export function useCollectionBounds() {

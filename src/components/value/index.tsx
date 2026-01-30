@@ -36,10 +36,10 @@ export default function Value({ value }: { value: StacValue }) {
   const connection = useStore((store) => store.connection);
   const collections = useStore((store) => store.collections);
   const catalogs = useStore((store) => store.catalogs);
-  const setUnpagedItems = useStore((store) => store.setUnpagedItems);
+  const setStaticItems = useStore((store) => store.setStaticItems);
   const asset = useStore((store) => store.asset);
-  const unpagedItems = useStore((store) => store.unpagedItems);
-  const pagedItems = useStore((store) => store.pagedItems);
+  const staticItems = useStore((store) => store.staticItems);
+  const searchedItems = useStore((store) => store.searchedItems);
   const version = value.stac_version as string | undefined;
   const description = value.description as string | undefined;
   const rootHref = getLinkHref(value, "root");
@@ -60,8 +60,8 @@ export default function Value({ value }: { value: StacValue }) {
   }, [value]);
 
   useEffect(() => {
-    if (value.type === "FeatureCollection") setUnpagedItems(value.features);
-  }, [value, setUnpagedItems]);
+    if (value.type === "FeatureCollection") setStaticItems(value.features);
+  }, [value, setStaticItems]);
 
   return (
     <Stack gap={8}>
@@ -110,8 +110,8 @@ export default function Value({ value }: { value: StacValue }) {
           <Properties properties={value.properties} />
         )}
         {asset && <CogHref asset={asset} />}
-        {unpagedItems && <CogSources items={unpagedItems} />}
-        {pagedItems && <PagedCogSources pages={pagedItems} />}
+        {staticItems && <CogSources items={staticItems} />}
+        {searchedItems && <PagedCogSources pages={searchedItems} />}
       </Stack>
     </Stack>
   );

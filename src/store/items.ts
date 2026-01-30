@@ -3,14 +3,18 @@ import type { StateCreator } from "zustand";
 import type { State } from ".";
 import type { StacSearch } from "../types/stac";
 
+export type ItemSource = "static" | "searched";
+
 export interface ItemsState {
   search: StacSearch;
   setSearch: (search: StacSearch) => void;
-  unpagedItems: StacItem[] | null;
-  setUnpagedItems: (items: StacItem[] | null) => void;
+  staticItems: StacItem[] | null;
+  setStaticItems: (items: StacItem[] | null) => void;
   addItem: (item: StacItem) => void;
-  pagedItems: StacItem[][] | null;
-  setPagedItems: (items: StacItem[][] | null) => void;
+  searchedItems: StacItem[][] | null;
+  setSearchedItems: (items: StacItem[][] | null) => void;
+  itemSource: ItemSource;
+  setItemSource: (source: ItemSource) => void;
   hoveredItem: StacItem | null;
   setHoveredItem: (item: StacItem | null) => void;
   pickedItem: StacItem | null;
@@ -30,18 +34,22 @@ export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
   setSearch: (search) => {
     set({ search });
   },
-  unpagedItems: null,
-  setUnpagedItems: (items) => {
-    set({ unpagedItems: items });
+  staticItems: null,
+  setStaticItems: (items) => {
+    set({ staticItems: items });
   },
   addItem: (item) => {
-    const items = get().unpagedItems;
+    const items = get().staticItems;
     if (!items?.find((i) => i.id === item.id))
-      set({ unpagedItems: [...(items || []), item] });
+      set({ staticItems: [...(items || []), item] });
   },
-  pagedItems: null,
-  setPagedItems: (items) => {
-    set({ pagedItems: items });
+  searchedItems: null,
+  setSearchedItems: (items) => {
+    set({ searchedItems: items });
+  },
+  itemSource: "static",
+  setItemSource: (itemSource) => {
+    set({ itemSource });
   },
   hoveredItem: null,
   setHoveredItem: (item) => set({ hoveredItem: item }),
