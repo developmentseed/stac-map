@@ -104,7 +104,7 @@ export default function Search({ href, collection }: Props) {
           setSearch({ collections: [collection.id] });
           setFetchAll(false);
         }}
-        disabled={!search.bbox && !search.datetime}
+        disabled={!search.bbox && !search.datetime && !search.limit}
       >
         <LuX />
       </IconButton>
