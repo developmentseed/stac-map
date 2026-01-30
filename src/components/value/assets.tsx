@@ -19,6 +19,7 @@ import {
   Portal,
   Span,
   Stack,
+  Text,
 } from "@chakra-ui/react";
 import { useEffect, useMemo } from "react";
 import {
@@ -85,7 +86,7 @@ function AssetListItem({
   return (
     <List.Item display={"block"}>
       <HStack>
-        {asset.title || assetKey}
+        <Text truncate>{asset.title || assetKey}</Text>
         <Span flex={1} />
         <AssetActions asset={asset} scheme={scheme} />
         <AssetVisibility asset={asset} assetKey={assetKey} />
