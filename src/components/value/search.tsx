@@ -120,9 +120,17 @@ export default function Search({ href, collection }: Props) {
       <Stack gap={4}>
         <SearchControls
           collection={collection}
-          setSearch={(params: SetSearchParams) =>
-            setSearch({ ...search, collections: [collection.id], ...params })
-          }
+          setSearch={(params: SetSearchParams) => {
+            const merged = {
+              ...search,
+              collections: [collection.id],
+              ...params,
+            };
+            const filtered = Object.fromEntries(
+              Object.entries(merged).filter(([, v]) => v !== undefined)
+            ) as StacSearch;
+            setSearch(filtered);
+          }}
           {...result}
         />
         {numberMatched && (
