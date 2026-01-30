@@ -9,6 +9,7 @@ interface SectionProps {
   title: ReactNode;
   defaultListOrCard?: ListOrCard;
   open?: boolean;
+  headerAction?: ReactNode;
   children: ReactNode | ((listOrCard: ListOrCard) => ReactNode);
 }
 
@@ -18,6 +19,7 @@ export function Section({
   children,
   defaultListOrCard = "card",
   open = true,
+  headerAction,
 }: SectionProps) {
   const [listOrCard, setListOrCard] = useState<ListOrCard>(defaultListOrCard);
   const [isOpen, setIsOpen] = useState(open);
@@ -35,6 +37,7 @@ export function Section({
             {icon}
             {title}
             <Span flex={1} />
+            {headerAction}
             {showListOrCard && (
               <ListOrCardToggle
                 listOrCard={listOrCard}

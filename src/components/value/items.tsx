@@ -6,6 +6,7 @@ import {
   ButtonGroup,
   Center,
   DownloadTrigger,
+  IconButton,
   List,
   SegmentGroup,
   Stack,
@@ -27,6 +28,11 @@ import { Section } from "../section";
 export default function Items({ items }: { items: StacItem[] }) {
   const visualizeItems = useStore((store) => store.visualizeItems);
   const setVisualizeItems = useStore((store) => store.setVisualizeItems);
+  const visualizeItemBounds = useStore((store) => store.visualizeItemBounds);
+  const setVisualizeItemBounds = useStore(
+    (store) => store.setVisualizeItemBounds
+  );
+  const collections = useStore((store) => store.collections);
   const staticItems = useStore((store) => store.staticItems);
   const searchedItems = useStore((store) => store.searchedItems);
   const itemSource = useStore((store) => store.itemSource);
@@ -35,12 +41,34 @@ export default function Items({ items }: { items: StacItem[] }) {
   const hasStatic = staticItems && staticItems.length > 0;
   const hasSearched = searchedItems && searchedItems.length > 0;
   const hasBoth = hasStatic && hasSearched;
+  const hasCollections = collections && collections.length > 0;
 
   const title = `Items (${items.length})`;
   const { map } = useMap();
 
+  const headerAction = hasCollections ? (
+    <IconButton
+      size="2xs"
+      variant="ghost"
+      aria-label={
+        visualizeItemBounds ? "Hide item bounds on map" : "Show item bounds on map"
+      }
+      onClick={(e) => {
+        e.stopPropagation();
+        setVisualizeItemBounds(!visualizeItemBounds);
+      }}
+    >
+      {visualizeItemBounds ? <LuEye /> : <LuEyeClosed />}
+    </IconButton>
+  ) : undefined;
+
   return (
-    <Section defaultListOrCard="list" title={title} icon={<LuFiles />}>
+    <Section
+      defaultListOrCard="list"
+      title={title}
+      icon={<LuFiles />}
+      headerAction={headerAction}
+    >
       {(listOrCard) => {
         return (
           <Stack>

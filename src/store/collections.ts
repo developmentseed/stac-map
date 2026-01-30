@@ -15,6 +15,8 @@ export interface CollectionsState {
   setCollectionFreeTextSearch: (q: string | null) => void;
   setHrefFromCollectionId: (id: string) => void;
   setHoveredCollectionFromId: (id: string) => void;
+  visualizeCollections: boolean;
+  setVisualizeCollections: (visualize: boolean) => void;
 }
 
 export const createCollectionsSlice: StateCreator<
@@ -58,5 +60,9 @@ export const createCollectionsSlice: StateCreator<
       const href = getSelfHref(collection);
       if (href) get().setHoveredCollection(collection);
     }
+  },
+  visualizeCollections: true,
+  setVisualizeCollections: (visualizeCollections) => {
+    set({ visualizeCollections });
   },
 });

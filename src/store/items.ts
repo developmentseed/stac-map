@@ -22,6 +22,8 @@ export interface ItemsState {
   clearPickedItem: () => void;
   visualizeItems: boolean;
   setVisualizeItems: (visualizeItems: boolean) => void;
+  visualizeItemBounds: boolean;
+  setVisualizeItemBounds: (visualize: boolean) => void;
 }
 
 export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
@@ -70,5 +72,9 @@ export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
   visualizeItems: false,
   setVisualizeItems: (visualizeItems) => {
     set({ visualizeItems });
+  },
+  visualizeItemBounds: true,
+  setVisualizeItemBounds: (visualizeItemBounds) => {
+    set({ visualizeItemBounds });
   },
 });

@@ -43,6 +43,8 @@ export default function Map() {
   const hoveredCollection = useStore((store) => store.hoveredCollection);
   const stacGeoparquetTable = useStore((store) => store.stacGeoparquetTable);
   const visualizeItems = useStore((store) => store.visualizeItems);
+  const visualizeItemBounds = useStore((store) => store.visualizeItemBounds);
+  const visualizeCollections = useStore((store) => store.visualizeCollections);
   const setStacGeoparquetItemId = useStore(
     (store) => store.setStacGeoparquetItemId
   );
@@ -90,18 +92,6 @@ export default function Map() {
       lineWidthUnits: "pixels",
     }),
     new GeoJsonLayer({
-      id: "items",
-      data: (items as Feature[]) || undefined,
-      filled: true,
-      getFillColor: (e) => (e.id === hoveredItem?.id ? fillColor : transparent),
-      getLineColor: lineColor,
-      getLineWidth: lineWidth,
-      lineWidthUnits: "pixels",
-      pickable: true,
-      onClick: (e) => setPickedItem(e.object),
-      onHover: (e) => setHoveredItem(e.object),
-    }),
-    new GeoJsonLayer({
       id: "value",
       data: (value && toGeoJson(value)) || undefined,
       filled: !(items || cogHref),
@@ -110,24 +100,47 @@ export default function Map() {
       getLineWidth: lineWidth,
       lineWidthUnits: "pixels",
     }),
-    new GeoJsonLayer({
-      id: "collections",
-      data: collectionBounds,
-      filled: true,
-      getFillColor: (e) =>
-        e.id === hoveredCollection?.id ? fillColor : transparent,
-      getLineColor: lineColor,
-      getLineWidth: lineWidth,
-      lineWidthUnits: "pixels",
-      pickable: true,
-      onClick: (e) => setHrefFromCollectionId(e.object?.id),
-      onHover: (e) => {
-        if (e.object && !isGlobalBbox(e.object.bbox))
-          setHoveredCollectionFromId(e.object.id);
-        else setHoveredCollection(null);
-      },
-    }),
   ];
+
+  if (visualizeItemBounds) {
+    layers.push(
+      new GeoJsonLayer({
+        id: "items",
+        data: (items as Feature[]) || undefined,
+        filled: true,
+        getFillColor: (e) =>
+          e.id === hoveredItem?.id ? fillColor : transparent,
+        getLineColor: lineColor,
+        getLineWidth: lineWidth,
+        lineWidthUnits: "pixels",
+        pickable: true,
+        onClick: (e) => setPickedItem(e.object),
+        onHover: (e) => setHoveredItem(e.object),
+      })
+    );
+  }
+
+  if (visualizeCollections) {
+    layers.push(
+      new GeoJsonLayer({
+        id: "collections",
+        data: collectionBounds,
+        filled: true,
+        getFillColor: (e) =>
+          e.id === hoveredCollection?.id ? fillColor : transparent,
+        getLineColor: lineColor,
+        getLineWidth: lineWidth,
+        lineWidthUnits: "pixels",
+        pickable: true,
+        onClick: (e) => setHrefFromCollectionId(e.object?.id),
+        onHover: (e) => {
+          if (e.object && !isGlobalBbox(e.object.bbox))
+            setHoveredCollectionFromId(e.object.id);
+          else setHoveredCollection(null);
+        },
+      })
+    );
+  }
 
   if (stacGeoparquetTable)
     layers.push(

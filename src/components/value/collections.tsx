@@ -2,6 +2,7 @@ import CollectionCard from "@/components/cards/collection";
 import CollectionListItem from "@/components/list-items/collection";
 import { Section } from "@/components/section";
 import DatetimeSlider from "@/components/ui/datetime-slider";
+import { useItems } from "@/hooks/store";
 import { useStore } from "@/store";
 import {
   getCollectionDatetimes,
@@ -12,6 +13,7 @@ import {
   Button,
   Checkbox,
   CloseButton,
+  IconButton,
   Input,
   InputGroup,
   List,
@@ -20,7 +22,7 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { LuFilter, LuFolderPlus } from "react-icons/lu";
+import { LuEye, LuEyeClosed, LuFilter, LuFolderPlus } from "react-icons/lu";
 import type { StacCollection } from "stac-ts";
 
 export default function Collections({
@@ -30,6 +32,12 @@ export default function Collections({
 }) {
   const filteredCollections = useStore((store) => store.filteredCollections);
   const setDatetimeBounds = useStore((store) => store.setDatetimeBounds);
+  const visualizeCollections = useStore((store) => store.visualizeCollections);
+  const setVisualizeCollections = useStore(
+    (store) => store.setVisualizeCollections
+  );
+  const items = useItems();
+  const hasItems = items && items.length > 0;
 
   const { collectionsToShow, title } = useMemo(() => {
     return {
@@ -65,15 +73,33 @@ export default function Collections({
     });
   }, [collections, setDatetimeBounds]);
 
+  const headerAction = hasItems ? (
+    <IconButton
+      size="2xs"
+      variant="ghost"
+      aria-label={
+        visualizeCollections
+          ? "Hide collections on map"
+          : "Show collections on map"
+      }
+      onClick={(e) => {
+        e.stopPropagation();
+        setVisualizeCollections(!visualizeCollections);
+      }}
+    >
+      {visualizeCollections ? <LuEye /> : <LuEyeClosed />}
+    </IconButton>
+  ) : undefined;
+
   return (
-    <Section icon={<LuFolderPlus />} title={title}>
+    <Section icon={<LuFolderPlus />} title={title} headerAction={headerAction}>
       {(listOrCard) => {
         return (
           <Stack gap={4}>
             {collections.length > 1 && (
               <Popover.Root>
                 <Popover.Trigger asChild>
-                  <Button variant={"outline"} size={"sm"}>
+                  <Button variant="outline" size="sm">
                     <LuFilter /> Filter
                   </Button>
                 </Popover.Trigger>
