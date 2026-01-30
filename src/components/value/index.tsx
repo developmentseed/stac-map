@@ -85,7 +85,6 @@ export default function Value({ value }: { value: StacValue }) {
         {value.type === "Feature" && (
           <Properties properties={value.properties} />
         )}
-        {value.links && <Links links={value.links} />}
         {hrefIsParquet &&
           href &&
           connection &&
@@ -106,6 +105,7 @@ export default function Value({ value }: { value: StacValue }) {
         {(value.type === "Collection" || value.type === "FeatureCollection") &&
           items &&
           items?.length > 0 && <Items items={items} />}
+        {value.links && <Links links={value.links} />}
         {(value.assets as { [k: string]: StacAsset }) && (
           <Assets assets={value.assets as { [k: string]: StacAsset }} />
         )}
