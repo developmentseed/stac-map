@@ -95,10 +95,6 @@ export default function Items({ items }: { items: StacItem[] }) {
             )}
             <Center>
               <ButtonGroup size="2xs" variant={"subtle"} attached>
-                <Button onClick={() => setVisualizeItems(!visualizeItems)}>
-                  {visualizeItems ? <LuEye /> : <LuEyeClosed />}
-                  {visualizeItems ? "Hide" : "Show"}
-                </Button>
                 <Button
                   onClick={() =>
                     map &&
@@ -141,6 +137,16 @@ export default function Items({ items }: { items: StacItem[] }) {
                 </DownloadTrigger>
               </ButtonGroup>
             </Center>
+            <Button
+              onClick={() => setVisualizeItems(!visualizeItems)}
+              size={"xs"}
+              variant={"ghost"}
+            >
+              {visualizeItems ? <LuEye /> : <LuEyeClosed />}
+              {visualizeItems
+                ? "Hide assets"
+                : "Visualize assets (experimental)"}
+            </Button>
             {listOrCard === "list" ? (
               <List.Root variant={"plain"}>
                 {items.map((item) => (
