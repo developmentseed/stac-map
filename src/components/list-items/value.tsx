@@ -21,6 +21,7 @@ export default function ValueListItem({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       fontWeight={isHovered ? "bolder" : "normal"}
+      truncate
     >
       <Link
         href="#"
