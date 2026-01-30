@@ -11,6 +11,7 @@ import {
   ButtonGroup,
   Checkbox,
   HStack,
+  IconButton,
   Input,
   Popover,
   Portal,
@@ -50,6 +51,8 @@ export default function Search({ href, collection }: Props) {
   const result = useStacSearch({ href, search });
   const setDatetimeBounds = useStore((store) => store.setDatetimeBounds);
 
+  const [fetchAll, setFetchAll] = useState(false);
+
   const numberMatched = useMemo(() => {
     if (result.data) return result.data.pages.at(0)?.numberMatched;
   }, [result.data]);
@@ -68,15 +71,56 @@ export default function Search({ href, collection }: Props) {
     setDatetimeBounds(getCollectionDatetimes(collection));
   }, [collection, setDatetimeBounds]);
 
+  useEffect(() => {
+    if (fetchAll && !result.isFetching && result.hasNextPage)
+      result.fetchNextPage();
+  }, [fetchAll, result]);
+
+  const headerAction = (
+    <ButtonGroup size={"2xs"} variant={"ghost"}>
+      <IconButton
+        disabled={result.isFetching || fetchAll || !result.hasNextPage}
+        onClick={(e) => {
+          e.stopPropagation();
+          result.fetchNextPage();
+        }}
+      >
+        {result.isFetching ? <LuLoader /> : <LuForward />}
+      </IconButton>
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          setFetchAll((previous) => !previous);
+        }}
+        disabled={!result.hasNextPage}
+      >
+        {fetchAll && result.hasNextPage ? <LuPause /> : <LuPlay />}
+      </IconButton>
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          setSearch({ collections: [collection.id] });
+          setFetchAll(false);
+        }}
+        disabled={!search.bbox && !search.datetime}
+      >
+        <LuX />
+      </IconButton>
+    </ButtonGroup>
+  );
+
   return (
-    <Section icon={<LuSearch />} title="Item search">
+    <Section
+      icon={<LuSearch />}
+      title="Item search"
+      headerAction={headerAction}
+    >
       <Stack gap={4}>
         <SearchControls
           collection={collection}
           setSearch={(params: SetSearchParams) =>
             setSearch({ ...search, collections: [collection.id], ...params })
           }
-          resetSearch={() => setSearch({ collections: [collection.id] })}
           {...result}
         />
         {numberMatched && (
@@ -91,42 +135,15 @@ export default function Search({ href, collection }: Props) {
 function SearchControls({
   collection,
   setSearch,
-  resetSearch,
-  isFetching,
-  fetchNextPage,
-  hasNextPage,
 }: {
   collection: StacCollection;
   setSearch: (params: SetSearchParams) => void;
-  resetSearch: () => void;
-} & UseInfiniteQueryResult) {
-  const [fetchAll, setFetchAll] = useState(false);
+}) {
   const bbox = useStore((store) => store.bbox);
   const { start, end } = getCollectionDatetimes(collection);
 
-  useEffect(() => {
-    if (fetchAll && !isFetching && hasNextPage) fetchNextPage();
-  }, [fetchAll, isFetching, hasNextPage, fetchNextPage]);
-
   return (
     <Stack>
-      <ButtonGroup size={"xs"} variant={"surface"} attached>
-        <Button
-          disabled={isFetching || fetchAll || !hasNextPage}
-          onClick={() => fetchNextPage()}
-        >
-          {isFetching ? <LuLoader /> : <LuForward />}
-          Next page
-        </Button>
-        <Button
-          onClick={() => setFetchAll((previous) => !previous)}
-          disabled={!hasNextPage}
-        >
-          {fetchAll && hasNextPage ? <LuPause /> : <LuPlay />}
-          {fetchAll ? "Pause" : "Fetch all"}
-        </Button>
-      </ButtonGroup>
-
       <ButtonGroup size={"xs"} variant={"outline"} attached>
         <Button
           onClick={() => {
@@ -135,17 +152,13 @@ function SearchControls({
           }}
         >
           <LuFrame />
-          Set bbox to viewport
+          Bounding box to viewport
         </Button>
         <DatetimePopover
           start={start}
           end={end}
           setDatetime={(datetime) => setSearch({ datetime })}
         />
-        <Button onClick={() => resetSearch()}>
-          <LuX />
-          Reset
-        </Button>
       </ButtonGroup>
     </Stack>
   );
@@ -182,7 +195,7 @@ function DatetimePopover({
       <Popover.Trigger asChild>
         <Button>
           <LuCalendar />
-          Set datetime
+          Datetime
         </Button>
       </Popover.Trigger>
       <Portal>

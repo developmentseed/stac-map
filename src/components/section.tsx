@@ -49,11 +49,7 @@ export function Section({
             </IconButton>
           </HStack>
         </Card.Title>
-        <Card.Description
-          as={"div"}
-          display={isOpen ? "block" : "none"}
-          truncate
-        >
+        <Card.Description as={"div"} display={isOpen ? "block" : "none"}>
           {description}
         </Card.Description>
       </Card.Body>

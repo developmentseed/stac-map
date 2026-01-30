@@ -147,7 +147,6 @@ export async function fetchStacGeoparquetItem({
   const item = stacWasm.arrowToStacJson(result)[0];
   item.geometry = JSON.parse(item.geometry);
   return item;
-  return null;
 }
 
 async function fetchStacGeoparquetDatetimeColumns(
