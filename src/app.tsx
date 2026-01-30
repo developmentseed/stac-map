@@ -1,67 +1,29 @@
-import {
-  AbsoluteCenter,
-  Alert,
-  Box,
-  Center,
-  FileUpload,
-  HStack,
-  Link,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { AbsoluteCenter, Box, Center, FileUpload } from "@chakra-ui/react";
 import { useDuckDb } from "duckdb-wasm-kit";
 import { useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { LuGithub } from "react-icons/lu";
 import Footer from "./components/footer";
 import Map from "./components/map";
 import Overlay from "./components/overlay";
+import { ErrorBoundaryAlert } from "./components/ui/error-alert";
 import { useStore } from "./store";
 import { getCurrentHref } from "./utils/href";
 import { uploadFile } from "./utils/upload";
 
 function MapFallback({ error }: { error: unknown }) {
-  const message = error instanceof Error ? error.message : String(error);
   return (
     <AbsoluteCenter h="100dvh%" w="100dvw">
       <Center maxW={"40%"}>
-        <Alert.Root status="error">
-          <Alert.Indicator />
-          <Alert.Content gap={4}>
-            <Alert.Title>
-              <HStack>We're really sorry!</HStack>
-            </Alert.Title>
-            <Alert.Description>
-              <Stack>
-                <HStack>Something went wrong in the map component</HStack>
-                <Text>The error message is "{message}"</Text>
-                <Text>
-                  Please{" "}
-                  <Link href="https://github.com/developmentseed/stac-map/issues/new?template=bug_report.md">
-                    open an issue <LuGithub />
-                  </Link>{" "}
-                  so we can fix it!
-                </Text>
-              </Stack>
-            </Alert.Description>
-          </Alert.Content>
-        </Alert.Root>
+        <ErrorBoundaryAlert context="map component" error={error} />
       </Center>
     </AbsoluteCenter>
   );
 }
 
 function OverlayFallback({ error }: { error: unknown }) {
-  const message = error instanceof Error ? error.message : String(error);
   return (
-    <Box position="absolute" top={4} left={4}>
-      <Alert.Root status="error">
-        <Alert.Indicator />
-        <Alert.Content>
-          <Alert.Title>Overlay failed to load</Alert.Title>
-          <Alert.Description>{message}</Alert.Description>
-        </Alert.Content>
-      </Alert.Root>
+    <Box position="absolute" top={4} left={4} maxW={"30%"}>
+      <ErrorBoundaryAlert context="overlay" error={error} />
     </Box>
   );
 }
