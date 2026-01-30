@@ -128,7 +128,7 @@ export default function Search({ href, collection }: Props) {
             };
             const filtered = Object.fromEntries(
               Object.entries(merged).filter(([, v]) => v !== undefined)
-            ) as StacSearch;
+            ) as unknown as StacSearch;
             setSearch(filtered);
           }}
           {...result}
