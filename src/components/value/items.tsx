@@ -51,7 +51,9 @@ export default function Items({ items }: { items: StacItem[] }) {
       size="2xs"
       variant="ghost"
       aria-label={
-        visualizeItemBounds ? "Hide item bounds on map" : "Show item bounds on map"
+        visualizeItemBounds
+          ? "Hide item bounds on map"
+          : "Show item bounds on map"
       }
       onClick={(e) => {
         e.stopPropagation();
