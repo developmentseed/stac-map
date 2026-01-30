@@ -3,7 +3,6 @@ import Header from "./header";
 import Panel from "./panel";
 
 export default function Overlay() {
-  df;
   return (
     <Container
       zIndex={1}
