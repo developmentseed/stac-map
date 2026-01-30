@@ -3,10 +3,9 @@ import {
   useStacGeoparquetTable,
 } from "@/hooks/stac";
 import { useStore } from "@/store";
+import { Box, Center } from "@chakra-ui/react";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { useEffect } from "react";
-import { LuFilter } from "react-icons/lu";
-import { Section } from "../section";
 import DatetimeSlider from "../ui/datetime-slider";
 import { ErrorAlert } from "../ui/error-alert";
 
@@ -52,8 +51,10 @@ function StacGeoparquetFilter({ href, connection }: Props) {
     );
   else if (result.data?.start && result.data?.end)
     return (
-      <Section title="Filter" icon={<LuFilter />}>
-        <DatetimeSlider start={result.data.start} end={result.data.end} />
-      </Section>
+      <Center mb={4}>
+        <Box mx={8} w="full">
+          <DatetimeSlider start={result.data.start} end={result.data.end} />
+        </Box>
+      </Center>
     );
 }

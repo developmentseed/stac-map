@@ -129,9 +129,10 @@ function SearchControls({
 
       <ButtonGroup size={"xs"} variant={"outline"} attached>
         <Button
-          onClick={() =>
-            setSearch({ bbox: bbox ? paddedBbox(bbox) : undefined })
-          }
+          onClick={() => {
+            const b = bbox ? paddedBbox(bbox) : undefined;
+            setSearch({ bbox: b || undefined });
+          }}
         >
           <LuFrame />
           Set bbox to viewport

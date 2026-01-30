@@ -79,6 +79,13 @@ export default function Value({ value }: { value: StacValue }) {
       </Stack>
 
       <Stack>
+        {conformsToFreeTextCollectionSearch(value) && <CollectionSearch />}
+        {collections && <Collections collections={collections} />}
+        {catalogs && <Catalogs catalogs={catalogs} />}
+        {value.type === "Feature" && (
+          <Properties properties={value.properties} />
+        )}
+        {value.links && <Links links={value.links} />}
         {hrefIsParquet &&
           href &&
           connection &&
@@ -92,22 +99,15 @@ export default function Value({ value }: { value: StacValue }) {
             connection={connection}
           />
         )}
-        {conformsToFreeTextCollectionSearch(value) && <CollectionSearch />}
-        {rootHref && <RootHref value={value} href={rootHref} />}
         {collectionsHref && <CollectionsHref href={collectionsHref} />}
         {!collectionsHref && childLinks && <ChildLinks links={childLinks} />}
         {itemLinks && <ItemLinks links={itemLinks} />}
-        {collections && <Collections collections={collections} />}
-        {catalogs && <Catalogs catalogs={catalogs} />}
+        {rootHref && <RootHref value={value} href={rootHref} />}
         {(value.type === "Collection" || value.type === "FeatureCollection") &&
           items &&
           items?.length > 0 && <Items items={items} />}
         {(value.assets as { [k: string]: StacAsset }) && (
           <Assets assets={value.assets as { [k: string]: StacAsset }} />
-        )}
-        {value.links && <Links links={value.links} />}
-        {value.type === "Feature" && (
-          <Properties properties={value.properties} />
         )}
         {asset && <CogHref asset={asset} />}
         {staticItems && <CogSources items={staticItems} />}

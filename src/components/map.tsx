@@ -27,6 +27,7 @@ type Color = [number, number, number, number];
 
 export default function Map() {
   const mapRef = useRef<MapRef>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
   const mapStyle = useColorModeValue(
     "positron-gl-style",
     "dark-matter-gl-style"
@@ -78,8 +79,9 @@ export default function Map() {
   const transparent = [0, 0, 0, 0] as Color;
 
   useEffect(() => {
-    if (mapRef?.current && value) fitBounds(mapRef.current, value, collections);
-  }, [value, collections]);
+    if (mapRef?.current && value && isLoaded)
+      fitBounds(mapRef.current, value, collections);
+  }, [value, collections, isLoaded]);
 
   const layers: Layer[] = [
     new GeoJsonLayer({
@@ -224,12 +226,14 @@ export default function Map() {
       }}
       mapStyle={`https://basemaps.cartocdn.com/gl/${mapStyle}/style.json`}
       style={{ zIndex: 0 }}
+      onLoad={() => setIsLoaded(true)}
       onMoveEnd={() => {
         const bbox = mapRef?.current
           ?.getBounds()
           .toArray()
           .flatMap((a) => a);
-        if (bbox) setBbox(sanitizeBbox(bbox));
+        const sanitizedBbox = bbox && sanitizeBbox(bbox);
+        if (sanitizedBbox) setBbox(sanitizedBbox);
       }}
     >
       <DeckGLOverlay

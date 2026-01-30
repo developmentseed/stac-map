@@ -10,7 +10,7 @@ import type {
 } from "stac-ts";
 import type { BBox2D } from "../types/map";
 import type { AssetWithAlternates, StacAssets, StacValue } from "../types/stac";
-import { sanitizeBbox } from "./bbox";
+import { GLOBAL_BBOX, sanitizeBbox } from "./bbox";
 import { toAbsoluteUrl } from "./href";
 
 export function getStacValueTitle(value: StacValue) {
@@ -165,6 +165,7 @@ export function isGlobalCollection(collection: StacCollection) {
 export function isGlobalBbox(bbox: BBox2D | SpatialExtent) {
   const sanitizedBbox = sanitizeBbox(bbox);
   return (
+    sanitizedBbox &&
     sanitizedBbox[0] == -180 &&
     sanitizedBbox[1] == -90 &&
     sanitizedBbox[2] == 180 &&
@@ -309,7 +310,7 @@ export function getAssetScore(asset: AssetWithAlternates): number {
 }
 
 export function collectionToFeature(collection: StacCollection) {
-  const bbox = sanitizeBbox(getCollectionExtents(collection));
+  const bbox = sanitizeBbox(getCollectionExtents(collection)) || GLOBAL_BBOX;
   return bboxPolygon(bbox, {
     id: collection.id,
   });
@@ -318,14 +319,14 @@ export function collectionToFeature(collection: StacCollection) {
 export function getBbox(
   value: StacValue,
   collections: StacCollection[] | null
-): BBox2D | undefined {
+): BBox2D | null {
   switch (value.type) {
     case "Catalog":
-      return (collections && getCollectionsBbox(collections)) || undefined;
+      return (collections && getCollectionsBbox(collections)) || null;
     case "Collection":
       return sanitizeBbox(getCollectionExtents(value));
     case "Feature":
-      return value.bbox && sanitizeBbox(value.bbox);
+      return (value.bbox && sanitizeBbox(value.bbox)) || null;
     case "FeatureCollection":
       return bbox(value as FeatureCollection) as BBox2D;
   }

@@ -2,7 +2,10 @@ import type { BBox } from "geojson";
 import type { SpatialExtent } from "stac-ts";
 import type { BBox2D } from "../types/map";
 
-export function sanitizeBbox(bbox: BBox | SpatialExtent): BBox2D {
+export const GLOBAL_BBOX: BBox2D = [-180, -90, 180, 90];
+
+export function sanitizeBbox(bbox: BBox | SpatialExtent): BBox2D | null {
+  if (!bbox) return null;
   if (bbox.length === 6) {
     return [
       Math.max(bbox[0], -180),
@@ -24,7 +27,7 @@ export function formatBbox(bbox: BBox2D): string {
   return `${bbox[0].toFixed(2)}, ${bbox[1].toFixed(2)}, ${bbox[2].toFixed(2)}, ${bbox[3].toFixed(2)}`;
 }
 
-export function paddedBbox(bbox: BBox2D): BBox2D {
+export function paddedBbox(bbox: BBox2D): BBox2D | null {
   const width = bbox[2] - bbox[0];
   const height = bbox[3] - bbox[1];
   const viewportWidth = window.innerWidth;
