@@ -7,7 +7,6 @@ import Map from "./components/map";
 import Overlay from "./components/overlay";
 import { ErrorBoundaryAlert } from "./components/ui/error-alert";
 import { useStore } from "./store";
-import { getCurrentHref } from "./utils/href";
 import { uploadFile } from "./utils/upload";
 
 function MapFallback({ error }: { error: unknown }) {
@@ -36,32 +35,18 @@ export default function App() {
   const { db } = useDuckDb();
 
   useEffect(() => {
-    if (href) {
-      history.pushState(null, "", "?href=" + href);
-      document.title = "stac-map | " + href;
-    } else {
-      history.pushState(null, "", location.pathname);
-      document.title = "stac-map";
-    }
+    if (href && new URLSearchParams(location.search).get("href") !== href)
+      history.replaceState(null, "", "?href=" + href);
+    else history.replaceState(null, "", null);
   }, [href]);
 
   useEffect(() => {
     function handlePopState() {
-      setHref(getCurrentHref() ?? "");
+      setHref(new URLSearchParams(location.search).get("href"));
     }
     window.addEventListener("popstate", handlePopState);
 
-    if (getCurrentHref()) {
-      try {
-        new URL(getCurrentHref());
-      } catch {
-        history.pushState(null, "", location.pathname);
-      }
-    }
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
+    return () => window.removeEventListener("popstate", handlePopState);
   }, [setHref]);
 
   useEffect(() => {
