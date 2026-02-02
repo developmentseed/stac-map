@@ -164,8 +164,8 @@ export default function Map() {
             data: stacGeoparquetTable.table,
             filled: true,
             getFillColor: ({ index, data }) => {
-              return data.data.get(index)?.["id"] ===
-                hoveredStacGeoparquetItemId
+              const id = data.data.get(index)?.["id"];
+              return id === hoveredStacGeoparquetItemId && id !== pickedItem?.id
                 ? fillColor
                 : transparent;
             },
