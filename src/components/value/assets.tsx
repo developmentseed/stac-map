@@ -47,8 +47,14 @@ type SortedAssets = [string, StacAsset][];
 
 export default function Assets({ assets }: { assets: StacAssets }) {
   const setAsset = useStore((store) => store.setAsset);
-  const sortedAssets = sortAssets(assets);
-  const [bestAssetKey, bestAsset] = getBestAssetFromSortedList(sortedAssets);
+  const restrictToThreeBandCogs = useStore(
+    (store) => store.restrictToThreeBandCogs
+  );
+  const sortedAssets = sortAssets(assets, restrictToThreeBandCogs);
+  const [bestAssetKey, bestAsset] = getBestAssetFromSortedList(
+    sortedAssets,
+    restrictToThreeBandCogs
+  );
 
   useEffect(() => {
     if (bestAssetKey) setAsset(bestAssetKey, bestAsset);
@@ -220,10 +226,13 @@ function AssetVisibility({
 }) {
   const storeAssetKey = useStore((store) => store.assetKey);
   const setAsset = useStore((store) => store.setAsset);
+  const restrictToThreeBandCogs = useStore(
+    (store) => store.restrictToThreeBandCogs
+  );
   const isVisible = storeAssetKey === assetKey;
   const score = useMemo(() => {
-    return getAssetScore(asset);
-  }, [asset]);
+    return getAssetScore(asset, restrictToThreeBandCogs);
+  }, [asset, restrictToThreeBandCogs]);
 
   return (
     <IconButton

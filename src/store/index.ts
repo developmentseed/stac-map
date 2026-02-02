@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { type AssetsState, createAssetsSlice } from "./assets";
 import { type BboxState, createBboxSlice } from "./bbox";
 import { type CatalogsState, createCatalogsSlice } from "./catalogs";
@@ -10,6 +11,7 @@ import { createHrefSlice, type HrefState } from "./href";
 import { createInputSlice, type InputState } from "./input";
 import { createItemsSlice, type ItemsState } from "./items";
 import { createMapSlice, type MapState } from "./map";
+import { createSettingsSlice, type SettingsState } from "./settings";
 import {
   createStacGeoparquetState,
   type StacGeoparquetState,
@@ -35,28 +37,40 @@ export interface State
     ConnectionState,
     DatetimeState,
     MapState,
+    SettingsState,
     StacGeoparquetState {
   fillColor: [number, number, number, number];
   lineColor: [number, number, number, number];
   lineWidth: number;
 }
 
-export const useStore = create<State>((...a) => ({
-  ...createHrefSlice(...a),
-  ...createInputSlice(...a),
-  ...createValueSlice(...a),
-  ...createCollectionsSlice(...a),
-  ...createCogsSlice(...a),
-  ...createItemsSlice(...a),
-  ...createAssetsSlice(...a),
-  ...createBboxSlice(...a),
-  ...createUploadedFileSlice(...a),
-  ...createConnectionSlice(...a),
-  ...createStacGeoparquetState(...a),
-  ...createCatalogsSlice(...a),
-  ...createDatetimeSlice(...a),
-  ...createMapSlice(...a),
-  fillColor: [207, 63, 2, 50] as [number, number, number, number],
-  lineColor: [207, 63, 2, 100] as [number, number, number, number],
-  lineWidth: 2,
-}));
+export const useStore = create<State>()(
+  persist(
+    (...a) => ({
+      ...createHrefSlice(...a),
+      ...createInputSlice(...a),
+      ...createValueSlice(...a),
+      ...createCollectionsSlice(...a),
+      ...createCogsSlice(...a),
+      ...createItemsSlice(...a),
+      ...createAssetsSlice(...a),
+      ...createBboxSlice(...a),
+      ...createUploadedFileSlice(...a),
+      ...createConnectionSlice(...a),
+      ...createStacGeoparquetState(...a),
+      ...createCatalogsSlice(...a),
+      ...createDatetimeSlice(...a),
+      ...createMapSlice(...a),
+      ...createSettingsSlice(...a),
+      fillColor: [207, 63, 2, 50] as [number, number, number, number],
+      lineColor: [207, 63, 2, 100] as [number, number, number, number],
+      lineWidth: 2,
+    }),
+    {
+      name: "stac-map-settings",
+      partialize: (state) => ({
+        restrictToThreeBandCogs: state.restrictToThreeBandCogs,
+      }),
+    }
+  )
+);

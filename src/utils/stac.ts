@@ -218,8 +218,11 @@ export function isCollectionInDatetimes(
   );
 }
 
-export function getGeotiffHref(asset: AssetWithAlternates): string | null {
-  if (!isGeotiff(asset)) {
+export function getGeotiffHref(
+  asset: AssetWithAlternates,
+  restrictToThreeBandCogs: boolean = true
+): string | null {
+  if (!isGeotiff(asset, restrictToThreeBandCogs)) {
     return null;
   }
   let geotiffHref = null;
@@ -236,22 +239,27 @@ export function getGeotiffHref(asset: AssetWithAlternates): string | null {
   return geotiffHref;
 }
 
-export function isGeotiff(asset: AssetWithAlternates) {
+export function isGeotiff(
+  asset: AssetWithAlternates,
+  restrictToThreeBandCogs: boolean = true
+) {
   if (!asset.type?.startsWith("image/tiff; application=geotiff")) {
     return false;
   }
-  if (!hasValidBandCount(asset)) {
+  if (!hasValidBandCount(asset, restrictToThreeBandCogs)) {
     return false;
   }
   return hasHttpHref(asset);
 }
 
-function hasValidBandCount(asset: AssetWithAlternates): boolean {
+function hasValidBandCount(
+  asset: AssetWithAlternates,
+  restrictToThreeBandCogs: boolean = true
+): boolean {
   const bandCount = getBandCount(asset);
-  if (bandCount === null) {
-    return true;
-  }
-  return bandCount === 3 || bandCount === 4;
+  if (bandCount === null) return !restrictToThreeBandCogs;
+  else if (restrictToThreeBandCogs) return bandCount === 3;
+  else return bandCount === 3 || bandCount === 4;
 }
 
 function hasHttpHref(asset: AssetWithAlternates): boolean {
@@ -271,31 +279,44 @@ export function getBandCount(asset: AssetWithAlternates): number | null {
   return bands ? bands.length : null;
 }
 
-export function sortAssets(assets: StacAssets) {
+export function sortAssets(
+  assets: StacAssets,
+  restrictToThreeBandCogs: boolean = true
+) {
   return Object.entries(assets).sort(
     ([, a], [, b]) =>
-      getAssetScore(b as AssetWithAlternates) -
-      getAssetScore(a as AssetWithAlternates)
+      getAssetScore(b as AssetWithAlternates, restrictToThreeBandCogs) -
+      getAssetScore(a as AssetWithAlternates, restrictToThreeBandCogs)
   );
 }
 
 export function getBestAssetFromSortedList(
-  sortedAssets: [string, AssetWithAlternates][]
+  sortedAssets: [string, AssetWithAlternates][],
+  restrictToThreeBandCogs: boolean = true
 ) {
   const first = sortedAssets[0];
-  if (first && getAssetScore(first[1] as AssetWithAlternates) > 0) {
+  if (
+    first &&
+    getAssetScore(first[1] as AssetWithAlternates, restrictToThreeBandCogs) > 0
+  ) {
     return first;
   }
   return [null, null];
 }
 
-export function getBestAsset(item: StacItem) {
-  const sortedAssets = sortAssets(item.assets);
-  return getBestAssetFromSortedList(sortedAssets);
+export function getBestAsset(
+  item: StacItem,
+  restrictToThreeBandCogs: boolean = true
+) {
+  const sortedAssets = sortAssets(item.assets, restrictToThreeBandCogs);
+  return getBestAssetFromSortedList(sortedAssets, restrictToThreeBandCogs);
 }
 
-export function getAssetScore(asset: AssetWithAlternates): number {
-  const geotiff = isGeotiff(asset);
+export function getAssetScore(
+  asset: AssetWithAlternates,
+  restrictToThreeBandCogs: boolean = true
+): number {
+  const geotiff = isGeotiff(asset, restrictToThreeBandCogs);
   if (!geotiff) return 0;
 
   const hasVisualRole = asset.roles?.includes("visual") ?? false;
