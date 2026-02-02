@@ -95,6 +95,7 @@ export default function Value({ value }: { value: StacValue }) {
 
       <Stack>
         {conformsToFreeTextCollectionSearch(value) && <CollectionSearch />}
+        {collectionsHref && <CollectionsHref href={collectionsHref} />}
         {collections && <Collections collections={collections} />}
         {catalogs && <Catalogs catalogs={catalogs} />}
         {value.type === "Feature" && (
@@ -113,7 +114,6 @@ export default function Value({ value }: { value: StacValue }) {
             connection={connection}
           />
         )}
-        {collectionsHref && <CollectionsHref href={collectionsHref} />}
         {!collectionsHref && childLinks && <ChildLinks links={childLinks} />}
         {itemLinks && <ItemLinks links={itemLinks} />}
         {rootHref && <RootHref value={value} href={rootHref} />}

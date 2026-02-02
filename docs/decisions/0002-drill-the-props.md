@@ -1,5 +1,8 @@
 # Drill the props
 
+> [!NOTE]
+> This ADR is out-of-date as of v1.0.0, when we switched to [zustand](https://zustand.docs.pmnd.rs/) for state management.
+
 ## Context and Problem Statement
 
 There's a lot of state that we need to synchronize between the map and the rest of the application.

@@ -14,5 +14,8 @@ export function useItems() {
 
 export function useCollectionBounds() {
   const collections = useStore((store) => store.collections);
-  return collections?.map((collection) => collectionToFeature(collection));
+  const filteredCollections = useStore((store) => store.filteredCollections);
+  return (filteredCollections || collections)?.map((collection) =>
+    collectionToFeature(collection)
+  );
 }
