@@ -37,6 +37,7 @@ export default function Items({ items }: { items: StacItem[] }) {
   const searchedItems = useStore((store) => store.searchedItems);
   const itemSource = useStore((store) => store.itemSource);
   const setItemSource = useStore((store) => store.setItemSource);
+  const projection = useStore((store) => store.projection);
 
   const hasStatic = staticItems && staticItems.length > 0;
   const hasSearched = searchedItems && searchedItems.length > 0;
@@ -141,6 +142,7 @@ export default function Items({ items }: { items: StacItem[] }) {
               onClick={() => setVisualizeItems(!visualizeItems)}
               size={"xs"}
               variant={"ghost"}
+              disabled={projection === "globe"}
             >
               {visualizeItems ? <LuEye /> : <LuEyeClosed />}
               {visualizeItems

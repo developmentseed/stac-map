@@ -32,10 +32,12 @@ export default function Map() {
     "positron-gl-style",
     "dark-matter-gl-style"
   );
+  const projection = useStore((store) => store.projection);
   const value = useStore((store) => store.value);
   const collections = useStore((store) => store.collections);
   const setBbox = useStore((store) => store.setBbox);
   const cogHref = useStore((store) => store.cogHref);
+  const cogSources = useStore((store) => store.cogSources);
   const pagedCogSources = useStore((store) => store.pagedCogSources);
   const hoveredItem = useStore((store) => store.hoveredItem);
   const pickedItem = useStore((store) => store.pickedItem);
@@ -185,7 +187,7 @@ export default function Map() {
           })
     );
 
-  if (cogHref)
+  if (cogHref && projection === "mercator")
     layers.push(
       new COGLayer({
         id: "cog-" + cogHref,
@@ -193,7 +195,7 @@ export default function Map() {
         geoKeysParser,
       })
     );
-  else if (visualizeItems && pagedCogSources)
+  else if (visualizeItems && pagedCogSources && projection === "mercator")
     pagedCogSources.forEach((page, i) => {
       if (page)
         layers.push(
@@ -214,6 +216,24 @@ export default function Map() {
           })
         );
     });
+  else if (visualizeItems && cogSources && projection === "mercator")
+    layers.push(
+      new MosaicLayer({
+        id: "cog-mosaic",
+        sources: cogSources,
+        getSource: async (source) => {
+          return source.assets.data.href;
+        },
+        renderSource: (source, { data, signal }) => {
+          return new COGLayer({
+            id: `cog-${source.id}`,
+            geotiff: data,
+            geoKeysParser,
+            signal,
+          });
+        },
+      })
+    );
 
   return (
     <MaplibreMap
@@ -224,6 +244,7 @@ export default function Map() {
         latitude: 0,
         zoom: 1,
       }}
+      projection={projection}
       mapStyle={`https://basemaps.cartocdn.com/gl/${mapStyle}/style.json`}
       style={{ zIndex: 0 }}
       onLoad={() => setIsLoaded(true)}

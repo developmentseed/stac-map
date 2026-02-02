@@ -6,6 +6,7 @@ import { uploadFile } from "../utils/upload";
 import { Examples } from "./examples";
 import HrefInput from "./href-input";
 import { ColorModeButton } from "./ui/color-mode";
+import { ProjectionButton } from "./ui/projection";
 
 export default function Header() {
   const setUploadedFile = useStore((store) => store.setUploadedFile);
@@ -36,6 +37,7 @@ export default function Header() {
           Examples
         </Button>
       </Examples>
+      <ProjectionButton variant={"surface"} />
       <ColorModeButton variant={"surface"} />
     </HStack>
   );
