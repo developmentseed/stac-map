@@ -40,6 +40,9 @@ export default function Value({ value }: { value: StacValue }) {
   const asset = useStore((store) => store.asset);
   const staticItems = useStore((store) => store.staticItems);
   const searchedItems = useStore((store) => store.searchedItems);
+  const setCogHref = useStore((store) => store.setCogHref);
+  const setCogSources = useStore((store) => store.setCogSources);
+  const setPagedCogSources = useStore((store) => store.setPagedCogSources);
   const version = value.stac_version as string | undefined;
   const description = value.description as string | undefined;
   const rootHref = getLinkHref(value, "root");
@@ -62,6 +65,18 @@ export default function Value({ value }: { value: StacValue }) {
   useEffect(() => {
     if (value.type === "FeatureCollection") setStaticItems(value.features);
   }, [value, setStaticItems]);
+
+  useEffect(() => {
+    if (!asset) setCogHref(null);
+  }, [asset, setCogHref]);
+
+  useEffect(() => {
+    if (!staticItems) setCogSources(null);
+  }, [staticItems, setCogSources]);
+
+  useEffect(() => {
+    if (!searchedItems) setPagedCogSources(null);
+  }, [searchedItems, setPagedCogSources]);
 
   return (
     <Stack gap={8}>
@@ -104,7 +119,7 @@ export default function Value({ value }: { value: StacValue }) {
         {rootHref && <RootHref value={value} href={rootHref} />}
         {(value.type === "Collection" || value.type === "FeatureCollection") &&
           items &&
-          items?.length > 0 && <Items items={items} />}
+          items?.length > 0 && <Items items={items} value={value} />}
         {value.links && <Links links={value.links} />}
         {(value.assets as { [k: string]: StacAsset }) && (
           <Assets assets={value.assets as { [k: string]: StacAsset }} />

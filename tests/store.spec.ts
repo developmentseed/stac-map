@@ -61,7 +61,6 @@ function resetStore() {
     visualizeItemBounds: true,
     asset: null,
     assetKey: null,
-    geotiffHref: null,
     uploadedFile: null,
     stacGeoparquetTable: null,
     stacGeoparquetItemId: null,
@@ -116,7 +115,6 @@ describe("href.ts - setHref", () => {
     expect(state.pickedItem).toBeNull();
     expect(state.staticItems).toBeNull();
     expect(state.searchedItems).toBeNull();
-    expect(state.geotiffHref).toBeNull();
     expect(state.stacGeoparquetTable).toBeNull();
     expect(state.stacGeoparquetItemId).toBeNull();
   });
@@ -314,30 +312,16 @@ describe("items.ts - addItem", () => {
   });
 });
 
-describe("items.ts - setPickedItem", () => {
-  test("sets pickedItem and clears geotiffHref", () => {
-    useStore.setState({ geotiffHref: "https://example.com/test.tiff" });
-
-    const item = makeItem("test");
-    useStore.getState().setPickedItem(item);
-
-    expect(useStore.getState().pickedItem).toBe(item);
-    expect(useStore.getState().geotiffHref).toBeNull();
-  });
-});
-
 describe("items.ts - clearPickedItem", () => {
-  test("clears pickedItem, geotiffHref, and stacGeoparquetItemId", () => {
+  test("clears pickedItem and stacGeoparquetItemId", () => {
     useStore.setState({
       pickedItem: makeItem("test"),
-      geotiffHref: "https://example.com/test.tiff",
       stacGeoparquetItemId: "test",
     });
 
     useStore.getState().clearPickedItem();
 
     expect(useStore.getState().pickedItem).toBeNull();
-    expect(useStore.getState().geotiffHref).toBeNull();
     expect(useStore.getState().stacGeoparquetItemId).toBeNull();
   });
 });
@@ -353,9 +337,6 @@ describe("assets.ts - setAsset", () => {
 
     expect(useStore.getState().asset).toBe(asset);
     expect(useStore.getState().assetKey).toBe("visual");
-    expect(useStore.getState().geotiffHref).toBe(
-      "https://example.com/asset.tiff"
-    );
   });
 });
 

@@ -59,13 +59,11 @@ export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
   setPickedItem: (item) => {
     set({
       pickedItem: item,
-      geotiffHref: null,
     });
   },
   clearPickedItem: () => {
     set({
       pickedItem: null,
-      geotiffHref: null,
       stacGeoparquetItemId: null,
     });
   },

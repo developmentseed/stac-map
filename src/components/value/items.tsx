@@ -1,6 +1,8 @@
 import { useStore } from "@/store";
 import type { ItemSource } from "@/store/items";
+import type { StacValue } from "@/types/stac";
 import { fitBounds } from "@/utils/map";
+import { getLink } from "@/utils/stac";
 import {
   Button,
   ButtonGroup,
@@ -17,6 +19,8 @@ import {
   LuEyeClosed,
   LuFiles,
   LuFocus,
+  LuStepBack,
+  LuStepForward,
 } from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
 import type { StacItem } from "stac-ts";
@@ -25,14 +29,15 @@ import ItemCard from "../cards/item";
 import ItemListItem from "../list-items/item";
 import { Section } from "../section";
 
-export default function Items({ items }: { items: StacItem[] }) {
+export default function Items({
+  items,
+  value,
+}: {
+  items: StacItem[];
+  value: StacValue;
+}) {
   const visualizeItems = useStore((store) => store.visualizeItems);
   const setVisualizeItems = useStore((store) => store.setVisualizeItems);
-  const visualizeItemBounds = useStore((store) => store.visualizeItemBounds);
-  const setVisualizeItemBounds = useStore(
-    (store) => store.setVisualizeItemBounds
-  );
-  const collections = useStore((store) => store.collections);
   const staticItems = useStore((store) => store.staticItems);
   const searchedItems = useStore((store) => store.searchedItems);
   const itemSource = useStore((store) => store.itemSource);
@@ -41,35 +46,16 @@ export default function Items({ items }: { items: StacItem[] }) {
   const hasStatic = staticItems && staticItems.length > 0;
   const hasSearched = searchedItems && searchedItems.length > 0;
   const hasBoth = hasStatic && hasSearched;
-  const hasCollections = collections && collections.length > 0;
 
   const title = `Items (${items.length})`;
   const { map } = useMap();
-
-  const headerAction = hasCollections ? (
-    <IconButton
-      size="2xs"
-      variant="ghost"
-      aria-label={
-        visualizeItemBounds
-          ? "Hide item bounds on map"
-          : "Show item bounds on map"
-      }
-      onClick={(e) => {
-        e.stopPropagation();
-        setVisualizeItemBounds(!visualizeItemBounds);
-      }}
-    >
-      {visualizeItemBounds ? <LuEye /> : <LuEyeClosed />}
-    </IconButton>
-  ) : undefined;
 
   return (
     <Section
       defaultListOrCard="list"
       title={title}
       icon={<LuFiles />}
-      headerAction={headerAction}
+      headerAction={<HeaderAction value={value} />}
     >
       {(listOrCard) => {
         return (
@@ -164,5 +150,67 @@ export default function Items({ items }: { items: StacItem[] }) {
         );
       }}
     </Section>
+  );
+}
+
+function HeaderAction({ value }: { value: StacValue }) {
+  const setHref = useStore((store) => store.setHref);
+  const collections = useStore((store) => store.collections);
+  const hasCollections = collections && collections.length > 0;
+  const visualizeItemBounds = useStore((store) => store.visualizeItemBounds);
+  const setVisualizeItemBounds = useStore(
+    (store) => store.setVisualizeItemBounds
+  );
+
+  const nextLink = getLink(value, "next");
+  const prevLink = getLink(value, "prev");
+
+  const nextPrevButtons =
+    nextLink || prevLink ? (
+      <ButtonGroup attached variant={"outline"} size="2xs">
+        <IconButton
+          disabled={!prevLink}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (prevLink) setHref(prevLink.href);
+          }}
+        >
+          <LuStepBack />
+        </IconButton>
+        <IconButton
+          disabled={!nextLink}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (nextLink) setHref(nextLink.href);
+          }}
+        >
+          <LuStepForward />
+        </IconButton>
+      </ButtonGroup>
+    ) : undefined;
+
+  const itemBoundsButton = hasCollections ? (
+    <IconButton
+      size="2xs"
+      variant="ghost"
+      aria-label={
+        visualizeItemBounds
+          ? "Hide item bounds on map"
+          : "Show item bounds on map"
+      }
+      onClick={(e) => {
+        e.stopPropagation();
+        setVisualizeItemBounds(!visualizeItemBounds);
+      }}
+    >
+      {visualizeItemBounds ? <LuEye /> : <LuEyeClosed />}
+    </IconButton>
+  ) : undefined;
+
+  return (
+    <>
+      {nextPrevButtons}
+      {itemBoundsButton}
+    </>
   );
 }

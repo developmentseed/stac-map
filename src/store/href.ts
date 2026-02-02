@@ -30,7 +30,6 @@ export const createHrefSlice: StateCreator<State, [], [], HrefState> = (
       searchedItems: null,
       datetimeBounds: null,
       datetimeFilter: null,
-      geotiffHref: null,
       stacGeoparquetTable: null,
       stacGeoparquetItemId: null,
       cogHref: null,

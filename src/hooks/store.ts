@@ -16,8 +16,3 @@ export function useCollectionBounds() {
   const collections = useStore((store) => store.collections);
   return collections?.map((collection) => collectionToFeature(collection));
 }
-
-export function useGeotiffHref() {
-  const geotiffHref = useStore((store) => store.geotiffHref);
-  return geotiffHref;
-}
