@@ -16,7 +16,7 @@ The map-first, single-page, statically-hosted STAC visualizer at <https://develo
 Includes:
 
 - Client-side COG rendering via [deck.gl-raster](https://github.com/developmentseed/deck.gl-raster)
-- [stac-geoparquet](https://github.com/radiantearth/stac-geoparquet-spec) visualization, upload, and download
+- [stac-geoparquet](https://github.com/radiantearth/stac-geoparquet-spec) visualization, upload, and export
 
 ## Development
 
@@ -31,7 +31,7 @@ yarn dev
 
 This will open a development server at <http://localhost:5173/stac-map/>.
 
-We have some code quality checks/tools:
+We have some code quality checks:
 
 ```shell
 yarn lint
