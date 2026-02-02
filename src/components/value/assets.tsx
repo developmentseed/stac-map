@@ -1,5 +1,11 @@
+import { usePlanetaryComputerToken } from "@/hooks/planetary-computer";
 import { useStore } from "@/store";
+import type { AzureBlobStorageContainer } from "@/types/planetary-computer";
 import type { AssetWithAlternates } from "@/types/stac";
+import {
+  parsePlanetaryComputerContainer,
+  signPlanetaryComputerHref,
+} from "@/utils/planetary-computer";
 import {
   getAssetScore,
   getBestAssetFromSortedList,
@@ -144,6 +150,10 @@ function AssetActions({
 }) {
   const alternates = asset.alternate ? Object.entries(asset.alternate) : [];
 
+  const planetaryComputerContainer = useMemo(() => {
+    return parsePlanetaryComputerContainer(asset.href);
+  }, [asset.href]);
+
   return (
     <ButtonGroup size="xs" variant="plain" attached>
       <Clipboard.Root value={asset.href}>
@@ -153,13 +163,19 @@ function AssetActions({
           </IconButton>
         </Clipboard.Trigger>
       </Clipboard.Root>
-      {scheme?.startsWith("http") && (
-        <IconButton asChild>
-          <a href={asset.href}>
-            <LuDownload />
-          </a>
-        </IconButton>
-      )}
+      {scheme?.startsWith("http") &&
+        (planetaryComputerContainer ? (
+          <PlanetaryComputerDownload
+            container={planetaryComputerContainer}
+            href={asset.href}
+          />
+        ) : (
+          <IconButton asChild>
+            <a href={asset.href}>
+              <LuDownload />
+            </a>
+          </IconButton>
+        ))}
       {alternates.length > 0 && (
         <Menu.Root>
           <Menu.Trigger asChild>
@@ -220,6 +236,25 @@ function AssetVisibility({
       }}
     >
       {score === 0 ? <LuEyeOff /> : isVisible ? <LuEye /> : <LuEyeClosed />}
+    </IconButton>
+  );
+}
+
+function PlanetaryComputerDownload({
+  container,
+  href,
+}: {
+  container: AzureBlobStorageContainer;
+  href: string;
+}) {
+  const { data: token } = usePlanetaryComputerToken({ container });
+  const signedHref = token && signPlanetaryComputerHref(href, token);
+
+  return (
+    <IconButton asChild disabled={!token}>
+      <a href={signedHref}>
+        <LuDownload />
+      </a>
     </IconButton>
   );
 }
