@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.1](https://github.com/developmentseed/stac-map/compare/v1.0.0...v1.0.1) (2026-02-02)
+
+
+### Bug Fixes
+
+* move collection pagination above collections ([#289](https://github.com/developmentseed/stac-map/issues/289)) ([b1a8b16](https://github.com/developmentseed/stac-map/commit/b1a8b16ac3375f09b873c60b15f279c17b6c4507))
+* restrict to three-band cogs by default ([#291](https://github.com/developmentseed/stac-map/issues/291)) ([e785e4d](https://github.com/developmentseed/stac-map/commit/e785e4d76adb612a2e580f387d1a6e964c417a0f)), closes [#285](https://github.com/developmentseed/stac-map/issues/285)
+* use filtered collections for collection bounds ([#287](https://github.com/developmentseed/stac-map/issues/287)) ([5ed4ab7](https://github.com/developmentseed/stac-map/commit/5ed4ab70448d598d0670090b8c1b997ddf982471))
+
 ## [1.0.0](https://github.com/developmentseed/stac-map/compare/v0.14.0...v1.0.0) (2026-02-02)
 
 

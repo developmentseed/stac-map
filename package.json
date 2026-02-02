@@ -24,7 +24,7 @@
     "url": "https://github.com/developmentseed/stac-map/issues"
   },
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
