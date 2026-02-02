@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.0.0](https://github.com/developmentseed/stac-map/compare/v0.14.0...v1.0.0) (2026-02-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* use zustand for state management
+
+### Features
+
+* add action bar for pagination ([5fb56c1](https://github.com/developmentseed/stac-map/commit/5fb56c1142932782e8e86562fb78d8097276c07c))
+* add globe view ([#282](https://github.com/developmentseed/stac-map/issues/282)) ([fbb9c49](https://github.com/developmentseed/stac-map/commit/fbb9c4905646977f09e2e046d602b26240eb0360)), closes [#145](https://github.com/developmentseed/stac-map/issues/145)
+* add limit to search ([#276](https://github.com/developmentseed/stac-map/issues/276)) ([a3c84dd](https://github.com/developmentseed/stac-map/commit/a3c84ddf27f4f09aa8280a9ef8e9a57f9079777d))
+* allow picking collections ([5fb56c1](https://github.com/developmentseed/stac-map/commit/5fb56c1142932782e8e86562fb78d8097276c07c))
+* better visual feedback when loading ([5fb56c1](https://github.com/developmentseed/stac-map/commit/5fb56c1142932782e8e86562fb78d8097276c07c))
+* focus on hovered collections ([5fb56c1](https://github.com/developmentseed/stac-map/commit/5fb56c1142932782e8e86562fb78d8097276c07c))
+* next and prev for feature collections ([#283](https://github.com/developmentseed/stac-map/issues/283)) ([3b8a970](https://github.com/developmentseed/stac-map/commit/3b8a97065d99c2b15da1eb4e2e061293559b010d))
+* show and hide collections and items (when both are present) ([#273](https://github.com/developmentseed/stac-map/issues/273)) ([187bf06](https://github.com/developmentseed/stac-map/commit/187bf064abd347eae2c117532ecb95f88f1a29b1))
+* sign Planetary Computer assets ([5fb56c1](https://github.com/developmentseed/stac-map/commit/5fb56c1142932782e8e86562fb78d8097276c07c))
+* sign planetary computer assets for download ([#281](https://github.com/developmentseed/stac-map/issues/281)) ([c760c69](https://github.com/developmentseed/stac-map/commit/c760c69bda04886d2cccd0b2f6d4578919f05d9d))
+* visualize four-band geoTIFFs ([5fb56c1](https://github.com/developmentseed/stac-map/commit/5fb56c1142932782e8e86562fb78d8097276c07c))
+
+
+### Bug Fixes
+
+* better map error boundary ([#271](https://github.com/developmentseed/stac-map/issues/271)) ([577e479](https://github.com/developmentseed/stac-map/commit/577e479d1e302736af22e6b1a05d4a64d081f600)), closes [#267](https://github.com/developmentseed/stac-map/issues/267)
+* don't fill picked item ([#279](https://github.com/developmentseed/stac-map/issues/279)) ([045673e](https://github.com/developmentseed/stac-map/commit/045673e3aa50b53c891b793e1ca0499d396b0b8d))
+* replace state ([#278](https://github.com/developmentseed/stac-map/issues/278)) ([ea2bc5f](https://github.com/developmentseed/stac-map/commit/ea2bc5f641be2947042bffdb730af3e0ad3bdba7))
+* time slider for stac geoparquet ([5fb56c1](https://github.com/developmentseed/stac-map/commit/5fb56c1142932782e8e86562fb78d8097276c07c))
+* truncate asset titles ([#277](https://github.com/developmentseed/stac-map/issues/277)) ([cb3004c](https://github.com/developmentseed/stac-map/commit/cb3004ce4bf1ffa0aa200f387da886862fdb8dec))
+
+
+### Code Refactoring
+
+* use zustand for state management ([5fb56c1](https://github.com/developmentseed/stac-map/commit/5fb56c1142932782e8e86562fb78d8097276c07c))
+
 ## [0.14.0](https://github.com/developmentseed/stac-map/compare/stac-map-v0.13.1...stac-map-v0.14.0) (2026-01-23)
 
 
