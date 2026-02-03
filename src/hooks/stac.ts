@@ -38,14 +38,16 @@ export function useStacJsonFromFile({ file }: { file: File }) {
 export function useStacGeoparquet({
   href,
   connection,
+  hivePartitioning,
 }: {
   href: string;
   connection: AsyncDuckDBConnection;
+  hivePartitioning: boolean;
 }) {
   return useQuery({
-    queryKey: ["stac-geoparquet", href],
+    queryKey: ["stac-geoparquet", href, hivePartitioning],
     queryFn: async () => {
-      return await fetchStacGeoparquet({ href, connection });
+      return await fetchStacGeoparquet({ href, connection, hivePartitioning });
     },
   });
 }
@@ -53,14 +55,20 @@ export function useStacGeoparquet({
 export function useStacGeoparquetDatetimeBounds({
   href,
   connection,
+  hivePartitioning,
 }: {
   href: string;
   connection: AsyncDuckDBConnection;
+  hivePartitioning: boolean;
 }) {
   return useQuery({
-    queryKey: ["stac-geoparquet-datetime-bounds", href],
+    queryKey: ["stac-geoparquet-datetime-bounds", href, hivePartitioning],
     queryFn: async () => {
-      return await fetchStacGeoparquetDatetimeBounds({ href, connection });
+      return await fetchStacGeoparquetDatetimeBounds({
+        href,
+        connection,
+        hivePartitioning,
+      });
     },
   });
 }
@@ -69,18 +77,21 @@ export function useStacGeoparquetTable({
   href,
   connection,
   datetimeFilter,
+  hivePartitioning,
 }: {
   href: string;
   connection: AsyncDuckDBConnection;
   datetimeFilter: DatetimeFilter | null;
+  hivePartitioning: boolean;
 }) {
   return useQuery({
-    queryKey: ["stac-geoparquet-table", href, datetimeFilter],
+    queryKey: ["stac-geoparquet-table", href, datetimeFilter, hivePartitioning],
     queryFn: async () => {
       return await fetchStacGeoparquetTable({
         href,
         connection,
         datetimeFilter,
+        hivePartitioning,
       });
     },
     placeholderData: (previousData) => previousData,
@@ -91,15 +102,22 @@ export function useStacGeoparquetItem({
   id,
   href,
   connection,
+  hivePartitioning,
 }: {
   id: string;
   href: string;
   connection: AsyncDuckDBConnection;
+  hivePartitioning: boolean;
 }) {
   return useQuery({
-    queryKey: ["stac-geoparquet-item", id, href],
+    queryKey: ["stac-geoparquet-item", id, href, hivePartitioning],
     queryFn: async () => {
-      return await fetchStacGeoparquetItem({ id, href, connection });
+      return await fetchStacGeoparquetItem({
+        id,
+        href,
+        connection,
+        hivePartitioning,
+      });
     },
   });
 }

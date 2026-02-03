@@ -13,17 +13,46 @@ import type { DatetimeFilter } from "../store/datetime";
 import type { StacItemCollection } from "../types/stac";
 
 export const SUPPORTED_GEOMETRY_TYPES = ["point", "polygon"] as const;
+
+export async function executeDuckdbQuery({
+  connection,
+  select,
+  href,
+  where,
+  hivePartitioning,
+}: {
+  connection: AsyncDuckDBConnection;
+  select: string;
+  href: string;
+  where?: string;
+  hivePartitioning: boolean;
+}) {
+  let query = `SELECT ${select} FROM read_parquet('${href}', hive_partitioning = ${hivePartitioning})`;
+  if (where) {
+    query += ` WHERE ${where}`;
+  }
+  console.log(query);
+
+  return await connection.query(query);
+}
 export type SupportedGeometryType = (typeof SUPPORTED_GEOMETRY_TYPES)[number];
 
 export async function fetchStacGeoparquet({
   href,
   connection,
+  hivePartitioning,
 }: {
   href: string;
   connection: AsyncDuckDBConnection;
+  hivePartitioning: boolean;
 }): Promise<StacItemCollection> {
-  const query = `SELECT COUNT(*) as count, MIN(bbox.xmin) as xmin, MIN(bbox.ymin) as ymin, MAX(bbox.xmax) as xmax, MAX(bbox.ymax) as ymax FROM read_parquet('${href}')`;
-  const result = await connection.query(query);
+  const result = await executeDuckdbQuery({
+    connection,
+    href,
+    hivePartitioning,
+    select:
+      "COUNT(*) as count, MIN(bbox.xmin) as xmin, MIN(bbox.ymin) as ymin, MAX(bbox.xmax) as xmax, MAX(bbox.ymax) as ymax",
+  });
   const row = result.toArray().map((row) => row.toJSON())[0];
   return {
     type: "FeatureCollection",
@@ -43,15 +72,25 @@ export async function fetchStacGeoparquet({
 export async function fetchStacGeoparquetDatetimeBounds({
   href,
   connection,
+  hivePartitioning,
 }: {
   href: string;
   connection: AsyncDuckDBConnection;
+  hivePartitioning: boolean;
 }): Promise<{ start: Date; end: Date } | null> {
   const { startDatetimeColumnName, endDatetimeColumnName } =
-    await fetchStacGeoparquetDatetimeColumns(href, connection);
+    await fetchStacGeoparquetDatetimeColumns(
+      href,
+      connection,
+      hivePartitioning
+    );
   if (!startDatetimeColumnName || !endDatetimeColumnName) return null;
-  const query = `SELECT MIN(${startDatetimeColumnName}) as start, MAX(${endDatetimeColumnName}) as end FROM read_parquet('${href}')`;
-  const result = await connection.query(query);
+  const result = await executeDuckdbQuery({
+    connection,
+    href,
+    hivePartitioning,
+    select: `MIN(${startDatetimeColumnName}) as start, MAX(${endDatetimeColumnName}) as end`,
+  });
   const row = result.toArray().map((row) => row.toJSON())[0];
   return {
     start: new Date(row.start),
@@ -63,20 +102,33 @@ export async function fetchStacGeoparquetTable({
   href,
   connection,
   datetimeFilter,
+  hivePartitioning,
 }: {
   href: string;
   connection: AsyncDuckDBConnection;
   datetimeFilter: DatetimeFilter | null;
+  hivePartitioning: boolean;
 }) {
-  let query = `SELECT ST_AsWKB(geometry) AS geometry, ST_GeometryType(geometry) AS geometry_type, id FROM read_parquet('${href}')`;
+  let where: string | undefined;
   if (datetimeFilter) {
     const { startDatetimeColumnName, endDatetimeColumnName } =
-      await fetchStacGeoparquetDatetimeColumns(href, connection);
+      await fetchStacGeoparquetDatetimeColumns(
+        href,
+        connection,
+        hivePartitioning
+      );
     if (!startDatetimeColumnName || !endDatetimeColumnName) return null;
     const { start, end } = datetimeFilter;
-    query += ` WHERE ${startDatetimeColumnName} >= '${start.toISOString()}' AND ${endDatetimeColumnName} <= '${end.toISOString()}'`;
+    where = `${startDatetimeColumnName} >= '${start.toISOString()}' AND ${endDatetimeColumnName} <= '${end.toISOString()}'`;
   }
-  const result = await connection.query(query);
+  const result = await executeDuckdbQuery({
+    connection,
+    href,
+    hivePartitioning,
+    select:
+      "ST_AsWKB(geometry) AS geometry, ST_GeometryType(geometry) AS geometry_type, id",
+    where,
+  });
   const geometry: Uint8Array[] = result.getChildAt(0)?.toArray();
   const geometryType = result.getChildAt(1)?.toArray()[0]?.toLowerCase() as
     | string
@@ -136,14 +188,20 @@ export async function fetchStacGeoparquetItem({
   id,
   href,
   connection,
+  hivePartitioning,
 }: {
   id: string;
   href: string;
   connection: AsyncDuckDBConnection;
+  hivePartitioning: boolean;
 }) {
-  const result = await connection.query(
-    `SELECT * REPLACE ST_AsGeoJSON(geometry) as geometry FROM read_parquet('${href}') WHERE id = '${id}'`
-  );
+  const result = await executeDuckdbQuery({
+    connection,
+    href,
+    hivePartitioning,
+    select: "* REPLACE ST_AsGeoJSON(geometry) as geometry",
+    where: `id = '${id}'`,
+  });
   const item = stacWasm.arrowToStacJson(result)[0];
   item.geometry = JSON.parse(item.geometry);
   return item;
@@ -151,10 +209,11 @@ export async function fetchStacGeoparquetItem({
 
 async function fetchStacGeoparquetDatetimeColumns(
   href: string,
-  connection: AsyncDuckDBConnection
+  connection: AsyncDuckDBConnection,
+  hivePartitioning: boolean
 ) {
   const describeResult = await connection.query(
-    `DESCRIBE SELECT * FROM read_parquet('${href}')`
+    `DESCRIBE SELECT * FROM read_parquet('${href}', hive_partitioning = ${hivePartitioning})`
   );
   const describe = describeResult.toArray().map((row) => row.toJSON());
   const columnNames = describe.map((row) => row.column_name);

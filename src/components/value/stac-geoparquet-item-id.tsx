@@ -14,7 +14,13 @@ export default function StacGeoparquetItemId({
   connection: AsyncDuckDBConnection;
 }) {
   const setPickedItem = useStore((store) => store.setPickedItem);
-  const result = useStacGeoparquetItem({ id, href, connection });
+  const hivePartitioning = useStore((store) => store.hivePartitioning);
+  const result = useStacGeoparquetItem({
+    id,
+    href,
+    connection,
+    hivePartitioning,
+  });
 
   useEffect(() => {
     setPickedItem(result.data);

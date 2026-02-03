@@ -29,7 +29,8 @@ export function StacGeoparquetHrefConnectionPanel({
   connection: AsyncDuckDBConnection;
 }) {
   const setValue = useStore((store) => store.setValue);
-  const result = useStacGeoparquet({ href, connection });
+  const hivePartitioning = useStore((store) => store.hivePartitioning);
+  const result = useStacGeoparquet({ href, connection, hivePartitioning });
   useEffect(() => {
     if (result.data) setValue(result.data);
   }, [result.data, setValue]);

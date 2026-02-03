@@ -24,6 +24,8 @@ export const SettingsButton = React.forwardRef<
   const setRestrictToThreeBandCogs = useStore(
     (store) => store.setRestrictToThreeBandCogs
   );
+  const hivePartitioning = useStore((store) => store.hivePartitioning);
+  const setHivePartitioning = useStore((store) => store.setHivePartitioning);
 
   return (
     <Dialog.Root>
@@ -56,6 +58,24 @@ export const SettingsButton = React.forwardRef<
                     When enabled, only COGs with three bands can be visualized.
                     Disable to allow COGs with any number of bands or no bands
                     in their STAC metadata.
+                  </Text>
+                </Field.HelperText>
+              </Field.Root>
+              <Field.Root mt={4}>
+                <Switch.Root
+                  checked={hivePartitioning}
+                  onCheckedChange={(e) => setHivePartitioning(e.checked)}
+                >
+                  <Switch.HiddenInput />
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                  <Switch.Label>Hive partitioning</Switch.Label>
+                </Switch.Root>
+                <Field.HelperText>
+                  <Text fontSize="sm" color="fg.muted">
+                    When enabled, DuckDB will interpret path segments as
+                    partitions when reading stac-geoparquet files.
                   </Text>
                 </Field.HelperText>
               </Field.Root>

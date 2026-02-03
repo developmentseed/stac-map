@@ -70,6 +70,7 @@ export const useStore = create<State>()(
       name: "stac-map-settings",
       partialize: (state) => ({
         restrictToThreeBandCogs: state.restrictToThreeBandCogs,
+        hivePartitioning: state.hivePartitioning,
       }),
     }
   )

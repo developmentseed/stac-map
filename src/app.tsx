@@ -55,6 +55,7 @@ export default function App() {
         const connection = await db.connect();
         await connection.query("LOAD spatial;");
         await connection.query("LOAD icu;");
+        await connection.query("LOAD httpfs;");
         setConnection(connection);
       })();
     }

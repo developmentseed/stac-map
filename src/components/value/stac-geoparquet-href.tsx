@@ -16,10 +16,16 @@ interface Props {
 
 export default function StacGeoparquetHref({ href, connection }: Props) {
   const datetimeFilter = useStore((store) => store.datetimeFilter);
+  const hivePartitioning = useStore((store) => store.hivePartitioning);
   const setStacGeoparquetTable = useStore(
     (store) => store.setStacGeoparquetTable
   );
-  const result = useStacGeoparquetTable({ href, connection, datetimeFilter });
+  const result = useStacGeoparquetTable({
+    href,
+    connection,
+    datetimeFilter,
+    hivePartitioning,
+  });
 
   useEffect(() => {
     if (result.data?.geometryType && result.data.table)
@@ -41,7 +47,12 @@ export default function StacGeoparquetHref({ href, connection }: Props) {
 }
 
 function StacGeoparquetFilter({ href, connection }: Props) {
-  const result = useStacGeoparquetDatetimeBounds({ href, connection });
+  const hivePartitioning = useStore((store) => store.hivePartitioning);
+  const result = useStacGeoparquetDatetimeBounds({
+    href,
+    connection,
+    hivePartitioning,
+  });
   if (result.error)
     return (
       <ErrorAlert
