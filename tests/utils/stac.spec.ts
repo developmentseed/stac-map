@@ -168,6 +168,30 @@ describe("getThumbnailAsset", () => {
     item.assets = { data: { href: "http://example.com/data.tiff" } };
     expect(getThumbnailAsset(item)).toBeUndefined();
   });
+
+  test("returns thumbnail asset if it has thumbnail role", () => {
+    const item = makeItem("test");
+    item.assets = {
+      foo: { href: "http://example.com/thumb.png", roles: ["thumbnail"] },
+    };
+    expect(getThumbnailAsset(item)).toEqual({
+      href: "http://example.com/thumb.png",
+      roles: ["thumbnail"],
+    });
+  });
+
+  test("returns thumbnail asset if it has thumbnails key", () => {
+    // https://github.com/englacial/xopr/issues/64
+    const item = makeItem("test");
+    item.assets = {
+      thumbnails: {
+        href: "http://example.com/thumb.png",
+      },
+    };
+    expect(getThumbnailAsset(item)).toEqual({
+      href: "http://example.com/thumb.png",
+    });
+  });
 });
 
 describe("makeHrefsAbsolute", () => {

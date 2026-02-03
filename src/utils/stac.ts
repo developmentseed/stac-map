@@ -3,7 +3,6 @@ import bboxPolygon from "@turf/bbox-polygon";
 import type { FeatureCollection } from "geojson";
 import type {
   SpatialExtent,
-  StacAsset,
   StacCollection,
   StacItem,
   StacLink,
@@ -62,7 +61,13 @@ export function getSelfHref(value: StacValue) {
 
 export function getThumbnailAsset(value: StacValue) {
   if ("assets" in value) {
-    const asset = (value.assets as { [key: string]: StacAsset })["thumbnail"];
+    const assets = value.assets as StacAssets;
+    const asset =
+      assets["thumbnail"] ||
+      Object.values(assets).find((asset) =>
+        asset.roles?.includes("thumbnail")
+      ) ||
+      assets["thumbnails"];
     return asset?.href.startsWith("http") && asset;
   }
 }
