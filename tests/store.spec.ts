@@ -1,7 +1,6 @@
 import type { StacCatalog, StacCollection, StacItem } from "stac-ts";
 import { beforeEach, describe, expect, test } from "vitest";
 import { useStore } from "../src/store";
-import type { StacSearch } from "../src/types/stac";
 
 function makeCollection(id: string): StacCollection {
   return {
@@ -64,6 +63,11 @@ function resetStore() {
     uploadedFile: null,
     stacGeoparquetTable: null,
     stacGeoparquetItemId: null,
+    cogHref: null,
+    cogSources: null,
+    pagedCogSources: null,
+    datetimeBounds: null,
+    datetimeFilter: null,
   });
 }
 
@@ -99,7 +103,11 @@ describe("href.ts - setHref", () => {
       pickedItem: makeItem("item1"),
       staticItems: [makeItem("item1")],
       searchedItems: [[makeItem("item1")]],
-      geotiffHref: "https://example.com/test.tiff",
+      cogHref: "https://example.com/test.tiff",
+      cogSources: [] as never,
+      pagedCogSources: [] as never,
+      datetimeBounds: { start: new Date(), end: new Date() },
+      datetimeFilter: { start: new Date(), end: new Date() },
       stacGeoparquetTable: {} as never,
       stacGeoparquetItemId: "item1",
     });
@@ -115,6 +123,11 @@ describe("href.ts - setHref", () => {
     expect(state.pickedItem).toBeNull();
     expect(state.staticItems).toBeNull();
     expect(state.searchedItems).toBeNull();
+    expect(state.cogHref).toBeNull();
+    expect(state.cogSources).toBeNull();
+    expect(state.pagedCogSources).toBeNull();
+    expect(state.datetimeBounds).toBeNull();
+    expect(state.datetimeFilter).toBeNull();
     expect(state.stacGeoparquetTable).toBeNull();
     expect(state.stacGeoparquetItemId).toBeNull();
   });
@@ -131,51 +144,20 @@ describe("href.ts - setHref", () => {
   });
 });
 
-describe("value.ts - setValue", () => {
-  test("sets value normally", () => {
-    const collection = makeCollection("test");
-    useStore.getState().setValue(collection);
-    expect(useStore.getState().value).toBe(collection);
-  });
+describe("collections.ts - setCollections", () => {
+  test("clears filteredCollections when setting collections", () => {
+    const col1 = makeCollection("col1");
+    const col2 = makeCollection("col2");
+    useStore.setState({
+      collections: [col1],
+      filteredCollections: [col1],
+    });
 
-  test("does not clear search when value is not a Collection", () => {
-    const search: StacSearch = { collections: ["other-collection"] };
-    useStore.setState({ search });
+    useStore.getState().setCollections([col2]);
 
-    const item = makeItem("test");
-    useStore.getState().setValue(item);
-
-    expect(useStore.getState().search).toBe(search);
-  });
-
-  test("does not clear search when search has 0 collections", () => {
-    const search: StacSearch = { collections: [] };
-    useStore.setState({ search });
-
-    const collection = makeCollection("test");
-    useStore.getState().setValue(collection);
-
-    expect(useStore.getState().search).toBe(search);
-  });
-
-  test("does not clear search when search has 2+ collections", () => {
-    const search: StacSearch = { collections: ["col1", "col2"] };
-    useStore.setState({ search });
-
-    const collection = makeCollection("test");
-    useStore.getState().setValue(collection);
-
-    expect(useStore.getState().search).toBe(search);
-  });
-
-  test("does not clear search when collection id matches", () => {
-    const search: StacSearch = { collections: ["test"] };
-    useStore.setState({ search });
-
-    const collection = makeCollection("test");
-    useStore.getState().setValue(collection);
-
-    expect(useStore.getState().search).toBe(search);
+    expect(useStore.getState().collections).toHaveLength(1);
+    expect(useStore.getState().collections?.[0]).toBe(col2);
+    expect(useStore.getState().filteredCollections).toBeNull();
   });
 });
 
@@ -323,20 +305,6 @@ describe("items.ts - clearPickedItem", () => {
 
     expect(useStore.getState().pickedItem).toBeNull();
     expect(useStore.getState().stacGeoparquetItemId).toBeNull();
-  });
-});
-
-describe("assets.ts - setAsset", () => {
-  test("setting asset calls getGeotiffHref and updates state", async () => {
-    const asset = {
-      href: "https://example.com/asset.tiff",
-      type: "image/tiff; application=geotiff",
-    };
-
-    useStore.getState().setAsset("visual", asset);
-
-    expect(useStore.getState().asset).toBe(asset);
-    expect(useStore.getState().assetKey).toBe("visual");
   });
 });
 
