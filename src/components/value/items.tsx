@@ -165,7 +165,7 @@ function HeaderAction({ value }: { value: StacValue }) {
   );
 
   const nextLink = getLink(value, "next");
-  const prevLink = getLink(value, "prev");
+  const prevLink = getLink(value, "prev") || getLink(value, "previous");
 
   const nextPrevButtons =
     nextLink || prevLink ? (
