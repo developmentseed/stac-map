@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.2](https://github.com/developmentseed/stac-map/compare/v1.0.1...v1.0.2) (2026-02-04)
+
+
+### Bug Fixes
+
+* add a hive partitioned setting ([#295](https://github.com/developmentseed/stac-map/issues/295)) ([4f3957b](https://github.com/developmentseed/stac-map/commit/4f3957b3ce444eb075d64622be8032bcefc365d2))
+* expand the assets that can be considered thumbnails ([#298](https://github.com/developmentseed/stac-map/issues/298)) ([0d1e1d2](https://github.com/developmentseed/stac-map/commit/0d1e1d286a065602b3fadeae366da5c39d9dd609))
+* use prev or previous for previous link ([#300](https://github.com/developmentseed/stac-map/issues/300)) ([1cdd741](https://github.com/developmentseed/stac-map/commit/1cdd7411eb39d882787f5ead8ca63c20fe4bba58))
+
 ## [1.0.1](https://github.com/developmentseed/stac-map/compare/v1.0.0...v1.0.1) (2026-02-02)
 
 
