@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/developmentseed/stac-map/compare/v1.0.4...v1.1.0) (2026-02-05)
+
+
+### Features
+
+* web-map-links for TileJSON ([#311](https://github.com/developmentseed/stac-map/issues/311)) ([045c884](https://github.com/developmentseed/stac-map/commit/045c884d22ee2dd986be9e7b1447fed5bd342ce1))
+
 ## [1.0.4](https://github.com/developmentseed/stac-map/compare/v1.0.3...v1.0.4) (2026-02-05)
 
 
