@@ -248,13 +248,12 @@ export function isGeotiff(
   asset: AssetWithAlternates,
   restrictToThreeBandCogs: boolean = true
 ) {
-  if (!asset.type?.startsWith("image/tiff; application=geotiff")) {
-    return false;
-  }
-  if (!hasValidBandCount(asset, restrictToThreeBandCogs)) {
-    return false;
-  }
-  return hasHttpHref(asset);
+  return (
+    hasHttpHref(asset) &&
+    (asset.roles?.includes("visual") ||
+      (asset.type?.startsWith("image/tiff; application=geotiff") &&
+        hasValidBandCount(asset, restrictToThreeBandCogs)))
+  );
 }
 
 function hasValidBandCount(

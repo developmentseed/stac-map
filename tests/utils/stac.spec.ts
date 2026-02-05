@@ -486,6 +486,14 @@ describe("isGeotiff", () => {
     } as AssetWithAlternates;
     expect(isGeotiff(asset)).toBe(true);
   });
+
+  test("returns true for visual role", () => {
+    const asset = {
+      href: "https://example.com/test.tiff",
+      roles: ["visual"],
+    } as AssetWithAlternates;
+    expect(isGeotiff(asset)).toBe(true);
+  });
 });
 
 describe("getGeotiffHref", () => {
