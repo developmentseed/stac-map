@@ -12,7 +12,7 @@ export default function Footer() {
       fontWeight={"lighter"}
       fontSize={"small"}
     >
-      v{version} | Created with <LuHeart /> by{" "}
+      v{version} | Crafted with <LuHeart /> by{" "}
       <Link href="https://developmentseed.org/">
         Development Seed <CollecticonBrandDevelopmentSeed2 />
       </Link>
