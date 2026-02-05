@@ -47,22 +47,24 @@ interface SetSearchParams {
 }
 
 export default function Search({ href, collection }: Props) {
-  const search = useStore((store) => store.search);
-  const setSearch = useStore((store) => store.setSearch);
+  const getSearch = useStore((store) => store.getSearch);
+  const setSearchState = useStore((store) => store.setSearch);
   const setSearchedItems = useStore((store) => store.setSearchedItems);
-  const result = useStacSearch({ href, search });
   const setDatetimeBounds = useStore((store) => store.setDatetimeBounds);
-
   const [fetchAll, setFetchAll] = useState(false);
+
+  const searchKey = useMemo(() => {
+    return { href, collectionId: collection.id };
+  }, [collection.id, href]);
+  const search = useMemo(() => {
+    return getSearch(searchKey);
+  }, [searchKey, getSearch]);
+  const setSearch = (s: StacSearch) => setSearchState(searchKey, s);
+  const result = useStacSearch({ href, search });
 
   const numberMatched = useMemo(() => {
     if (result.data) return result.data.pages.at(0)?.numberMatched;
   }, [result.data]);
-
-  useEffect(() => {
-    if (search.collections.at(0) !== collection.id)
-      setSearch({ collections: [collection.id] });
-  }, [collection, setSearch, search]);
 
   useEffect(() => {
     if (result.data)

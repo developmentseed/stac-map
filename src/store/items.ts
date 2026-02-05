@@ -5,9 +5,12 @@ import type { StacSearch } from "../types/stac";
 
 export type ItemSource = "static" | "searched";
 
+export type SearchKey = { href: string; collectionId: string };
+
 export interface ItemsState {
-  search: StacSearch;
-  setSearch: (search: StacSearch) => void;
+  searches: Record<string, StacSearch>;
+  getSearch: (key: SearchKey) => StacSearch;
+  setSearch: (key: SearchKey, search: StacSearch) => void;
   staticItems: StacItem[] | null;
   setStaticItems: (items: StacItem[] | null) => void;
   addItem: (item: StacItem) => void;
@@ -26,15 +29,26 @@ export interface ItemsState {
   setVisualizeItemBounds: (visualize: boolean) => void;
 }
 
+function toSearchKey({ href, collectionId }: SearchKey): string {
+  return `${href}:${collectionId}`;
+}
+
 export const createItemsSlice: StateCreator<State, [], [], ItemsState> = (
   set,
   get
 ) => ({
-  search: {
-    collections: [],
+  searches: {},
+  getSearch: (key) => {
+    const search = get().searches[toSearchKey(key)];
+    return search || { collections: [key.collectionId] };
   },
-  setSearch: (search) => {
-    set({ search });
+  setSearch: (key, search) => {
+    set({
+      searches: {
+        ...get().searches,
+        [toSearchKey(key)]: search,
+      },
+    });
   },
   staticItems: null,
   setStaticItems: (items) => {

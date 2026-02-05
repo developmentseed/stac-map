@@ -28,6 +28,7 @@ export const createHrefSlice: StateCreator<State, [], [], HrefState> = (
       pickedItem: null,
       staticItems: null,
       searchedItems: null,
+      searches: {},
       datetimeBounds: null,
       datetimeFilter: null,
       stacGeoparquetTable: null,
