@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.3](https://github.com/developmentseed/stac-map/compare/v1.0.2...v1.0.3) (2026-02-05)
+
+
+### Bug Fixes
+
+* always try to show visual assets ([#304](https://github.com/developmentseed/stac-map/issues/304)) ([af484af](https://github.com/developmentseed/stac-map/commit/af484affc767d34889843de307d01a8fe77883ee)), closes [#301](https://github.com/developmentseed/stac-map/issues/301)
+* attach upload button to input ([5be42fd](https://github.com/developmentseed/stac-map/commit/5be42fd62b6b73a723fb89dcbfc71ac0f19e3bfb))
+* don't break when there's no collections in a catalog ([5be42fd](https://github.com/developmentseed/stac-map/commit/5be42fd62b6b73a723fb89dcbfc71ac0f19e3bfb))
+* don't get SAS for public Planetary Computer assets ([5be42fd](https://github.com/developmentseed/stac-map/commit/5be42fd62b6b73a723fb89dcbfc71ac0f19e3bfb))
+* save per-collection searches ([#302](https://github.com/developmentseed/stac-map/issues/302)) ([5be42fd](https://github.com/developmentseed/stac-map/commit/5be42fd62b6b73a723fb89dcbfc71ac0f19e3bfb))
+* sign Planetary Computer thumbnails ([5be42fd](https://github.com/developmentseed/stac-map/commit/5be42fd62b6b73a723fb89dcbfc71ac0f19e3bfb))
+
 ## [1.0.2](https://github.com/developmentseed/stac-map/compare/v1.0.1...v1.0.2) (2026-02-04)
 
 
