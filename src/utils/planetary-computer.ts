@@ -9,7 +9,10 @@ export function parsePlanetaryComputerContainer(
 ): AzureBlobStorageContainer | null {
   try {
     const url = new URL(href);
-    if (url.host.endsWith("blob.core.windows.net"))
+    if (
+      url.host.endsWith("blob.core.windows.net") &&
+      !url.host.startsWith("ai4edatasetspublicassets")
+    )
       return {
         storageAccount: url.hostname.split(".")[0],
         container: url.pathname.split("/")[1],

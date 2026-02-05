@@ -17,6 +17,13 @@ describe("parsePlanetaryComputerContainer", () => {
     });
   });
 
+  test("parses public storage to null", () => {
+    const result = parsePlanetaryComputerContainer(
+      "https://ai4edatasetspublicassets.blob.core.windows.net/assets/path/to/file.tiff"
+    );
+    expect(result).toBeNull();
+  });
+
   test("returns null for non-Azure URL", () => {
     expect(
       parsePlanetaryComputerContainer("https://example.com/file.tiff")
@@ -42,7 +49,7 @@ describe("signPlanetaryComputerHref", () => {
   test("adds token to URL query string", () => {
     const token: PlanetaryComputerToken = {
       token: "sv=2019-12-12&st=2021-01-01&se=2021-01-02&sr=c&sp=rl&sig=abc123",
-      msft_request_id: "request-id",
+      "msft:expiry": "2026-02-05T12:00:00Z",
     };
     const result = signPlanetaryComputerHref(
       "https://myaccount.blob.core.windows.net/container/file.tiff",
@@ -56,7 +63,7 @@ describe("signPlanetaryComputerHref", () => {
   test("replaces existing query string", () => {
     const token: PlanetaryComputerToken = {
       token: "newsig=xyz",
-      msft_request_id: "request-id",
+      "msft:expiry": "2026-02-05T12:00:00Z",
     };
     const result = signPlanetaryComputerHref(
       "https://myaccount.blob.core.windows.net/container/file.tiff?oldsig=abc",
@@ -74,7 +81,7 @@ describe("signPlanetaryComputerHrefFromTokens", () => {
       myaccount: {
         mycontainer: {
           token: "sig=abc123",
-          msft_request_id: "request-id",
+          "msft:expiry": "2026-02-05T12:00:00Z",
         },
       },
     };
@@ -101,7 +108,7 @@ describe("signPlanetaryComputerHrefFromTokens", () => {
       otheraccount: {
         othercontainer: {
           token: "sig=abc123",
-          msft_request_id: "request-id",
+          "msft:expiry": "2026-02-05T12:00:00Z",
         },
       },
     };
