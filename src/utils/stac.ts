@@ -359,17 +359,19 @@ export function getBbox(
 }
 
 function getCollectionsBbox(collections: StacCollection[]) {
-  return sanitizeBbox(
-    collections
-      .map((collection) => getCollectionExtents(collection))
-      .filter((extents) => !!extents)
-      .reduce((accumulator, currentValue) => {
-        return [
-          Math.min(accumulator[0], currentValue[0]),
-          Math.min(accumulator[1], currentValue[1]),
-          Math.max(accumulator[2], currentValue[2]),
-          Math.max(accumulator[3], currentValue[3]),
-        ];
-      })
-  );
+  if (collections.length > 1)
+    return sanitizeBbox(
+      collections
+        .map((collection) => getCollectionExtents(collection))
+        .filter((extents) => !!extents)
+        .reduce((accumulator, currentValue) => {
+          return [
+            Math.min(accumulator[0], currentValue[0]),
+            Math.min(accumulator[1], currentValue[1]),
+            Math.max(accumulator[2], currentValue[2]),
+            Math.max(accumulator[3], currentValue[3]),
+          ];
+        })
+    );
+  else return null;
 }
