@@ -17,8 +17,10 @@ import { toProj4 } from "geotiff-geokeys-to-proj4";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import {
+  Layer as MaplibreLayer,
   Map as MaplibreMap,
   type MapRef,
+  Source,
   useControl,
 } from "react-map-gl/maplibre";
 import { useColorModeValue } from "../components/ui/color-mode";
@@ -64,6 +66,7 @@ export default function Map() {
   const lineWidth = useStore((store) => store.lineWidth);
   const collectionBounds = useCollectionBounds();
   const items = useItems();
+  const webMapLink = useStore((store) => store.webMapLink);
   const [hoveredStacGeoparquetItemId, setHoveredStacGeoparquetItemId] =
     useState<string | null>(null);
 
@@ -262,6 +265,16 @@ export default function Map() {
         if (sanitizedBbox) setBbox(sanitizedBbox);
       }}
     >
+      {webMapLink && webMapLink.rel === "tilejson" && (
+        <Source
+          key={webMapLink.href}
+          id="web-map-link"
+          type="raster"
+          url={webMapLink.href}
+        >
+          <MaplibreLayer id="web-map-link-layer" type="raster" />
+        </Source>
+      )}
       <DeckGLOverlay
         layers={layers}
         getCursor={(props) => getCursor(mapRef, props)}

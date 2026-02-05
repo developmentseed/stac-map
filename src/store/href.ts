@@ -36,6 +36,7 @@ export const createHrefSlice: StateCreator<State, [], [], HrefState> = (
       cogHref: null,
       cogSources: null,
       pagedCogSources: null,
+      webMapLink: null,
     });
   },
 });

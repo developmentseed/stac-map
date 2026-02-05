@@ -21,6 +21,7 @@ import {
   type UploadedFileState,
 } from "./uploaded-file";
 import { createValueSlice, type ValueState } from "./value";
+import { createWebMapLinksSlice, type WebMapLinksState } from "./web-map-links";
 
 export interface State
   extends
@@ -38,7 +39,8 @@ export interface State
     DatetimeState,
     MapState,
     SettingsState,
-    StacGeoparquetState {
+    StacGeoparquetState,
+    WebMapLinksState {
   fillColor: [number, number, number, number];
   lineColor: [number, number, number, number];
   lineWidth: number;
@@ -62,6 +64,7 @@ export const useStore = create<State>()(
       ...createDatetimeSlice(...a),
       ...createMapSlice(...a),
       ...createSettingsSlice(...a),
+      ...createWebMapLinksSlice(...a),
       fillColor: [207, 63, 2, 50] as [number, number, number, number],
       lineColor: [207, 63, 2, 100] as [number, number, number, number],
       lineWidth: 2,

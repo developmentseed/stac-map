@@ -1,3 +1,4 @@
+import { useStore } from "@/store";
 import type { StacValue } from "@/types/stac";
 import { fitBounds } from "@/utils/map";
 import { getSelfHref } from "@/utils/stac";
@@ -11,9 +12,17 @@ import {
   Portal,
   createShikiAdapter,
 } from "@chakra-ui/react";
-import { LuExternalLink, LuFileJson, LuFocus } from "react-icons/lu";
+import { useMemo } from "react";
+import {
+  LuExternalLink,
+  LuEye,
+  LuEyeClosed,
+  LuFileJson,
+  LuFocus,
+} from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
 import type { HighlighterGeneric } from "shiki";
+import type { StacLink } from "stac-ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({
@@ -33,9 +42,19 @@ const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({
 export default function Buttons({ value }: { value: StacValue }) {
   const selfHref = getSelfHref(value);
   const { map } = useMap();
+  const webMapLink = useStore((store) => store.webMapLink);
+  const setWebMapLink = useStore((store) => store.setWebMapLink);
+
+  const tileJsonLinks = useMemo(
+    () =>
+      (value.links as StacLink[] | undefined)?.filter(
+        (link) => link.rel === "tilejson"
+      ) ?? [],
+    [value]
+  );
 
   return (
-    <ButtonGroup variant={"surface"} size="xs">
+    <ButtonGroup variant={"surface"} size="xs" flexWrap="wrap">
       <Button onClick={() => map && fitBounds(map, value, null)}>
         <LuFocus />
         Zoom to extents
@@ -55,6 +74,20 @@ export default function Buttons({ value }: { value: StacValue }) {
           </a>
         </Button>
       )}
+      {tileJsonLinks.map((link) => {
+        const active = webMapLink?.href === link.href;
+        return (
+          <Button
+            key={link.href}
+            onClick={() =>
+              setWebMapLink(active ? null : { href: link.href, rel: link.rel })
+            }
+          >
+            {active ? <LuEye /> : <LuEyeClosed />}
+            {link.title || "Tiles"}
+          </Button>
+        );
+      })}
       <JsonButton value={value} />
     </ButtonGroup>
   );
