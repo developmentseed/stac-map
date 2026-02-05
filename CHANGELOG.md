@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.4](https://github.com/developmentseed/stac-map/compare/v1.0.3...v1.0.4) (2026-02-05)
+
+
+### Bug Fixes
+
+* add collection extents to card footer ([cf55d62](https://github.com/developmentseed/stac-map/commit/cf55d62729ba0a549a8ce0a705691ee2079c399e))
+* filling collections ([#309](https://github.com/developmentseed/stac-map/issues/309)) ([cf55d62](https://github.com/developmentseed/stac-map/commit/cf55d62729ba0a549a8ce0a705691ee2079c399e))
+
 ## [1.0.3](https://github.com/developmentseed/stac-map/compare/v1.0.2...v1.0.3) (2026-02-05)
 
 
