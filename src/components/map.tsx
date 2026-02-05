@@ -11,10 +11,11 @@ import {
   GeoArrowPolygonLayer,
   GeoArrowScatterplotLayer,
 } from "@geoarrow/deck.gl-layers";
+import bbox from "@turf/bbox";
 import type { Feature, FeatureCollection } from "geojson";
 import { toProj4 } from "geotiff-geokeys-to-proj4";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { type RefObject, useEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import {
   Map as MaplibreMap,
   type MapRef,
@@ -80,6 +81,10 @@ export default function Map() {
   ] as Color;
   const transparent = [0, 0, 0, 0] as Color;
 
+  const nonGlobalCollectionBounds = useMemo(() => {
+    return collectionBounds?.filter((feature) => !isGlobalBbox(bbox(feature)));
+  }, [collectionBounds]);
+
   useEffect(() => {
     if (mapRef?.current && value && isLoaded)
       fitBounds(mapRef.current, value, collections);
@@ -128,7 +133,7 @@ export default function Map() {
     layers.push(
       new GeoJsonLayer({
         id: "collections",
-        data: collectionBounds,
+        data: nonGlobalCollectionBounds,
         filled: true,
         getFillColor: (e) =>
           e.id === hoveredCollection?.id ? fillColor : transparent,
