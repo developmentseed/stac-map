@@ -270,22 +270,22 @@ export default function Map() {
       {webMapLink && webMapLink.rel === "tilejson" && (
         <Source
           key={webMapLink.href}
-          id="web-map-link"
+          id="web-map-link-tilejson"
           type="raster"
           url={webMapLink.href}
         >
-          <MaplibreLayer id="web-map-link-layer" type="raster" />
+          <MaplibreLayer id="web-map-link-layer-tilejson" type="raster" />
         </Source>
       )}
       {webMapLink && webMapLink.rel === "wmts" && wmtsTileUrl && (
         <Source
           key={wmtsTileUrl}
-          id="web-map-link"
+          id="web-map-link-wmts"
           type="raster"
           tiles={[wmtsTileUrl]}
           tileSize={256}
         >
-          <MaplibreLayer id="web-map-link-layer" type="raster" />
+          <MaplibreLayer id="web-map-link-layer-wmts" type="raster" />
         </Source>
       )}
       <DeckGLOverlay
