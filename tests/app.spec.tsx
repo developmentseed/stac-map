@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { userEvent } from "@vitest/browser/context";
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 import App from "../src/app";
@@ -40,5 +41,24 @@ describe("app", () => {
     await expect
       .element(app.getByRole("button", { name: "Toggle color mode" }))
       .toBeVisible();
+  });
+
+  test("has a TileJSON button for a MAAP collection", {
+    timeout: 15000,
+  }, async () => {
+      const app = await renderApp();
+      const input = app.getByRole("textbox", { name: "Enter a url" });
+      await input.fill(
+        "https://stac.dit.maap-project.org/collections/glad-glclu2020-v2"
+      );
+      await userEvent.keyboard("{Enter}");
+      await expect
+        .element(
+          app.getByRole("button", {
+            name: "TileJSON link for 2020 visualization",
+          }),
+          { timeout: 10000 }
+        )
+        .toBeVisible();
   });
 });
