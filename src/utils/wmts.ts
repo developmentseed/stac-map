@@ -43,7 +43,10 @@ export async function fetchWmtsTileUrl(
 
   const dimensions = link["wmts:dimensions"] ?? {};
   const dimensionParams = Object.entries(dimensions)
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+    )
     .join("&");
 
   const format = link.type ?? "image/png";

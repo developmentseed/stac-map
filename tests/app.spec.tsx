@@ -42,9 +42,12 @@ describe("app", () => {
       .toBeVisible();
   });
 
-  test("has a TileJSON button for a MAAP collection", {
-    timeout: 15000,
-  }, async () => {
+  test(
+    "has a TileJSON button for a MAAP collection",
+    {
+      timeout: 15000,
+    },
+    async () => {
       const app = await renderApp();
       const input = app.getByRole("textbox", { name: "Enter a url" });
       await input.fill(
@@ -59,11 +62,15 @@ describe("app", () => {
           { timeout: 10000 }
         )
         .toBeVisible();
-  });
+    }
+  );
 
-  test("has a WMTS button for a VEDA collection", {
-    timeout: 15000,
-  }, async () => {
+  test(
+    "has a WMTS button for a VEDA collection",
+    {
+      timeout: 15000,
+    },
+    async () => {
       const app = await renderApp();
       const input = app.getByRole("textbox", { name: "Enter a url" });
       await input.fill(
@@ -78,5 +85,6 @@ describe("app", () => {
           { timeout: 10000 }
         )
         .toBeVisible();
-  });
+    }
+  );
 });
