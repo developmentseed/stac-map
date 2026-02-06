@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/developmentseed/stac-map/compare/v1.1.0...v1.2.0) (2026-02-06)
+
+
+### Features
+
+* wmts ([#316](https://github.com/developmentseed/stac-map/issues/316)) ([f49677d](https://github.com/developmentseed/stac-map/commit/f49677d3177cb8b051f8a6fbd8c1f655a7f62285))
+
 ## [1.1.0](https://github.com/developmentseed/stac-map/compare/v1.0.4...v1.1.0) (2026-02-05)
 
 
