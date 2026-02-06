@@ -133,7 +133,7 @@ export default function Search({ href, collection }: Props) {
           }}
           {...result}
         />
-        {numberMatched && (
+        {!!numberMatched && (
           <SearchProgress numberMatched={numberMatched} {...result} />
         )}
         <SearchDetails search={search} />

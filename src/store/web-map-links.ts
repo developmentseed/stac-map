@@ -4,6 +4,9 @@ import type { State } from ".";
 export interface WebMapLink {
   href: string;
   rel: string;
+  "wmts:layer"?: string[];
+  "wmts:dimensions"?: Record<string, string>;
+  type?: string;
 }
 
 export interface WebMapLinksState {

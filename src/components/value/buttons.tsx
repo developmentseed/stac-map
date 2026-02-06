@@ -53,6 +53,14 @@ export default function Buttons({ value }: { value: StacValue }) {
     [value]
   );
 
+  const wmtsLinks = useMemo(
+    () =>
+      (value.links as StacLink[] | undefined)?.filter(
+        (link) => link.rel === "wmts"
+      ) ?? [],
+    [value]
+  );
+
   return (
     <ButtonGroup variant={"surface"} size="xs" flexWrap="wrap">
       <Button onClick={() => map && fitBounds(map, value, null)}>
@@ -85,6 +93,33 @@ export default function Buttons({ value }: { value: StacValue }) {
           >
             {active ? <LuEye /> : <LuEyeClosed />}
             {link.title || "Tiles"}
+          </Button>
+        );
+      })}
+      {wmtsLinks.map((link) => {
+        const active =
+          webMapLink?.href === link.href && webMapLink?.rel === "wmts";
+        return (
+          <Button
+            key={link.href}
+            onClick={() =>
+              setWebMapLink(
+                active
+                  ? null
+                  : {
+                      href: link.href,
+                      rel: link.rel,
+                      "wmts:layer": link["wmts:layer"] as string[] | undefined,
+                      "wmts:dimensions": link["wmts:dimensions"] as
+                        | Record<string, string>
+                        | undefined,
+                      type: link.type,
+                    }
+              )
+            }
+          >
+            {active ? <LuEye /> : <LuEyeClosed />}
+            {link.title || "WMTS"}
           </Button>
         );
       })}
