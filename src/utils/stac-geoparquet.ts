@@ -12,7 +12,7 @@ import * as stacWasm from "stac-wasm";
 import type { DatetimeFilter } from "../store/datetime";
 import type { StacItemCollection } from "../types/stac";
 
-export const SUPPORTED_GEOMETRY_TYPES = ["point", "polygon"] as const;
+export const SUPPORTED_GEOMETRY_TYPES = ["point", "polygon", "linestring"] as const;
 
 export async function executeDuckdbQuery({
   connection,
@@ -176,6 +176,20 @@ export async function fetchStacGeoparquetTable({
     table.schema.fields[0].metadata.set(
       "ARROW:extension:name",
       "geoarrow.point"
+    );
+  } else if (geometryType === "linestring") {
+    const linestrings = io.parseWkb(
+      wkbData,
+      io.WKBType.LineString,
+      2
+    ) as data.LineStringData;
+    table = new Table({
+      geometry: makeVector(linestrings),
+      id: vectorFromArray(result.getChild("id")?.toArray()),
+    });
+    table.schema.fields[0].metadata.set(
+      "ARROW:extension:name",
+      "geoarrow.linestring"
     );
   }
   return {

@@ -9,6 +9,7 @@ import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { COGLayer, MosaicLayer, proj } from "@developmentseed/deck.gl-geotiff";
 import {
+  GeoArrowPathLayer,
   GeoArrowPolygonLayer,
   GeoArrowScatterplotLayer,
 } from "@geoarrow/deck.gl-layers";
@@ -156,46 +157,68 @@ export default function Map() {
     );
   }
 
-  if (stacGeoparquetTable)
-    layers.push(
-      stacGeoparquetTable.geometryType === "point"
-        ? new GeoArrowScatterplotLayer({
-            id: "stac-geoparquet-point",
-            data: stacGeoparquetTable.table,
-            getColor: lineColor,
-            getRadius: 2,
-            getPosition: stacGeoparquetTable.table.getChild("geometry")!,
-            radiusUnits: "pixels",
-            pickable: true,
-            onClick: (info) => {
-              setStacGeoparquetItemId(info.object?.id);
-            },
-          })
-        : new GeoArrowPolygonLayer({
-            id: "stac-geoparquet-polygon",
-            data: stacGeoparquetTable.table,
-            filled: true,
-            getFillColor: ({ index, data }) => {
-              const id = data.data.get(index)?.["id"];
-              return id === hoveredStacGeoparquetItemId && id !== pickedItem?.id
-                ? fillColor
-                : transparent;
-            },
-            getLineColor: lineColor,
-            getLineWidth: 2,
-            lineWidthUnits: "pixels",
-            pickable: true,
-            onClick: (info) => {
-              setStacGeoparquetItemId(info.object?.id);
-            },
-            onHover: (info) => {
-              setHoveredStacGeoparquetItemId(info.object?.id);
-            },
-            updateTriggers: {
-              getFillColor: [hoveredStacGeoparquetItemId],
-            },
-          })
-    );
+  if (stacGeoparquetTable) {
+    if (stacGeoparquetTable.geometryType === "point") {
+      layers.push(
+        new GeoArrowScatterplotLayer({
+          id: "stac-geoparquet-point",
+          data: stacGeoparquetTable.table,
+          getColor: lineColor,
+          getRadius: 2,
+          getPosition: stacGeoparquetTable.table.getChild("geometry")!,
+          radiusUnits: "pixels",
+          pickable: true,
+          onClick: (info) => {
+            setStacGeoparquetItemId(info.object?.id);
+          },
+        })
+      );
+    } else if (stacGeoparquetTable.geometryType === "linestring") {
+      layers.push(
+        new GeoArrowPathLayer({
+          id: "stac-geoparquet-linestring",
+          data: stacGeoparquetTable.table,
+          getColor: lineColor,
+          getWidth: lineWidth,
+          widthUnits: "pixels",
+          pickable: true,
+          onClick: (info) => {
+            setStacGeoparquetItemId(info.object?.id);
+          },
+          onHover: (info) => {
+            setHoveredStacGeoparquetItemId(info.object?.id);
+          },
+        })
+      );
+    } else {
+      layers.push(
+        new GeoArrowPolygonLayer({
+          id: "stac-geoparquet-polygon",
+          data: stacGeoparquetTable.table,
+          filled: true,
+          getFillColor: ({ index, data }) => {
+            const id = data.data.get(index)?.["id"];
+            return id === hoveredStacGeoparquetItemId && id !== pickedItem?.id
+              ? fillColor
+              : transparent;
+          },
+          getLineColor: lineColor,
+          getLineWidth: 2,
+          lineWidthUnits: "pixels",
+          pickable: true,
+          onClick: (info) => {
+            setStacGeoparquetItemId(info.object?.id);
+          },
+          onHover: (info) => {
+            setHoveredStacGeoparquetItemId(info.object?.id);
+          },
+          updateTriggers: {
+            getFillColor: [hoveredStacGeoparquetItemId],
+          },
+        })
+      );
+    }
+  }
 
   if (cogHref && projection === "mercator")
     layers.push(
