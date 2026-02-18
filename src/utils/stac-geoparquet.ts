@@ -12,7 +12,11 @@ import * as stacWasm from "stac-wasm";
 import type { DatetimeFilter } from "../store/datetime";
 import type { StacItemCollection } from "../types/stac";
 
-export const SUPPORTED_GEOMETRY_TYPES = ["point", "polygon", "linestring"] as const;
+export const SUPPORTED_GEOMETRY_TYPES = [
+  "point",
+  "polygon",
+  "linestring",
+] as const;
 
 export async function executeDuckdbQuery({
   connection,
