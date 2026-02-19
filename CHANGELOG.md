@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/developmentseed/stac-map/compare/v1.3.0...v1.3.1) (2026-02-19)
+
+
+### Bug Fixes
+
+* update stac-wasm ([#329](https://github.com/developmentseed/stac-map/issues/329)) ([b1bb33d](https://github.com/developmentseed/stac-map/commit/b1bb33d9d64f4ea04004e78fe487d974f47fa300))
+
 ## [1.3.0](https://github.com/developmentseed/stac-map/compare/v1.2.0...v1.3.0) (2026-02-19)
 
 
