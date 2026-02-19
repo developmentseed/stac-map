@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0](https://github.com/developmentseed/stac-map/compare/v1.2.0...v1.3.0) (2026-02-19)
+
+
+### Features
+
+* add linestring support ([#325](https://github.com/developmentseed/stac-map/issues/325)) ([bd1792d](https://github.com/developmentseed/stac-map/commit/bd1792d6a12850faf324c76e673790d4dfa51af2))
+
+
+### Bug Fixes
+
+* don't make previews for forks ([#327](https://github.com/developmentseed/stac-map/issues/327)) ([b56d739](https://github.com/developmentseed/stac-map/commit/b56d739c387067340e29c1958c2fffdb77bc85d0)), closes [#326](https://github.com/developmentseed/stac-map/issues/326)
+
 ## [1.2.0](https://github.com/developmentseed/stac-map/compare/v1.1.0...v1.2.0) (2026-02-06)
 
 
