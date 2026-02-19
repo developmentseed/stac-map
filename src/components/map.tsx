@@ -83,7 +83,7 @@ export default function Map() {
     256 - lineColor[0],
     256 - lineColor[1],
     256 - lineColor[2],
-    fillColor[3],
+    200,
   ] as Color;
   const transparent = [0, 0, 0, 0] as Color;
 
@@ -103,7 +103,7 @@ export default function Map() {
       filled: !cogHref,
       getFillColor: inverseFillColor,
       getLineColor: inverseLineColor,
-      getLineWidth: 2 * lineWidth,
+      getLineWidth: lineWidth * 2,
       lineWidthUnits: "pixels",
     }),
     new GeoJsonLayer({
@@ -179,7 +179,7 @@ export default function Map() {
           id: "stac-geoparquet-linestring",
           data: stacGeoparquetTable.table,
           getColor: lineColor,
-          getWidth: lineWidth,
+          getWidth: lineWidth * 2,
           widthUnits: "pixels",
           pickable: true,
           onClick: (info) => {
