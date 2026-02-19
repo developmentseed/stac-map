@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/developmentseed/stac-map/compare/v1.3.1...v1.3.2) (2026-02-19)
+
+
+### Bug Fixes
+
+* more clickable and visible lines ([#332](https://github.com/developmentseed/stac-map/issues/332)) ([d4bd83c](https://github.com/developmentseed/stac-map/commit/d4bd83c5379cf227be583a33b274660750860768))
+
 ## [1.3.1](https://github.com/developmentseed/stac-map/compare/v1.3.0...v1.3.1) (2026-02-19)
 
 
