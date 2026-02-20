@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.3](https://github.com/developmentseed/stac-map/compare/v1.3.2...v1.3.3) (2026-02-20)
+
+
+### Bug Fixes
+
+* show loading indicator when fetching stac-geoparquet item ([#336](https://github.com/developmentseed/stac-map/issues/336)) ([dd96480](https://github.com/developmentseed/stac-map/commit/dd964802ef69b3462e6e93a2c5b0e3c75049a255))
+
 ## [1.3.2](https://github.com/developmentseed/stac-map/compare/v1.3.1...v1.3.2) (2026-02-19)
 
 
