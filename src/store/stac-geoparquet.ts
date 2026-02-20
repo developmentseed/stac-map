@@ -30,5 +30,6 @@ export const createStacGeoparquetState: StateCreator<
   setStacGeoparquetItemId: (id) =>
     set({
       stacGeoparquetItemId: id,
+      pickedItem: null,
     }),
 });

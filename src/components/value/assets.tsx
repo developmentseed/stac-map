@@ -81,7 +81,7 @@ function AssetsList({ assets }: { assets: SortedAssets }) {
   return (
     <List.Root variant={"plain"}>
       {assets.map(([key, asset]) => (
-        <AssetListItem key={asset.href} assetKey={key} asset={asset} />
+        <AssetListItem key={key + asset.href} assetKey={key} asset={asset} />
       ))}
     </List.Root>
   );
@@ -111,7 +111,7 @@ function AssetCards({ assets }: { assets: SortedAssets }) {
   return (
     <Stack>
       {assets.map(([key, asset]) => (
-        <AssetCard key={asset.href} assetKey={key} asset={asset} />
+        <AssetCard key={key + asset.href} assetKey={key} asset={asset} />
       ))}
     </Stack>
   );
