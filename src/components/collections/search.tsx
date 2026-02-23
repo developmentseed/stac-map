@@ -1,4 +1,3 @@
-import { Section } from "@/components/section";
 import { useStore } from "@/store";
 import {
   Button,
@@ -8,17 +7,9 @@ import {
   InputGroup,
 } from "@chakra-ui/react";
 import { useRef, useState } from "react";
-import { LuFolderSearch, LuSearch } from "react-icons/lu";
+import { LuSearch } from "react-icons/lu";
 
-export default function CollectionSearch() {
-  return (
-    <Section icon={<LuFolderSearch />} title="Collection search">
-      <Search />
-    </Section>
-  );
-}
-
-function Search() {
+export default function Search() {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const setCollectionFreeTextSearch = useStore(

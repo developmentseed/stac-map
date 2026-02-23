@@ -17,9 +17,7 @@ import Buttons from "./value/buttons";
 import Catalogs from "./value/catalogs";
 import ChildLinks from "./value/child-links";
 import { CogHref, CogSources, PagedCogSources } from "./value/cogs";
-import CollectionSearch from "./value/collection-search";
-import Collections from "./value/collections";
-import CollectionsHref from "./value/collections-href";
+import Collections from "./collections";
 import Description from "./value/description";
 import ItemLinks from "./value/item-links";
 import Items from "./value/items";
@@ -92,9 +90,13 @@ export default function Value({ value }: { value: StacValue }) {
       </Stack>
 
       <Stack>
-        {conformsToFreeTextCollectionSearch(value) && <CollectionSearch />}
-        {collectionsHref && <CollectionsHref href={collectionsHref} />}
-        {collections && <Collections collections={collections} />}
+        {(collectionsHref || collections) && (
+          <Collections
+            href={collectionsHref}
+            showSearch={conformsToFreeTextCollectionSearch(value)}
+            collections={collections}
+          />
+        )}
         {catalogs && <Catalogs catalogs={catalogs} />}
         {value.type === "Feature" && (
           <Properties properties={value.properties} />

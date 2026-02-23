@@ -1,4 +1,6 @@
-import { Section } from "@/components/section";
+import { useStore } from "@/store";
+import type { StacCollections } from "@/types/stac";
+import { getLinkHref } from "@/utils/stac";
 import {
   ActionBar,
   Button,
@@ -15,17 +17,8 @@ import {
   type UseInfiniteQueryResult,
 } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import {
-  LuFolderSymlink,
-  LuForward,
-  LuLoader,
-  LuPause,
-  LuPlay,
-} from "react-icons/lu";
+import { LuForward, LuLoader, LuPause, LuPlay } from "react-icons/lu";
 import type { StacCollection } from "stac-ts";
-import { useStore } from "../../store";
-import type { StacCollections } from "../../types/stac";
-import { getLinkHref } from "../../utils/stac";
 import { ErrorAlert } from "../ui/error-alert";
 
 export default function CollectionsHref({ href }: { href: string }) {
@@ -89,18 +82,29 @@ export default function CollectionsHref({ href }: { href: string }) {
     );
   else if (collections && result.hasNextPage)
     return (
-      <PagedCollections
-        collections={collections}
-        numberMatched={numberMatched}
-        fetchAllCollections={fetchAllCollections}
-        setFetchAllCollections={setFetchAllCollections}
-        {...result}
-      />
+      <>
+        <PaginationControls
+          collections={collections}
+          numberMatched={numberMatched}
+          fetchAllCollections={fetchAllCollections}
+          setFetchAllCollections={setFetchAllCollections}
+          {...result}
+        />
+        <PagedCollectionsActionBar
+          collections={collections}
+          numberMatched={numberMatched}
+          fetchAllCollections={fetchAllCollections}
+          setFetchAllCollections={setFetchAllCollections}
+          fetchNextPage={result.fetchNextPage}
+          hasNextPage={result.hasNextPage}
+          isFetching={result.isFetching}
+        />
+      </>
     );
   else if (result.isFetching) return <SkeletonText />;
 }
 
-function PagedCollections({
+function PaginationControls({
   collections,
   numberMatched,
   fetchAllCollections,
@@ -115,52 +119,39 @@ function PagedCollections({
   setFetchAllCollections: (fetch: boolean) => void;
 } & UseInfiniteQueryResult) {
   return (
-    <>
-      <Section icon={<LuFolderSymlink />} title="Collection pagination">
-        <HStack width={"full"}>
-          {numberMatched ? (
-            <Progress.Root
-              width={"full"}
-              value={collections.length}
-              max={numberMatched}
-              striped={hasNextPage}
-              animated={fetchAllCollections || isFetching}
-            >
-              <Progress.Track>
-                <Progress.Range />
-              </Progress.Track>
-            </Progress.Root>
-          ) : (
-            <Span width={"full"}>
-              {collections.length} collection
-              {collections.length === 1 ? "" : "s"} found
-            </Span>
-          )}
-          <ButtonGroup variant={"subtle"} size={"sm"}>
-            <IconButton
-              onClick={() => fetchNextPage()}
-              disabled={isFetching || fetchAllCollections}
-            >
-              {isFetching ? <LuLoader /> : <LuForward />}
-            </IconButton>
-            <IconButton
-              onClick={() => setFetchAllCollections(!fetchAllCollections)}
-            >
-              {fetchAllCollections && hasNextPage ? <LuPause /> : <LuPlay />}
-            </IconButton>
-          </ButtonGroup>
-        </HStack>
-      </Section>
-      <PagedCollectionsActionBar
-        collections={collections}
-        numberMatched={numberMatched}
-        fetchAllCollections={fetchAllCollections}
-        setFetchAllCollections={setFetchAllCollections}
-        fetchNextPage={fetchNextPage}
-        hasNextPage={hasNextPage}
-        isFetching={isFetching}
-      />
-    </>
+    <HStack width={"full"}>
+      {numberMatched ? (
+        <Progress.Root
+          width={"full"}
+          value={collections.length}
+          max={numberMatched}
+          striped={hasNextPage}
+          animated={fetchAllCollections || isFetching}
+        >
+          <Progress.Track>
+            <Progress.Range />
+          </Progress.Track>
+        </Progress.Root>
+      ) : (
+        <Span width={"full"}>
+          {collections.length} collection
+          {collections.length === 1 ? "" : "s"} found
+        </Span>
+      )}
+      <ButtonGroup variant={"subtle"} size={"sm"}>
+        <IconButton
+          onClick={() => fetchNextPage()}
+          disabled={isFetching || fetchAllCollections}
+        >
+          {isFetching ? <LuLoader /> : <LuForward />}
+        </IconButton>
+        <IconButton
+          onClick={() => setFetchAllCollections(!fetchAllCollections)}
+        >
+          {fetchAllCollections && hasNextPage ? <LuPause /> : <LuPlay />}
+        </IconButton>
+      </ButtonGroup>
+    </HStack>
   );
 }
 
