@@ -1,9 +1,6 @@
 import DatetimeSlider from "@/components/ui/datetime-slider";
 import { useStore } from "@/store";
-import {
-  isCollectionInBbox,
-  isCollectionInDatetimes,
-} from "@/utils/stac";
+import { isCollectionInBbox, isCollectionInDatetimes } from "@/utils/stac";
 import {
   Checkbox,
   CloseButton,

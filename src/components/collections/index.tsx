@@ -2,13 +2,7 @@ import { Section } from "@/components/section";
 import { useItems } from "@/hooks/store";
 import { useStore } from "@/store";
 import { getCollectionDatetimes } from "@/utils/stac";
-import {
-  Button,
-  IconButton,
-  Popover,
-  Portal,
-  Stack,
-} from "@chakra-ui/react";
+import { Button, IconButton, Popover, Portal, Stack } from "@chakra-ui/react";
 import { useEffect, useMemo } from "react";
 import { LuEye, LuEyeClosed, LuFilter, LuFolderPlus } from "react-icons/lu";
 import type { StacCollection } from "stac-ts";

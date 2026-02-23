@@ -10,6 +10,7 @@ import {
 import { Badge, Heading, HStack, Stack } from "@chakra-ui/react";
 import { useEffect, useMemo } from "react";
 import type { StacAsset } from "stac-ts";
+import Collections from "./collections";
 import Thumbnail from "./ui/thumbnail";
 import Assets from "./value/assets";
 import Breadcrumbs from "./value/breadcrumbs";
@@ -17,7 +18,6 @@ import Buttons from "./value/buttons";
 import Catalogs from "./value/catalogs";
 import ChildLinks from "./value/child-links";
 import { CogHref, CogSources, PagedCogSources } from "./value/cogs";
-import Collections from "./collections";
 import Description from "./value/description";
 import ItemLinks from "./value/item-links";
 import Items from "./value/items";
