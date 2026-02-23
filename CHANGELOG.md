@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.4](https://github.com/developmentseed/stac-map/compare/v1.3.3...v1.3.4) (2026-02-23)
+
+
+### Bug Fixes
+
+* put all the collections stuff in one section ([#342](https://github.com/developmentseed/stac-map/issues/342)) ([8312ef3](https://github.com/developmentseed/stac-map/commit/8312ef3966a76d66a5bca5096493d4a1355e4ac8))
+
 ## [1.3.3](https://github.com/developmentseed/stac-map/compare/v1.3.2...v1.3.3) (2026-02-20)
 
 
