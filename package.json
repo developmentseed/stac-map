@@ -65,7 +65,7 @@
     "react-icons": "^5.5.0",
     "react-map-gl": "^8.1.0",
     "react-markdown": "^10.1.0",
-    "shiki": "^3.22.0",
+    "shiki": "^4.0.1",
     "stac-ts": "^1.0.4",
     "stac-wasm": "^0.1.0",
     "zustand": "^5.0.11"
