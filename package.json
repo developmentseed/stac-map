@@ -57,7 +57,7 @@
     "deck.gl": "^9.2.11",
     "duckdb-wasm-kit": "^0.1.38",
     "geotiff-geokeys-to-proj4": "^2024.4.13",
-    "maplibre-gl": "^5.19.0",
+    "maplibre-gl": "^5.20.1",
     "next-themes": "^0.4.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -68,7 +68,7 @@
     "shiki": "^4.0.2",
     "stac-ts": "^1.0.4",
     "stac-wasm": "^0.1.0",
-    "zustand": "^5.0.11"
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
