@@ -7,7 +7,11 @@ import { collectionToFeature, isGlobalBbox } from "@/utils/stac";
 import { type DeckProps, Layer } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
-import { COGLayer, MosaicLayer, epsgResolver } from "@developmentseed/deck.gl-geotiff";
+import {
+  COGLayer,
+  epsgResolver,
+  MosaicLayer,
+} from "@developmentseed/deck.gl-geotiff";
 import {
   GeoArrowPathLayer,
   GeoArrowPolygonLayer,
@@ -356,4 +360,3 @@ function toGeoJson(value: StacValue) {
       return value as FeatureCollection;
   }
 }
-
