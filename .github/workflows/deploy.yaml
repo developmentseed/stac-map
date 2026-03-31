@@ -29,7 +29,7 @@ jobs:
       - name: Install
         run: yarn install
       - id: setup_pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Build
         run: yarn build
       - name: Upload artifact
