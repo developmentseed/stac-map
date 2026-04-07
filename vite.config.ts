@@ -12,9 +12,5 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
-  plugins: [
-    react(),
-    wasm(),
-    topLevelAwait(),
-  ],
+  plugins: [react(), wasm(), topLevelAwait()],
 });
