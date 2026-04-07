@@ -1,11 +1,13 @@
 import react from "@vitejs/plugin-react";
 import { playwright } from "@vitest/browser-playwright";
 import wasm from "vite-plugin-wasm";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  plugins: [react(), tsconfigPaths(), wasm()],
+  plugins: [react(), wasm()],
+  resolve: {
+    tsconfigPaths: true,
+  },
   optimizeDeps: {
     include: ["@deck.gl/core", "@duckdb/duckdb-wasm", "react-icons/lib"],
   },
