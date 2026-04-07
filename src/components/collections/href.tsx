@@ -1,5 +1,6 @@
 import { useStore } from "@/store";
 import type { StacCollections } from "@/types/stac";
+import { getAccessToken } from "@/utils/auth";
 import { getLinkHref } from "@/utils/stac";
 import {
   ActionBar,
@@ -40,7 +41,10 @@ export default function CollectionsHref({ href }: { href: string }) {
     queryKey: ["stac-collections", searchHref],
     queryFn: async ({ pageParam }) => {
       if (pageParam) {
-        return await fetch(pageParam).then((response) => {
+        const headers: Record<string, string> = {};
+        const token = getAccessToken();
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        return await fetch(pageParam, { headers }).then((response) => {
           if (response.ok) return response.json();
           else
             throw new Error(
