@@ -9,6 +9,7 @@ import type {
 } from "stac-ts";
 import type { BBox2D } from "../types/map";
 import type { AssetWithAlternates, StacAssets, StacValue } from "../types/stac";
+import { getAccessToken } from "./auth";
 import { GLOBAL_BBOX, sanitizeBbox } from "./bbox";
 import { toAbsoluteUrl } from "./href";
 
@@ -81,11 +82,13 @@ export async function fetchStac({
   method?: "GET" | "POST";
   body?: string;
 }): Promise<StacValue> {
+  const headers: Record<string, string> = { Accept: "application/json" };
+  const token = getAccessToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   return await fetch(href, {
     method,
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
     body,
   }).then(async (response) => {
     if (response.ok) {
