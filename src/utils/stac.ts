@@ -83,7 +83,7 @@ export async function fetchStac({
   body?: string;
 }): Promise<StacValue> {
   const headers: Record<string, string> = { Accept: "application/json" };
-  const token = getAccessToken();
+  const token = getAccessToken(href);
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   return await fetch(href, {

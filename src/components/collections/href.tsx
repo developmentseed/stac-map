@@ -42,7 +42,7 @@ export default function CollectionsHref({ href }: { href: string }) {
     queryFn: async ({ pageParam }) => {
       if (pageParam) {
         const headers: Record<string, string> = {};
-        const token = getAccessToken();
+        const token = getAccessToken(pageParam);
         if (token) headers["Authorization"] = `Bearer ${token}`;
         return await fetch(pageParam, { headers }).then((response) => {
           if (response.ok) return response.json();
