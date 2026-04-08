@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.0](https://github.com/developmentseed/stac-map/compare/v1.3.4...v1.4.0) (2026-04-08)
+
+
+### Features
+
+* build-time oidc configuration ([#380](https://github.com/developmentseed/stac-map/issues/380)) ([12f1864](https://github.com/developmentseed/stac-map/commit/12f18642ff7448ea3b3d1837fd5ae158d53c6bd9)), closes [#373](https://github.com/developmentseed/stac-map/issues/373)
+
+
+### Reverts
+
+* remove plausible analytics snippet ([#353](https://github.com/developmentseed/stac-map/issues/353)) ([d11857e](https://github.com/developmentseed/stac-map/commit/d11857ed1b23549de3722f3adbd4b479cd48a683))
+
 ## [1.3.4](https://github.com/developmentseed/stac-map/compare/v1.3.3...v1.3.4) (2026-02-23)
 
 
