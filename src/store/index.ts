@@ -16,6 +16,7 @@ import {
   createStacGeoparquetState,
   type StacGeoparquetState,
 } from "./stac-geoparquet";
+import { createTokensSlice, type TokensState } from "./tokens";
 import {
   createUploadedFileSlice,
   type UploadedFileState,
@@ -40,6 +41,7 @@ export interface State
     MapState,
     SettingsState,
     StacGeoparquetState,
+    TokensState,
     WebMapLinksState {
   fillColor: [number, number, number, number];
   lineColor: [number, number, number, number];
@@ -64,6 +66,7 @@ export const useStore = create<State>()(
       ...createDatetimeSlice(...a),
       ...createMapSlice(...a),
       ...createSettingsSlice(...a),
+      ...createTokensSlice(...a),
       ...createWebMapLinksSlice(...a),
       fillColor: [207, 63, 2, 50] as [number, number, number, number],
       lineColor: [207, 63, 2, 100] as [number, number, number, number],
@@ -74,6 +77,7 @@ export const useStore = create<State>()(
       partialize: (state) => ({
         restrictToThreeBandCogs: state.restrictToThreeBandCogs,
         hivePartitioning: state.hivePartitioning,
+        tokens: state.tokens,
       }),
     }
   )
