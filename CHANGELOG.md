@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/developmentseed/stac-map/compare/v1.4.0...v1.5.0) (2026-04-14)
+
+
+### Features
+
+* bring your own token ([#386](https://github.com/developmentseed/stac-map/issues/386)) ([51ab4b7](https://github.com/developmentseed/stac-map/commit/51ab4b73b08367bcc533a6dac178f5ea732a3fed))
+
 ## [1.4.0](https://github.com/developmentseed/stac-map/compare/v1.3.4...v1.4.0) (2026-04-08)
 
 
