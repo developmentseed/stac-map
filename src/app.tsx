@@ -36,7 +36,7 @@ export default function App() {
 
   useEffect(() => {
     if (href && new URLSearchParams(location.search).get("href") !== href)
-      history.replaceState(null, "", "?href=" + href);
+      history.pushState(null, "", "?href=" + href);
     else history.replaceState(null, "", null);
   }, [href]);
 
