@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/developmentseed/stac-map/compare/v1.5.0...v1.5.1) (2026-04-17)
+
+
+### Bug Fixes
+
+* back button ([#399](https://github.com/developmentseed/stac-map/issues/399)) ([752d05b](https://github.com/developmentseed/stac-map/commit/752d05ba9b71e880e4e7770b4a290c7f48e05e4d))
+
 ## [1.5.0](https://github.com/developmentseed/stac-map/compare/v1.4.0...v1.5.0) (2026-04-14)
 
 
