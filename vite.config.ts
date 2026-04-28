@@ -12,5 +12,8 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  worker: {
+    format: "es",
+  },
   plugins: [react(), wasm(), topLevelAwait()],
 });
