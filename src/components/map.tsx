@@ -7,7 +7,7 @@ import { collectionToFeature, isGlobalBbox } from "@/utils/stac";
 import { type DeckProps, Layer } from "@deck.gl/core";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
-import { COGLayer, MosaicLayer, proj } from "@developmentseed/deck.gl-geotiff";
+import { COGLayer, MosaicLayer } from "@developmentseed/deck.gl-geotiff";
 import {
   GeoArrowPathLayer,
   GeoArrowPolygonLayer,
@@ -15,7 +15,6 @@ import {
 } from "@geoarrow/deck.gl-layers";
 import bbox from "@turf/bbox";
 import type { Feature, FeatureCollection } from "geojson";
-import { toProj4 } from "geotiff-geokeys-to-proj4";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -225,7 +224,6 @@ export default function Map() {
       new COGLayer({
         id: "cog-" + cogHref,
         geotiff: cogHref,
-        geoKeysParser,
       })
     );
   else if (visualizeItems && pagedCogSources && projection === "mercator")
@@ -242,7 +240,6 @@ export default function Map() {
               return new COGLayer({
                 id: `cog-${source.id}`,
                 geotiff: data,
-                geoKeysParser,
                 signal,
               });
             },
@@ -261,7 +258,6 @@ export default function Map() {
           return new COGLayer({
             id: `cog-${source.id}`,
             geotiff: data,
-            geoKeysParser,
             signal,
           });
         },
@@ -356,18 +352,4 @@ function toGeoJson(value: StacValue) {
     case "FeatureCollection":
       return value as FeatureCollection;
   }
-}
-
-async function geoKeysParser(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  geoKeys: Record<string, any>
-): Promise<proj.ProjectionInfo> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const projDefinition = toProj4(geoKeys as any);
-
-  return {
-    def: projDefinition.proj4,
-    parsed: proj.parseCrs(projDefinition.proj4),
-    coordinatesUnits: projDefinition.coordinatesUnits as proj.SupportedCrsUnit,
-  };
 }
