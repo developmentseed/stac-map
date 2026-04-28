@@ -82,7 +82,7 @@
     "@vitest/browser-playwright": "^4.1.4",
     "conventional-changelog-conventionalcommits": "^9.3.1",
     "esbuild": "^0.28.0",
-    "eslint": "^9.39.2",
+    "eslint": "^10.2.1",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
