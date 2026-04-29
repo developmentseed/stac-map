@@ -15,7 +15,9 @@ import {
 } from "@geoarrow/deck.gl-layers";
 import bbox from "@turf/bbox";
 import type { Feature, FeatureCollection } from "geojson";
+import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { Protocol } from "pmtiles";
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import {
   Layer as MaplibreLayer,
@@ -27,11 +29,27 @@ import {
 import { useColorModeValue } from "../components/ui/color-mode";
 import { useStore } from "../store";
 
+const pmtilesProtocol = new Protocol();
+maplibregl.addProtocol("pmtiles", pmtilesProtocol.tile.bind(pmtilesProtocol));
+
 type Color = [number, number, number, number];
+
+interface ExtraLayerConfig {
+  id: string;
+  type: string;
+  "source-layer"?: string;
+  source: { type: string; [key: string]: unknown };
+  paint?: Record<string, unknown>;
+  layout?: Record<string, unknown>;
+  filter?: unknown[];
+  minzoom?: number;
+  maxzoom?: number;
+}
 
 export default function Map() {
   const mapRef = useRef<MapRef>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [extraLayers, setExtraLayers] = useState<ExtraLayerConfig[]>([]);
   const mapStyle = useColorModeValue(
     "positron-gl-style",
     "dark-matter-gl-style"
@@ -94,6 +112,15 @@ export default function Map() {
     if (mapRef?.current && value && isLoaded)
       fitBounds(mapRef.current, value, collections);
   }, [value, collections, isLoaded]);
+
+  useEffect(() => {
+    const url = import.meta.env.VITE_EXTRA_LAYERS_URL;
+    if (!url || !isLoaded) return;
+    fetch(url)
+      .then((r) => r.json())
+      .then((data) => setExtraLayers(data))
+      .catch((e) => console.warn("stac-map: failed to load extra layers", e));
+  }, [isLoaded]);
 
   const layers: Layer[] = [
     new GeoJsonLayer({
@@ -307,6 +334,23 @@ export default function Map() {
           <MaplibreLayer id="web-map-link-layer-wmts" type="raster" />
         </Source>
       )}
+      {extraLayers.map((layer) => {
+        const { type: sourceType, ...sourceProps } = layer.source;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { source, ...layerSpec } = layer;
+        return (
+          <Source
+            key={layer.id}
+            id={`extra-${layer.id}`}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            type={sourceType as any}
+            {...sourceProps}
+          >
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            <MaplibreLayer {...(layerSpec as any)} />
+          </Source>
+        );
+      })}
       <DeckGLOverlay
         layers={layers}
         getCursor={(props) => getCursor(mapRef, props)}

@@ -7,10 +7,10 @@ export default function Overlay() {
     <Container
       zIndex={1}
       fluid
-      h="100dvh"
+      h="calc(100dvh - var(--header-height, 0px))"
       pointerEvents={"none"}
       position={"absolute"}
-      top={0}
+      top="var(--header-height, 0px)"
       left={0}
       pt={4}
     >

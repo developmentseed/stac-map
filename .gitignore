@@ -25,3 +25,6 @@ dist-ssr
 tests/**/__screenshots__/
 codebook.toml
 .env
+
+# Additional layers file (user modified)
+public/layers.json

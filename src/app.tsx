@@ -63,7 +63,7 @@ export default function App() {
 
   return (
     <>
-      <Box h={"100dvh"}>
+      <Box h={"calc(100dvh - var(--header-height, 0px))"}>
         <FileUpload.Root
           unstyled={true}
           onFileAccept={(details) => {
@@ -79,7 +79,7 @@ export default function App() {
           <FileUpload.Dropzone
             disableClick={true}
             style={{
-              height: "100dvh",
+              height: "calc(100dvh - var(--header-height, 0px))",
               width: "100dvw",
             }}
           >
