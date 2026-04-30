@@ -7,7 +7,7 @@ export default function Overlay() {
     <Container
       zIndex={1}
       fluid
-      h="100dvh"
+      h="100%"
       pointerEvents={"none"}
       position={"absolute"}
       top={0}

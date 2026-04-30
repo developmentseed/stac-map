@@ -1,4 +1,5 @@
 import {
+  Box,
   ChakraProvider,
   defaultSystem,
   type SystemContext,
@@ -47,6 +48,12 @@ export interface StacMapProps {
   footer?: ReactNode;
   /** Source and layer information for extra maplibre layers */
   extraLayers?: ExtraLayerProps[];
+  /**
+   * Skip the internal `ChakraProvider` and `ColorModeProvider`. Use when the
+   * host app already mounts its own Chakra v3 system and `next-themes`
+   * provider; the `chakraSystem` and `colorMode` props are ignored when true.
+   */
+  disableChakraProvider?: boolean;
 }
 
 let mountCount = 0;
@@ -66,6 +73,7 @@ export function StacMap({
   stacBrowserUrl,
   footer,
   extraLayers,
+  disableChakraProvider = false,
 }: StacMapProps) {
   useEffect(() => {
     mountCount += 1;
@@ -102,19 +110,27 @@ export function StacMap({
     </QueryClientProvider>
   );
 
+  const wrapped = (
+    <Box position="relative" h="100%" w="100%" overflow="hidden">
+      {auth ? (
+        <AuthProvider {...auth}>
+          <OidcTokenSync>
+            <LoginSplash>{inner}</LoginSplash>
+          </OidcTokenSync>
+        </AuthProvider>
+      ) : (
+        inner
+      )}
+    </Box>
+  );
+
+  if (disableChakraProvider) {
+    return wrapped;
+  }
+
   return (
     <ChakraProvider value={chakraSystem ?? defaultSystem}>
-      <ColorModeProvider {...colorMode}>
-        {auth ? (
-          <AuthProvider {...auth}>
-            <OidcTokenSync>
-              <LoginSplash>{inner}</LoginSplash>
-            </OidcTokenSync>
-          </AuthProvider>
-        ) : (
-          inner
-        )}
-      </ColorModeProvider>
+      <ColorModeProvider {...colorMode}>{wrapped}</ColorModeProvider>
     </ChakraProvider>
   );
 }

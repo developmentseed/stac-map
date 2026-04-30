@@ -11,7 +11,7 @@ import { ErrorBoundaryAlert } from "./ui/error-alert";
 
 function MapFallback({ error }: { error: unknown }) {
   return (
-    <AbsoluteCenter h="100dvh%" w="100dvw">
+    <AbsoluteCenter h="100%" w="100%">
       <Center maxW={"40%"}>
         <ErrorBoundaryAlert context="map component" error={error} />
       </Center>
@@ -52,7 +52,7 @@ export default function App({
 
   return (
     <>
-      <Box h={"100dvh"}>
+      <Box h={"100%"} w={"100%"}>
         <FileUpload.Root
           unstyled={true}
           onFileAccept={(details) => {
@@ -63,15 +63,11 @@ export default function App({
             });
           }}
           disabled={!db}
+          h={"100%"}
+          w={"100%"}
         >
           <FileUpload.HiddenInput />
-          <FileUpload.Dropzone
-            disableClick={true}
-            style={{
-              height: "100dvh",
-              width: "100dvw",
-            }}
-          >
+          <FileUpload.Dropzone disableClick={true} h={"100%"} w={"100%"}>
             <ErrorBoundary FallbackComponent={MapFallback}>
               <Map extraLayers={extraLayers} />
             </ErrorBoundary>
