@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/developmentseed/stac-map/compare/v1.6.0...v1.6.1) (2026-04-30)
+
+
+### Bug Fixes
+
+* **ci:** yarn playwright install when releasing ([#414](https://github.com/developmentseed/stac-map/issues/414)) ([030f796](https://github.com/developmentseed/stac-map/commit/030f796fd66ff4f07ef3350f07085a658e62dfa0))
+
 ## [1.6.0](https://github.com/developmentseed/stac-map/compare/v1.5.1...v1.6.0) (2026-04-30)
 
 
