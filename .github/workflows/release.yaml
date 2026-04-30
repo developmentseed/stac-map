@@ -21,6 +21,7 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: yarn
       - run: yarn install
+      - run: yarn playwright install
       - run: yarn build
       - run: yarn test
       - name: Read version and publish
