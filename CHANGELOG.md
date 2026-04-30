@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.0-alpha.1](https://github.com/developmentseed/stac-map/compare/v2.0.0-alpha...v2.0.0-alpha.1) (2026-04-30)
+
+
+### Bug Fixes
+
+* pre releases for npm ([#419](https://github.com/developmentseed/stac-map/issues/419)) ([0c7d7ae](https://github.com/developmentseed/stac-map/commit/0c7d7aefbf9437645d847a759be8cbc59038315c))
+
 ## [2.0.0-alpha](https://github.com/developmentseed/stac-map/compare/v1.6.1...v2.0.0-alpha) (2026-04-30)
 
 
