@@ -1,10 +1,7 @@
 {
-  "name": "stac-map",
+  "name": "@developmentseed/stac-map",
   "description": "A map-first single-page STAC search and visualization tool with stac-geoparquet support",
-  "author": {
-    "name": "Pete Gadomski",
-    "email": "pete.gadomski@gmail.com"
-  },
+  "author": "Pete Gadomski <pete.gadomski@gmail.com>",
   "contributors": [
     {
       "name": "Indraneel Purohit",
@@ -100,5 +97,16 @@
     "vitest": "^4.1.5",
     "vitest-browser-react": "^2.2.0"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "main": "eslint.config.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "keywords": [
+    "stac",
+    "geospatial",
+    "raster",
+    "map"
+  ]
 }
