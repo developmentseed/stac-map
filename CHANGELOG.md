@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/developmentseed/stac-map/compare/v1.5.1...v1.6.0) (2026-04-30)
+
+
+### Features
+
+* add npm publishing ([#412](https://github.com/developmentseed/stac-map/issues/412)) ([e53ec08](https://github.com/developmentseed/stac-map/commit/e53ec0803f7ab2a0ecc4681b58d924a141c395b0)), closes [#411](https://github.com/developmentseed/stac-map/issues/411)
+
 ## [1.5.1](https://github.com/developmentseed/stac-map/compare/v1.5.0...v1.5.1) (2026-04-17)
 
 
