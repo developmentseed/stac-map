@@ -2,11 +2,12 @@ import { AbsoluteCenter, Box, Center, FileUpload } from "@chakra-ui/react";
 import { useDuckDb } from "duckdb-wasm-kit";
 import { type ReactNode, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import Map from "./components/map";
-import Overlay from "./components/overlay";
-import { ErrorBoundaryAlert } from "./components/ui/error-alert";
-import { useStore } from "./store";
-import { uploadFile } from "./utils/upload";
+import { useStore } from "../store";
+import { uploadFile } from "../utils/upload";
+import Map from "./map";
+import Overlay from "./overlay";
+import type { ExtraLayerProps } from "./stac-map";
+import { ErrorBoundaryAlert } from "./ui/error-alert";
 
 function MapFallback({ error }: { error: unknown }) {
   return (
@@ -26,7 +27,13 @@ function OverlayFallback({ error }: { error: unknown }) {
   );
 }
 
-export default function App({ footer }: { footer?: ReactNode }) {
+export default function App({
+  footer,
+  extraLayers,
+}: {
+  footer?: ReactNode;
+  extraLayers?: ExtraLayerProps[];
+}) {
   const setUploadedFile = useStore((state) => state.setUploadedFile);
   const setConnection = useStore((state) => state.setConnection);
   const { db } = useDuckDb();
@@ -66,7 +73,7 @@ export default function App({ footer }: { footer?: ReactNode }) {
             }}
           >
             <ErrorBoundary FallbackComponent={MapFallback}>
-              <Map />
+              <Map extraLayers={extraLayers} />
             </ErrorBoundary>
           </FileUpload.Dropzone>
         </FileUpload.Root>

@@ -25,10 +25,15 @@ import {
 } from "react-map-gl/maplibre";
 import { useColorModeValue } from "../components/ui/color-mode";
 import { useStore } from "../store";
+import type { ExtraLayerProps } from "./stac-map";
 
 type Color = [number, number, number, number];
 
-export default function Map() {
+export default function Map({
+  extraLayers,
+}: {
+  extraLayers?: ExtraLayerProps[];
+}) {
   const mapRef = useRef<MapRef>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const mapStyle = useColorModeValue(
@@ -310,6 +315,12 @@ export default function Map() {
         layers={layers}
         getCursor={(props) => getCursor(mapRef, props)}
       ></DeckGLOverlay>
+      {extraLayers &&
+        extraLayers.map((layer, i) => (
+          <Source key={"extra-layer-" + i} {...layer.source}>
+            <MaplibreLayer {...layer.layer} />
+          </Source>
+        ))}
     </MaplibreMap>
   );
 }

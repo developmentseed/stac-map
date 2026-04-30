@@ -5,12 +5,16 @@ import {
 } from "@chakra-ui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { type ReactNode, useEffect, useMemo } from "react";
-import { MapProvider } from "react-map-gl/maplibre";
+import { useEffect, useMemo, type ReactNode } from "react";
+import {
+  MapProvider,
+  type LayerProps,
+  type SourceProps,
+} from "react-map-gl/maplibre";
 import { AuthProvider, type AuthProviderProps } from "react-oidc-context";
-import App from "../app";
 import { AuthEnabledProvider } from "../contexts/auth-enabled";
 import { StacBrowserUrlProvider } from "../contexts/stac-browser";
+import App from "./app";
 import { HrefBootstrap } from "./href-bootstrap";
 import { OidcTokenSync } from "./oidc-token-sync";
 import { LoginSplash } from "./ui/auth";
@@ -18,6 +22,11 @@ import {
   ColorModeProvider,
   type ColorModeProviderProps,
 } from "./ui/color-mode";
+
+export interface ExtraLayerProps {
+  source: SourceProps;
+  layer: LayerProps;
+}
 
 export interface StacMapProps {
   /** Initial STAC URL to load on mount when no `?href=` is present in the URL. */
@@ -36,6 +45,8 @@ export interface StacMapProps {
   stacBrowserUrl?: string;
   /** Optional footer rendered below the map (e.g. version + changelog). */
   footer?: ReactNode;
+  /** Source and layer information for extra maplibre layers */
+  extraLayers?: ExtraLayerProps[];
 }
 
 let mountCount = 0;
@@ -54,6 +65,7 @@ export function StacMap({
   auth,
   stacBrowserUrl,
   footer,
+  extraLayers,
 }: StacMapProps) {
   useEffect(() => {
     mountCount += 1;
@@ -82,7 +94,7 @@ export function StacMap({
         <StacBrowserUrlProvider url={stacBrowserUrl}>
           <MapProvider>
             <HrefBootstrap defaultHref={defaultHref} syncWithUrl={syncWithUrl}>
-              <App footer={footer} />
+              <App footer={footer} extraLayers={extraLayers} />
             </HrefBootstrap>
           </MapProvider>
         </StacBrowserUrlProvider>
