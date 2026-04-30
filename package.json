@@ -27,6 +27,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build-preview": "tsc -b && vite build --base=/",
+    "build:lib": "vite build --config vite.lib.config.ts",
+    "prepublishOnly": "yarn build:lib",
     "lint": "eslint .",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
@@ -35,7 +37,6 @@
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^15.3.5",
-    "@chakra-ui/react": "^3.35.0",
     "@deck.gl/core": "^9.3.1",
     "@deck.gl/layers": "^9.3.1",
     "@deck.gl/mapbox": "^9.3.1",
@@ -43,10 +44,8 @@
     "@developmentseed/proj": "^0.5.0",
     "@devseed-ui/collecticons-chakra": "^4.0.0",
     "@duckdb/duckdb-wasm": "^1.32.0",
-    "@emotion/react": "^11.13.5",
     "@geoarrow/deck.gl-layers": "^0.3.2",
     "@geoarrow/geoarrow-js": "github:smohiudd/geoarrow-js#feature/wkb",
-    "@tanstack/react-query": "^5.100.5",
     "@turf/bbox": "^7.3.5",
     "@turf/bbox-polygon": "^7.3.5",
     "@turf/boolean-valid": "^7.3.5",
@@ -55,26 +54,24 @@
     "deck.gl": "^9.3.1",
     "duckdb-wasm-kit": "^0.1.38",
     "geotiff-geokeys-to-proj4": "^2024.4.13",
-    "maplibre-gl": "^5.24.0",
     "next-themes": "^0.4.3",
-    "oidc-client-ts": "^3.5.0",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
     "react-error-boundary": "^6.1.1",
     "react-icons": "^5.6.0",
-    "react-map-gl": "^8.1.1",
     "react-markdown": "^10.1.0",
-    "react-oidc-context": "^3.3.1",
     "shiki": "^4.0.2",
     "stac-ts": "^1.0.5",
     "stac-wasm": "^0.1.0",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@chakra-ui/react": "^3.35.0",
+    "@emotion/react": "^11.13.5",
     "@eslint/js": "^10.0.1",
+    "@microsoft/api-extractor": "^7.58.7",
+    "@tanstack/react-query": "^5.100.5",
     "@types/geojson": "^7946.0.16",
     "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.1.2",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/browser": "^4.1.5",
     "@vitest/browser-playwright": "^4.1.5",
@@ -84,21 +81,62 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
+    "maplibre-gl": "^5.24.0",
+    "oidc-client-ts": "^3.5.0",
     "playwright": "^1.59.1",
     "prettier": "^3.8.3",
     "prettier-plugin-organize-imports": "^4.1.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-map-gl": "^8.1.1",
+    "react-oidc-context": "^3.3.1",
     "rollup": "^4.60.2",
     "semantic-release": "^25.0.3",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.59.1",
     "vite": "^8.0.10",
+    "vite-plugin-dts": "^5.0.0",
     "vite-plugin-top-level-await": "^1.5.0",
     "vite-plugin-wasm": "^3.6.0",
     "vitest": "^4.1.5",
     "vitest-browser-react": "^2.2.0"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
-  "main": "eslint.config.js",
+  "main": "./dist/lib.js",
+  "module": "./dist/lib.js",
+  "types": "./dist/lib.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/lib.d.ts",
+      "import": "./dist/lib.js"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "peerDependencies": {
+    "@chakra-ui/react": "^3.35.0",
+    "@emotion/react": "^11.13.5",
+    "@tanstack/react-query": "^5.100.5",
+    "maplibre-gl": "^5.24.0",
+    "oidc-client-ts": "^3.5.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-map-gl": "^8.1.1",
+    "react-oidc-context": "^3.3.1"
+  },
+  "peerDependenciesMeta": {
+    "oidc-client-ts": {
+      "optional": true
+    },
+    "react-oidc-context": {
+      "optional": true
+    }
+  },
   "directories": {
     "doc": "docs",
     "test": "tests"

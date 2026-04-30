@@ -30,14 +30,14 @@ export async function executeDuckdbQuery({
   href: string;
   where?: string;
   hivePartitioning: boolean;
-}) {
+}): Promise<Table> {
   let query = `SELECT ${select} FROM read_parquet('${href}', hive_partitioning = ${hivePartitioning})`;
   if (where) {
     query += ` WHERE ${where}`;
   }
   console.log(query);
 
-  return await connection.query(query);
+  return (await connection.query(query)) as unknown as Table;
 }
 export type SupportedGeometryType = (typeof SUPPORTED_GEOMETRY_TYPES)[number];
 

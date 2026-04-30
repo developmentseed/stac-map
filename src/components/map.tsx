@@ -15,7 +15,6 @@ import {
 } from "@geoarrow/deck.gl-layers";
 import bbox from "@turf/bbox";
 import type { Feature, FeatureCollection } from "geojson";
-import "maplibre-gl/dist/maplibre-gl.css";
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import {
   Layer as MaplibreLayer,

@@ -1,4 +1,10 @@
-import type { StacAsset, StacCatalog, StacCollection, StacItem } from "stac-ts";
+import type {
+  StacAsset,
+  StacCatalog,
+  StacCollection,
+  StacItem,
+  StacLink,
+} from "stac-ts";
 
 export interface StacItemCollection {
   type: "FeatureCollection";
@@ -39,24 +45,19 @@ export interface StacSearch {
 
 export type DatetimeBounds = { start: Date | null; end: Date | null };
 
-type AssetWithAlternates = StacAsset & {
-  alternate?: { [key: string]: AlternateAsset };
-  bands?: Band[];
-  "eo:bands"?: Band[];
-};
-
-interface AlternateAsset {
+export interface AlternateAsset {
   href: string;
   title?: string;
 }
 
-interface Band {
+export interface Band {
   name?: string;
   common_name?: string;
   description?: string;
 }
 
-interface SignedItem extends StacItem {
-  bbox: BBox2D;
-  assets: { data: StacAsset };
+export interface AssetWithAlternates extends StacAsset {
+  alternate?: { [key: string]: AlternateAsset };
+  bands?: Band[];
+  "eo:bands"?: Band[];
 }

@@ -1,8 +1,7 @@
 import { AbsoluteCenter, Box, Center, FileUpload } from "@chakra-ui/react";
 import { useDuckDb } from "duckdb-wasm-kit";
-import { useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import Footer from "./components/footer";
 import Map from "./components/map";
 import Overlay from "./components/overlay";
 import { ErrorBoundaryAlert } from "./components/ui/error-alert";
@@ -27,27 +26,10 @@ function OverlayFallback({ error }: { error: unknown }) {
   );
 }
 
-export default function App() {
-  const href = useStore((state) => state.href);
-  const setHref = useStore((state) => state.setHref);
+export default function App({ footer }: { footer?: ReactNode }) {
   const setUploadedFile = useStore((state) => state.setUploadedFile);
   const setConnection = useStore((state) => state.setConnection);
   const { db } = useDuckDb();
-
-  useEffect(() => {
-    if (href && new URLSearchParams(location.search).get("href") !== href)
-      history.pushState(null, "", "?href=" + href);
-    else history.replaceState(null, "", null);
-  }, [href]);
-
-  useEffect(() => {
-    function handlePopState() {
-      setHref(new URLSearchParams(location.search).get("href"));
-    }
-    window.addEventListener("popstate", handlePopState);
-
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [setHref]);
 
   useEffect(() => {
     if (db) {
@@ -92,7 +74,7 @@ export default function App() {
       <ErrorBoundary FallbackComponent={OverlayFallback}>
         <Overlay />
       </ErrorBoundary>
-      <Footer />
+      {footer}
     </>
   );
 }
