@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.0.0-alpha](https://github.com/developmentseed/stac-map/compare/v1.6.1...v2.0.0-alpha) (2026-04-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* initial v2 with export ([#416](https://github.com/developmentseed/stac-map/issues/416))
+
+### Features
+
+* initial v2 with export ([#416](https://github.com/developmentseed/stac-map/issues/416)) ([778902e](https://github.com/developmentseed/stac-map/commit/778902e27bef0400dc8ef7dba6b287ad38bb6fcb))
+
+
+### Bug Fixes
+
+* prerelease versioning ([#418](https://github.com/developmentseed/stac-map/issues/418)) ([080c377](https://github.com/developmentseed/stac-map/commit/080c3771d926abb319ac046ddba50dcd670613cd))
+
 ## [1.6.1](https://github.com/developmentseed/stac-map/compare/v1.6.0...v1.6.1) (2026-04-30)
 
 
