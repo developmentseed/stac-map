@@ -1,6 +1,5 @@
 import type { StateCreator } from "zustand";
 import type { State } from ".";
-import { getInitialHref } from "../utils/href";
 
 export interface HrefState {
   href: string | null;
@@ -8,13 +7,11 @@ export interface HrefState {
   setHref: (href: string | null) => void;
 }
 
-const initialHref = getInitialHref();
-
 export const createHrefSlice: StateCreator<State, [], [], HrefState> = (
   set
 ) => ({
-  href: initialHref,
-  hrefIsParquet: !!initialHref?.endsWith(".parquet"),
+  href: null,
+  hrefIsParquet: false,
   setHref: (href) => {
     set({
       href,

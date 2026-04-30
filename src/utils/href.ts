@@ -2,8 +2,8 @@ export function getCurrentHref(): string {
   return new URLSearchParams(location.search).get("href") || "";
 }
 
-export function getInitialHref(): string | null {
-  const href = getCurrentHref() || import.meta.env.VITE_DEFAULT_HREF || "";
+export function resolveInitialHref(defaultHref?: string): string | null {
+  const href = getCurrentHref() || defaultHref || "";
   try {
     new URL(href);
   } catch {

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { type AssetsState, createAssetsSlice } from "./assets";
+import { type AuthState, createAuthSlice } from "./auth";
 import { type BboxState, createBboxSlice } from "./bbox";
 import { type CatalogsState, createCatalogsSlice } from "./catalogs";
 import { type CogsState, createCogsSlice } from "./cogs";
@@ -34,6 +35,7 @@ export interface State
     InputState,
     ValueState,
     AssetsState,
+    AuthState,
     BboxState,
     UploadedFileState,
     ConnectionState,
@@ -58,6 +60,7 @@ export const useStore = create<State>()(
       ...createCogsSlice(...a),
       ...createItemsSlice(...a),
       ...createAssetsSlice(...a),
+      ...createAuthSlice(...a),
       ...createBboxSlice(...a),
       ...createUploadedFileSlice(...a),
       ...createConnectionSlice(...a),

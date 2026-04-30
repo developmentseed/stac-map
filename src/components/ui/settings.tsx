@@ -15,8 +15,8 @@ import {
 } from "@chakra-ui/react";
 import * as React from "react";
 import { LuPlus, LuSettings, LuTrash2 } from "react-icons/lu";
+import { useAuthEnabled } from "../../contexts/auth-enabled";
 import { useStore } from "../../store";
-import { authConfig } from "./auth";
 
 interface SettingsButtonProps extends Omit<IconButtonProps, "aria-label"> {}
 
@@ -24,6 +24,7 @@ export const SettingsButton = React.forwardRef<
   HTMLButtonElement,
   SettingsButtonProps
 >(function SettingsButton(props, ref) {
+  const authEnabled = useAuthEnabled();
   const restrictToThreeBandCogs = useStore(
     (store) => store.restrictToThreeBandCogs
   );
@@ -85,7 +86,7 @@ export const SettingsButton = React.forwardRef<
                   </Text>
                 </Field.HelperText>
               </Field.Root>
-              {!authConfig && (
+              {!authEnabled && (
                 <>
                   <Separator my={4} />
                   <TokensSection />

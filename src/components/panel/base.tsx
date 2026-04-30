@@ -45,7 +45,7 @@ export function BasePanel({
       >
         {header}
       </Box>
-      <Box p={4} overflow={"scroll"} maxH={"80dvh"}>
+      <Box p={4} overflow={"auto"} maxH={"80dvh"}>
         {children}
       </Box>
     </Box>

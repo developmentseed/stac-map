@@ -17,28 +17,6 @@ import * as React from "react";
 import { LuLock, LuUser } from "react-icons/lu";
 import { useAuth } from "react-oidc-context";
 
-const authority = import.meta.env.VITE_AUTH_AUTHORITY as string | undefined;
-const clientId = import.meta.env.VITE_AUTH_CLIENT_ID as string | undefined;
-
-export const authConfig =
-  authority && clientId
-    ? {
-        authority,
-        client_id: clientId,
-        redirect_uri:
-          window.location.origin +
-          (import.meta.env.BASE_URL ?? "/").replace(/\/$/, "") +
-          "/",
-        onSigninCallback: () => {
-          window.history.replaceState(
-            {},
-            document.title,
-            window.location.pathname + window.location.search
-          );
-        },
-      }
-    : null;
-
 export function LoginSplash({ children }: { children: React.ReactNode }) {
   const { isLoading, isAuthenticated, signinRedirect, error } = useAuth();
 

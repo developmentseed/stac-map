@@ -1,3 +1,4 @@
+import { useStacBrowserUrl } from "@/contexts/stac-browser";
 import { useStore } from "@/store";
 import type { StacValue } from "@/types/stac";
 import { fitBounds } from "@/utils/map";
@@ -44,6 +45,7 @@ export default function Buttons({ value }: { value: StacValue }) {
   const { map } = useMap();
   const webMapLink = useStore((store) => store.webMapLink);
   const setWebMapLink = useStore((store) => store.setWebMapLink);
+  const stacBrowserUrl = useStacBrowserUrl();
 
   const tileJsonLinks = useMemo(
     () =>
@@ -70,11 +72,7 @@ export default function Buttons({ value }: { value: StacValue }) {
       {selfHref && (
         <Button asChild>
           <a
-            href={
-              (import.meta.env.VITE_STAC_BROWSER_URL ||
-                "https://radiantearth.github.io/stac-browser/#/external/") +
-              selfHref.replace(/^(https?:\/\/)/, "")
-            }
+            href={stacBrowserUrl + selfHref.replace(/^(https?:\/\/)/, "")}
             target="_blank"
           >
             <LuExternalLink />

@@ -1,31 +1,44 @@
-import { QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { MapProvider } from "react-map-gl/maplibre";
-import { AuthProvider } from "react-oidc-context";
-import App from "./app.tsx";
-import { authConfig, LoginSplash } from "./components/ui/auth.tsx";
-import { Provider } from "./components/ui/provider.tsx";
-import { queryClient } from "./query-client.ts";
+import changelog from "../CHANGELOG.md?raw";
+import { version } from "../package.json";
+import Footer from "./components/footer";
+import { StacMap, type StacMapProps } from "./components/stac-map";
 
-const inner = (
-  <QueryClientProvider client={queryClient}>
-    <MapProvider>
-      <App />
-    </MapProvider>
-  </QueryClientProvider>
-);
+const authority = import.meta.env.VITE_AUTH_AUTHORITY as string | undefined;
+const clientId = import.meta.env.VITE_AUTH_CLIENT_ID as string | undefined;
+
+const auth: StacMapProps["auth"] | undefined =
+  authority && clientId
+    ? {
+        authority,
+        client_id: clientId,
+        redirect_uri:
+          window.location.origin +
+          (import.meta.env.BASE_URL ?? "/").replace(/\/$/, "") +
+          "/",
+        onSigninCallback: () => {
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname + window.location.search
+          );
+        },
+      }
+    : undefined;
+
+const defaultHref = import.meta.env.VITE_DEFAULT_HREF as string | undefined;
+const stacBrowserUrl = import.meta.env.VITE_STAC_BROWSER_URL as
+  | string
+  | undefined;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <Provider>
-      {authConfig ? (
-        <AuthProvider {...authConfig}>
-          <LoginSplash>{inner}</LoginSplash>
-        </AuthProvider>
-      ) : (
-        inner
-      )}
-    </Provider>
+    <StacMap
+      defaultHref={defaultHref}
+      auth={auth}
+      stacBrowserUrl={stacBrowserUrl}
+      footer={<Footer version={version} changelog={changelog} />}
+    />
   </StrictMode>
 );

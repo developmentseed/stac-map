@@ -3,10 +3,13 @@ import { CloseButton, Dialog, HStack, Link, Portal } from "@chakra-ui/react";
 import { CollecticonBrandDevelopmentSeed2 } from "@devseed-ui/collecticons-chakra";
 import { LuGithub, LuHeart } from "react-icons/lu";
 import Markdown from "react-markdown";
-import changelog from "../../CHANGELOG.md?raw";
-import { version } from "../../package.json";
 
-export default function Footer() {
+export interface FooterProps {
+  version: string;
+  changelog?: string;
+}
+
+export default function Footer({ version, changelog }: FooterProps) {
   return (
     <HStack
       position={"absolute"}
@@ -35,11 +38,13 @@ export default function Footer() {
                   </Link>
                 </Dialog.Title>
               </Dialog.Header>
-              <Dialog.Body>
-                <Prose>
-                  <Markdown>{changelog}</Markdown>
-                </Prose>
-              </Dialog.Body>
+              {changelog && (
+                <Dialog.Body>
+                  <Prose>
+                    <Markdown>{changelog}</Markdown>
+                  </Prose>
+                </Dialog.Body>
+              )}
               <Dialog.CloseTrigger asChild>
                 <CloseButton size="sm" />
               </Dialog.CloseTrigger>
