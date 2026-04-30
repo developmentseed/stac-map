@@ -57,7 +57,7 @@ Then run `yarn build` and deploy the `dist/` directory to your static hosting pr
 ### React component
 
 For more flexible configuration, we provide a `StacMap` React component via [@developmentseed/stac-map](https://www.npmjs.com/package/@developmentseed/stac-map).
-To use it: 
+To use it:
 
 ```javascript
 import { StrictMode } from "react";
