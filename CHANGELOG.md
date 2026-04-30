@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.0-alpha.2](https://github.com/developmentseed/stac-map/compare/v2.0.0-alpha.1...v2.0.0-alpha.2) (2026-04-30)
+
+
+### Features
+
+* extra maplibre layers ([#421](https://github.com/developmentseed/stac-map/issues/421)) ([0732eaa](https://github.com/developmentseed/stac-map/commit/0732eaa20f2c8ef539e2d5f13b2158773a069802))
+
+
+### Bug Fixes
+
+* relative heights for app ([#423](https://github.com/developmentseed/stac-map/issues/423)) ([a5e4b0a](https://github.com/developmentseed/stac-map/commit/a5e4b0afa556c091fa2988d9ce2f7b488ade15be))
+
 ## [2.0.0-alpha.1](https://github.com/developmentseed/stac-map/compare/v2.0.0-alpha...v2.0.0-alpha.1) (2026-04-30)
 
 
