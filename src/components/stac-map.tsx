@@ -1,4 +1,5 @@
 import {
+  Box,
   ChakraProvider,
   defaultSystem,
   type SystemContext,
@@ -105,15 +106,17 @@ export function StacMap({
   return (
     <ChakraProvider value={chakraSystem ?? defaultSystem}>
       <ColorModeProvider {...colorMode}>
-        {auth ? (
-          <AuthProvider {...auth}>
-            <OidcTokenSync>
-              <LoginSplash>{inner}</LoginSplash>
-            </OidcTokenSync>
-          </AuthProvider>
-        ) : (
-          inner
-        )}
+        <Box position="relative" h="100%" w="100%" overflow="hidden">
+          {auth ? (
+            <AuthProvider {...auth}>
+              <OidcTokenSync>
+                <LoginSplash>{inner}</LoginSplash>
+              </OidcTokenSync>
+            </AuthProvider>
+          ) : (
+            inner
+          )}
+        </Box>
       </ColorModeProvider>
     </ChakraProvider>
   );

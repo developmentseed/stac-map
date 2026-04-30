@@ -5,6 +5,11 @@ import { version } from "../package.json";
 import Footer from "./components/footer";
 import { StacMap, type StacMapProps } from "./components/stac-map";
 
+const rootStyle = {
+  height: "100dvh",
+  width: "100dvw",
+} as const;
+
 const authority = import.meta.env.VITE_AUTH_AUTHORITY as string | undefined;
 const clientId = import.meta.env.VITE_AUTH_CLIENT_ID as string | undefined;
 
@@ -34,11 +39,13 @@ const stacBrowserUrl = import.meta.env.VITE_STAC_BROWSER_URL as
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <StacMap
-      defaultHref={defaultHref}
-      auth={auth}
-      stacBrowserUrl={stacBrowserUrl}
-      footer={<Footer version={version} changelog={changelog} />}
-    />
+    <div style={rootStyle}>
+      <StacMap
+        defaultHref={defaultHref}
+        auth={auth}
+        stacBrowserUrl={stacBrowserUrl}
+        footer={<Footer version={version} changelog={changelog} />}
+      />
+    </div>
   </StrictMode>
 );
