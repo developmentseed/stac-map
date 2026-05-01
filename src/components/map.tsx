@@ -32,7 +32,7 @@ export default function Map({
   useEffect(() => {
     const padding = {
       top: window.innerHeight / 10,
-      bottom: window.innerHeight / 20,
+      bottom: window.innerHeight / 10,
       right: window.innerWidth / 20,
       left: window.innerWidth / 20 + window.innerWidth / 3,
     };
