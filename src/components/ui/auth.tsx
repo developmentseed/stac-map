@@ -62,12 +62,7 @@ export const UserButton = React.forwardRef<HTMLButtonElement, UserButtonProps>(
     return (
       <Dialog.Root>
         <Dialog.Trigger asChild>
-          <IconButton
-            variant="ghost"
-            aria-label="User info"
-            ref={ref}
-            {...props}
-          >
+          <IconButton aria-label="User info" ref={ref} {...props}>
             <LuUser />
           </IconButton>
         </Dialog.Trigger>

@@ -19,7 +19,6 @@ export const ProjectionButton = React.forwardRef<
   return (
     <IconButton
       onClick={toggleProjection}
-      variant="ghost"
       aria-label="Toggle projection"
       ref={ref}
       {...props}
