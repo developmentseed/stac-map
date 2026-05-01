@@ -1,12 +1,23 @@
 import { useStore } from "@/store";
 import type { StacItemCollection } from "@/types/stac";
 import { fetchStacValue, getLinkHref, getSelfHref } from "@/utils/stac";
-import { Alert, Field, Fieldset, Input, SkeletonText } from "@chakra-ui/react";
+import {
+  Alert,
+  Button,
+  CloseButton,
+  Dialog,
+  Field,
+  Fieldset,
+  Input,
+  Portal,
+  SkeletonText,
+  Slider,
+} from "@chakra-ui/react";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { Feature } from "geojson";
 import { useEffect, useMemo, useState } from "react";
-import { LuFiles, LuFileSearch2 } from "react-icons/lu";
+import { LuFiles, LuFileSearch2, LuSettings2 } from "react-icons/lu";
 import type { StacCollection, StacItem, StacLink } from "stac-ts";
 import ItemCard from "./cards/item";
 import ItemListItem from "./list-items/item";
@@ -29,6 +40,15 @@ export default function Search({
     toDatetimeInputValue(collection.extent?.temporal?.interval?.[0]?.[1])
   );
   const [limit, setLimit] = useState("");
+
+  const startBoundMs = useMemo(
+    () => toMs(collection.extent?.temporal?.interval?.[0]?.[0]),
+    [collection]
+  );
+  const endBoundMs = useMemo(
+    () => toMs(collection.extent?.temporal?.interval?.[0]?.[1]),
+    [collection]
+  );
 
   const href = useMemo(() => {
     const url = new URL(link.href);
@@ -82,38 +102,48 @@ export default function Search({
               <Field.Label>Collection</Field.Label>
               <Input value={collection.id} disabled />
             </Field.Root>
-            <Field.Root>
-              <Field.Label>Start datetime</Field.Label>
-              <Input
-                size={"sm"}
-                type={"datetime-local"}
-                step={1}
-                value={startDatetime}
-                onChange={(e) => setStartDatetime(e.target.value)}
-              />
-            </Field.Root>
-            <Field.Root>
-              <Field.Label>End datetime</Field.Label>
-              <Input
-                size={"sm"}
-                type={"datetime-local"}
-                step={1}
-                value={endDatetime}
-                onChange={(e) => setEndDatetime(e.target.value)}
-              />
-            </Field.Root>
-            <Field.Root>
-              <Field.Label>Limit</Field.Label>
-              <Input
-                size={"sm"}
-                type={"number"}
-                min={1}
-                value={limit}
-                onChange={(e) => setLimit(e.target.value)}
-              />
-            </Field.Root>
+            <Fieldset.Root size={"sm"}>
+              <Fieldset.Legend>Datetime</Fieldset.Legend>
+              <Fieldset.Content>
+                <Field.Root orientation={"horizontal"}>
+                  <Field.Label color={"fg.muted"} fontWeight={"normal"}>
+                    Start
+                  </Field.Label>
+                  <Input
+                    size={"sm"}
+                    type={"datetime-local"}
+                    step={1}
+                    value={startDatetime}
+                    onChange={(e) => setStartDatetime(e.target.value)}
+                  />
+                </Field.Root>
+                <Field.Root orientation={"horizontal"}>
+                  <Field.Label color={"fg.muted"} fontWeight={"normal"}>
+                    End
+                  </Field.Label>
+                  <Input
+                    size={"sm"}
+                    type={"datetime-local"}
+                    step={1}
+                    value={endDatetime}
+                    onChange={(e) => setEndDatetime(e.target.value)}
+                  />
+                </Field.Root>
+                {startBoundMs !== undefined && endBoundMs !== undefined && (
+                  <DatetimeSlider
+                    startBoundMs={startBoundMs}
+                    endBoundMs={endBoundMs}
+                    startDatetime={startDatetime}
+                    endDatetime={endDatetime}
+                    setStartDatetime={setStartDatetime}
+                    setEndDatetime={setEndDatetime}
+                  />
+                )}
+              </Fieldset.Content>
+            </Fieldset.Root>
           </Fieldset.Content>
         </Fieldset.Root>
+        <AdvancedSettings limit={limit} setLimit={setLimit} />
       </Section>
       <Section icon={<LuFiles />} title="Items">
         {body}
@@ -129,6 +159,99 @@ export default function Search({
         />
       )}
     </>
+  );
+}
+
+function DatetimeSlider({
+  startBoundMs,
+  endBoundMs,
+  startDatetime,
+  endDatetime,
+  setStartDatetime,
+  setEndDatetime,
+}: {
+  startBoundMs: number;
+  endBoundMs: number;
+  startDatetime: string;
+  endDatetime: string;
+  setStartDatetime: (value: string) => void;
+  setEndDatetime: (value: string) => void;
+}) {
+  const startMs = datetimeInputToMs(startDatetime) ?? startBoundMs;
+  const endMs = datetimeInputToMs(endDatetime) ?? endBoundMs;
+  const [value, setValue] = useState([startMs, endMs]);
+  const [lastExternal, setLastExternal] = useState([startMs, endMs]);
+  if (lastExternal[0] !== startMs || lastExternal[1] !== endMs) {
+    setLastExternal([startMs, endMs]);
+    setValue([startMs, endMs]);
+  }
+  return (
+    <Slider.Root
+      size={"sm"}
+      min={startBoundMs}
+      max={endBoundMs}
+      value={value}
+      onValueChange={(e) => setValue(e.value)}
+      onValueChangeEnd={(e) => {
+        setStartDatetime(msToDatetimeInputValue(e.value[0]));
+        setEndDatetime(msToDatetimeInputValue(e.value[1]));
+      }}
+    >
+      <Slider.Control>
+        <Slider.Track>
+          <Slider.Range />
+        </Slider.Track>
+        <Slider.Thumbs />
+      </Slider.Control>
+    </Slider.Root>
+  );
+}
+
+function AdvancedSettings({
+  limit,
+  setLimit,
+}: {
+  limit: string;
+  setLimit: (value: string) => void;
+}) {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger asChild>
+        <Button variant={"ghost"} size={"sm"} mt={2}>
+          <LuSettings2 />
+          Advanced settings
+        </Button>
+      </Dialog.Trigger>
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.Header>
+              <Dialog.Title>Advanced settings</Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body>
+              <Fieldset.Root size={"sm"}>
+                <Fieldset.Content>
+                  <Field.Root>
+                    <Field.Label>Limit</Field.Label>
+                    <Input
+                      size={"sm"}
+                      type={"number"}
+                      min={1}
+                      value={limit}
+                      onChange={(e) => setLimit(e.target.value)}
+                    />
+                  </Field.Root>
+                </Fieldset.Content>
+              </Fieldset.Root>
+            </Dialog.Body>
+            <Dialog.CloseTrigger asChild>
+              <CloseButton size={"sm"} />
+            </Dialog.CloseTrigger>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   );
 }
 
@@ -187,6 +310,22 @@ function toDatetimeInputValue(datetime: string | null | undefined): string {
   if (!datetime) return "";
   const date = new Date(datetime);
   return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 19);
+}
+
+function toMs(datetime: string | null | undefined): number | undefined {
+  if (!datetime) return undefined;
+  const ms = new Date(datetime).getTime();
+  return Number.isNaN(ms) ? undefined : ms;
+}
+
+function datetimeInputToMs(value: string): number | undefined {
+  if (!value) return undefined;
+  const ms = new Date(`${value}Z`).getTime();
+  return Number.isNaN(ms) ? undefined : ms;
+}
+
+function msToDatetimeInputValue(ms: number): string {
+  return new Date(ms).toISOString().slice(0, 19);
 }
 
 function Error({ error }: { error: Error | null }) {
