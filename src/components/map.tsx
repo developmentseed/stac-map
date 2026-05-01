@@ -19,6 +19,7 @@ export default function Map({
 }) {
   const projection = useStore((store) => store.projection);
   const layers = useStore((store) => store.layers);
+  const setMapBbox = useStore((store) => store.setMapBbox);
   const mapRef = useRef<MapRef>(null);
   const mapStyle = useColorModeValue(
     "positron-gl-style",
@@ -37,6 +38,14 @@ export default function Map({
       projection={projection}
       mapStyle={`https://basemaps.cartocdn.com/gl/${mapStyle}/style.json`}
       style={{ zIndex: 0 }}
+      onLoad={(e) => {
+        const b = e.target.getBounds();
+        setMapBbox([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()]);
+      }}
+      onMoveEnd={(e) => {
+        const b = e.target.getBounds();
+        setMapBbox([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()]);
+      }}
     >
       <DeckGLOverlay
         layers={Object.values(layers)}

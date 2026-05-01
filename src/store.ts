@@ -5,6 +5,7 @@ import { persist } from "zustand/middleware";
 
 export type Color = [number, number, number, number];
 export type Projection = "mercator" | "globe";
+export type BBox2D = [number, number, number, number];
 
 export interface State {
   href: string | null;
@@ -23,6 +24,8 @@ export interface State {
   toggleProjection: () => void;
   oidcAccessToken: string | null;
   setOidcAccessToken: (token: string | null) => void;
+  mapBbox: BBox2D | null;
+  setMapBbox: (bbox: BBox2D | null) => void;
 }
 
 export const useStore = create<State>()(
@@ -65,6 +68,8 @@ export const useStore = create<State>()(
         }),
       oidcAccessToken: null,
       setOidcAccessToken: (oidcAccessToken) => set({ oidcAccessToken }),
+      mapBbox: null,
+      setMapBbox: (mapBbox) => set({ mapBbox }),
     }),
     {
       name: "stac-map-settings",

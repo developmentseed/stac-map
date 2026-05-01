@@ -1,15 +1,20 @@
 import { useStore } from "@/store";
 import type { StacCollections } from "@/types/stac";
-import { fetchStacValue, getLinkHref } from "@/utils/stac";
+import { fetchStacValue, getLinkHref, getSelfHref } from "@/utils/stac";
 import {
   ActionBar,
   Alert,
   Button,
   ButtonGroup,
+  Checkbox,
+  HStack,
+  IconButton,
   List,
+  Popover,
   Portal,
   SegmentGroup,
   SkeletonText,
+  Span,
   Stack,
 } from "@chakra-ui/react";
 import { GeoJsonLayer } from "@deck.gl/layers";
@@ -24,6 +29,7 @@ import {
   LuFolderPlus,
   LuForward,
   LuList,
+  LuListFilter,
   LuPause,
   LuPlay,
   LuSquare,
@@ -88,14 +94,27 @@ export default function Collections({ link }: { link: StacLink }) {
 type View = "list" | "card";
 
 function Data({ collections }: { collections: StacCollection[] }) {
+  const [includeGlobal, setIncludeGlobal] = useState(false);
+  const [filterByMapBbox, setFilterByMapBbox] = useState(true);
   const [hovered, setHovered] = useState<StacCollection>();
   const [view, setView] = useState<View>("card");
-  const fillColor = useStore((state) => state.fillColor);
-  const lineColor = useStore((state) => state.lineColor);
-  const setLayer = useStore((state) => state.setLayer);
+  const setHref = useStore((store) => store.setHref);
+  const fillColor = useStore((store) => store.fillColor);
+  const lineColor = useStore((store) => store.lineColor);
+  const setLayer = useStore((store) => store.setLayer);
+  const mapBbox = useStore((store) => store.mapBbox);
+
+  const filteredCollections = useMemo(() => {
+    return collections.filter(
+      (collection) =>
+        !filterByMapBbox ||
+        !mapBbox ||
+        isCollectionInBbox(collection, mapBbox, includeGlobal)
+    );
+  }, [collections, includeGlobal, filterByMapBbox, mapBbox]);
 
   const bounds = useMemo(() => {
-    return collections
+    return filteredCollections
       ?.map((collection) => ({
         id: collection.id,
         bbox: sanitizeBbox(getSpatialExtent(collection)),
@@ -105,7 +124,7 @@ function Data({ collections }: { collections: StacCollection[] }) {
           !!entry.bbox && !isGlobalBbox(entry.bbox)
       )
       .map(({ id, bbox }) => bboxPolygon(bbox, { id }));
-  }, [collections]);
+  }, [filteredCollections]);
 
   useEffect(() => {
     setLayer(
@@ -120,6 +139,13 @@ function Data({ collections }: { collections: StacCollection[] }) {
         getLineWidth: 2,
         lineWidthUnits: "pixels",
         pickable: true,
+        onClick: (e) => {
+          const collection: StacCollection | undefined =
+            e.object &&
+            collections.find((collection) => collection.id === e.object?.id);
+          const href = collection && getSelfHref(collection);
+          if (href) setHref(href);
+        },
         onHover: (e) => {
           if (e.object && !isGlobalBbox(e.object.bbox))
             setHovered(
@@ -138,29 +164,71 @@ function Data({ collections }: { collections: StacCollection[] }) {
 
   return (
     <Stack>
-      <SegmentGroup.Root
-        size={"xs"}
-        alignSelf={"flex-end"}
-        value={view}
-        onValueChange={(e) => e.value && setView(e.value as View)}
-      >
-        <SegmentGroup.Indicator />
-        <SegmentGroup.Items
-          items={[
-            {
-              value: "list",
-              label: <LuList />,
-            },
-            {
-              value: "card",
-              label: <LuSquare />,
-            },
-          ]}
-        />
-      </SegmentGroup.Root>
+      <HStack display={"flex"}>
+        <SegmentGroup.Root
+          size={"xs"}
+          value={view}
+          onValueChange={(e) => e.value && setView(e.value as View)}
+        >
+          <SegmentGroup.Indicator />
+          <SegmentGroup.Items
+            items={[
+              {
+                value: "list",
+                label: <LuList />,
+              },
+              {
+                value: "card",
+                label: <LuSquare />,
+              },
+            ]}
+          />
+        </SegmentGroup.Root>
+        <Span flex={1} />
+        <Popover.Root>
+          <Popover.Trigger asChild>
+            <IconButton size={"xs"} variant={"outline"} aria-label={"Filters"}>
+              <LuListFilter />
+            </IconButton>
+          </Popover.Trigger>
+          <Portal>
+            <Popover.Positioner>
+              <Popover.Content>
+                <Popover.Arrow />
+                <Popover.Body>
+                  <Stack gap={2}>
+                    <Checkbox.Root
+                      size={"sm"}
+                      checked={includeGlobal}
+                      onCheckedChange={(e) => setIncludeGlobal(!!e.checked)}
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                      <Checkbox.Label>
+                        Include global collections
+                      </Checkbox.Label>
+                    </Checkbox.Root>
+                    <Checkbox.Root
+                      size={"sm"}
+                      checked={filterByMapBbox}
+                      onCheckedChange={(e) => setFilterByMapBbox(!!e.checked)}
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                      <Checkbox.Label>
+                        Filter by map bounding box
+                      </Checkbox.Label>
+                    </Checkbox.Root>
+                  </Stack>
+                </Popover.Body>
+              </Popover.Content>
+            </Popover.Positioner>
+          </Portal>
+        </Popover.Root>
+      </HStack>
       {view === "card" ? (
         <Stack>
-          {collections.map((collection) => (
+          {filteredCollections.map((collection) => (
             <CollectionCard
               key={collection.id}
               collection={collection}
@@ -171,7 +239,7 @@ function Data({ collections }: { collections: StacCollection[] }) {
         </Stack>
       ) : (
         <List.Root variant={"plain"}>
-          {collections.map((collection) => (
+          {filteredCollections.map((collection) => (
             <CollectionListItem
               key={collection.id}
               collection={collection}
@@ -286,4 +354,42 @@ function sanitizeBbox(bbox: BBox | SpatialExtent): BBox2D | null {
       Math.min(bbox[3], 90),
     ];
   }
+}
+
+function isCollectionInBbox(
+  collection: StacCollection,
+  bbox: BBox2D,
+  includeGlobalCollections: boolean
+) {
+  if (bbox[2] - bbox[0] >= 360) {
+    // A global bbox always contains every collection
+    return true;
+  } else if (includeGlobalCollections && isGlobalCollection(collection)) {
+    // A global collection is always there
+    return true;
+  }
+  const collectionBbox = collection?.extent?.spatial?.bbox?.[0];
+  if (collectionBbox) {
+    return (
+      !(
+        collectionBbox[0] < bbox[0] &&
+        collectionBbox[1] < bbox[1] &&
+        collectionBbox[2] > bbox[2] &&
+        collectionBbox[3] > bbox[3]
+      ) &&
+      !(
+        collectionBbox[0] > bbox[2] ||
+        collectionBbox[1] > bbox[3] ||
+        collectionBbox[2] < bbox[0] ||
+        collectionBbox[3] < bbox[1]
+      )
+    );
+  } else {
+    return false;
+  }
+}
+
+function isGlobalCollection(collection: StacCollection) {
+  const bbox = getSpatialExtent(collection);
+  return isGlobalBbox(bbox);
 }
