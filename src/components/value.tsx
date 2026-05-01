@@ -1,5 +1,10 @@
 import type { StacValue } from "@/types/stac";
-import { getLink, getStacTitle, getThumbnailAsset } from "@/utils/stac";
+import {
+  conformsToFreeTextCollectionSearch,
+  getLink,
+  getStacTitle,
+  getThumbnailAsset,
+} from "@/utils/stac";
 import { Badge, Heading, HStack, Separator, Stack } from "@chakra-ui/react";
 import Breadcrumbs from "./breadcrumbs";
 import Buttons from "./buttons";
@@ -28,7 +33,12 @@ export default function Value({ value }: { value: StacValue }) {
 
       <Separator my={2} />
 
-      {collectionsLink && <Collections link={collectionsLink} />}
+      {collectionsLink && (
+        <Collections
+          link={collectionsLink}
+          hasCollectionSearch={conformsToFreeTextCollectionSearch(value)}
+        />
+      )}
     </Stack>
   );
 }

@@ -7,8 +7,12 @@ import {
   Button,
   ButtonGroup,
   Checkbox,
+  CloseButton,
+  Group,
   HStack,
   IconButton,
+  Input,
+  InputGroup,
   List,
   Popover,
   Portal,
@@ -24,14 +28,16 @@ import {
 } from "@tanstack/react-query";
 import bboxPolygon from "@turf/bbox-polygon";
 import type { BBox, Feature } from "geojson";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   LuFolderPlus,
+  LuFolderSearch2,
   LuForward,
   LuList,
   LuListFilter,
   LuPause,
   LuPlay,
+  LuSearch,
   LuSquare,
 } from "react-icons/lu";
 import type { SpatialExtent, StacCollection, StacLink } from "stac-ts";
@@ -40,13 +46,28 @@ import CollectionListItem from "./list-items/collection";
 import Section from "./ui/section";
 
 type BBox2D = [number, number, number, number];
+type View = "list" | "card";
 
-export default function Collections({ link }: { link: StacLink }) {
+export default function Collections({
+  link,
+  hasCollectionSearch,
+}: {
+  link: StacLink;
+  hasCollectionSearch: boolean;
+}) {
+  const [search, setSearch] = useState("");
   const [isFetchingAll, setIsFetchingAll] = useState(false);
+
+  const href = useMemo(() => {
+    const url = new URL(link.href);
+    if (search) url.searchParams.set("q", search);
+    return url.toString();
+  }, [link, search]);
+
   const result = useInfiniteQuery({
-    queryKey: ["collections", link.href],
+    queryKey: ["collections", href],
     queryFn: async ({ pageParam }) => fetchStacValue({ href: pageParam }),
-    initialPageParam: link.href,
+    initialPageParam: href,
     getNextPageParam: (lastPage: StacCollections | null) =>
       lastPage ? getLinkHref(lastPage, "next") : undefined,
   });
@@ -67,7 +88,18 @@ export default function Collections({ link }: { link: StacLink }) {
   }, [result.data]);
 
   const body = collections ? (
-    <Data collections={collections} />
+    collections.length > 0 ? (
+      <Data collections={collections} />
+    ) : (
+      <Alert.Root status={"info"}>
+        <Alert.Indicator />
+        <Alert.Content>
+          <Alert.Title>
+            No collections found{search && ` for search "${search}"`}
+          </Alert.Title>
+        </Alert.Content>
+      </Alert.Root>
+    )
   ) : result.isLoading ? (
     <Loading />
   ) : (
@@ -75,10 +107,11 @@ export default function Collections({ link }: { link: StacLink }) {
   );
   return (
     <>
+      {hasCollectionSearch && <Search setSearch={setSearch} />}
       <Section icon={<LuFolderPlus />} title="Collections">
         {body}
       </Section>
-      {collections && (
+      {collections && collections.length > 0 && (
         <Actions
           collections={collections}
           numberMatched={numberMatched}
@@ -90,8 +123,6 @@ export default function Collections({ link }: { link: StacLink }) {
     </>
   );
 }
-
-type View = "list" | "card";
 
 function Data({ collections }: { collections: StacCollection[] }) {
   const [includeGlobal, setIncludeGlobal] = useState(false);
@@ -160,7 +191,7 @@ function Data({ collections }: { collections: StacCollection[] }) {
     );
 
     return () => setLayer("collections", undefined);
-  }, [bounds, setLayer, fillColor, hovered, lineColor, collections]);
+  }, [bounds, setLayer, fillColor, hovered, lineColor, collections, setHref]);
 
   return (
     <Stack>
@@ -290,7 +321,7 @@ function Actions({
           <ActionBar.Content>
             <ActionBar.SelectionTrigger>
               {collections.length}
-              {numberMatched && "/" + numberMatched} collection
+              {numberMatched !== undefined && "/" + numberMatched} collection
               {collections.length !== 1 && "s"} loaded
             </ActionBar.SelectionTrigger>
             {hasNextPage && (
@@ -392,4 +423,48 @@ function isCollectionInBbox(
 function isGlobalCollection(collection: StacCollection) {
   const bbox = getSpatialExtent(collection);
   return isGlobalBbox(bbox);
+}
+
+function Search({ setSearch }: { setSearch: (search: string) => void }) {
+  const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  return (
+    <Section icon={<LuFolderSearch2 />} title="Collection search">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          setSearch(input);
+        }}
+      >
+        <Group width={"full"}>
+          <InputGroup
+            flex={1}
+            endElement={
+              input && (
+                <CloseButton
+                  size={"xs"}
+                  me="-2"
+                  onClick={() => {
+                    setInput("");
+                    setSearch("");
+                    inputRef.current?.focus();
+                  }}
+                />
+              )
+            }
+          >
+            <Input
+              placeholder="Free-text collection search"
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.currentTarget.value)}
+            />
+          </InputGroup>
+          <Button variant={"outline"} type="submit">
+            <LuSearch /> Search
+          </Button>
+        </Group>
+      </form>
+    </Section>
+  );
 }

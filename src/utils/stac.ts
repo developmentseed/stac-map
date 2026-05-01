@@ -109,3 +109,16 @@ function makeHrefsAbsolute<T extends StacValue>(value: T, baseUrl: string): T {
   }
   return value;
 }
+
+export function conformsToFreeTextCollectionSearch(value: StacValue) {
+  if (value.type !== "Catalog" || !Array.isArray(value.conformsTo))
+    return false;
+
+  return !!(value.conformsTo as string[]).find((conformsTo) => {
+    const parts = conformsTo.split("/");
+    return (
+      parts[2] === "api.stacspec.org" &&
+      parts[4] === "collection-search#free-text"
+    );
+  });
+}
