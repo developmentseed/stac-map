@@ -18,8 +18,7 @@ export function buildAuth({
   return {
     authority,
     client_id: clientId,
-    redirect_uri:
-      window.location.origin + basePath.replace(/\/$/, "") + "/",
+    redirect_uri: window.location.origin + basePath.replace(/\/$/, "") + "/",
     onSigninCallback: () => {
       window.history.replaceState(
         {},
