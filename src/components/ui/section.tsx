@@ -13,7 +13,7 @@ export default function Section({
 }) {
   return (
     <Collapsible.Root defaultOpen>
-      <Collapsible.Trigger display="flex" gap={2} py={2} cursor={"pointer"}>
+      <Collapsible.Trigger display="flex" gap={2} py={3} cursor={"pointer"}>
         <HStack>
           <Collapsible.Indicator
             transition="transform 0.2s"

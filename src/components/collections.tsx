@@ -2,51 +2,29 @@ import { useStore } from "@/store";
 import type { StacCollections } from "@/types/stac";
 import { fetchStacValue, getLinkHref, getSelfHref } from "@/utils/stac";
 import {
-  ActionBar,
   Alert,
   Button,
-  ButtonGroup,
   Checkbox,
   CloseButton,
   Group,
-  HStack,
-  IconButton,
   Input,
   InputGroup,
-  List,
-  Popover,
-  Portal,
-  SegmentGroup,
   SkeletonText,
-  Span,
-  Stack,
 } from "@chakra-ui/react";
 import { GeoJsonLayer } from "@deck.gl/layers";
-import {
-  useInfiniteQuery,
-  type UseInfiniteQueryResult,
-} from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import bboxPolygon from "@turf/bbox-polygon";
 import type { BBox, Feature } from "geojson";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  LuFolderPlus,
-  LuFolderSearch2,
-  LuForward,
-  LuList,
-  LuListFilter,
-  LuPause,
-  LuPlay,
-  LuSearch,
-  LuSquare,
-} from "react-icons/lu";
+import { LuFolderPlus, LuFolderSearch2, LuSearch } from "react-icons/lu";
 import type { SpatialExtent, StacCollection, StacLink } from "stac-ts";
 import CollectionCard from "./cards/collection";
 import CollectionListItem from "./list-items/collection";
+import EntityList from "./ui/entity-list";
+import PaginationBar from "./ui/pagination-bar";
 import Section from "./ui/section";
 
 type BBox2D = [number, number, number, number];
-type View = "list" | "card";
 
 export default function Collections({
   link,
@@ -112,12 +90,15 @@ export default function Collections({
         {body}
       </Section>
       {collections && collections.length > 0 && (
-        <Actions
-          collections={collections}
+        <PaginationBar
+          count={collections.length}
           numberMatched={numberMatched}
+          noun={"collection"}
           isFetchingAll={isFetchingAll}
           setIsFetchingAll={setIsFetchingAll}
-          {...result}
+          fetchNextPage={result.fetchNextPage}
+          isFetchingNextPage={result.isFetchingNextPage}
+          hasNextPage={result.hasNextPage}
         />
       )}
     </>
@@ -129,7 +110,6 @@ function Data({ collections }: { collections: StacCollection[] }) {
   const [filterByMapBbox, setFilterByMapBbox] = useState(true);
   const [filterText, setFilterText] = useState("");
   const [hovered, setHovered] = useState<StacCollection>();
-  const [view, setView] = useState<View>("card");
   const setHref = useStore((store) => store.setHref);
   const fillColor = useStore((store) => store.fillColor);
   const lineColor = useStore((store) => store.lineColor);
@@ -204,113 +184,69 @@ function Data({ collections }: { collections: StacCollection[] }) {
     return () => setLayer("collections", undefined);
   }, [bounds, setLayer, fillColor, hovered, lineColor, collections, setHref]);
 
+  const filters = (
+    <>
+      <Checkbox.Root
+        size={"sm"}
+        checked={includeGlobal}
+        onCheckedChange={(e) => setIncludeGlobal(!!e.checked)}
+      >
+        <Checkbox.HiddenInput />
+        <Checkbox.Control />
+        <Checkbox.Label>Include global collections</Checkbox.Label>
+      </Checkbox.Root>
+      <Checkbox.Root
+        size={"sm"}
+        checked={filterByMapBbox}
+        onCheckedChange={(e) => setFilterByMapBbox(!!e.checked)}
+      >
+        <Checkbox.HiddenInput />
+        <Checkbox.Control />
+        <Checkbox.Label>Filter by map bounding box</Checkbox.Label>
+      </Checkbox.Root>
+      <InputGroup
+        startElement={<LuSearch />}
+        endElement={
+          filterText && (
+            <CloseButton
+              size={"xs"}
+              variant={"plain"}
+              onClick={() => setFilterText("")}
+            />
+          )
+        }
+      >
+        <Input
+          size={"sm"}
+          placeholder={"Filter by id or title"}
+          value={filterText}
+          onChange={(e) => setFilterText(e.target.value)}
+        />
+      </InputGroup>
+    </>
+  );
+
   return (
-    <Stack>
-      <HStack display={"flex"}>
-        <SegmentGroup.Root
-          size={"xs"}
-          value={view}
-          onValueChange={(e) => e.value && setView(e.value as View)}
-        >
-          <SegmentGroup.Indicator />
-          <SegmentGroup.Items
-            items={[
-              {
-                value: "list",
-                label: <LuList />,
-              },
-              {
-                value: "card",
-                label: <LuSquare />,
-              },
-            ]}
-          />
-        </SegmentGroup.Root>
-        <Span flex={1} />
-        <Popover.Root>
-          <Popover.Trigger asChild>
-            <IconButton size={"xs"} variant={"outline"} aria-label={"Filters"}>
-              <LuListFilter />
-            </IconButton>
-          </Popover.Trigger>
-          <Portal>
-            <Popover.Positioner>
-              <Popover.Content>
-                <Popover.Arrow />
-                <Popover.Body>
-                  <Stack gap={2}>
-                    <Checkbox.Root
-                      size={"sm"}
-                      checked={includeGlobal}
-                      onCheckedChange={(e) => setIncludeGlobal(!!e.checked)}
-                    >
-                      <Checkbox.HiddenInput />
-                      <Checkbox.Control />
-                      <Checkbox.Label>
-                        Include global collections
-                      </Checkbox.Label>
-                    </Checkbox.Root>
-                    <Checkbox.Root
-                      size={"sm"}
-                      checked={filterByMapBbox}
-                      onCheckedChange={(e) => setFilterByMapBbox(!!e.checked)}
-                    >
-                      <Checkbox.HiddenInput />
-                      <Checkbox.Control />
-                      <Checkbox.Label>
-                        Filter by map bounding box
-                      </Checkbox.Label>
-                    </Checkbox.Root>
-                    <InputGroup
-                      startElement={<LuSearch />}
-                      endElement={
-                        filterText && (
-                          <CloseButton
-                            size={"xs"}
-                            variant={"plain"}
-                            onClick={() => setFilterText("")}
-                          />
-                        )
-                      }
-                    >
-                      <Input
-                        size={"sm"}
-                        placeholder={"Filter by id or title"}
-                        value={filterText}
-                        onChange={(e) => setFilterText(e.target.value)}
-                      />
-                    </InputGroup>
-                  </Stack>
-                </Popover.Body>
-              </Popover.Content>
-            </Popover.Positioner>
-          </Portal>
-        </Popover.Root>
-      </HStack>
-      {view === "card" ? (
-        <Stack>
-          {filteredCollections.map((collection) => (
-            <CollectionCard
-              key={collection.id}
-              collection={collection}
-              hovered={hovered}
-              setHovered={setHovered}
-            />
-          ))}
-        </Stack>
-      ) : (
-        <List.Root variant={"plain"}>
-          {filteredCollections.map((collection) => (
-            <CollectionListItem
-              key={collection.id}
-              collection={collection}
-              hovered={hovered}
-              setHovered={setHovered}
-            />
-          ))}
-        </List.Root>
+    <EntityList
+      items={filteredCollections}
+      getKey={(collection) => collection.id}
+      renderCard={(collection) => (
+        <CollectionCard
+          collection={collection}
+          hovered={hovered}
+          setHovered={setHovered}
+        />
       )}
-    </Stack>
+      renderListItem={(collection) => (
+        <CollectionListItem
+          collection={collection}
+          hovered={hovered}
+          setHovered={setHovered}
+        />
+      )}
+      filters={filters}
+      defaultView={"card"}
+    />
   );
 }
 
@@ -327,55 +263,6 @@ function Error({ error }: { error: Error | null }) {
         {error && <Alert.Description>{error.message}</Alert.Description>}
       </Alert.Content>
     </Alert.Root>
-  );
-}
-
-function Actions({
-  collections,
-  numberMatched,
-  isFetchingAll,
-  setIsFetchingAll,
-  fetchNextPage,
-  isFetchingNextPage,
-  hasNextPage,
-}: {
-  collections: StacCollection[];
-  numberMatched: number | undefined;
-  isFetchingAll: boolean;
-  setIsFetchingAll: (isFetchingAll: boolean) => void;
-} & UseInfiniteQueryResult) {
-  return (
-    <ActionBar.Root open={true}>
-      <Portal>
-        <ActionBar.Positioner>
-          <ActionBar.Content>
-            <ActionBar.SelectionTrigger>
-              {collections.length}
-              {numberMatched !== undefined && "/" + numberMatched} collection
-              {collections.length !== 1 && "s"} loaded
-            </ActionBar.SelectionTrigger>
-            {hasNextPage && (
-              <>
-                <ActionBar.Separator />
-                <ButtonGroup size={"sm"} variant={"outline"}>
-                  <Button
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage || isFetchingAll}
-                  >
-                    <LuForward />
-                    Next page
-                  </Button>
-                  <Button onClick={() => setIsFetchingAll(!isFetchingAll)}>
-                    {isFetchingAll ? <LuPause /> : <LuPlay />}
-                    Fetch all
-                  </Button>
-                </ButtonGroup>
-              </>
-            )}
-          </ActionBar.Content>
-        </ActionBar.Positioner>
-      </Portal>
-    </ActionBar.Root>
   );
 }
 

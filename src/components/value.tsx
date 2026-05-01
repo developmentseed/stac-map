@@ -1,3 +1,4 @@
+import { useStacValue } from "@/hooks/stac";
 import type { StacValue } from "@/types/stac";
 import {
   conformsToFreeTextCollectionSearch,
@@ -6,9 +7,12 @@ import {
   getThumbnailAsset,
 } from "@/utils/stac";
 import { Badge, Heading, HStack, Separator, Stack } from "@chakra-ui/react";
+import { useMemo } from "react";
+import type { StacLink } from "stac-ts";
 import Breadcrumbs from "./breadcrumbs";
 import Buttons from "./buttons";
 import Collections from "./collections";
+import Search from "./search";
 import Description from "./ui/description";
 import Thumbnail from "./ui/thumbnail";
 
@@ -17,6 +21,7 @@ export default function Value({ value }: { value: StacValue }) {
   const thumbnailAsset = getThumbnailAsset(value);
   const description = value.description as string;
   const collectionsLink = getLink(value, "data");
+  const rootLink = getLink(value, "root");
 
   return (
     <Stack>
@@ -39,6 +44,19 @@ export default function Value({ value }: { value: StacValue }) {
           hasCollectionSearch={conformsToFreeTextCollectionSearch(value)}
         />
       )}
+      {rootLink && <Root link={rootLink} value={value} />}
     </Stack>
   );
+}
+
+function Root({ value, link }: { value: StacValue; link: StacLink }) {
+  const result = useStacValue({ href: link.href });
+
+  const searchLink = useMemo(() => {
+    return result.data && getLink(result.data, "search");
+  }, [result]);
+
+  return searchLink && value.type === "Collection" ? (
+    <Search link={searchLink} collection={value} />
+  ) : null;
 }
