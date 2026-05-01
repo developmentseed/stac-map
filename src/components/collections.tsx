@@ -127,6 +127,7 @@ export default function Collections({
 function Data({ collections }: { collections: StacCollection[] }) {
   const [includeGlobal, setIncludeGlobal] = useState(false);
   const [filterByMapBbox, setFilterByMapBbox] = useState(true);
+  const [filterText, setFilterText] = useState("");
   const [hovered, setHovered] = useState<StacCollection>();
   const [view, setView] = useState<View>("card");
   const setHref = useStore((store) => store.setHref);
@@ -136,13 +137,23 @@ function Data({ collections }: { collections: StacCollection[] }) {
   const mapBbox = useStore((store) => store.mapBbox);
 
   const filteredCollections = useMemo(() => {
-    return collections.filter(
-      (collection) =>
-        !filterByMapBbox ||
-        !mapBbox ||
-        isCollectionInBbox(collection, mapBbox, includeGlobal)
-    );
-  }, [collections, includeGlobal, filterByMapBbox, mapBbox]);
+    const needle = filterText.trim().toLowerCase();
+    return collections.filter((collection) => {
+      if (
+        filterByMapBbox &&
+        mapBbox &&
+        !isCollectionInBbox(collection, mapBbox, includeGlobal)
+      ) {
+        return false;
+      }
+      if (needle) {
+        const id = collection.id?.toLowerCase() ?? "";
+        const title = collection.title?.toLowerCase() ?? "";
+        if (!id.includes(needle) && !title.includes(needle)) return false;
+      }
+      return true;
+    });
+  }, [collections, includeGlobal, filterByMapBbox, mapBbox, filterText]);
 
   const bounds = useMemo(() => {
     return filteredCollections
@@ -250,6 +261,25 @@ function Data({ collections }: { collections: StacCollection[] }) {
                         Filter by map bounding box
                       </Checkbox.Label>
                     </Checkbox.Root>
+                    <InputGroup
+                      startElement={<LuSearch />}
+                      endElement={
+                        filterText && (
+                          <CloseButton
+                            size={"xs"}
+                            variant={"plain"}
+                            onClick={() => setFilterText("")}
+                          />
+                        )
+                      }
+                    >
+                      <Input
+                        size={"sm"}
+                        placeholder={"Filter by id or title"}
+                        value={filterText}
+                        onChange={(e) => setFilterText(e.target.value)}
+                      />
+                    </InputGroup>
                   </Stack>
                 </Popover.Body>
               </Popover.Content>
