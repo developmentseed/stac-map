@@ -14,7 +14,7 @@ import {
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import bboxPolygon from "@turf/bbox-polygon";
-import type { BBox, Feature } from "geojson";
+import type { Feature } from "geojson";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LuFolderPlus, LuFolderSearch2, LuSearch } from "react-icons/lu";
 import type { SpatialExtent, StacCollection, StacLink } from "stac-ts";
@@ -23,8 +23,6 @@ import CollectionListItem from "./list-items/collection";
 import EntityList from "./ui/entity-list";
 import PaginationBar from "./ui/pagination-bar";
 import Section from "./ui/section";
-
-type BBox2D = [number, number, number, number];
 
 export default function Collections({
   link,
@@ -260,14 +258,6 @@ function Error({ error }: { error: Error | null }) {
   );
 }
 
-function getSpatialExtent(collection: StacCollection): SpatialExtent {
-  const spatialExtent = collection.extent?.spatial;
-  // check if bbox is a list of lists, otherwise its a single list of nums
-  return Array.isArray(spatialExtent?.bbox?.[0])
-    ? spatialExtent?.bbox[0]
-    : (spatialExtent?.bbox as unknown as SpatialExtent);
-}
-
 function isGlobalBbox(bbox: BBox2D | SpatialExtent) {
   const sanitizedBbox = sanitizeBbox(bbox);
   return (
@@ -277,25 +267,6 @@ function isGlobalBbox(bbox: BBox2D | SpatialExtent) {
     sanitizedBbox[2] == 180 &&
     sanitizedBbox[3] == 90
   );
-}
-
-function sanitizeBbox(bbox: BBox | SpatialExtent): BBox2D | null {
-  if (!bbox) return null;
-  if (bbox.length === 6) {
-    return [
-      Math.max(bbox[0], -180),
-      Math.max(bbox[1], -90),
-      Math.min(bbox[3], 180),
-      Math.min(bbox[4], 90),
-    ];
-  } else {
-    return [
-      Math.max(bbox[0], -180),
-      Math.max(bbox[1], -90),
-      Math.min(bbox[2], 180),
-      Math.min(bbox[3], 90),
-    ];
-  }
 }
 
 function isCollectionInBbox(

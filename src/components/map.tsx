@@ -1,11 +1,13 @@
 import { useStore } from "@/store";
+import type { BBox2D } from "@/types/map";
 import { type DeckProps } from "@deck.gl/core";
+import type { LngLatLike, MapRef } from "react-map-gl/maplibre";
+
 import { MapboxOverlay } from "@deck.gl/mapbox";
-import { type RefObject, useRef } from "react";
+import { type RefObject, useEffect, useRef } from "react";
 import {
   Layer as MaplibreLayer,
   Map as MaplibreMap,
-  type MapRef,
   Source,
   useControl,
 } from "react-map-gl/maplibre";
@@ -19,12 +21,24 @@ export default function Map({
 }) {
   const projection = useStore((store) => store.projection);
   const layers = useStore((store) => store.layers);
+  const valueBbox = useStore((store) => store.valueBbox);
   const setMapBbox = useStore((store) => store.setMapBbox);
   const mapRef = useRef<MapRef>(null);
   const mapStyle = useColorModeValue(
     "positron-gl-style",
     "dark-matter-gl-style"
   );
+
+  useEffect(() => {
+    const padding = {
+      top: window.innerHeight / 10,
+      bottom: window.innerHeight / 20,
+      right: window.innerWidth / 20,
+      left: window.innerWidth / 20 + window.innerWidth / 3,
+    };
+    if (mapRef.current && valueBbox)
+      mapRef.current.fitBounds(bboxToBounds(valueBbox), { padding });
+  }, [valueBbox]);
 
   return (
     <MaplibreMap
@@ -87,4 +101,11 @@ function getCursor(
     mapRef.current.getCanvas().style.cursor = cursor;
   }
   return cursor;
+}
+
+function bboxToBounds(bbox: BBox2D): [LngLatLike, LngLatLike] {
+  return [
+    [bbox[0], bbox[1]],
+    [bbox[2], bbox[3]],
+  ];
 }

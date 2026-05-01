@@ -1,4 +1,6 @@
-import type { StacLink } from "stac-ts";
+import type { BBox } from "geojson";
+import type { SpatialExtent, StacCollection, StacLink } from "stac-ts";
+import type { BBox2D } from "../store";
 import type { StacAssets, StacValue } from "../types/stac";
 import { getAccessToken } from "./auth";
 import { toAbsoluteUrl } from "./href";
@@ -121,4 +123,31 @@ export function conformsToFreeTextCollectionSearch(value: StacValue) {
       parts[4] === "collection-search#free-text"
     );
   });
+}
+
+export function getSpatialExtent(collection: StacCollection): SpatialExtent {
+  const spatialExtent = collection.extent?.spatial;
+  // check if bbox is a list of lists, otherwise its a single list of nums
+  return Array.isArray(spatialExtent?.bbox?.[0])
+    ? spatialExtent?.bbox[0]
+    : (spatialExtent?.bbox as unknown as SpatialExtent);
+}
+
+export function sanitizeBbox(bbox: BBox | SpatialExtent): BBox2D | null {
+  if (!bbox) return null;
+  if (bbox.length === 6) {
+    return [
+      Math.max(bbox[0], -180),
+      Math.max(bbox[1], -90),
+      Math.min(bbox[3], 180),
+      Math.min(bbox[4], 90),
+    ];
+  } else {
+    return [
+      Math.max(bbox[0], -180),
+      Math.max(bbox[1], -90),
+      Math.min(bbox[2], 180),
+      Math.min(bbox[3], 90),
+    ];
+  }
 }
