@@ -1,22 +1,22 @@
-import { useStore } from "@/store";
 import type { StacCollection } from "stac-ts";
 import ValueListItem from "./value";
 
 export default function CollectionListItem({
   collection,
+  hovered,
+  setHovered,
 }: {
   collection: StacCollection;
+  hovered: StacCollection | undefined;
+  setHovered: (collection: StacCollection | undefined) => void;
 }) {
-  const hoveredCollection = useStore((store) => store.hoveredCollection);
-  const setHoveredCollection = useStore((store) => store.setHoveredCollection);
-
   return (
     <ValueListItem
       value={collection}
-      isHovered={collection.id === hoveredCollection?.id}
-      onMouseEnter={() => setHoveredCollection(collection)}
+      isHovered={collection.id === hovered?.id}
+      onMouseEnter={() => setHovered(collection)}
       onMouseLeave={() => {
-        if (hoveredCollection?.id === collection.id) setHoveredCollection(null);
+        if (hovered?.id === collection.id) setHovered(undefined);
       }}
     />
   );

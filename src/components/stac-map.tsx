@@ -16,7 +16,7 @@ import { AuthProvider, type AuthProviderProps } from "react-oidc-context";
 import { AuthEnabledProvider } from "../contexts/auth-enabled";
 import { StacBrowserUrlProvider } from "../contexts/stac-browser";
 import App from "./app";
-import { HrefBootstrap } from "./href-bootstrap";
+import HrefBootstrap from "./href-bootstrap";
 import { OidcTokenSync } from "./oidc-token-sync";
 import { LoginSplash } from "./ui/auth";
 import {
@@ -32,8 +32,6 @@ export interface ExtraLayerProps {
 export interface StacMapProps {
   /** Initial STAC URL to load on mount when no `?href=` is present in the URL. */
   defaultHref?: string;
-  /** When true (default), the `href` state is mirrored into `?href=` and reacts to popstate. */
-  syncWithUrl?: boolean;
   /** Override the Chakra UI system. Defaults to `defaultSystem`. */
   chakraSystem?: SystemContext;
   /** Forwarded to the internal next-themes ColorModeProvider. */
@@ -65,7 +63,6 @@ let mountCount = 0;
  */
 export function StacMap({
   defaultHref,
-  syncWithUrl = true,
   chakraSystem,
   colorMode,
   queryClient: externalQueryClient,
@@ -101,9 +98,8 @@ export function StacMap({
       <AuthEnabledProvider enabled={!!auth}>
         <StacBrowserUrlProvider url={stacBrowserUrl}>
           <MapProvider>
-            <HrefBootstrap defaultHref={defaultHref} syncWithUrl={syncWithUrl}>
-              <App footer={footer} extraLayers={extraLayers} />
-            </HrefBootstrap>
+            <HrefBootstrap defaultHref={defaultHref} />
+            <App footer={footer} extraLayers={extraLayers} />
           </MapProvider>
         </StacBrowserUrlProvider>
       </AuthEnabledProvider>
@@ -114,9 +110,8 @@ export function StacMap({
     <Box position="relative" h="100%" w="100%" overflow="hidden">
       {auth ? (
         <AuthProvider {...auth}>
-          <OidcTokenSync>
-            <LoginSplash>{inner}</LoginSplash>
-          </OidcTokenSync>
+          <OidcTokenSync />
+          <LoginSplash>{inner}</LoginSplash>
         </AuthProvider>
       ) : (
         inner

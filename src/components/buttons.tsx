@@ -1,7 +1,5 @@
 import { useStacBrowserUrl } from "@/contexts/stac-browser";
-import { useStore } from "@/store";
 import type { StacValue } from "@/types/stac";
-import { fitBounds } from "@/utils/map";
 import { getSelfHref } from "@/utils/stac";
 import {
   Button,
@@ -13,17 +11,8 @@ import {
   Portal,
   createShikiAdapter,
 } from "@chakra-ui/react";
-import { useMemo } from "react";
-import {
-  LuExternalLink,
-  LuEye,
-  LuEyeClosed,
-  LuFileJson,
-  LuFocus,
-} from "react-icons/lu";
-import { useMap } from "react-map-gl/maplibre";
+import { LuExternalLink, LuFileJson } from "react-icons/lu";
 import type { HighlighterGeneric } from "shiki";
-import type { StacLink } from "stac-ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({
@@ -42,33 +31,10 @@ const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({
 
 export default function Buttons({ value }: { value: StacValue }) {
   const selfHref = getSelfHref(value);
-  const { map } = useMap();
-  const webMapLink = useStore((store) => store.webMapLink);
-  const setWebMapLink = useStore((store) => store.setWebMapLink);
   const stacBrowserUrl = useStacBrowserUrl();
-
-  const tileJsonLinks = useMemo(
-    () =>
-      (value.links as StacLink[] | undefined)?.filter(
-        (link) => link.rel === "tilejson"
-      ) ?? [],
-    [value]
-  );
-
-  const wmtsLinks = useMemo(
-    () =>
-      (value.links as StacLink[] | undefined)?.filter(
-        (link) => link.rel === "wmts"
-      ) ?? [],
-    [value]
-  );
 
   return (
     <ButtonGroup variant={"surface"} size="xs" flexWrap="wrap">
-      <Button onClick={() => map && fitBounds(map, value, null)}>
-        <LuFocus />
-        Zoom to extents
-      </Button>
       {selfHref && (
         <Button asChild>
           <a
@@ -80,47 +46,6 @@ export default function Buttons({ value }: { value: StacValue }) {
           </a>
         </Button>
       )}
-      {tileJsonLinks.map((link) => {
-        const active = webMapLink?.href === link.href;
-        return (
-          <Button
-            key={link.href}
-            onClick={() =>
-              setWebMapLink(active ? null : { href: link.href, rel: link.rel })
-            }
-          >
-            {active ? <LuEye /> : <LuEyeClosed />}
-            {link.title || "Tiles"}
-          </Button>
-        );
-      })}
-      {wmtsLinks.map((link) => {
-        const active =
-          webMapLink?.href === link.href && webMapLink?.rel === "wmts";
-        return (
-          <Button
-            key={link.href}
-            onClick={() =>
-              setWebMapLink(
-                active
-                  ? null
-                  : {
-                      href: link.href,
-                      rel: link.rel,
-                      "wmts:layer": link["wmts:layer"] as string[] | undefined,
-                      "wmts:dimensions": link["wmts:dimensions"] as
-                        | Record<string, string>
-                        | undefined,
-                      type: link.type,
-                    }
-              )
-            }
-          >
-            {active ? <LuEye /> : <LuEyeClosed />}
-            {link.title || "WMTS"}
-          </Button>
-        );
-      })}
       <JsonButton value={value} />
     </ButtonGroup>
   );

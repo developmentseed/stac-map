@@ -2,11 +2,7 @@ import { Prose } from "@/components/ui/prose";
 import Thumbnail from "@/components/ui/thumbnail";
 import { useStore } from "@/store";
 import type { StacValue } from "@/types/stac";
-import {
-  getSelfHref,
-  getStacValueTitle,
-  getThumbnailAsset,
-} from "@/utils/stac";
+import { getSelfHref, getStacTitle, getThumbnailAsset } from "@/utils/stac";
 import { Card } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 import { MarkdownHooks } from "react-markdown";
@@ -41,7 +37,7 @@ export default function ValueCard({
       onClick={() => selfHref && setHref(selfHref)}
     >
       <Card.Body gap={2}>
-        <Card.Title>{getStacValueTitle(value)}</Card.Title>
+        <Card.Title>{getStacTitle(value)}</Card.Title>
         <Card.Description as="div">
           {thumbnailAsset && <Thumbnail asset={thumbnailAsset} />}
           {description && (

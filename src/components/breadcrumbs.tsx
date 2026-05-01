@@ -1,8 +1,8 @@
 import { StacIcon } from "@/components/ui/stac";
-import { useStacJson } from "@/hooks/stac";
+import { useStacValue } from "@/hooks/stac";
 import { useStore } from "@/store";
 import type { StacValue } from "@/types/stac";
-import { getLink, getStacValueTitle, getStacValueType } from "@/utils/stac";
+import { getLink, getStacTitle, getStacType } from "@/utils/stac";
 import { Breadcrumb, HStack } from "@chakra-ui/react";
 import { useMemo } from "react";
 import type { StacLink } from "stac-ts";
@@ -14,7 +14,7 @@ export default function Breadcrumbs({ value }: { value: StacValue }) {
         {getBreadcrumbLink(value)}
         <Breadcrumb.Item>
           <Breadcrumb.CurrentLink>
-            <HStack whiteSpace="nowrap">{getStacValueType(value)}</HStack>
+            <HStack whiteSpace="nowrap">{getStacType(value)}</HStack>
           </Breadcrumb.CurrentLink>
         </Breadcrumb.Item>
       </Breadcrumb.List>
@@ -30,13 +30,13 @@ function BreadcrumbLink({
   root?: boolean;
 }) {
   const setHref = useStore((store) => store.setHref);
-  const result = useStacJson({ href: link.href });
+  const result = useStacValue({ href: link.href });
   const text = useMemo(() => {
     return result.data ? (
       <HStack gap={1} whiteSpace="nowrap">
         <StacIcon value={result.data} />
         <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
-          {getStacValueTitle(result.data)}
+          {getStacTitle(result.data)}
         </span>
       </HStack>
     ) : (
