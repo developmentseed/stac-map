@@ -1,14 +1,16 @@
-import { useStore } from "@/store";
+import { type BBox2D, useStore } from "@/store";
 import type { StacItemCollection } from "@/types/stac";
 import { fetchStacValue, getLinkHref, getSelfHref } from "@/utils/stac";
 import {
   Alert,
   Button,
+  Checkbox,
   CloseButton,
   Dialog,
   Field,
   Fieldset,
   Input,
+  InputGroup,
   Portal,
   SkeletonText,
   Slider,
@@ -17,7 +19,12 @@ import { GeoJsonLayer } from "@deck.gl/layers";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { Feature } from "geojson";
 import { useEffect, useMemo, useState } from "react";
-import { LuFiles, LuFileSearch2, LuSettings2 } from "react-icons/lu";
+import {
+  LuFiles,
+  LuFileSearch2,
+  LuSearch,
+  LuSettings2,
+} from "react-icons/lu";
 import type { StacCollection, StacItem, StacLink } from "stac-ts";
 import ItemCard from "./cards/item";
 import ItemListItem from "./list-items/item";
@@ -32,14 +39,25 @@ export default function Search({
   link: StacLink;
   collection: StacCollection;
 }) {
+  const setSearchParams = useStore((store) => store.setSearchParams);
   const [isFetchingAll, setIsFetchingAll] = useState(false);
-  const [startDatetime, setStartDatetime] = useState(() =>
-    toDatetimeInputValue(collection.extent?.temporal?.interval?.[0]?.[0])
+  const [startDatetime, setStartDatetime] = useState(
+    () =>
+      useStore.getState().searchParams[collection.id]?.startDatetime ??
+      toDatetimeInputValue(collection.extent?.temporal?.interval?.[0]?.[0])
   );
-  const [endDatetime, setEndDatetime] = useState(() =>
-    toDatetimeInputValue(collection.extent?.temporal?.interval?.[0]?.[1])
+  const [endDatetime, setEndDatetime] = useState(
+    () =>
+      useStore.getState().searchParams[collection.id]?.endDatetime ??
+      toDatetimeInputValue(collection.extent?.temporal?.interval?.[0]?.[1])
   );
-  const [limit, setLimit] = useState("");
+  const [limit, setLimit] = useState(
+    () => useStore.getState().searchParams[collection.id]?.limit ?? ""
+  );
+
+  useEffect(() => {
+    setSearchParams(collection.id, { startDatetime, endDatetime, limit });
+  }, [collection.id, startDatetime, endDatetime, limit, setSearchParams]);
 
   const startBoundMs = useMemo(
     () => toMs(collection.extent?.temporal?.interval?.[0]?.[0]),
@@ -214,8 +232,20 @@ function AdvancedSettings({
   limit: string;
   setLimit: (value: string) => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const [draftLimit, setDraftLimit] = useState(limit);
+  const save = () => {
+    setLimit(draftLimit);
+    setOpen(false);
+  };
   return (
-    <Dialog.Root>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(e) => {
+        if (e.open) setDraftLimit(limit);
+        setOpen(e.open);
+      }}
+    >
       <Dialog.Trigger asChild>
         <Button variant={"ghost"} size={"sm"} mt={2}>
           <LuSettings2 />
@@ -229,22 +259,35 @@ function AdvancedSettings({
             <Dialog.Header>
               <Dialog.Title>Advanced settings</Dialog.Title>
             </Dialog.Header>
-            <Dialog.Body>
-              <Fieldset.Root size={"sm"}>
-                <Fieldset.Content>
-                  <Field.Root>
-                    <Field.Label>Limit</Field.Label>
-                    <Input
-                      size={"sm"}
-                      type={"number"}
-                      min={1}
-                      value={limit}
-                      onChange={(e) => setLimit(e.target.value)}
-                    />
-                  </Field.Root>
-                </Fieldset.Content>
-              </Fieldset.Root>
-            </Dialog.Body>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                save();
+              }}
+            >
+              <Dialog.Body>
+                <Fieldset.Root size={"sm"}>
+                  <Fieldset.Content>
+                    <Field.Root>
+                      <Field.Label>Limit</Field.Label>
+                      <Input
+                        size={"sm"}
+                        type={"number"}
+                        min={1}
+                        value={draftLimit}
+                        onChange={(e) => setDraftLimit(e.target.value)}
+                      />
+                    </Field.Root>
+                  </Fieldset.Content>
+                </Fieldset.Root>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Dialog.ActionTrigger asChild>
+                  <Button variant={"outline"}>Cancel</Button>
+                </Dialog.ActionTrigger>
+                <Button type={"submit"}>Save</Button>
+              </Dialog.Footer>
+            </form>
             <Dialog.CloseTrigger asChild>
               <CloseButton size={"sm"} />
             </Dialog.CloseTrigger>
@@ -256,18 +299,37 @@ function AdvancedSettings({
 }
 
 function Items({ items }: { items: StacItem[] }) {
+  const [filterByMapBbox, setFilterByMapBbox] = useState(true);
+  const [filterText, setFilterText] = useState("");
   const [hovered, setHovered] = useState<StacItem>();
   const setHref = useStore((store) => store.setHref);
   const setLayer = useStore((store) => store.setLayer);
   const fillColor = useStore((store) => store.fillColor);
   const lineColor = useStore((store) => store.lineColor);
+  const mapBbox = useStore((store) => store.mapBbox);
+
+  const filteredItems = useMemo(() => {
+    const needle = filterText.trim().toLowerCase();
+    return items.filter((item) => {
+      if (filterByMapBbox && mapBbox && !isItemInBbox(item, mapBbox)) {
+        return false;
+      }
+      if (needle) {
+        const id = item.id?.toLowerCase() ?? "";
+        const title =
+          (item.properties?.title as string | undefined)?.toLowerCase() ?? "";
+        if (!id.includes(needle) && !title.includes(needle)) return false;
+      }
+      return true;
+    });
+  }, [items, filterByMapBbox, mapBbox, filterText]);
 
   useEffect(() => {
     setLayer(
       "items",
       new GeoJsonLayer({
         id: "items",
-        data: items as Feature[],
+        data: filteredItems as Feature[],
         filled: true,
         getFillColor: (e: Feature) =>
           e.id === hovered?.id ? fillColor : [0, 0, 0, 0],
@@ -277,13 +339,13 @@ function Items({ items }: { items: StacItem[] }) {
         pickable: true,
         onClick: (e) => {
           const item: StacItem | undefined =
-            e.object && items.find((item) => item.id === e.object?.id);
+            e.object && filteredItems.find((item) => item.id === e.object?.id);
           const href = item && getSelfHref(item);
           if (href) setHref(href);
         },
         onHover: (e) => {
           if (e.object)
-            setHovered(items.find((item) => item.id === e.object.id));
+            setHovered(filteredItems.find((item) => item.id === e.object.id));
           else setHovered(undefined);
         },
         updateTriggers: {
@@ -293,16 +355,62 @@ function Items({ items }: { items: StacItem[] }) {
     );
 
     return () => setLayer("items", undefined);
-  }, [setLayer, fillColor, hovered, lineColor, items, setHref]);
+  }, [setLayer, fillColor, hovered, lineColor, filteredItems, setHref]);
+
+  const filters = (
+    <>
+      <Checkbox.Root
+        size={"sm"}
+        checked={filterByMapBbox}
+        onCheckedChange={(e) => setFilterByMapBbox(!!e.checked)}
+      >
+        <Checkbox.HiddenInput />
+        <Checkbox.Control />
+        <Checkbox.Label>Filter by map bounding box</Checkbox.Label>
+      </Checkbox.Root>
+      <InputGroup
+        startElement={<LuSearch />}
+        endElement={
+          filterText && (
+            <CloseButton
+              size={"xs"}
+              variant={"plain"}
+              onClick={() => setFilterText("")}
+            />
+          )
+        }
+      >
+        <Input
+          size={"sm"}
+          placeholder={"Filter by id or title"}
+          value={filterText}
+          onChange={(e) => setFilterText(e.target.value)}
+        />
+      </InputGroup>
+    </>
+  );
 
   return (
     <EntityList
-      items={items}
+      items={filteredItems}
       getKey={(item) => item.id}
       renderCard={(item) => <ItemCard item={item} />}
       renderListItem={(item) => <ItemListItem item={item} />}
+      filters={filters}
       defaultView={"list"}
     />
+  );
+}
+
+function isItemInBbox(item: StacItem, bbox: BBox2D): boolean {
+  const itemBbox = item.bbox as BBox2D | undefined;
+  if (!itemBbox) return false;
+  if (bbox[2] - bbox[0] >= 360) return true;
+  return !(
+    itemBbox[0] > bbox[2] ||
+    itemBbox[1] > bbox[3] ||
+    itemBbox[2] < bbox[0] ||
+    itemBbox[3] < bbox[1]
   );
 }
 

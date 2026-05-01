@@ -7,6 +7,12 @@ export type Color = [number, number, number, number];
 export type Projection = "mercator" | "globe";
 export type BBox2D = [number, number, number, number];
 
+export interface SearchParams {
+  startDatetime: string;
+  endDatetime: string;
+  limit: string;
+}
+
 export interface State {
   href: string | null;
   hrefIsParquet: boolean;
@@ -29,6 +35,8 @@ export interface State {
   setValueBbox: (bbox: BBox2D | null) => void;
   mapBbox: BBox2D | null;
   setMapBbox: (bbox: BBox2D | null) => void;
+  searchParams: Record<string, SearchParams>;
+  setSearchParams: (collectionId: string, params: SearchParams) => void;
 }
 
 export const useStore = create<State>()(
@@ -76,6 +84,11 @@ export const useStore = create<State>()(
       setValueBbox: (valueBbox) => set({ valueBbox }),
       mapBbox: null,
       setMapBbox: (mapBbox) => set({ mapBbox }),
+      searchParams: {},
+      setSearchParams: (collectionId, params) =>
+        set({
+          searchParams: { ...get().searchParams, [collectionId]: params },
+        }),
     }),
     {
       name: "stac-map-settings",
