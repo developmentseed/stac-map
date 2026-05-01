@@ -23,10 +23,10 @@ export default function Search({
 }) {
   const [isFetchingAll, setIsFetchingAll] = useState(false);
   const [startDatetime, setStartDatetime] = useState(() =>
-    toDateInputValue(collection.extent?.temporal?.interval?.[0]?.[0])
+    toDatetimeInputValue(collection.extent?.temporal?.interval?.[0]?.[0])
   );
   const [endDatetime, setEndDatetime] = useState(() =>
-    toDateInputValue(collection.extent?.temporal?.interval?.[0]?.[1])
+    toDatetimeInputValue(collection.extent?.temporal?.interval?.[0]?.[1])
   );
   const [limit, setLimit] = useState("");
 
@@ -86,7 +86,8 @@ export default function Search({
               <Field.Label>Start datetime</Field.Label>
               <Input
                 size={"sm"}
-                type={"date"}
+                type={"datetime-local"}
+                step={1}
                 value={startDatetime}
                 onChange={(e) => setStartDatetime(e.target.value)}
               />
@@ -95,7 +96,8 @@ export default function Search({
               <Field.Label>End datetime</Field.Label>
               <Input
                 size={"sm"}
-                type={"date"}
+                type={"datetime-local"}
+                step={1}
                 value={endDatetime}
                 onChange={(e) => setEndDatetime(e.target.value)}
               />
@@ -181,10 +183,10 @@ function Items({ items }: { items: StacItem[] }) {
   );
 }
 
-function toDateInputValue(datetime: string | null | undefined): string {
+function toDatetimeInputValue(datetime: string | null | undefined): string {
   if (!datetime) return "";
   const date = new Date(datetime);
-  return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 19);
 }
 
 function Error({ error }: { error: Error | null }) {
@@ -200,5 +202,5 @@ function Error({ error }: { error: Error | null }) {
 }
 
 function toStacDatetime(datetime: string | null): string {
-  return datetime ? new Date(datetime).toISOString() : "..";
+  return datetime ? new Date(`${datetime}Z`).toISOString() : "..";
 }
