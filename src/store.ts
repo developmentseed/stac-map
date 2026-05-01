@@ -24,6 +24,7 @@ export interface State {
   toggleProjection: () => void;
   oidcAccessToken: string | null;
   setOidcAccessToken: (token: string | null) => void;
+  tokens: Record<string, string>;
   mapBbox: BBox2D | null;
   setMapBbox: (bbox: BBox2D | null) => void;
 }
@@ -68,13 +69,17 @@ export const useStore = create<State>()(
         }),
       oidcAccessToken: null,
       setOidcAccessToken: (oidcAccessToken) => set({ oidcAccessToken }),
+      tokens: {},
       mapBbox: null,
       setMapBbox: (mapBbox) => set({ mapBbox }),
     }),
     {
       name: "stac-map-settings",
       partialize: (state) => ({
+        fillColor: state.fillColor,
+        lineColor: state.lineColor,
         projection: state.projection,
+        tokens: state.tokens,
       }),
     }
   )

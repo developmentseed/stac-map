@@ -79,7 +79,7 @@ export default function Collections({
       </Alert.Root>
     )
   ) : result.isLoading ? (
-    <Loading />
+    <SkeletonText h={3} />
   ) : (
     <Error error={result.error} />
   );
@@ -96,9 +96,7 @@ export default function Collections({
           noun={"collection"}
           isFetchingAll={isFetchingAll}
           setIsFetchingAll={setIsFetchingAll}
-          fetchNextPage={result.fetchNextPage}
-          isFetchingNextPage={result.isFetchingNextPage}
-          hasNextPage={result.hasNextPage}
+          {...result}
         />
       )}
     </>
@@ -248,10 +246,6 @@ function Data({ collections }: { collections: StacCollection[] }) {
       defaultView={"card"}
     />
   );
-}
-
-function Loading() {
-  return <SkeletonText h={3} />;
 }
 
 function Error({ error }: { error: Error | null }) {

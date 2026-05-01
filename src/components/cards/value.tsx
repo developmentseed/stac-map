@@ -28,7 +28,7 @@ export default function ValueCard({
   return (
     <Card.Root
       size={"sm"}
-      variant={"subtle"}
+      variant={"outline"}
       borderWidth={2}
       borderColor={isHovered ? "colorPalette.solid" : "transparent"}
       cursor={"pointer"}

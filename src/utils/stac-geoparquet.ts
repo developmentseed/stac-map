@@ -9,7 +9,6 @@ import {
   vectorFromArray,
 } from "apache-arrow";
 import * as stacWasm from "stac-wasm";
-import type { DatetimeFilter } from "../store/datetime";
 import type { StacItemCollection } from "../types/stac";
 
 export const SUPPORTED_GEOMETRY_TYPES = [
@@ -105,33 +104,18 @@ export async function fetchStacGeoparquetDatetimeBounds({
 export async function fetchStacGeoparquetTable({
   href,
   connection,
-  datetimeFilter,
   hivePartitioning,
 }: {
   href: string;
   connection: AsyncDuckDBConnection;
-  datetimeFilter: DatetimeFilter | null;
   hivePartitioning: boolean;
 }) {
-  let where: string | undefined;
-  if (datetimeFilter) {
-    const { startDatetimeColumnName, endDatetimeColumnName } =
-      await fetchStacGeoparquetDatetimeColumns(
-        href,
-        connection,
-        hivePartitioning
-      );
-    if (!startDatetimeColumnName || !endDatetimeColumnName) return null;
-    const { start, end } = datetimeFilter;
-    where = `${startDatetimeColumnName} >= '${start.toISOString()}' AND ${endDatetimeColumnName} <= '${end.toISOString()}'`;
-  }
   const result = await executeDuckdbQuery({
     connection,
     href,
     hivePartitioning,
     select:
       "ST_AsWKB(geometry) AS geometry, ST_GeometryType(geometry) AS geometry_type, id",
-    where,
   });
   const geometry: Uint8Array[] = result.getChildAt(0)?.toArray();
   const geometryType = result.getChildAt(1)?.toArray()[0]?.toLowerCase() as
