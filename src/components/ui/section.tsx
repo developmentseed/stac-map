@@ -1,4 +1,4 @@
-import { Collapsible, HStack } from "@chakra-ui/react";
+import { Box, Collapsible, HStack } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 import { LuChevronRight } from "react-icons/lu";
 
@@ -12,8 +12,18 @@ export default function Section({
   children: ReactNode;
 }) {
   return (
-    <Collapsible.Root defaultOpen>
-      <Collapsible.Trigger display="flex" gap={2} py={3} cursor={"pointer"}>
+    <Collapsible.Root
+      defaultOpen
+      borderTopWidth={"1px"}
+      borderColor={"border.emphasized"}
+    >
+      <Collapsible.Trigger
+        display="flex"
+        gap={0}
+        pt={4}
+        pb={2}
+        cursor={"pointer"}
+      >
         <HStack>
           <Collapsible.Indicator
             transition="transform 0.2s"
@@ -25,7 +35,9 @@ export default function Section({
           {title}
         </HStack>
       </Collapsible.Trigger>
-      <Collapsible.Content>{children}</Collapsible.Content>
+      <Collapsible.Content>
+        <Box py={2}>{children}</Box>
+      </Collapsible.Content>
     </Collapsible.Root>
   );
 }

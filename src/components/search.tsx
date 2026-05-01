@@ -1,7 +1,7 @@
 import { useStore } from "@/store";
 import type { StacItemCollection } from "@/types/stac";
 import { fetchStacValue, getLinkHref, getSelfHref } from "@/utils/stac";
-import { Alert, DataList, Input, SkeletonText } from "@chakra-ui/react";
+import { Alert, Field, Fieldset, Input, SkeletonText } from "@chakra-ui/react";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { Feature } from "geojson";
@@ -76,36 +76,32 @@ export default function Search({
   return (
     <>
       <Section icon={<LuFileSearch2 />} title="Search">
-        <DataList.Root orientation={"horizontal"} size={"sm"} gap={2}>
-          <DataList.Item>
-            <DataList.ItemLabel>Collection</DataList.ItemLabel>
-            <DataList.ItemValue>{collection.id}</DataList.ItemValue>
-          </DataList.Item>
-          <DataList.Item>
-            <DataList.ItemLabel>Start datetime</DataList.ItemLabel>
-            <DataList.ItemValue>
+        <Fieldset.Root size={"sm"}>
+          <Fieldset.Content>
+            <Field.Root>
+              <Field.Label>Collection</Field.Label>
+              <Input value={collection.id} disabled />
+            </Field.Root>
+            <Field.Root>
+              <Field.Label>Start datetime</Field.Label>
               <Input
                 size={"sm"}
                 type={"date"}
                 value={startDatetime}
                 onChange={(e) => setStartDatetime(e.target.value)}
               />
-            </DataList.ItemValue>
-          </DataList.Item>
-          <DataList.Item>
-            <DataList.ItemLabel>End datetime</DataList.ItemLabel>
-            <DataList.ItemValue>
+            </Field.Root>
+            <Field.Root>
+              <Field.Label>End datetime</Field.Label>
               <Input
                 size={"sm"}
                 type={"date"}
                 value={endDatetime}
                 onChange={(e) => setEndDatetime(e.target.value)}
               />
-            </DataList.ItemValue>
-          </DataList.Item>
-          <DataList.Item>
-            <DataList.ItemLabel>Limit</DataList.ItemLabel>
-            <DataList.ItemValue>
+            </Field.Root>
+            <Field.Root>
+              <Field.Label>Limit</Field.Label>
               <Input
                 size={"sm"}
                 type={"number"}
@@ -113,9 +109,9 @@ export default function Search({
                 value={limit}
                 onChange={(e) => setLimit(e.target.value)}
               />
-            </DataList.ItemValue>
-          </DataList.Item>
-        </DataList.Root>
+            </Field.Root>
+          </Fieldset.Content>
+        </Fieldset.Root>
       </Section>
       <Section icon={<LuFiles />} title="Items">
         {body}

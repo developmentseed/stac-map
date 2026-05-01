@@ -6,7 +6,7 @@ import {
   getStacTitle,
   getThumbnailAsset,
 } from "@/utils/stac";
-import { Badge, Heading, HStack, Separator, Stack } from "@chakra-ui/react";
+import { Badge, Box, Heading, HStack, Stack } from "@chakra-ui/react";
 import { useMemo } from "react";
 import type { StacLink } from "stac-ts";
 import Breadcrumbs from "./breadcrumbs";
@@ -36,7 +36,7 @@ export default function Value({ value }: { value: StacValue }) {
       {description && <Description description={description} />}
       <Buttons value={value} />
 
-      <Separator my={2} />
+      <Box my={2} />
 
       {collectionsLink && (
         <Collections
