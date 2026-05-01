@@ -1,6 +1,12 @@
-import { useStore } from "@/store";
+import { type BBox2D, useStore } from "@/store";
 import type { StacCollections } from "@/types/stac";
-import { fetchStacValue, getLinkHref, getSelfHref } from "@/utils/stac";
+import {
+  fetchStacValue,
+  getLinkHref,
+  getSelfHref,
+  getSpatialExtent,
+  sanitizeBbox,
+} from "@/utils/stac";
 import {
   Alert,
   Button,
