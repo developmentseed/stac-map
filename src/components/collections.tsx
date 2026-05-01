@@ -39,6 +39,7 @@ export default function Collections({
 }) {
   const [search, setSearch] = useState("");
   const [isFetchingAll, setIsFetchingAll] = useState(false);
+  const setValueBbox = useStore((store) => store.setValueBbox);
 
   const href = useMemo(() => {
     const url = new URL(link.href);
@@ -64,6 +65,10 @@ export default function Collections({
       .flatMap((page) => page?.collections)
       .filter((collection) => !!collection);
   }, [result.data]);
+
+  useEffect(() => {
+    if (collections) setValueBbox(getCollectionsBbox(collections));
+  }, [collections, setValueBbox]);
 
   const numberMatched = useMemo(() => {
     return result.data?.pages[0]?.numberMatched;
@@ -355,4 +360,22 @@ function Search({ setSearch }: { setSearch: (search: string) => void }) {
       </form>
     </Section>
   );
+}
+
+function getCollectionsBbox(collections: StacCollection[]) {
+  if (collections.length > 1)
+    return sanitizeBbox(
+      collections
+        .map((collection) => getSpatialExtent(collection))
+        .filter((extents) => !!extents)
+        .reduce((accumulator, currentValue) => {
+          return [
+            Math.min(accumulator[0], currentValue[0]),
+            Math.min(accumulator[1], currentValue[1]),
+            Math.max(accumulator[2], currentValue[2]),
+            Math.max(accumulator[3], currentValue[3]),
+          ];
+        })
+    );
+  else return null;
 }
