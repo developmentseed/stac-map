@@ -1,10 +1,8 @@
-import { useStore } from "@/store";
-import type { BBox2D } from "@/types/map";
+import { useStore, type BBox2D } from "@/store";
 import { type DeckProps } from "@deck.gl/core";
-import type { LngLatLike, MapRef } from "react-map-gl/maplibre";
-
 import { MapboxOverlay } from "@deck.gl/mapbox";
-import { type RefObject, useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
+import type { LngLatLike, MapRef } from "react-map-gl/maplibre";
 import {
   Layer as MaplibreLayer,
   Map as MaplibreMap,
