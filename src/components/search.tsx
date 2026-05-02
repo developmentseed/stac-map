@@ -394,8 +394,12 @@ function Items({ items }: { items: StacItem[] }) {
     <EntityList
       items={filteredItems}
       getKey={(item) => item.id}
-      renderCard={(item) => <ItemCard item={item} />}
-      renderListItem={(item) => <ItemListItem item={item} />}
+      renderCard={(item) => (
+        <ItemCard item={item} hovered={hovered} setHovered={setHovered} />
+      )}
+      renderListItem={(item) => (
+        <ItemListItem item={item} hovered={hovered} setHovered={setHovered} />
+      )}
       filters={filters}
       defaultView={"list"}
     />
