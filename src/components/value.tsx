@@ -1,6 +1,6 @@
 import { useStacValue } from "@/hooks/stac";
 import { useStore } from "@/store";
-import type { StacValue } from "@/types/stac";
+import type { StacAssets, StacValue } from "@/types/stac";
 import {
   conformsToFreeTextCollectionSearch,
   getLink,
@@ -16,6 +16,7 @@ import bboxPolygon from "@turf/bbox-polygon";
 import type { Feature, FeatureCollection } from "geojson";
 import { useEffect, useMemo } from "react";
 import type { StacCollection, StacLink } from "stac-ts";
+import Assets from "./assets";
 import Breadcrumbs from "./breadcrumbs";
 import Buttons from "./buttons";
 import Collections from "./collections";
@@ -32,6 +33,7 @@ export default function Value({ value }: { value: StacValue }) {
   const description = value.description as string;
   const collectionsLink = getLink(value, "data");
   const rootLink = getLink(value, "root");
+  const assets = value.assets as StacAssets | undefined;
 
   useEffect(() => {
     switch (value.type) {
@@ -88,6 +90,7 @@ export default function Value({ value }: { value: StacValue }) {
         />
       )}
       {rootLink && <Root link={rootLink} value={value} />}
+      {assets && <Assets assets={assets} />}
     </Stack>
   );
 }
