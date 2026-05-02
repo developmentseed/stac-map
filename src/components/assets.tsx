@@ -8,11 +8,25 @@ import type { StacAsset } from "stac-ts";
 import Section from "./ui/section";
 
 export default function Assets({ assets }: { assets: StacAssets }) {
+  const [selectedKey, setSelectedKey] = useState(() => pickBestKey(assets));
+  const [lastAssets, setLastAssets] = useState(assets);
+  if (lastAssets !== assets) {
+    setLastAssets(assets);
+    setSelectedKey(pickBestKey(assets));
+  }
   return (
     <Section icon={<LuFileArchive />} title="Assets">
       <Stack>
-        {Object.entries(assets).map((entry) => (
-          <AssetCard key={entry[0]} assetKey={entry[0]} asset={entry[1]} />
+        {Object.entries(assets).map(([key, asset]) => (
+          <AssetCard
+            key={key}
+            assetKey={key}
+            asset={asset}
+            selected={selectedKey === key}
+            onToggle={() =>
+              setSelectedKey(selectedKey === key ? undefined : key)
+            }
+          />
         ))}
       </Stack>
     </Section>
@@ -22,17 +36,20 @@ export default function Assets({ assets }: { assets: StacAssets }) {
 function AssetCard({
   assetKey,
   asset,
+  selected,
+  onToggle,
 }: {
   assetKey: string;
   asset: StacAsset;
+  selected: boolean;
+  onToggle: () => void;
 }) {
   const setLayer = useStore((store) => store.setLayer);
   const scheme = asset.href.split(":").at(0);
   const cogHref = getCogHref(asset);
-  const [visualized, setVisualized] = useState(true);
 
   useEffect(() => {
-    if (!cogHref || !visualized) return;
+    if (!cogHref || !selected) return;
     const layerId = `cog-asset-${assetKey}`;
     setLayer(
       layerId,
@@ -42,7 +59,7 @@ function AssetCard({
       })
     );
     return () => setLayer(layerId, undefined);
-  }, [cogHref, assetKey, setLayer, visualized]);
+  }, [cogHref, assetKey, setLayer, selected]);
 
   return (
     <Card.Root size={"sm"} variant={"outline"}>
@@ -54,11 +71,11 @@ function AssetCard({
               size={"xs"}
               variant={"ghost"}
               aria-label={
-                visualized ? "Disable visualization" : "Enable visualization"
+                selected ? "Disable visualization" : "Enable visualization"
               }
-              onClick={() => setVisualized((v) => !v)}
+              onClick={onToggle}
             >
-              {visualized ? <LuEye /> : <LuEyeOff />}
+              {selected ? <LuEye /> : <LuEyeOff />}
             </IconButton>
           )}
         </HStack>
@@ -72,6 +89,18 @@ function AssetCard({
       </Card.Body>
     </Card.Root>
   );
+}
+
+function pickBestKey(assets: StacAssets): string | undefined {
+  const displayable = Object.entries(assets).filter(([, asset]) =>
+    getCogHref(asset)
+  );
+  if (displayable.length === 0) return undefined;
+  const score = ([key, asset]: [string, StacAsset]) =>
+    (key === "visual" ? 2 : 0) + (asset.roles?.includes("visual") ? 1 : 0);
+  return displayable.reduce((best, current) =>
+    score(current) > score(best) ? current : best
+  )[0];
 }
 
 function getCogHref(asset: StacAsset): string | undefined {
