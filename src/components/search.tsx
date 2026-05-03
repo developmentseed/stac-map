@@ -542,7 +542,7 @@ function PageLayer({
   }, [page, assetKey]);
 
   useEffect(() => {
-    const id = `search-visualization-page-${pageIndex}`;
+    const id = `search-visualization-page-${pageIndex}-${assetKey}`;
     if (sources.length === 0) {
       setLayer(id, undefined);
       return;
@@ -565,7 +565,7 @@ function PageLayer({
       })
     );
     return () => setLayer(id, undefined);
-  }, [sources, pageIndex, setLayer]);
+  }, [sources, pageIndex, assetKey, setLayer]);
 
   return null;
 }
