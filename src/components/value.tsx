@@ -20,6 +20,7 @@ import Assets from "./assets";
 import Breadcrumbs from "./breadcrumbs";
 import Buttons from "./buttons";
 import Collections from "./collections";
+import Links from "./links";
 import Search from "./search";
 import Description from "./ui/description";
 import Thumbnail from "./ui/thumbnail";
@@ -91,6 +92,7 @@ export default function Value({ value }: { value: StacValue }) {
       )}
       {rootLink && <Root link={rootLink} value={value} />}
       {assets && <Assets assets={assets} />}
+      {value.links && <Links links={value.links} />}
     </Stack>
   );
 }
