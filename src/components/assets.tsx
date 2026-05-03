@@ -1,5 +1,6 @@
 import { useStore } from "@/store";
 import type { StacAssets } from "@/types/stac";
+import { getCogHref } from "@/utils/stac";
 import { Badge, Box, Card, HStack, IconButton, Stack } from "@chakra-ui/react";
 import { COGLayer } from "@developmentseed/deck.gl-geotiff";
 import { useEffect, useState } from "react";
@@ -103,22 +104,3 @@ function pickBestKey(assets: StacAssets): string | undefined {
   )[0];
 }
 
-function getCogHref(asset: StacAsset): string | undefined {
-  if (!asset.type?.startsWith("image/tiff; application=geotiff"))
-    return undefined;
-  const extra = asset as {
-    "eo:bands"?: unknown[];
-    bands?: unknown[];
-    alternate?: Record<string, { href?: string }>;
-  };
-  for (const bands of [extra["eo:bands"], extra.bands]) {
-    if (bands && bands.length !== 3 && bands.length !== 4) return undefined;
-  }
-  if (asset.href.startsWith("http")) return asset.href;
-  if (extra.alternate) {
-    for (const alt of Object.values(extra.alternate)) {
-      if (alt.href?.startsWith("http")) return alt.href;
-    }
-  }
-  return undefined;
-}

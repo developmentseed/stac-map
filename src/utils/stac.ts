@@ -1,5 +1,10 @@
 import type { BBox } from "geojson";
-import type { SpatialExtent, StacCollection, StacLink } from "stac-ts";
+import type {
+  SpatialExtent,
+  StacAsset,
+  StacCollection,
+  StacLink,
+} from "stac-ts";
 import type { BBox2D } from "../store";
 import type { StacAssets, StacValue } from "../types/stac";
 import { getAccessToken } from "./auth";
@@ -131,6 +136,26 @@ export function getSpatialExtent(collection: StacCollection): SpatialExtent {
   return Array.isArray(spatialExtent?.bbox?.[0])
     ? spatialExtent?.bbox[0]
     : (spatialExtent?.bbox as unknown as SpatialExtent);
+}
+
+export function getCogHref(asset: StacAsset): string | undefined {
+  if (!asset.type?.startsWith("image/tiff; application=geotiff"))
+    return undefined;
+  const extra = asset as {
+    "eo:bands"?: unknown[];
+    bands?: unknown[];
+    alternate?: Record<string, { href?: string }>;
+  };
+  for (const bands of [extra["eo:bands"], extra.bands]) {
+    if (bands && bands.length !== 3 && bands.length !== 4) return undefined;
+  }
+  if (asset.href.startsWith("http")) return asset.href;
+  if (extra.alternate) {
+    for (const alt of Object.values(extra.alternate)) {
+      if (alt.href?.startsWith("http")) return alt.href;
+    }
+  }
+  return undefined;
 }
 
 export function sanitizeBbox(bbox: BBox | SpatialExtent): BBox2D | null {
