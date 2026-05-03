@@ -13,12 +13,16 @@ import {
   type SourceProps,
 } from "react-map-gl/maplibre";
 import { AuthProvider, type AuthProviderProps } from "react-oidc-context";
+import type { Example } from "../constants";
 import { AuthEnabledProvider } from "../contexts/auth-enabled";
+import { ExamplesProvider } from "../contexts/examples";
 import { StacBrowserUrlProvider } from "../contexts/stac-browser";
 import App from "./app";
+import ErrorListener from "./error-listener";
 import HrefBootstrap from "./href-bootstrap";
 import { OidcTokenSync } from "./oidc-token-sync";
 import { LoginSplash } from "./ui/auth";
+import { Toaster } from "./ui/toaster";
 import {
   ColorModeProvider,
   type ColorModeProviderProps,
@@ -47,6 +51,12 @@ export interface StacMapProps {
   /** Source and layer information for extra maplibre layers */
   extraLayers?: ExtraLayerProps[];
   /**
+   * Override the list of example STAC resources shown in the Examples menu.
+   * Pass an empty array to hide the Examples button entirely. Defaults to a
+   * built-in list of public STAC catalogs and APIs.
+   */
+  examples?: Example[];
+  /**
    * Skip the internal `ChakraProvider` and `ColorModeProvider`. Use when the
    * host app already mounts its own Chakra v3 system and `next-themes`
    * provider; the `chakraSystem` and `colorMode` props are ignored when true.
@@ -70,6 +80,7 @@ export function StacMap({
   stacBrowserUrl,
   footer,
   extraLayers,
+  examples,
   disableChakraProvider = false,
 }: StacMapProps) {
   useEffect(() => {
@@ -97,10 +108,12 @@ export function StacMap({
     <QueryClientProvider client={queryClient}>
       <AuthEnabledProvider enabled={!!auth}>
         <StacBrowserUrlProvider url={stacBrowserUrl}>
-          <MapProvider>
-            <HrefBootstrap defaultHref={defaultHref} />
-            <App footer={footer} extraLayers={extraLayers} />
-          </MapProvider>
+          <ExamplesProvider examples={examples}>
+            <MapProvider>
+              <HrefBootstrap defaultHref={defaultHref} />
+              <App footer={footer} extraLayers={extraLayers} />
+            </MapProvider>
+          </ExamplesProvider>
         </StacBrowserUrlProvider>
       </AuthEnabledProvider>
     </QueryClientProvider>
@@ -108,6 +121,8 @@ export function StacMap({
 
   const wrapped = (
     <Box position="relative" h="100%" w="100%" overflow="hidden">
+      <ErrorListener />
+      <Toaster />
       {auth ? (
         <AuthProvider {...auth}>
           <OidcTokenSync />
