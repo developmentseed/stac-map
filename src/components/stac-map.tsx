@@ -22,11 +22,11 @@ import ErrorListener from "./error-listener";
 import HrefBootstrap from "./href-bootstrap";
 import { OidcTokenSync } from "./oidc-token-sync";
 import { LoginSplash } from "./ui/auth";
-import { Toaster } from "./ui/toaster";
 import {
   ColorModeProvider,
   type ColorModeProviderProps,
 } from "./ui/color-mode";
+import { Toaster } from "./ui/toaster";
 
 export interface ExtraLayerProps {
   source: SourceProps;

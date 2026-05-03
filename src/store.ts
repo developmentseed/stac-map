@@ -37,6 +37,8 @@ export interface State {
   setMapBbox: (bbox: BBox2D | null) => void;
   searchParams: Record<string, SearchParams>;
   setSearchParams: (collectionId: string, params: SearchParams) => void;
+  addErrorListener: boolean;
+  setAddErrorListener: (addErrorListener: boolean) => void;
 }
 
 export const useStore = create<State>()(
@@ -89,6 +91,8 @@ export const useStore = create<State>()(
         set({
           searchParams: { ...get().searchParams, [collectionId]: params },
         }),
+      addErrorListener: false,
+      setAddErrorListener: (addErrorListener) => set({ addErrorListener }),
     }),
     {
       name: "stac-map-settings",
@@ -97,6 +101,7 @@ export const useStore = create<State>()(
         lineColor: state.lineColor,
         projection: state.projection,
         tokens: state.tokens,
+        addErrorListener: state.addErrorListener,
       }),
     }
   )

@@ -1,9 +1,4 @@
-import {
-  ActionBar,
-  Button,
-  ButtonGroup,
-  Portal,
-} from "@chakra-ui/react";
+import { ActionBar, Button, ButtonGroup, Portal } from "@chakra-ui/react";
 import type { UseInfiniteQueryResult } from "@tanstack/react-query";
 import { LuForward, LuPause, LuPlay } from "react-icons/lu";
 

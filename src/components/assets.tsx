@@ -103,4 +103,3 @@ function pickBestKey(assets: StacAssets): string | undefined {
     score(current) > score(best) ? current : best
   )[0];
 }
-

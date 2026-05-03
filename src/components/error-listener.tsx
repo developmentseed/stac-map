@@ -1,8 +1,13 @@
 import { useEffect } from "react";
+import { useStore } from "../store";
 import { toaster } from "./ui/toaster";
 
 export default function ErrorListener() {
+  const addErrorListener = useStore((store) => store.addErrorListener);
+
   useEffect(() => {
+    if (!addErrorListener) return;
+
     const onError = (event: ErrorEvent) => {
       toaster.create({
         title: "Error",
@@ -29,7 +34,7 @@ export default function ErrorListener() {
       window.removeEventListener("error", onError, true);
       window.removeEventListener("unhandledrejection", onRejection);
     };
-  }, []);
+  }, [addErrorListener]);
 
   return null;
 }

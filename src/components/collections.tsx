@@ -40,6 +40,7 @@ export default function Collections({
   const [search, setSearch] = useState("");
   const [isFetchingAll, setIsFetchingAll] = useState(false);
   const setValueBbox = useStore((store) => store.setValueBbox);
+  const setMapBbox = useStore((store) => store.setMapBbox);
 
   const href = useMemo(() => {
     const url = new URL(link.href);
@@ -67,8 +68,11 @@ export default function Collections({
   }, [result.data]);
 
   useEffect(() => {
-    if (collections) setValueBbox(getCollectionsBbox(collections));
-  }, [collections, setValueBbox]);
+    if (collections) {
+      setValueBbox(getCollectionsBbox(collections));
+      setMapBbox(getCollectionsBbox(collections));
+    }
+  }, [collections, setValueBbox, setMapBbox]);
 
   const numberMatched = useMemo(() => {
     return result.data?.pages[0]?.numberMatched;

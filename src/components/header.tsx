@@ -6,6 +6,7 @@ import HrefInput from "./href-input";
 import { UserButton } from "./ui/auth";
 import { ColorModeButton } from "./ui/color-mode";
 import { ProjectionButton } from "./ui/projection";
+import { SettingsButton } from "./ui/settings";
 
 export default function Header() {
   const authEnabled = useAuthEnabled();
@@ -21,6 +22,7 @@ export default function Header() {
         )}
         <ProjectionButton />
         <ColorModeButton />
+        <SettingsButton />
         {authEnabled && <UserButton />}
       </ButtonGroup>
     </HStack>
