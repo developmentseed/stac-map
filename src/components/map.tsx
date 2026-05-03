@@ -1,8 +1,9 @@
-import { useStore, type BBox2D } from "@/store";
+import { useStore } from "@/store";
+import { fitBoundsToBbox } from "@/utils/map";
 import { type DeckProps } from "@deck.gl/core";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { useEffect, useRef, type RefObject } from "react";
-import type { LngLatLike, MapRef } from "react-map-gl/maplibre";
+import type { MapRef } from "react-map-gl/maplibre";
 import {
   Layer as MaplibreLayer,
   Map as MaplibreMap,
@@ -28,14 +29,7 @@ export default function Map({
   );
 
   useEffect(() => {
-    const padding = {
-      top: window.innerHeight / 10,
-      bottom: window.innerHeight / 10,
-      right: window.innerWidth / 20,
-      left: window.innerWidth / 20 + window.innerWidth / 3,
-    };
-    if (mapRef.current && valueBbox)
-      mapRef.current.fitBounds(bboxToBounds(valueBbox), { padding });
+    if (mapRef.current && valueBbox) fitBoundsToBbox(mapRef.current, valueBbox);
   }, [valueBbox]);
 
   return (
@@ -101,9 +95,3 @@ function getCursor(
   return cursor;
 }
 
-function bboxToBounds(bbox: BBox2D): [LngLatLike, LngLatLike] {
-  return [
-    [bbox[0], bbox[1]],
-    [bbox[2], bbox[3]],
-  ];
-}

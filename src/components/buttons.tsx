@@ -1,5 +1,7 @@
 import { useStacBrowserUrl } from "@/contexts/stac-browser";
+import { useStore } from "@/store";
 import type { StacValue } from "@/types/stac";
+import { fitBoundsToBbox } from "@/utils/map";
 import { getSelfHref } from "@/utils/stac";
 import {
   Button,
@@ -11,7 +13,8 @@ import {
   Portal,
   createShikiAdapter,
 } from "@chakra-ui/react";
-import { LuExternalLink, LuFileJson } from "react-icons/lu";
+import { LuExternalLink, LuFileJson, LuLocate } from "react-icons/lu";
+import { useMap } from "react-map-gl/maplibre";
 import type { HighlighterGeneric } from "shiki";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,6 +38,7 @@ export default function Buttons({ value }: { value: StacValue }) {
 
   return (
     <ButtonGroup variant={"surface"} size="xs" flexWrap="wrap">
+      <ZoomToExtentButton />
       {selfHref && (
         <Button asChild>
           <a
@@ -48,6 +52,18 @@ export default function Buttons({ value }: { value: StacValue }) {
       )}
       <JsonButton value={value} />
     </ButtonGroup>
+  );
+}
+
+function ZoomToExtentButton() {
+  const valueBbox = useStore((store) => store.valueBbox);
+  const { map } = useMap();
+  if (!valueBbox || !map) return null;
+  return (
+    <Button onClick={() => fitBoundsToBbox(map, valueBbox)}>
+      <LuLocate />
+      Zoom to extent
+    </Button>
   );
 }
 
