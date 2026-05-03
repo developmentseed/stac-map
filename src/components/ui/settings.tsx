@@ -1,10 +1,12 @@
 import {
+  Box,
   Checkbox,
   CloseButton,
   Dialog,
   Fieldset,
   IconButton,
   Portal,
+  Stack,
 } from "@chakra-ui/react";
 import { LuSettings } from "react-icons/lu";
 import { useStore } from "../../store";
@@ -14,7 +16,7 @@ export function SettingsButton() {
   const setAddErrorListener = useStore((store) => store.setAddErrorListener);
 
   return (
-    <Dialog.Root>
+    <Dialog.Root size={"lg"}>
       <Dialog.Trigger asChild>
         <IconButton aria-label="Settings">
           <LuSettings />
@@ -33,10 +35,17 @@ export function SettingsButton() {
                   <Checkbox.Root
                     checked={addErrorListener}
                     onCheckedChange={(e) => setAddErrorListener(!!e.checked)}
+                    alignItems={"flex-start"}
                   >
                     <Checkbox.HiddenInput />
                     <Checkbox.Control />
-                    <Checkbox.Label>Add error listener</Checkbox.Label>
+                    <Stack>
+                      <Checkbox.Label>Add error listener</Checkbox.Label>
+                      <Box textStyle={"sm"} color={"fg.muted"}>
+                        Listen for errors in upstream libraries and display them
+                        as toasts. Can be noisy.
+                      </Box>
+                    </Stack>
                   </Checkbox.Root>
                 </Fieldset.Content>
               </Fieldset.Root>
