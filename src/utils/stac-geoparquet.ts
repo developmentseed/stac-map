@@ -11,11 +11,7 @@ import {
 import * as stacWasm from "stac-wasm";
 import type { StacItemCollection } from "../types/stac";
 
-const SUPPORTED_GEOMETRY_TYPES = [
-  "point",
-  "polygon",
-  "linestring",
-] as const;
+const SUPPORTED_GEOMETRY_TYPES = ["point", "polygon", "linestring"] as const;
 
 async function executeDuckdbQuery({
   connection,
