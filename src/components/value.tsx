@@ -52,6 +52,7 @@ export default function Value({
   const itemLinks = value.links?.filter((link) => link.rel === "item");
   const rootLink = getLink(value, "root");
   const tilejsonLink = getLink(value, "tilejson");
+  const wmtsLink = getLink(value, "wmts");
   const properties = value.properties as GeoJsonProperties | undefined;
   const assets = value.assets as StacAssets | undefined;
 
@@ -104,7 +105,9 @@ export default function Value({
       </Stack>
 
       <Stack>
-        {tilejsonLink && <WebMapLinks tilejsonLink={tilejsonLink} />}
+        {(tilejsonLink || wmtsLink) && (
+          <WebMapLinks tilejsonLink={tilejsonLink} wmtsLink={wmtsLink} />
+        )}
         {collectionsLink && (
           <CollectionsEndpoint
             link={collectionsLink}

@@ -13,27 +13,41 @@ import { LuEye } from "react-icons/lu";
 import type { StacLink } from "stac-ts";
 import Section from "./ui/section";
 
-type LayerType = "tilejson";
+type LayerType = "tilejson" | "wmts";
 
 export default function WebMapLinks({
   tilejsonLink,
+  wmtsLink,
 }: {
   tilejsonLink: StacLink | undefined;
+  wmtsLink: StacLink | undefined;
 }) {
-  const [layerType, setLayerType] = useState<LayerType>("tilejson");
-  const [enabled, setEnabled] = useState(true);
   const setMaplibreLayer = useStore((store) => store.setMaplibreLayer);
 
-  const collection = useMemo(
-    () =>
-      createListCollection({
-        items: [{ label: "TileJSON", value: "tilejson" }],
-      }),
-    []
+  const items = useMemo(() => {
+    const items: { label: string; value: LayerType }[] = [];
+    if (tilejsonLink) items.push({ label: "TileJSON", value: "tilejson" });
+    if (wmtsLink) items.push({ label: "WMTS", value: "wmts" });
+    return items;
+  }, [tilejsonLink, wmtsLink]);
+
+  const collection = useMemo(() => createListCollection({ items }), [items]);
+
+  const [layerType, setLayerType] = useState<LayerType | undefined>(
+    () => items[0]?.value
   );
+  const [lastItems, setLastItems] = useState(items);
+  if (items !== lastItems) {
+    setLastItems(items);
+    if (!layerType || !items.some((item) => item.value === layerType)) {
+      setLayerType(items[0]?.value);
+    }
+  }
+
+  const [enabled, setEnabled] = useState(true);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !layerType) return;
 
     if (layerType === "tilejson" && tilejsonLink)
       setMaplibreLayer("web-map", {
@@ -48,10 +62,24 @@ export default function WebMapLinks({
         },
       });
 
+    if (layerType === "wmts" && wmtsLink)
+      setMaplibreLayer("web-map", {
+        source: {
+          id: "web-map",
+          type: "raster",
+          url: wmtsLink.href,
+          tileSize: 256,
+        },
+        layer: {
+          id: "web-map",
+          type: "raster",
+        },
+      });
+
     return () => {
       setMaplibreLayer("web-map", undefined);
     };
-  }, [tilejsonLink, setMaplibreLayer, layerType, enabled]);
+  }, [tilejsonLink, wmtsLink, setMaplibreLayer, layerType, enabled]);
 
   return (
     <Section icon={<LuEye />} title="Web map">
@@ -61,7 +89,7 @@ export default function WebMapLinks({
           <Select.Root
             size={"sm"}
             collection={collection}
-            value={[layerType]}
+            value={layerType ? [layerType] : []}
             onValueChange={(e) => setLayerType(e.value[0] as LayerType)}
             disabled={!enabled}
           >
