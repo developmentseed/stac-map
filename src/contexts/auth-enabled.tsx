@@ -16,6 +16,11 @@ export function AuthEnabledProvider({
   );
 }
 
+/**
+ * Returns `true` when the surrounding `<StacMap>` was given an `auth` prop,
+ * i.e. when the OIDC `AuthProvider` is mounted. Useful for host components
+ * rendered inside the map that need to gate behavior on authentication.
+ */
 export function useAuthEnabled(): boolean {
   return useContext(AuthEnabledContext);
 }
