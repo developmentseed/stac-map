@@ -27,6 +27,7 @@ import Links from "./links";
 import Properties from "./properties";
 import Search from "./search";
 import StacGeoparquet from "./stac-geoparquet";
+import Tilejson from "./tilejson";
 import Description from "./ui/description";
 import Thumbnail from "./ui/thumbnail";
 
@@ -50,6 +51,7 @@ export default function Value({
   const childLinks = value.links?.filter((link) => link.rel === "child");
   const itemLinks = value.links?.filter((link) => link.rel === "item");
   const rootLink = getLink(value, "root");
+  const tilejsonLink = getLink(value, "tilejson");
   const properties = value.properties as GeoJsonProperties | undefined;
   const assets = value.assets as StacAssets | undefined;
 
@@ -101,10 +103,6 @@ export default function Value({
         <Buttons value={value} />
       </Stack>
 
-      {hrefIsParquet && connection && (
-        <StacGeoparquet href={href} connection={connection} />
-      )}
-
       <Stack>
         {collectionsLink && (
           <CollectionsEndpoint
@@ -118,9 +116,14 @@ export default function Value({
         {itemLinks && itemLinks?.length > 0 && <ItemLinks links={itemLinks} />}
         {rootLink && <Root link={rootLink} value={value} />}
         {properties && <Properties properties={properties} />}
+        {tilejsonLink && <Tilejson link={tilejsonLink} />}
         {assets && <Assets assets={assets} />}
         {value.links && <Links links={value.links} />}
       </Stack>
+
+      {hrefIsParquet && connection && (
+        <StacGeoparquet href={href} connection={connection} />
+      )}
     </Stack>
   );
 }

@@ -20,6 +20,7 @@ export default function Map({
 }) {
   const projection = useStore((store) => store.projection);
   const layers = useStore((store) => store.layers);
+  const maplibreLayers = useStore((store) => store.maplibreLayers);
   const valueBbox = useStore((store) => store.valueBbox);
   const setMapBbox = useStore((store) => store.setMapBbox);
   const mapRef = useRef<MapRef>(null);
@@ -57,6 +58,11 @@ export default function Map({
         layers={Object.values(layers)}
         getCursor={(props) => getCursor(mapRef, props)}
       ></DeckGLOverlay>
+      {Object.values(maplibreLayers).map((layer, i) => (
+        <Source key={"maplibre-layer-" + i} {...layer.source}>
+          <MaplibreLayer {...layer.layer} />
+        </Source>
+      ))}
       {extraLayers &&
         extraLayers.map((layer, i) => (
           <Source key={"extra-layer-" + i} {...layer.source}>

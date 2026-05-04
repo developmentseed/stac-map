@@ -2,6 +2,7 @@ import type { Layer } from "@deck.gl/core";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { ExtraLayerProps } from "./components/stac-map";
 
 export type Color = [number, number, number, number];
 export type Projection = "mercator" | "globe";
@@ -29,6 +30,8 @@ export interface State {
   projection: Projection;
   layers: Record<string, Layer>;
   setLayer: (id: string, layer: Layer | undefined) => void;
+  maplibreLayers: Record<string, ExtraLayerProps>;
+  setMaplibreLayer: (id: string, layer: ExtraLayerProps | undefined) => void;
   setProjection: (projection: Projection) => void;
   toggleProjection: () => void;
   oidcAccessToken: string | null;
@@ -78,6 +81,16 @@ export const useStore = create<State>()(
           const layers = { ...get().layers };
           delete layers[id];
           set({ layers });
+        }
+      },
+      maplibreLayers: {},
+      setMaplibreLayer: (id, layer) => {
+        if (layer) {
+          set({ maplibreLayers: { ...get().maplibreLayers, [id]: layer } });
+        } else {
+          const maplibreLayers = { ...get().maplibreLayers };
+          delete maplibreLayers[id];
+          set({ maplibreLayers });
         }
       },
       projection: "mercator",
