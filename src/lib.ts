@@ -1,3 +1,13 @@
+/**
+ * Public API for `@developmentseed/stac-map`.
+ *
+ * The {@link StacMap} component is the single entry point. The other exports
+ * are escape hatches for host apps that want to read shared state, integrate
+ * authentication, or override defaults.
+ *
+ * @packageDocumentation
+ */
+
 export { StacMap, default } from "./components/stac-map";
 export type { StacMapProps } from "./components/stac-map";
 export { useAuthEnabled } from "./contexts/auth-enabled";

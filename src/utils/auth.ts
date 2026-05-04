@@ -1,12 +1,24 @@
 import type { AuthProviderProps } from "react-oidc-context";
 import { useStore } from "../store";
 
+/**
+ * Options for {@link buildAuth}.
+ */
 export interface BuildAuthOptions {
+  /** OpenID Connect authority URL (e.g. from `VITE_AUTH_AUTHORITY`). */
   authority: string | undefined;
+  /** OAuth2 client ID (e.g. from `VITE_AUTH_CLIENT_ID`). */
   clientId: string | undefined;
+  /** App base path used to construct the redirect URI. Defaults to `/`. */
   basePath?: string;
 }
 
+/**
+ * Build an `AuthProviderProps` object for `react-oidc-context` from
+ * stac-map-friendly inputs, returning `undefined` when either `authority` or
+ * `clientId` is missing so the caller can omit the `auth` prop and run
+ * unauthenticated.
+ */
 export function buildAuth({
   authority,
   clientId,

@@ -17,6 +17,9 @@ export interface SearchParams {
   bbox?: BBox2D;
 }
 
+/**
+ * Shape of the shared Zustand store. See {@link useStore}.
+ */
 export interface State {
   href: string | null;
   hrefIsParquet: boolean;
@@ -63,6 +66,11 @@ export interface State {
   setHivePartitioning: (hivePartitioning: boolean) => void;
 }
 
+/**
+ * Zustand hook for the shared stac-map store. The store is a singleton — host
+ * apps can read filters, the loaded value, the active `href`, etc., or call
+ * setters to drive the map programmatically.
+ */
 export const useStore = create<State>()(
   persist(
     (set, get) => ({

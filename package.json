@@ -33,7 +33,8 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "docs": "typedoc"
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^15.3.5",
@@ -68,7 +69,6 @@
     "@chakra-ui/react": "^3.35.0",
     "@emotion/react": "^11.13.5",
     "@eslint/js": "^10.0.1",
-    "@microsoft/api-extractor": "^7.58.7",
     "@tanstack/react-query": "^5.100.5",
     "@types/geojson": "^7946.0.16",
     "@types/react": "^19.2.14",
@@ -93,6 +93,7 @@
     "react-oidc-context": "^3.3.1",
     "rollup": "^4.60.2",
     "semantic-release": "^25.0.3",
+    "typedoc": "^0.28.19",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.59.1",
     "vite": "^8.0.10",

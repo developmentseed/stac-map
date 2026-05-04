@@ -1,0 +1,16 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/lib.ts"],
+  "out": "docs/api",
+  "tsconfig": "tsconfig.lib.json",
+  "readme": "none",
+  "excludeExternals": true,
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "navigationLinks": {
+    "GitHub": "https://github.com/developmentseed/stac-map"
+  },
+  "validation": {
+    "notExported": false
+  }
+}
