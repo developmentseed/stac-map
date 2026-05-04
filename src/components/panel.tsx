@@ -54,8 +54,7 @@ function StacGeoparquetHrefPanel({
   href: string;
   connection: AsyncDuckDBConnection;
 }) {
-  const hivePartitioning = useStore((store) => store.hivePartitioning);
-  const result = useStacGeoparquetValue({ href, connection, hivePartitioning });
+  const result = useStacGeoparquetValue({ href, connection });
   return result.data ? (
     <ValuePanel value={result.data} />
   ) : result.isLoading ? (
