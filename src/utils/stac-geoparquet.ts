@@ -17,7 +17,7 @@ export const SUPPORTED_GEOMETRY_TYPES = [
   "linestring",
 ] as const;
 
-export async function executeDuckdbQuery({
+async function executeDuckdbQuery({
   connection,
   select,
   href,
@@ -34,13 +34,11 @@ export async function executeDuckdbQuery({
   if (where) {
     query += ` WHERE ${where}`;
   }
-  console.log(query);
-
   return (await connection.query(query)) as unknown as Table;
 }
 export type SupportedGeometryType = (typeof SUPPORTED_GEOMETRY_TYPES)[number];
 
-export async function fetchStacGeoparquet({
+export async function fetchStacGeoparquetValue({
   href,
   connection,
   hivePartitioning,

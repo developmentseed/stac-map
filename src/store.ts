@@ -40,6 +40,8 @@ export interface State {
   setSearchParams: (key: string, params: SearchParams) => void;
   addErrorListener: boolean;
   setAddErrorListener: (addErrorListener: boolean) => void;
+  hivePartitioning: boolean;
+  setHivePartitioning: (hivePartitioning: boolean) => void;
 }
 
 export const useStore = create<State>()(
@@ -94,6 +96,8 @@ export const useStore = create<State>()(
         }),
       addErrorListener: false,
       setAddErrorListener: (addErrorListener) => set({ addErrorListener }),
+      hivePartitioning: false,
+      setHivePartitioning: (hivePartitioning) => set({ hivePartitioning }),
     }),
     {
       name: "stac-map-settings",
@@ -103,6 +107,7 @@ export const useStore = create<State>()(
         projection: state.projection,
         tokens: state.tokens,
         addErrorListener: state.addErrorListener,
+        hivePartitioning: state.hivePartitioning,
       }),
     }
   )

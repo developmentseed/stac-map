@@ -12,6 +12,8 @@ import { LuSettings } from "react-icons/lu";
 import { useStore } from "../../store";
 
 export function SettingsButton() {
+  const hivePartitioning = useStore((store) => store.hivePartitioning);
+  const setHivePartitioning = useStore((store) => store.setHivePartitioning);
   const addErrorListener = useStore((store) => store.addErrorListener);
   const setAddErrorListener = useStore((store) => store.setAddErrorListener);
 
@@ -32,6 +34,19 @@ export function SettingsButton() {
             <Dialog.Body>
               <Fieldset.Root size={"sm"}>
                 <Fieldset.Content>
+                  <Checkbox.Root
+                    checked={hivePartitioning}
+                    onCheckedChange={(e) => setHivePartitioning(!!e.checked)}
+                    alignItems={"flex-start"}
+                  >
+                    <Checkbox.HiddenInput />
+                    <Checkbox.Control />
+                    <Stack>
+                      <Checkbox.Label>
+                        Use hive partitioning for stac-geoparquet queries
+                      </Checkbox.Label>
+                    </Stack>
+                  </Checkbox.Root>
                   <Checkbox.Root
                     checked={addErrorListener}
                     onCheckedChange={(e) => setAddErrorListener(!!e.checked)}

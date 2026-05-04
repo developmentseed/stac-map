@@ -1,4 +1,4 @@
-import { useStacValue } from "@/hooks/stac";
+import { useStacGeoparquetValue, useStacValue } from "@/hooks/stac";
 import { useStore } from "@/store";
 import type { StacValue } from "@/types/stac";
 import { getStacId } from "@/utils/stac";
@@ -11,18 +11,51 @@ import {
   Span,
   Stack,
 } from "@chakra-ui/react";
+import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { type ReactNode } from "react";
-import { LuLoader } from "react-icons/lu";
+import { LuBird, LuLoader } from "react-icons/lu";
 import { StacIcon } from "./ui/stac";
 import Value from "./value";
 
 export default function Panel() {
   const href = useStore((store) => store.href);
-  return href ? <HrefPanel href={href} /> : <IntroductionPanel />;
+  const hrefIsParquet = useStore((store) => store.hrefIsParquet);
+  const connection = useStore((store) => store.connection);
+  return href ? (
+    hrefIsParquet ? (
+      connection ? (
+        <StacGeoparquetHrefPanel href={href} connection={connection} />
+      ) : (
+        <LoadingDuckdbPanel />
+      )
+    ) : (
+      <HrefPanel href={href} />
+    )
+  ) : (
+    <IntroductionPanel />
+  );
 }
 
 function HrefPanel({ href }: { href: string }) {
   const result = useStacValue({ href });
+  return result.data ? (
+    <ValuePanel value={result.data} />
+  ) : result.isLoading ? (
+    <LoadingPanel href={href} />
+  ) : (
+    <ErrorPanel error={result.error} href={href} />
+  );
+}
+
+function StacGeoparquetHrefPanel({
+  href,
+  connection,
+}: {
+  href: string;
+  connection: AsyncDuckDBConnection;
+}) {
+  const hivePartitioning = useStore((store) => store.hivePartitioning);
+  const result = useStacGeoparquetValue({ href, connection, hivePartitioning });
   return result.data ? (
     <ValuePanel value={result.data} />
   ) : result.isLoading ? (
@@ -47,6 +80,15 @@ function ValuePanel({ value }: { value: StacValue }) {
 
 function LoadingPanel({ href }: { href: string }) {
   const header = <PanelHeader icon={<LuLoader />}>Loading {href}</PanelHeader>;
+  return (
+    <BasePanel header={header}>
+      <SkeletonText h={3} />
+    </BasePanel>
+  );
+}
+
+function LoadingDuckdbPanel() {
+  const header = <PanelHeader icon={<LuBird />}>Loading DuckDB...</PanelHeader>;
   return (
     <BasePanel header={header}>
       <SkeletonText h={3} />
