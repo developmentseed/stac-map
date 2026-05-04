@@ -9,8 +9,9 @@ import {
   getThumbnailAsset,
   sanitizeBbox,
 } from "@/utils/stac";
-import { Badge, Box, Heading, HStack, Stack } from "@chakra-ui/react";
+import { Badge, Heading, HStack, Stack } from "@chakra-ui/react";
 import { GeoJsonLayer } from "@deck.gl/layers";
+import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import bbox from "@turf/bbox";
 import bboxPolygon from "@turf/bbox-polygon";
 import type { Feature, FeatureCollection, GeoJsonProperties } from "geojson";
@@ -23,13 +24,23 @@ import Collections from "./collections";
 import Links from "./links";
 import Properties from "./properties";
 import Search from "./search";
+import StacGeoparquet from "./stac-geoparquet";
 import Description from "./ui/description";
 import Thumbnail from "./ui/thumbnail";
 
-export default function Value({ value }: { value: StacValue }) {
+export default function Value({
+  href,
+  value,
+  connection,
+}: {
+  href: string;
+  value: StacValue;
+  connection?: AsyncDuckDBConnection;
+}) {
   const lineColor = useStore((store) => store.lineColor);
   const setValueBbox = useStore((store) => store.setValueBbox);
   const setLayer = useStore((store) => store.setLayer);
+  const hrefIsParquet = useStore((store) => store.hrefIsParquet);
   const version = value.stac_version as string;
   const thumbnailAsset = getThumbnailAsset(value);
   const description = value.description as string;
@@ -72,7 +83,7 @@ export default function Value({ value }: { value: StacValue }) {
   }, [value, setLayer, lineColor]);
 
   return (
-    <Stack>
+    <Stack gap={4}>
       <Stack gap={4}>
         <Heading>
           <HStack gap={4}>
@@ -86,18 +97,22 @@ export default function Value({ value }: { value: StacValue }) {
         <Buttons value={value} />
       </Stack>
 
-      <Box my={2} />
-
-      {collectionsLink && (
-        <Collections
-          link={collectionsLink}
-          hasCollectionSearch={conformsToFreeTextCollectionSearch(value)}
-        />
+      {hrefIsParquet && connection && (
+        <StacGeoparquet href={href} connection={connection} />
       )}
-      {rootLink && <Root link={rootLink} value={value} />}
-      {properties && <Properties properties={properties} />}
-      {assets && <Assets assets={assets} />}
-      {value.links && <Links links={value.links} />}
+
+      <Stack>
+        {collectionsLink && (
+          <Collections
+            link={collectionsLink}
+            hasCollectionSearch={conformsToFreeTextCollectionSearch(value)}
+          />
+        )}
+        {rootLink && <Root link={rootLink} value={value} />}
+        {properties && <Properties properties={properties} />}
+        {assets && <Assets assets={assets} />}
+        {value.links && <Links links={value.links} />}
+      </Stack>
     </Stack>
   );
 }

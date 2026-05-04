@@ -39,7 +39,7 @@ export default function Panel() {
 function HrefPanel({ href }: { href: string }) {
   const result = useStacValue({ href });
   return result.data ? (
-    <ValuePanel value={result.data} />
+    <ValuePanel href={href} value={result.data} />
   ) : result.isLoading ? (
     <LoadingPanel href={href} />
   ) : (
@@ -56,7 +56,7 @@ function StacGeoparquetHrefPanel({
 }) {
   const result = useStacGeoparquetValue({ href, connection });
   return result.data ? (
-    <ValuePanel value={result.data} />
+    <ValuePanel href={href} value={result.data} connection={connection} />
   ) : result.isLoading ? (
     <LoadingPanel href={href} />
   ) : (
@@ -64,7 +64,15 @@ function StacGeoparquetHrefPanel({
   );
 }
 
-function ValuePanel({ value }: { value: StacValue }) {
+function ValuePanel({
+  href,
+  value,
+  connection,
+}: {
+  href: string;
+  value: StacValue;
+  connection?: AsyncDuckDBConnection;
+}) {
   const header = (
     <PanelHeader icon={<StacIcon value={value} />}>
       {getStacId(value)}
@@ -72,7 +80,7 @@ function ValuePanel({ value }: { value: StacValue }) {
   );
   return (
     <BasePanel header={header}>
-      <Value value={value} />
+      <Value href={href} value={value} connection={connection} />
     </BasePanel>
   );
 }

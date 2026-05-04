@@ -1,5 +1,8 @@
 import { useStore } from "@/store";
-import { fetchStacGeoparquetValue } from "@/utils/stac-geoparquet";
+import {
+  fetchStacGeoparquetTable,
+  fetchStacGeoparquetValue,
+} from "@/utils/stac-geoparquet";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { useQuery } from "@tanstack/react-query";
 import { fetchStacValue } from "../utils/stac";
@@ -23,5 +26,20 @@ export function useStacGeoparquetValue({
     queryKey: ["stac-geoparquet-value", href],
     queryFn: async () =>
       fetchStacGeoparquetValue({ href, connection, hivePartitioning }),
+  });
+}
+
+export function useStacGeoparquetTable({
+  href,
+  connection,
+}: {
+  href: string;
+  connection: AsyncDuckDBConnection;
+}) {
+  const hivePartitioning = useStore((store) => store.hivePartitioning);
+  return useQuery({
+    queryKey: ["stac-geoparquet-table", href],
+    queryFn: async () =>
+      fetchStacGeoparquetTable({ href, connection, hivePartitioning }),
   });
 }
