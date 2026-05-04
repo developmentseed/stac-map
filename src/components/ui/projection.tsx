@@ -9,7 +9,7 @@ function ProjectionIcon() {
   return projection === "globe" ? <LuGlobe /> : <LuMap />;
 }
 
-interface ProjectionButtonProps extends Omit<IconButtonProps, "aria-label"> {}
+type ProjectionButtonProps = Omit<IconButtonProps, "aria-label">;
 
 export const ProjectionButton = React.forwardRef<
   HTMLButtonElement,

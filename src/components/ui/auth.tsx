@@ -53,7 +53,7 @@ export function LoginSplash({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-interface UserButtonProps extends Omit<IconButtonProps, "aria-label"> {}
+type UserButtonProps = Omit<IconButtonProps, "aria-label">;
 
 export const UserButton = React.forwardRef<HTMLButtonElement, UserButtonProps>(
   function UserButton(props, ref) {
