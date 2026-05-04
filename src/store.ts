@@ -39,6 +39,8 @@ export interface State {
   oidcAccessToken: string | null;
   setOidcAccessToken: (token: string | null) => void;
   tokens: Record<string, string>;
+  setToken: (uri: string, token: string) => void;
+  removeToken: (uri: string) => void;
   valueBbox: BBox2D | null;
   setValueBbox: (bbox: BBox2D | null) => void;
   mapBbox: BBox2D | null;
@@ -114,6 +116,13 @@ export const useStore = create<State>()(
       oidcAccessToken: null,
       setOidcAccessToken: (oidcAccessToken) => set({ oidcAccessToken }),
       tokens: {},
+      setToken: (uri, token) =>
+        set({ tokens: { ...get().tokens, [uri]: token } }),
+      removeToken: (uri) => {
+        const tokens = { ...get().tokens };
+        delete tokens[uri];
+        set({ tokens });
+      },
       valueBbox: null,
       setValueBbox: (valueBbox) => set({ valueBbox }),
       mapBbox: null,
