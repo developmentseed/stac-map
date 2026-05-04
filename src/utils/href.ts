@@ -1,24 +1,12 @@
-export function getCurrentHref(): string {
-  return new URLSearchParams(location.search).get("href") || "";
-}
-
 export function resolveInitialHref(defaultHref?: string): string | null {
-  const href = getCurrentHref() || defaultHref || "";
+  const href =
+    new URLSearchParams(location.search).get("href") || defaultHref || "";
   try {
     new URL(href);
   } catch {
     return null;
   }
   return href;
-}
-
-export function isUrl(href: string) {
-  try {
-    new URL(href);
-  } catch {
-    return false;
-  }
-  return true;
 }
 
 export function toAbsoluteUrl(href: string, baseUrl: URL): string {

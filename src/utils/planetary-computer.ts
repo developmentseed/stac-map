@@ -1,7 +1,6 @@
 import type {
   AzureBlobStorageContainer,
   PlanetaryComputerToken,
-  PlanetaryComputerTokens,
 } from "@/types/planetary-computer";
 
 export function parsePlanetaryComputerContainer(
@@ -46,14 +45,4 @@ export function signPlanetaryComputerHref(
   const url = new URL(href);
   url.search = token.token;
   return url.toString();
-}
-
-export function signPlanetaryComputerHrefFromTokens(
-  href: string,
-  tokens: PlanetaryComputerTokens
-) {
-  const container = parsePlanetaryComputerContainer(href);
-  const token =
-    container && tokens[container.storageAccount]?.[container.container];
-  return token && signPlanetaryComputerHref(href, token);
 }

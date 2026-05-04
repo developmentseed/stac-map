@@ -1,85 +1,100 @@
-import { useItems } from "@/hooks/store";
+import { useStacValue } from "@/hooks/stac";
 import { useStore } from "@/store";
-import type { StacValue } from "@/types/stac";
+import type { StacAssets, StacValue } from "@/types/stac";
 import {
   conformsToFreeTextCollectionSearch,
-  getLinkHref,
-  getStacValueTitle,
+  getLink,
+  getSpatialExtent,
+  getStacTitle,
   getThumbnailAsset,
+  sanitizeBbox,
 } from "@/utils/stac";
 import { Badge, Heading, HStack, Stack } from "@chakra-ui/react";
+import { GeoJsonLayer } from "@deck.gl/layers";
+import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
+import bbox from "@turf/bbox";
+import bboxPolygon from "@turf/bbox-polygon";
+import type { Feature, FeatureCollection, GeoJsonProperties } from "geojson";
 import { useEffect, useMemo } from "react";
-import type { StacAsset } from "stac-ts";
-import Collections from "./collections";
+import type { StacCollection, StacLink } from "stac-ts";
+import Assets from "./assets";
+import Breadcrumbs from "./breadcrumbs";
+import Buttons from "./buttons";
+import Children from "./children";
+import { CollectionsEndpoint } from "./collections";
+import { ItemLinks } from "./items";
+import Links from "./links";
+import Properties from "./properties";
+import Search from "./search";
+import StacGeoparquet from "./stac-geoparquet";
+import Description from "./ui/description";
 import Thumbnail from "./ui/thumbnail";
-import Assets from "./value/assets";
-import Breadcrumbs from "./value/breadcrumbs";
-import Buttons from "./value/buttons";
-import Catalogs from "./value/catalogs";
-import ChildLinks from "./value/child-links";
-import { CogHref, CogSources, PagedCogSources } from "./value/cogs";
-import Description from "./value/description";
-import ItemLinks from "./value/item-links";
-import Items from "./value/items";
-import Links from "./value/links";
-import Properties from "./value/properties";
-import RootHref from "./value/root-href";
-import StacGeoparquetHref from "./value/stac-geoparquet-href";
+import WebMapLinks from "./web-map-links";
 
-export default function Value({ value }: { value: StacValue }) {
-  const href = useStore((store) => store.href);
+export default function Value({
+  href,
+  value,
+  connection,
+}: {
+  href: string;
+  value: StacValue;
+  connection?: AsyncDuckDBConnection;
+}) {
+  const lineColor = useStore((store) => store.lineColor);
+  const setValueBbox = useStore((store) => store.setValueBbox);
+  const setLayer = useStore((store) => store.setLayer);
   const hrefIsParquet = useStore((store) => store.hrefIsParquet);
-  const connection = useStore((store) => store.connection);
-  const collections = useStore((store) => store.collections);
-  const catalogs = useStore((store) => store.catalogs);
-  const setStaticItems = useStore((store) => store.setStaticItems);
-  const asset = useStore((store) => store.asset);
-  const staticItems = useStore((store) => store.staticItems);
-  const searchedItems = useStore((store) => store.searchedItems);
-  const setCogHref = useStore((store) => store.setCogHref);
-  const setCogSources = useStore((store) => store.setCogSources);
-  const setPagedCogSources = useStore((store) => store.setPagedCogSources);
-  const version = value.stac_version as string | undefined;
-  const description = value.description as string | undefined;
-  const rootHref = getLinkHref(value, "root");
-  const collectionsHref = getLinkHref(value, "data");
-  const items = useItems();
+  const version = value.stac_version as string;
   const thumbnailAsset = getThumbnailAsset(value);
-
-  const childLinks = useMemo(() => {
-    return value.links?.filter((link) => link.rel === "child");
-  }, [value]);
-
-  const itemLinks = useMemo(() => {
-    return value.links?.filter((link) => link.rel === "item");
-  }, [value]);
-
-  useEffect(() => {
-    document.title = "stac-map | " + getStacValueTitle(value);
-  }, [value]);
+  const description = value.description as string;
+  const collectionsLink = getLink(value, "data");
+  const childLinks = value.links?.filter((link) => link.rel === "child");
+  const itemLinks = value.links?.filter((link) => link.rel === "item");
+  const rootLink = getLink(value, "root");
+  const tilejsonLink = getLink(value, "tilejson");
+  const wmtsLink = getLink(value, "wmts");
+  const properties = value.properties as GeoJsonProperties | undefined;
+  const assets = value.assets as StacAssets | undefined;
 
   useEffect(() => {
-    if (value.type === "FeatureCollection") setStaticItems(value.features);
-  }, [value, setStaticItems]);
+    switch (value.type) {
+      case "Collection":
+        setValueBbox(sanitizeBbox(getSpatialExtent(value)));
+        break;
+      case "Feature":
+        setValueBbox((value.bbox && sanitizeBbox(value.bbox)) || null);
+        break;
+      case "FeatureCollection":
+        setValueBbox(sanitizeBbox(bbox(value as FeatureCollection)));
+        break;
+    }
+  }, [value, setValueBbox]);
 
   useEffect(() => {
-    if (!asset) setCogHref(null);
-  }, [asset, setCogHref]);
+    setLayer(
+      "value",
+      new GeoJsonLayer({
+        id: "value",
+        data: (value && toGeoJson(value)) || undefined,
+        filled: true,
+        getFillColor: [0, 0, 0, 0],
+        getLineColor: lineColor,
+        getLineWidth: 2,
+        lineWidthUnits: "pixels",
+      })
+    );
 
-  useEffect(() => {
-    if (!staticItems) setCogSources(null);
-  }, [staticItems, setCogSources]);
-
-  useEffect(() => {
-    if (!searchedItems) setPagedCogSources(null);
-  }, [searchedItems, setPagedCogSources]);
+    return () => {
+      setLayer("value", undefined);
+    };
+  }, [value, setLayer, lineColor]);
 
   return (
-    <Stack gap={8}>
+    <Stack gap={4}>
       <Stack gap={4}>
-        <Heading wordBreak={"break-all"}>
+        <Heading>
           <HStack gap={4}>
-            {getStacValueTitle(value)}
+            {getStacTitle(value)}
             {version && <Badge variant={"surface"}>{version}</Badge>}
           </HStack>
         </Heading>
@@ -90,37 +105,60 @@ export default function Value({ value }: { value: StacValue }) {
       </Stack>
 
       <Stack>
-        {(collectionsHref || collections) && (
-          <Collections
-            href={collectionsHref}
-            showSearch={conformsToFreeTextCollectionSearch(value)}
-            collections={collections}
+        {(tilejsonLink || wmtsLink) && (
+          <WebMapLinks tilejsonLink={tilejsonLink} wmtsLink={wmtsLink} />
+        )}
+        {collectionsLink && (
+          <CollectionsEndpoint
+            link={collectionsLink}
+            hasCollectionSearch={conformsToFreeTextCollectionSearch(value)}
           />
         )}
-        {catalogs && <Catalogs catalogs={catalogs} />}
-        {value.type === "Feature" && (
-          <Properties properties={value.properties} />
+        {!collectionsLink && childLinks && childLinks?.length > 0 && (
+          <Children links={childLinks} />
         )}
-        {hrefIsParquet &&
-          href &&
-          connection &&
-          value.type === "FeatureCollection" && (
-            <StacGeoparquetHref href={href} connection={connection} />
-          )}
-        {!collectionsHref && childLinks && <ChildLinks links={childLinks} />}
-        {itemLinks && <ItemLinks links={itemLinks} />}
-        {rootHref && <RootHref value={value} href={rootHref} />}
-        {(value.type === "Collection" || value.type === "FeatureCollection") &&
-          items &&
-          items?.length > 0 && <Items items={items} value={value} />}
+        {itemLinks && itemLinks?.length > 0 && <ItemLinks links={itemLinks} />}
+        {rootLink && <Root link={rootLink} value={value} />}
+        {properties && <Properties properties={properties} />}
+        {assets && <Assets assets={assets} />}
         {value.links && <Links links={value.links} />}
-        {(value.assets as { [k: string]: StacAsset }) && (
-          <Assets assets={value.assets as { [k: string]: StacAsset }} />
-        )}
-        {asset && <CogHref asset={asset} />}
-        {staticItems && <CogSources items={staticItems} />}
-        {searchedItems && <PagedCogSources pages={searchedItems} />}
       </Stack>
+
+      {hrefIsParquet && connection && (
+        <StacGeoparquet href={href} connection={connection} />
+      )}
     </Stack>
   );
+}
+
+function Root({ value, link }: { value: StacValue; link: StacLink }) {
+  const result = useStacValue({ href: link.href });
+
+  const searchLink = useMemo(() => {
+    return result.data && getLink(result.data, "search");
+  }, [result]);
+
+  return searchLink && value.type === "Collection" ? (
+    <Search link={searchLink} collection={value} />
+  ) : null;
+}
+
+function toGeoJson(value: StacValue) {
+  switch (value.type) {
+    case "Collection":
+      return collectionToFeature(value);
+    case "Feature":
+      return value as Feature;
+    case "FeatureCollection":
+      return value as FeatureCollection;
+  }
+}
+
+function collectionToFeature(collection: StacCollection) {
+  const bbox = sanitizeBbox(getSpatialExtent(collection)) || [
+    -180, -90, 180, 90,
+  ];
+  return bboxPolygon(bbox, {
+    id: collection.id,
+  });
 }

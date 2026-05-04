@@ -1,4 +1,10 @@
-export const EXAMPLES = [
+export interface Example {
+  title: string;
+  badge: string;
+  href: string;
+}
+
+export const EXAMPLES: Example[] = [
   { title: "eoAPI DevSeed", badge: "API", href: "https://stac.eoapi.dev/" },
   {
     title: "Microsoft Planetary Computer",

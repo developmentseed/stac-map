@@ -6,16 +6,23 @@ import {
   InputGroup,
 } from "@chakra-ui/react";
 import { useDuckDb } from "duckdb-wasm-kit";
+import { useState } from "react";
 import { LuUpload } from "react-icons/lu";
 import { useStore } from "../store";
 import { uploadFile } from "../utils/upload";
 
 export default function HrefInput() {
+  const href = useStore((store) => store.href);
   const setHref = useStore((state) => state.setHref);
-  const input = useStore((state) => state.input);
-  const setInput = useStore((state) => state.setInput);
   const setUploadedFile = useStore((store) => store.setUploadedFile);
   const { db } = useDuckDb();
+  const [input, setInput] = useState(href || "");
+  const [lastHref, setLastHref] = useState(href);
+
+  if (href !== lastHref) {
+    setLastHref(href);
+    setInput(href || "");
+  }
 
   return (
     <Box

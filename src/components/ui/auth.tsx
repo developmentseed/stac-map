@@ -53,7 +53,7 @@ export function LoginSplash({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-interface UserButtonProps extends Omit<IconButtonProps, "aria-label"> {}
+type UserButtonProps = Omit<IconButtonProps, "aria-label">;
 
 export const UserButton = React.forwardRef<HTMLButtonElement, UserButtonProps>(
   function UserButton(props, ref) {
@@ -62,12 +62,7 @@ export const UserButton = React.forwardRef<HTMLButtonElement, UserButtonProps>(
     return (
       <Dialog.Root>
         <Dialog.Trigger asChild>
-          <IconButton
-            variant="ghost"
-            aria-label="User info"
-            ref={ref}
-            {...props}
-          >
+          <IconButton aria-label="User info" ref={ref} {...props}>
             <LuUser />
           </IconButton>
         </Dialog.Trigger>

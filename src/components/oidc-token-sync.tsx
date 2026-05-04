@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useAuth } from "react-oidc-context";
 import { useStore } from "../store";
 
-export function OidcTokenSync({ children }: { children: React.ReactNode }) {
+export function OidcTokenSync() {
   const { user } = useAuth();
   const setOidcAccessToken = useStore((state) => state.setOidcAccessToken);
 
@@ -10,5 +10,5 @@ export function OidcTokenSync({ children }: { children: React.ReactNode }) {
     setOidcAccessToken(user?.access_token ?? null);
   }, [user, setOidcAccessToken]);
 
-  return <>{children}</>;
+  return null;
 }

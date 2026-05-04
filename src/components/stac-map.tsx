@@ -13,16 +13,20 @@ import {
   type SourceProps,
 } from "react-map-gl/maplibre";
 import { AuthProvider, type AuthProviderProps } from "react-oidc-context";
+import type { Example } from "../constants";
 import { AuthEnabledProvider } from "../contexts/auth-enabled";
+import { ExamplesProvider } from "../contexts/examples";
 import { StacBrowserUrlProvider } from "../contexts/stac-browser";
 import App from "./app";
-import { HrefBootstrap } from "./href-bootstrap";
+import ErrorListener from "./error-listener";
+import HrefBootstrap from "./href-bootstrap";
 import { OidcTokenSync } from "./oidc-token-sync";
 import { LoginSplash } from "./ui/auth";
 import {
   ColorModeProvider,
   type ColorModeProviderProps,
 } from "./ui/color-mode";
+import { Toaster } from "./ui/toaster";
 
 export interface ExtraLayerProps {
   source: SourceProps;
@@ -32,8 +36,6 @@ export interface ExtraLayerProps {
 export interface StacMapProps {
   /** Initial STAC URL to load on mount when no `?href=` is present in the URL. */
   defaultHref?: string;
-  /** When true (default), the `href` state is mirrored into `?href=` and reacts to popstate. */
-  syncWithUrl?: boolean;
   /** Override the Chakra UI system. Defaults to `defaultSystem`. */
   chakraSystem?: SystemContext;
   /** Forwarded to the internal next-themes ColorModeProvider. */
@@ -48,6 +50,12 @@ export interface StacMapProps {
   footer?: ReactNode;
   /** Source and layer information for extra maplibre layers */
   extraLayers?: ExtraLayerProps[];
+  /**
+   * Override the list of example STAC resources shown in the Examples menu.
+   * Pass an empty array to hide the Examples button entirely. Defaults to a
+   * built-in list of public STAC catalogs and APIs.
+   */
+  examples?: Example[];
   /**
    * Skip the internal `ChakraProvider` and `ColorModeProvider`. Use when the
    * host app already mounts its own Chakra v3 system and `next-themes`
@@ -65,7 +73,6 @@ let mountCount = 0;
  */
 export function StacMap({
   defaultHref,
-  syncWithUrl = true,
   chakraSystem,
   colorMode,
   queryClient: externalQueryClient,
@@ -73,6 +80,7 @@ export function StacMap({
   stacBrowserUrl,
   footer,
   extraLayers,
+  examples,
   disableChakraProvider = false,
 }: StacMapProps) {
   useEffect(() => {
@@ -100,11 +108,12 @@ export function StacMap({
     <QueryClientProvider client={queryClient}>
       <AuthEnabledProvider enabled={!!auth}>
         <StacBrowserUrlProvider url={stacBrowserUrl}>
-          <MapProvider>
-            <HrefBootstrap defaultHref={defaultHref} syncWithUrl={syncWithUrl}>
+          <ExamplesProvider examples={examples}>
+            <MapProvider>
+              <HrefBootstrap defaultHref={defaultHref} />
               <App footer={footer} extraLayers={extraLayers} />
-            </HrefBootstrap>
-          </MapProvider>
+            </MapProvider>
+          </ExamplesProvider>
         </StacBrowserUrlProvider>
       </AuthEnabledProvider>
     </QueryClientProvider>
@@ -112,11 +121,12 @@ export function StacMap({
 
   const wrapped = (
     <Box position="relative" h="100%" w="100%" overflow="hidden">
+      <ErrorListener />
+      <Toaster />
       {auth ? (
         <AuthProvider {...auth}>
-          <OidcTokenSync>
-            <LoginSplash>{inner}</LoginSplash>
-          </OidcTokenSync>
+          <OidcTokenSync />
+          <LoginSplash>{inner}</LoginSplash>
         </AuthProvider>
       ) : (
         inner

@@ -1,48 +1,45 @@
-import { useStore } from "@/store";
-import { HStack, Slider, Span } from "@chakra-ui/react";
+import { Slider } from "@chakra-ui/react";
 import { useState } from "react";
 
 export default function DatetimeSlider({
-  start,
-  end,
+  startBoundMs,
+  endBoundMs,
+  value,
+  onChangeEnd,
+  orientation = "horizontal",
 }: {
-  start: Date;
-  end: Date;
+  startBoundMs: number;
+  endBoundMs: number;
+  value: [number, number];
+  onChangeEnd: (value: [number, number]) => void;
+  orientation?: "horizontal" | "vertical";
 }) {
-  const [userValue, setUserValue] = useState<[number, number] | null>(null);
-  const datetimeFilter = useStore((store) => store.datetimeFilter);
-  const setDatetimeFilter = useStore((store) => store.setDatetimeFilter);
-
-  const value =
-    datetimeFilter && userValue ? userValue : [start.getTime(), end.getTime()];
-
+  const [internal, setInternal] = useState<number[]>([value[0], value[1]]);
+  const [lastExternal, setLastExternal] = useState<number[]>([
+    value[0],
+    value[1],
+  ]);
+  if (lastExternal[0] !== value[0] || lastExternal[1] !== value[1]) {
+    setLastExternal([value[0], value[1]]);
+    setInternal([value[0], value[1]]);
+  }
   return (
     <Slider.Root
-      value={value}
-      min={start.getTime()}
-      max={end.getTime()}
-      onValueChange={(e) => {
-        setUserValue(e.value as [number, number]);
-        setDatetimeFilter({
-          start: new Date(value[0]),
-          end: new Date(value[1]),
-        });
-      }}
-      onValueChangeEnd={() => {}}
+      size={"sm"}
+      orientation={orientation}
+      min={startBoundMs}
+      max={endBoundMs}
+      value={internal}
+      onValueChange={(e) => setInternal(e.value)}
+      onValueChangeEnd={(e) => onChangeEnd([e.value[0], e.value[1]])}
+      h={orientation === "vertical" ? "100%" : undefined}
     >
-      <HStack>
-        <Slider.Label>Filter by datetime</Slider.Label>
-      </HStack>
       <Slider.Control>
         <Slider.Track>
           <Slider.Range />
         </Slider.Track>
         <Slider.Thumbs />
       </Slider.Control>
-      <HStack justify={"space-between"}>
-        <Span>{new Date(value[0]).toLocaleDateString()}</Span>
-        <Span>{new Date(value[1]).toLocaleDateString()}</Span>
-      </HStack>
     </Slider.Root>
   );
 }

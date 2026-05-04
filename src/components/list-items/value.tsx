@@ -1,6 +1,6 @@
 import { useStore } from "@/store";
 import type { StacValue } from "@/types/stac";
-import { getSelfHref, getStacValueTitle } from "@/utils/stac";
+import { getSelfHref, getStacTitle } from "@/utils/stac";
 import { Link, List } from "@chakra-ui/react";
 
 export default function ValueListItem({
@@ -30,7 +30,7 @@ export default function ValueListItem({
           if (selfHref) setHref(selfHref);
         }}
       >
-        {getStacValueTitle(value)}
+        {getStacTitle(value)}
       </Link>
     </List.Item>
   );

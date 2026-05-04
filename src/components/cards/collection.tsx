@@ -1,16 +1,16 @@
-import { useStore } from "@/store";
 import { Text, VStack } from "@chakra-ui/react";
 import type { StacCollection } from "stac-ts";
 import ValueCard from "./value";
 
 export default function CollectionCard({
   collection,
+  hovered,
+  setHovered,
 }: {
   collection: StacCollection;
+  hovered: StacCollection | undefined;
+  setHovered: (collection: StacCollection | undefined) => void;
 }) {
-  const hoveredCollection = useStore((store) => store.hoveredCollection);
-  const setHoveredCollection = useStore((store) => store.setHoveredCollection);
-
   const bbox = collection.extent?.spatial?.bbox?.[0];
   const interval = collection.extent?.temporal?.interval?.[0];
 
@@ -34,10 +34,10 @@ export default function CollectionCard({
   return (
     <ValueCard
       value={collection}
-      isHovered={collection.id === hoveredCollection?.id}
-      onMouseEnter={() => setHoveredCollection(collection)}
+      isHovered={collection.id === hovered?.id}
+      onMouseEnter={() => setHovered(collection)}
       onMouseLeave={() => {
-        if (hoveredCollection?.id === collection.id) setHoveredCollection(null);
+        if (hovered?.id === collection.id) setHovered(undefined);
       }}
       footer={footer}
     />

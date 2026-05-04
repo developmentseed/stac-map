@@ -1,27 +1,36 @@
-import type { BBox2D } from "@/types/map";
-import type { StacValue } from "@/types/stac";
-import type { LngLatLike, MapRef } from "react-map-gl/maplibre";
-import type { StacCollection } from "stac-ts";
-import { getBbox } from "./stac";
+import type { BBox2D } from "@/store";
+import type { MapRef } from "react-map-gl/maplibre";
 
-export function fitBounds(
-  map: MapRef,
-  value: StacValue,
-  collections: StacCollection[] | null
-) {
-  const padding = {
+function getPadding() {
+  return {
     top: window.innerHeight / 10,
-    bottom: window.innerHeight / 20,
+    bottom: window.innerHeight / 10,
     right: window.innerWidth / 20,
     left: window.innerWidth / 20 + window.innerWidth / 3,
   };
-  const bbox = getBbox(value, collections);
-  if (bbox) map.fitBounds(bboxToBounds(bbox), { padding });
 }
 
-function bboxToBounds(bbox: BBox2D): [LngLatLike, LngLatLike] {
+export function fitBoundsToBbox(map: MapRef, bbox: BBox2D) {
+  map.fitBounds(
+    [
+      [bbox[0], bbox[1]],
+      [bbox[2], bbox[3]],
+    ],
+    { padding: getPadding() }
+  );
+}
+
+export function getPaddedViewportBbox(map: MapRef): BBox2D {
+  const padding = getPadding();
+  const canvas = map.getCanvas();
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  const tl = map.unproject([padding.left, padding.top]);
+  const br = map.unproject([width - padding.right, height - padding.bottom]);
   return [
-    [bbox[0], bbox[1]],
-    [bbox[2], bbox[3]],
+    Math.min(tl.lng, br.lng),
+    Math.min(tl.lat, br.lat),
+    Math.max(tl.lng, br.lng),
+    Math.max(tl.lat, br.lat),
   ];
 }
