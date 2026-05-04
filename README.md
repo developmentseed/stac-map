@@ -9,8 +9,9 @@ The map-first, single-page, statically-hosted STAC visualizer at <https://develo
 Includes:
 
 - Client-side COG rendering via [deck.gl-raster](https://github.com/developmentseed/deck.gl-raster)
-- Render collections via some web map services (see https://github.com/developmentseed/stac-map/issues/314 for which ones we haven't implemented yet)
+- Web map service display
 - [stac-geoparquet](https://github.com/radiantearth/stac-geoparquet-spec) visualization, upload, and export
+- React component for re-use in other applications
 
 <!-- markdownlint-disable MD033 -->
 <picture>
@@ -28,16 +29,17 @@ There's two ways to deploy your own version of **stac-map**:
 
 ### Build-time configuration
 
-If you only need to customize a few things (default href or auth), you can simply clone this repository and configure the app with environment variables.
+If you only need to customize a few things, you can clone this repository and configure a build of the app with environment variables.
 See [deploy.yaml](./.github/workflows/deploy.yaml) for a (drop-dead simple) example of deploying this application as a static site via Github Pages.
-The environment variables are:
+The environment variables available are:
 
-| Variable              | Description                        | Default            |
-| --------------------- | ---------------------------------- | ------------------ |
-| `VITE_BASE_PATH`      | URL path prefix (e.g., `/my-app/`) | `/stac-map/`       |
-| `VITE_DEFAULT_HREF`   | STAC resource to load on startup   | None (shows intro) |
-| `VITE_AUTH_AUTHORITY` | The OIDC authority to use for auth | None               |
-| `VITE_AUTH_CLIENT_ID` | The OIDC client id to use for auth | None               |
+| Variable                | Description                                          | Default                                                   |
+| ----------------------- | ---------------------------------------------------- | --------------------------------------------------------- |
+| `VITE_BASE_PATH`        | URL path prefix (e.g., `/my-app/`)                   | `/stac-map/`                                              |
+| `VITE_DEFAULT_HREF`     | STAC resource to load on startup                     | None (shows intro)                                        |
+| `VITE_AUTH_AUTHORITY`   | The OIDC authority to use for auth                   | None                                                      |
+| `VITE_AUTH_CLIENT_ID`   | The OIDC client id to use for auth                   | None                                                      |
+| `VITE_STAC_BROWSER_URL` | URL prefix for "Open in STAC Browser" external links | `https://radiantearth.github.io/stac-browser/#/external/` |
 
 Example:
 
@@ -62,7 +64,7 @@ To use it:
 ```javascript
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { StacMap } from "@development-seed/stac-map";
+import { StacMap } from "@developmentseed/stac-map";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -71,10 +73,23 @@ createRoot(document.getElementById("root")!).render(
 );
 ```
 
-See [src/main.tsx](./src/main.tsx) for a real-world example of using the component (it's what drives https://developmentseed.org/stac-map).
+You'll also need to add [vite-plugin-top-level-await](https://www.npmjs.com/package/vite-plugin-top-level-await) and [vite-plugin-wasm](https://www.npmjs.com/package/vite-plugin-wasm) to your app, e.g.:
 
-> [!NOTE]
-> We plan to provide JSDocs for all available properties before releasing v2 of **stac-map**
+```sh
+yarn add --dev vite-plugin-top-level-await vite-plugin-wasm
+```
+
+Then in [vite.config.ts](./vite.config.ts):
+
+```javascript
+import topLevelAwait from "vite-plugin-top-level-await";
+import wasm from "vite-plugin-wasm";
+/// --- >8 ---
+  plugins: [react(), wasm(), topLevelAwait()],
+```
+
+See [src/main.tsx](./src/main.tsx) for a real-world example of using the component (it's what drives https://developmentseed.org/stac-map).
+We have a JSDoc of our exports rendered at https://developmentseed.org/stac-map/docs.
 
 ## Development
 
