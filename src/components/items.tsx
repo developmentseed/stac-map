@@ -1,6 +1,6 @@
 import { type BBox2D, useStore } from "@/store";
 import { fitBoundsToBbox } from "@/utils/map";
-import { getSelfHref } from "@/utils/stac";
+import { fetchStacValue, getSelfHref } from "@/utils/stac";
 import {
   Button,
   ButtonGroup,
@@ -12,17 +12,19 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { GeoJsonLayer } from "@deck.gl/layers";
+import { useQueries } from "@tanstack/react-query";
 import type { Feature } from "geojson";
 import { useEffect, useMemo, useState } from "react";
-import { LuDownload, LuLocate, LuSearch } from "react-icons/lu";
+import { LuDownload, LuFiles, LuLocate, LuSearch } from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
-import type { StacItem } from "stac-ts";
+import type { StacItem, StacLink } from "stac-ts";
 import * as stac_wasm from "stac-wasm";
 import ItemCard from "./cards/item";
 import ItemListItem from "./list-items/item";
 import EntityList from "./ui/entity-list";
+import Section from "./ui/section";
 
-export default function Items({ items }: { items: StacItem[] }) {
+export function Items({ items }: { items: StacItem[] }) {
   const [filterByMapBbox, setFilterByMapBbox] = useState(true);
   const [filterText, setFilterText] = useState("");
   const [hovered, setHovered] = useState<StacItem>();
@@ -118,56 +120,77 @@ export default function Items({ items }: { items: StacItem[] }) {
   );
 
   return (
-    <Stack>
-      <ButtonGroup size={"xs"} variant={"surface"}>
-        <Button
-          disabled={!map || !itemsBbox}
-          onClick={() => map && itemsBbox && fitBoundsToBbox(map, itemsBbox)}
-        >
-          <LuLocate /> Zoom to extent
-        </Button>
-        <DownloadTrigger
-          fileName="items.geojson"
-          mimeType="application/json"
-          data={() =>
-            JSON.stringify({
-              type: "FeatureCollection",
-              features: items,
-            })
-          }
-          asChild
-        >
-          <Button>
-            <LuDownload /> JSON
+    <Section icon={<LuFiles />} title="Items">
+      <Stack>
+        <ButtonGroup size={"xs"} variant={"surface"}>
+          <Button
+            disabled={!map || !itemsBbox}
+            onClick={() => map && itemsBbox && fitBoundsToBbox(map, itemsBbox)}
+          >
+            <LuLocate /> Zoom to extent
           </Button>
-        </DownloadTrigger>
-        <DownloadTrigger
-          fileName="items.parquet"
-          mimeType="application/vnd.apache.parquet"
-          data={() =>
-            new Blob([stac_wasm.stacJsonToParquet(items) as BlobPart])
-          }
-          asChild
-        >
-          <Button>
-            <LuDownload /> stac-geoparquet
-          </Button>
-        </DownloadTrigger>
-      </ButtonGroup>
-      <EntityList
-        items={filteredItems}
-        getKey={(item) => item.id}
-        renderCard={(item) => (
-          <ItemCard item={item} hovered={hovered} setHovered={setHovered} />
-        )}
-        renderListItem={(item) => (
-          <ItemListItem item={item} hovered={hovered} setHovered={setHovered} />
-        )}
-        filters={filters}
-        defaultView={"list"}
-      />
-    </Stack>
+          <DownloadTrigger
+            fileName="items.geojson"
+            mimeType="application/json"
+            data={() =>
+              JSON.stringify({
+                type: "FeatureCollection",
+                features: items,
+              })
+            }
+            asChild
+          >
+            <Button>
+              <LuDownload /> JSON
+            </Button>
+          </DownloadTrigger>
+          <DownloadTrigger
+            fileName="items.parquet"
+            mimeType="application/vnd.apache.parquet"
+            data={() =>
+              new Blob([stac_wasm.stacJsonToParquet(items) as BlobPart])
+            }
+            asChild
+          >
+            <Button>
+              <LuDownload /> stac-geoparquet
+            </Button>
+          </DownloadTrigger>
+        </ButtonGroup>
+        <EntityList
+          items={filteredItems}
+          getKey={(item) => item.id}
+          renderCard={(item) => (
+            <ItemCard item={item} hovered={hovered} setHovered={setHovered} />
+          )}
+          renderListItem={(item) => (
+            <ItemListItem
+              item={item}
+              hovered={hovered}
+              setHovered={setHovered}
+            />
+          )}
+          filters={filters}
+          defaultView={"list"}
+        />
+      </Stack>
+    </Section>
   );
+}
+
+export function ItemLinks({ links }: { links: StacLink[] }) {
+  const results = useQueries({
+    queries: links.map((link) => ({
+      queryKey: ["stac-value", link.href],
+      queryFn: async () => fetchStacValue({ href: link.href }),
+    })),
+  });
+
+  const items = useMemo(() => {
+    return results.flatMap((result) => (result.data ? [result.data] : []));
+  }, [results]);
+
+  return items.length > 0 ? <Items items={items} /> : null;
 }
 
 function getItemsBbox(items: StacItem[]): BBox2D | undefined {

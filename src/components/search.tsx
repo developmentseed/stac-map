@@ -37,7 +37,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import bboxPolygon from "@turf/bbox-polygon";
 import { useEffect, useMemo, useState } from "react";
 import {
-  LuFiles,
   LuFileSearch2,
   LuFrame,
   LuSettings2,
@@ -46,7 +45,7 @@ import {
 } from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
 import type { StacCollection, StacItem, StacLink } from "stac-ts";
-import Items from "./items";
+import { Items } from "./items";
 import PaginationBar from "./ui/pagination-bar";
 import Section from "./ui/section";
 
@@ -214,9 +213,7 @@ export default function Search({
       {result.data?.pages && result.data.pages.length > 0 && (
         <Visualization pages={result.data.pages} />
       )}
-      <Section icon={<LuFiles />} title="Items">
-        {body}
-      </Section>
+      {body}
       {items && items.length > 0 && (
         <PaginationBar
           count={items.length}

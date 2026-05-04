@@ -22,6 +22,7 @@ import Breadcrumbs from "./breadcrumbs";
 import Buttons from "./buttons";
 import Children from "./children";
 import { CollectionsEndpoint } from "./collections";
+import { ItemLinks } from "./items";
 import Links from "./links";
 import Properties from "./properties";
 import Search from "./search";
@@ -47,6 +48,7 @@ export default function Value({
   const description = value.description as string;
   const collectionsLink = getLink(value, "data");
   const childLinks = value.links?.filter((link) => link.rel === "child");
+  const itemLinks = value.links?.filter((link) => link.rel === "item");
   const rootLink = getLink(value, "root");
   const properties = value.properties as GeoJsonProperties | undefined;
   const assets = value.assets as StacAssets | undefined;
@@ -113,6 +115,7 @@ export default function Value({
         {!collectionsLink && childLinks && childLinks?.length > 0 && (
           <Children links={childLinks} />
         )}
+        {itemLinks && itemLinks?.length > 0 && <ItemLinks links={itemLinks} />}
         {rootLink && <Root link={rootLink} value={value} />}
         {properties && <Properties properties={properties} />}
         {assets && <Assets assets={assets} />}
