@@ -27,9 +27,9 @@ import Links from "./links";
 import Properties from "./properties";
 import Search from "./search";
 import StacGeoparquet from "./stac-geoparquet";
-import Tilejson from "./tilejson";
 import Description from "./ui/description";
 import Thumbnail from "./ui/thumbnail";
+import WebMapLinks from "./web-map-links";
 
 export default function Value({
   href,
@@ -104,6 +104,7 @@ export default function Value({
       </Stack>
 
       <Stack>
+        {tilejsonLink && <WebMapLinks tilejsonLink={tilejsonLink} />}
         {collectionsLink && (
           <CollectionsEndpoint
             link={collectionsLink}
@@ -116,7 +117,6 @@ export default function Value({
         {itemLinks && itemLinks?.length > 0 && <ItemLinks links={itemLinks} />}
         {rootLink && <Root link={rootLink} value={value} />}
         {properties && <Properties properties={properties} />}
-        {tilejsonLink && <Tilejson link={tilejsonLink} />}
         {assets && <Assets assets={assets} />}
         {value.links && <Links links={value.links} />}
       </Stack>
