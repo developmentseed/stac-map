@@ -20,7 +20,8 @@ import type { StacCollection, StacLink } from "stac-ts";
 import Assets from "./assets";
 import Breadcrumbs from "./breadcrumbs";
 import Buttons from "./buttons";
-import Collections from "./collections";
+import Children from "./children";
+import { CollectionsEndpoint } from "./collections";
 import Links from "./links";
 import Properties from "./properties";
 import Search from "./search";
@@ -45,6 +46,7 @@ export default function Value({
   const thumbnailAsset = getThumbnailAsset(value);
   const description = value.description as string;
   const collectionsLink = getLink(value, "data");
+  const childLinks = value.links?.filter((link) => link.rel === "child");
   const rootLink = getLink(value, "root");
   const properties = value.properties as GeoJsonProperties | undefined;
   const assets = value.assets as StacAssets | undefined;
@@ -103,10 +105,13 @@ export default function Value({
 
       <Stack>
         {collectionsLink && (
-          <Collections
+          <CollectionsEndpoint
             link={collectionsLink}
             hasCollectionSearch={conformsToFreeTextCollectionSearch(value)}
           />
+        )}
+        {!collectionsLink && childLinks && childLinks?.length > 0 && (
+          <Children links={childLinks} />
         )}
         {rootLink && <Root link={rootLink} value={value} />}
         {properties && <Properties properties={properties} />}

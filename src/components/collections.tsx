@@ -30,7 +30,7 @@ import EntityList from "./ui/entity-list";
 import PaginationBar from "./ui/pagination-bar";
 import Section from "./ui/section";
 
-export default function Collections({
+export function CollectionsEndpoint({
   link,
   hasCollectionSearch,
 }: {
@@ -80,7 +80,7 @@ export default function Collections({
 
   const body = collections ? (
     collections.length > 0 ? (
-      <Data collections={collections} />
+      <Collections collections={collections} />
     ) : (
       <Alert.Root status={"info"}>
         <Alert.Indicator />
@@ -99,9 +99,7 @@ export default function Collections({
   return (
     <>
       {hasCollectionSearch && <Search setSearch={setSearch} />}
-      <Section icon={<LuFolderPlus />} title="Collections">
-        {body}
-      </Section>
+      {body}
       {collections && collections.length > 0 && (
         <PaginationBar
           count={collections.length}
@@ -116,7 +114,11 @@ export default function Collections({
   );
 }
 
-function Data({ collections }: { collections: StacCollection[] }) {
+export function Collections({
+  collections,
+}: {
+  collections: StacCollection[];
+}) {
   const [includeGlobal, setIncludeGlobal] = useState(false);
   const [filterByMapBbox, setFilterByMapBbox] = useState(true);
   const [filterText, setFilterText] = useState("");
@@ -158,6 +160,10 @@ function Data({ collections }: { collections: StacCollection[] }) {
       )
       .map(({ id, bbox }) => bboxPolygon(bbox, { id }));
   }, [filteredCollections]);
+
+  const title = useMemo(() => {
+    return `Collections (${filteredCollections.length}/${collections.length})`;
+  }, [collections, filteredCollections]);
 
   useEffect(() => {
     setLayer(
@@ -238,26 +244,28 @@ function Data({ collections }: { collections: StacCollection[] }) {
   );
 
   return (
-    <EntityList
-      items={filteredCollections}
-      getKey={(collection) => collection.id}
-      renderCard={(collection) => (
-        <CollectionCard
-          collection={collection}
-          hovered={hovered}
-          setHovered={setHovered}
-        />
-      )}
-      renderListItem={(collection) => (
-        <CollectionListItem
-          collection={collection}
-          hovered={hovered}
-          setHovered={setHovered}
-        />
-      )}
-      filters={filters}
-      defaultView={"card"}
-    />
+    <Section icon={<LuFolderPlus />} title={title}>
+      <EntityList
+        items={filteredCollections}
+        getKey={(collection) => collection.id}
+        renderCard={(collection) => (
+          <CollectionCard
+            collection={collection}
+            hovered={hovered}
+            setHovered={setHovered}
+          />
+        )}
+        renderListItem={(collection) => (
+          <CollectionListItem
+            collection={collection}
+            hovered={hovered}
+            setHovered={setHovered}
+          />
+        )}
+        filters={filters}
+        defaultView={"card"}
+      />
+    </Section>
   );
 }
 
