@@ -8,3 +8,5 @@ export {
 export { useStore } from "./store";
 export type { State } from "./store";
 export type { StacItemCollection, StacValue } from "./types/stac";
+export { buildAuth } from "./utils/auth";
+export type { BuildAuthOptions } from "./utils/auth";
