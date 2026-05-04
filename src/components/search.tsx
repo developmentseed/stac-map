@@ -1,5 +1,6 @@
-import { type BBox2D, useStore } from "@/store";
+import { type BBox2D, type Color, useStore } from "@/store";
 import type { StacAssets, StacItemCollection } from "@/types/stac";
+import { fitBoundsToBbox, getPaddedViewportBbox } from "@/utils/map";
 import {
   fetchStacValue,
   getCogHref,
@@ -10,6 +11,7 @@ import {
 import {
   Alert,
   Button,
+  ButtonGroup,
   Center,
   Checkbox,
   CloseButton,
@@ -17,6 +19,7 @@ import {
   Dialog,
   Field,
   Fieldset,
+  IconButton,
   Input,
   InputGroup,
   Portal,
@@ -26,6 +29,7 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { GeoJsonLayer } from "@deck.gl/layers";
+import bboxPolygon from "@turf/bbox-polygon";
 import {
   COGLayer,
   MosaicLayer,
@@ -38,10 +42,14 @@ import { useEffect, useMemo, useState } from "react";
 import {
   LuFiles,
   LuFileSearch2,
+  LuFrame,
+  LuLocate,
   LuSearch,
   LuSettings2,
   LuView,
+  LuX,
 } from "react-icons/lu";
+import { useMap } from "react-map-gl/maplibre";
 import type { StacCollection, StacItem, StacLink } from "stac-ts";
 import ItemCard from "./cards/item";
 import ItemListItem from "./list-items/item";
@@ -60,21 +68,37 @@ export default function Search({
   const [isFetchingAll, setIsFetchingAll] = useState(false);
   const [startDatetime, setStartDatetime] = useState(
     () =>
-      useStore.getState().searchParams[collection.id]?.startDatetime ??
+      useStore.getState().searchParams[link.href]?.startDatetime ??
       toDatetimeInputValue(collection.extent?.temporal?.interval?.[0]?.[0])
   );
   const [endDatetime, setEndDatetime] = useState(
     () =>
-      useStore.getState().searchParams[collection.id]?.endDatetime ??
+      useStore.getState().searchParams[link.href]?.endDatetime ??
       toDatetimeInputValue(collection.extent?.temporal?.interval?.[0]?.[1])
   );
   const [limit, setLimit] = useState(
-    () => useStore.getState().searchParams[collection.id]?.limit ?? ""
+    () => useStore.getState().searchParams[link.href]?.limit ?? ""
   );
+  const [bbox, setBbox] = useState<BBox2D | undefined>(
+    () => useStore.getState().searchParams[link.href]?.bbox
+  );
+  const { map } = useMap();
 
   useEffect(() => {
-    setSearchParams(collection.id, { startDatetime, endDatetime, limit });
-  }, [collection.id, startDatetime, endDatetime, limit, setSearchParams]);
+    setSearchParams(link.href, {
+      startDatetime,
+      endDatetime,
+      limit,
+      bbox,
+    });
+  }, [
+    link.href,
+    startDatetime,
+    endDatetime,
+    limit,
+    bbox,
+    setSearchParams,
+  ]);
 
   const startBoundMs = useMemo(
     () => toMs(collection.extent?.temporal?.interval?.[0]?.[0]),
@@ -94,8 +118,9 @@ export default function Search({
         `${toStacDatetime(startDatetime)}/${toStacDatetime(endDatetime)}`
       );
     if (limit) url.searchParams.set("limit", limit);
+    if (bbox) url.searchParams.set("bbox", bbox.join(","));
     return url.toString();
-  }, [link, collection, startDatetime, endDatetime, limit]);
+  }, [link, collection, startDatetime, endDatetime, limit, bbox]);
 
   const result = useInfiniteQuery({
     queryKey: ["search", href],
@@ -174,12 +199,34 @@ export default function Search({
                     setEndDatetime={setEndDatetime}
                   />
                 )}
+                <Field.Root>
+                  <Field.Label>Bounding box</Field.Label>
+                  <ButtonGroup size={"sm"} variant={"surface"} attached>
+                    <Button
+                      disabled={!map}
+                      onClick={() =>
+                        map && setBbox(getPaddedViewportBbox(map))
+                      }
+                    >
+                      <LuFrame /> Set to map extents
+                    </Button>
+                    {bbox && (
+                      <IconButton
+                        aria-label={"Clear bounding box"}
+                        onClick={() => setBbox(undefined)}
+                      >
+                        <LuX />
+                      </IconButton>
+                    )}
+                  </ButtonGroup>
+                </Field.Root>
               </Fieldset.Content>
             </Fieldset.Root>
           </Fieldset.Content>
         </Fieldset.Root>
         <AdvancedSettings limit={limit} setLimit={setLimit} />
       </Section>
+      {bbox && <BboxLayer bbox={bbox} />}
       {result.data?.pages && result.data.pages.length > 0 && (
         <Visualization pages={result.data.pages} />
       )}
@@ -198,6 +245,35 @@ export default function Search({
       )}
     </>
   );
+}
+
+function BboxLayer({ bbox }: { bbox: BBox2D }) {
+  const setLayer = useStore((store) => store.setLayer);
+  const lineColor = useStore((store) => store.lineColor);
+
+  useEffect(() => {
+    const id = "search-bbox";
+    const inverted: Color = [
+      255 - lineColor[0],
+      255 - lineColor[1],
+      255 - lineColor[2],
+      lineColor[3],
+    ];
+    setLayer(
+      id,
+      new GeoJsonLayer({
+        id,
+        data: [bboxPolygon(bbox)],
+        filled: false,
+        getLineColor: inverted,
+        getLineWidth: 2,
+        lineWidthUnits: "pixels",
+      })
+    );
+    return () => setLayer(id, undefined);
+  }, [bbox, lineColor, setLayer]);
+
+  return null;
 }
 
 function DatetimeSlider({
@@ -327,6 +403,7 @@ function Items({ items }: { items: StacItem[] }) {
   const fillColor = useStore((store) => store.fillColor);
   const lineColor = useStore((store) => store.lineColor);
   const mapBbox = useStore((store) => store.mapBbox);
+  const { map } = useMap();
 
   const filteredItems = useMemo(() => {
     const needle = filterText.trim().toLowerCase();
@@ -343,6 +420,8 @@ function Items({ items }: { items: StacItem[] }) {
       return true;
     });
   }, [items, filterByMapBbox, mapBbox, filterText]);
+
+  const itemsBbox = useMemo(() => getItemsBbox(filteredItems), [filteredItems]);
 
   useEffect(() => {
     setLayer(
@@ -407,6 +486,15 @@ function Items({ items }: { items: StacItem[] }) {
           onChange={(e) => setFilterText(e.target.value)}
         />
       </InputGroup>
+      <Button
+        size={"sm"}
+        variant={"surface"}
+        alignSelf={"flex-start"}
+        disabled={!map || !itemsBbox}
+        onClick={() => map && itemsBbox && fitBoundsToBbox(map, itemsBbox)}
+      >
+        <LuLocate /> Zoom to extent
+      </Button>
     </>
   );
 
@@ -610,6 +698,23 @@ function pickBestKeyForItems(items: StacItem[]): string | undefined {
     }
   }
   return best;
+}
+
+function getItemsBbox(items: StacItem[]): BBox2D | undefined {
+  let west = Infinity;
+  let south = Infinity;
+  let east = -Infinity;
+  let north = -Infinity;
+  for (const item of items) {
+    const b = item.bbox;
+    if (!b || b.length < 4) continue;
+    if (b[0] < west) west = b[0];
+    if (b[1] < south) south = b[1];
+    if (b[2] > east) east = b[2];
+    if (b[3] > north) north = b[3];
+  }
+  if (west === Infinity) return undefined;
+  return [west, south, east, north];
 }
 
 function isItemInBbox(item: StacItem, bbox: BBox2D): boolean {

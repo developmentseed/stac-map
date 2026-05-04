@@ -11,6 +11,7 @@ export interface SearchParams {
   startDatetime: string;
   endDatetime: string;
   limit: string;
+  bbox?: BBox2D;
 }
 
 export interface State {
@@ -36,7 +37,7 @@ export interface State {
   mapBbox: BBox2D | null;
   setMapBbox: (bbox: BBox2D | null) => void;
   searchParams: Record<string, SearchParams>;
-  setSearchParams: (collectionId: string, params: SearchParams) => void;
+  setSearchParams: (key: string, params: SearchParams) => void;
   addErrorListener: boolean;
   setAddErrorListener: (addErrorListener: boolean) => void;
 }
@@ -87,9 +88,9 @@ export const useStore = create<State>()(
       mapBbox: null,
       setMapBbox: (mapBbox) => set({ mapBbox }),
       searchParams: {},
-      setSearchParams: (collectionId, params) =>
+      setSearchParams: (key, params) =>
         set({
-          searchParams: { ...get().searchParams, [collectionId]: params },
+          searchParams: { ...get().searchParams, [key]: params },
         }),
       addErrorListener: false,
       setAddErrorListener: (addErrorListener) => set({ addErrorListener }),
