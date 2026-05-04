@@ -17,6 +17,7 @@ import {
   CloseButton,
   createListCollection,
   Dialog,
+  DownloadTrigger,
   Field,
   Fieldset,
   IconButton,
@@ -29,7 +30,6 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { GeoJsonLayer } from "@deck.gl/layers";
-import bboxPolygon from "@turf/bbox-polygon";
 import {
   COGLayer,
   MosaicLayer,
@@ -37,9 +37,11 @@ import {
 } from "@developmentseed/deck.gl-geotiff";
 import { epsgResolver } from "@developmentseed/proj";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import bboxPolygon from "@turf/bbox-polygon";
 import type { Feature } from "geojson";
 import { useEffect, useMemo, useState } from "react";
 import {
+  LuDownload,
   LuFiles,
   LuFileSearch2,
   LuFrame,
@@ -51,6 +53,7 @@ import {
 } from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
 import type { StacCollection, StacItem, StacLink } from "stac-ts";
+import * as stac_wasm from "stac-wasm";
 import ItemCard from "./cards/item";
 import ItemListItem from "./list-items/item";
 import EntityList from "./ui/entity-list";
@@ -91,14 +94,7 @@ export default function Search({
       limit,
       bbox,
     });
-  }, [
-    link.href,
-    startDatetime,
-    endDatetime,
-    limit,
-    bbox,
-    setSearchParams,
-  ]);
+  }, [link.href, startDatetime, endDatetime, limit, bbox, setSearchParams]);
 
   const startBoundMs = useMemo(
     () => toMs(collection.extent?.temporal?.interval?.[0]?.[0]),
@@ -204,9 +200,7 @@ export default function Search({
                   <ButtonGroup size={"sm"} variant={"surface"} attached>
                     <Button
                       disabled={!map}
-                      onClick={() =>
-                        map && setBbox(getPaddedViewportBbox(map))
-                      }
+                      onClick={() => map && setBbox(getPaddedViewportBbox(map))}
                     >
                       <LuFrame /> Set to map extents
                     </Button>
@@ -486,31 +480,59 @@ function Items({ items }: { items: StacItem[] }) {
           onChange={(e) => setFilterText(e.target.value)}
         />
       </InputGroup>
-      <Button
-        size={"sm"}
-        variant={"surface"}
-        alignSelf={"flex-start"}
-        disabled={!map || !itemsBbox}
-        onClick={() => map && itemsBbox && fitBoundsToBbox(map, itemsBbox)}
-      >
-        <LuLocate /> Zoom to extent
-      </Button>
     </>
   );
 
   return (
-    <EntityList
-      items={filteredItems}
-      getKey={(item) => item.id}
-      renderCard={(item) => (
-        <ItemCard item={item} hovered={hovered} setHovered={setHovered} />
-      )}
-      renderListItem={(item) => (
-        <ItemListItem item={item} hovered={hovered} setHovered={setHovered} />
-      )}
-      filters={filters}
-      defaultView={"list"}
-    />
+    <Stack>
+      <ButtonGroup size={"xs"} variant={"surface"}>
+        <Button
+          disabled={!map || !itemsBbox}
+          onClick={() => map && itemsBbox && fitBoundsToBbox(map, itemsBbox)}
+        >
+          <LuLocate /> Zoom to extent
+        </Button>
+        <DownloadTrigger
+          fileName="items.geojson"
+          mimeType="application/json"
+          data={() =>
+            JSON.stringify({
+              type: "FeatureCollection",
+              features: items,
+            })
+          }
+          asChild
+        >
+          <Button>
+            <LuDownload /> JSON
+          </Button>
+        </DownloadTrigger>
+        <DownloadTrigger
+          fileName="items.parquet"
+          mimeType="application/vnd.apache.parquet"
+          data={() =>
+            new Blob([stac_wasm.stacJsonToParquet(items) as BlobPart])
+          }
+          asChild
+        >
+          <Button>
+            <LuDownload /> stac-geoparquet
+          </Button>
+        </DownloadTrigger>
+      </ButtonGroup>
+      <EntityList
+        items={filteredItems}
+        getKey={(item) => item.id}
+        renderCard={(item) => (
+          <ItemCard item={item} hovered={hovered} setHovered={setHovered} />
+        )}
+        renderListItem={(item) => (
+          <ItemListItem item={item} hovered={hovered} setHovered={setHovered} />
+        )}
+        filters={filters}
+        defaultView={"list"}
+      />
+    </Stack>
   );
 }
 
