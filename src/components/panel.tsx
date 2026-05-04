@@ -1,19 +1,26 @@
-import { useStacGeoparquetValue, useStacValue } from "@/hooks/stac";
+import {
+  useStacGeoparquetItem,
+  useStacGeoparquetValue,
+  useStacValue,
+} from "@/hooks/stac";
 import { useStore } from "@/store";
 import type { StacValue } from "@/types/stac";
 import { getStacId } from "@/utils/stac";
 import {
+  ActionBar,
   Alert,
   Box,
+  Button,
   HStack,
   Link,
+  Portal,
   SkeletonText,
   Span,
   Stack,
 } from "@chakra-ui/react";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { type ReactNode } from "react";
-import { LuBird, LuLoader } from "react-icons/lu";
+import { LuBird, LuLoader, LuX } from "react-icons/lu";
 import { StacIcon } from "./ui/stac";
 import Value from "./value";
 
@@ -55,8 +62,57 @@ function StacGeoparquetHrefPanel({
   connection: AsyncDuckDBConnection;
 }) {
   const result = useStacGeoparquetValue({ href, connection });
+  const stacGeoparquetId = useStore((store) => store.stacGeoparquetId);
+
   return result.data ? (
-    <ValuePanel href={href} value={result.data} connection={connection} />
+    stacGeoparquetId ? (
+      <StacGeoparquetItemPanel
+        href={href}
+        connection={connection}
+        id={stacGeoparquetId}
+      />
+    ) : (
+      <ValuePanel href={href} value={result.data} connection={connection} />
+    )
+  ) : result.isLoading ? (
+    <LoadingPanel href={href} />
+  ) : (
+    <ErrorPanel error={result.error} href={href} />
+  );
+}
+
+function StacGeoparquetItemPanel({
+  href,
+  connection,
+  id,
+}: {
+  href: string;
+  connection: AsyncDuckDBConnection;
+  id: string;
+}) {
+  const result = useStacGeoparquetItem({ href, connection, id });
+  const setStacGeoparquetId = useStore((store) => store.setStacGeoparquetId);
+  return result.data ? (
+    <>
+      <ValuePanel href={href} value={result.data} />
+      <ActionBar.Root open>
+        <Portal>
+          <ActionBar.Positioner>
+            <ActionBar.Content>
+              <ActionBar.SelectionTrigger>{id}</ActionBar.SelectionTrigger>
+              <ActionBar.Separator />
+              <Button
+                variant={"outline"}
+                size={"sm"}
+                onClick={() => setStacGeoparquetId(null)}
+              >
+                <LuX /> Clear selection
+              </Button>
+            </ActionBar.Content>
+          </ActionBar.Positioner>
+        </Portal>
+      </ActionBar.Root>
+    </>
   ) : result.isLoading ? (
     <LoadingPanel href={href} />
   ) : (

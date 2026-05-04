@@ -39,6 +39,7 @@ function StacGeoparquetTable({
   geometryType: SupportedGeometryType;
 }) {
   const [hovered, setHovered] = useState<string>();
+  const setStacGeoparquetId = useStore((store) => store.setStacGeoparquetId);
   const setLayer = useStore((store) => store.setLayer);
   const lineColor = useStore((store) => store.lineColor);
   const fillColor = useStore((store) => store.fillColor);
@@ -58,6 +59,9 @@ function StacGeoparquetTable({
           onHover: (info) => {
             setHovered(info.object?.id);
           },
+          onClick: (info) => {
+            setStacGeoparquetId(info.object?.id);
+          },
         });
       case "polygon":
         return new GeoArrowPolygonLayer({
@@ -75,6 +79,9 @@ function StacGeoparquetTable({
           onHover: (info) => {
             setHovered(info.object?.id);
           },
+          onClick: (info) => {
+            setStacGeoparquetId(info.object?.id);
+          },
           updateTriggers: {
             getFillColor: [hovered],
           },
@@ -90,11 +97,22 @@ function StacGeoparquetTable({
           onHover: (info) => {
             setHovered(info.object?.id);
           },
+          onClick: (info) => {
+            setStacGeoparquetId(info.object?.id);
+          },
         });
       default:
         return null;
     }
-  }, [id, geometryType, table, lineColor, fillColor, hovered]);
+  }, [
+    id,
+    geometryType,
+    table,
+    lineColor,
+    fillColor,
+    hovered,
+    setStacGeoparquetId,
+  ]);
 
   useEffect(() => {
     if (!layer) return;

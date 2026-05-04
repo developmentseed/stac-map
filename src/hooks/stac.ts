@@ -1,5 +1,6 @@
 import { useStore } from "@/store";
 import {
+  fetchStacGeoparquetItem,
   fetchStacGeoparquetTable,
   fetchStacGeoparquetValue,
 } from "@/utils/stac-geoparquet";
@@ -41,5 +42,22 @@ export function useStacGeoparquetTable({
     queryKey: ["stac-geoparquet-table", href],
     queryFn: async () =>
       fetchStacGeoparquetTable({ href, connection, hivePartitioning }),
+  });
+}
+
+export function useStacGeoparquetItem({
+  href,
+  connection,
+  id,
+}: {
+  href: string;
+  connection: AsyncDuckDBConnection;
+  id: string;
+}) {
+  const hivePartitioning = useStore((store) => store.hivePartitioning);
+  return useQuery({
+    queryKey: ["stac-geoparquet-item", href, id],
+    queryFn: async () =>
+      fetchStacGeoparquetItem({ href, connection, hivePartitioning, id }),
   });
 }

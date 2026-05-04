@@ -20,6 +20,8 @@ export interface State {
   setHref: (href: string | null) => void;
   uploadedFile: File | null;
   setUploadedFile: (uploadedFile: File) => void;
+  stacGeoparquetId: string | null;
+  setStacGeoparquetId: (id: string | null) => void;
   connection: AsyncDuckDBConnection | null;
   setConnection: (connection: AsyncDuckDBConnection) => void;
   fillColor: Color;
@@ -60,6 +62,8 @@ export const useStore = create<State>()(
         set({ uploadedFile });
         get().setHref(uploadedFile.name);
       },
+      stacGeoparquetId: null,
+      setStacGeoparquetId: (id) => set({ stacGeoparquetId: id }),
       connection: null,
       setConnection: (connection) => {
         set({ connection });
