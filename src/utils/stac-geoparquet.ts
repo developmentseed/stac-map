@@ -51,12 +51,18 @@ export async function fetchStacGeoparquetValue({
       "COUNT(*) as count, MIN(bbox.xmin) as xmin, MIN(bbox.ymin) as ymin, MAX(bbox.xmax) as xmax, MAX(bbox.ymax) as ymax",
   });
   const row = result.toArray().map((row) => row.toJSON())[0];
+  const datetimeExtent = await fetchStacGeoparquetDatetimeExtent({
+    href,
+    connection,
+    hivePartitioning,
+  });
   return {
     type: "FeatureCollection",
     id: href.split("/").pop(),
     description: `A stac-geoparquet file with ${row.count} item${row.count === 1 ? "" : "s"}`,
     bbox: [row.xmin, row.ymin, row.xmax, row.ymax],
     features: [],
+    datetimeExtent,
     assets: {
       data: {
         href: href,
@@ -66,7 +72,7 @@ export async function fetchStacGeoparquetValue({
   };
 }
 
-export async function fetchStacGeoparquetTable({
+async function fetchStacGeoparquetDatetimeExtent({
   href,
   connection,
   hivePartitioning,
@@ -74,11 +80,40 @@ export async function fetchStacGeoparquetTable({
   href: string;
   connection: AsyncDuckDBConnection;
   hivePartitioning: boolean;
+}): Promise<[number, number] | null> {
+  try {
+    const result = await executeDuckdbQuery({
+      connection,
+      href,
+      hivePartitioning,
+      select: "MIN(datetime) as dt_min, MAX(datetime) as dt_max",
+    });
+    const row = result.toArray().map((row) => row.toJSON())[0];
+    const min = row?.dt_min ? new Date(row.dt_min).getTime() : NaN;
+    const max = row?.dt_max ? new Date(row.dt_max).getTime() : NaN;
+    if (Number.isNaN(min) || Number.isNaN(max)) return null;
+    return [min, max];
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchStacGeoparquetTable({
+  href,
+  connection,
+  hivePartitioning,
+  where,
+}: {
+  href: string;
+  connection: AsyncDuckDBConnection;
+  hivePartitioning: boolean;
+  where?: string;
 }) {
   const result = await executeDuckdbQuery({
     connection,
     href,
     hivePartitioning,
+    where,
     select:
       "ST_AsWKB(geometry) AS geometry, ST_GeometryType(geometry) AS geometry_type, id",
   });

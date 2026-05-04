@@ -8,6 +8,8 @@ export type Color = [number, number, number, number];
 export type Projection = "mercator" | "globe";
 export type BBox2D = [number, number, number, number];
 
+export type DatetimeExtentSource = "items" | "collections" | "geoparquet";
+
 export interface SearchParams {
   startDatetime: string;
   endDatetime: string;
@@ -43,6 +45,16 @@ export interface State {
   setMapBbox: (bbox: BBox2D | null) => void;
   searchParams: Record<string, SearchParams>;
   setSearchParams: (key: string, params: SearchParams) => void;
+  datetimeExtents: Record<DatetimeExtentSource, [number, number] | null>;
+  setDatetimeExtent: (
+    source: DatetimeExtentSource,
+    extent: [number, number] | null
+  ) => void;
+  datetimeFilters: Record<string, [number, number]>;
+  setDatetimeFilter: (
+    href: string,
+    filter: [number, number] | undefined
+  ) => void;
   addErrorListener: boolean;
   setAddErrorListener: (addErrorListener: boolean) => void;
   hivePartitioning: boolean;
@@ -111,6 +123,21 @@ export const useStore = create<State>()(
         set({
           searchParams: { ...get().searchParams, [key]: params },
         }),
+      datetimeExtents: { items: null, collections: null, geoparquet: null },
+      setDatetimeExtent: (source, extent) =>
+        set({
+          datetimeExtents: { ...get().datetimeExtents, [source]: extent },
+        }),
+      datetimeFilters: {},
+      setDatetimeFilter: (href, filter) => {
+        const next = { ...get().datetimeFilters };
+        if (filter === undefined) {
+          delete next[href];
+        } else {
+          next[href] = filter;
+        }
+        set({ datetimeFilters: next });
+      },
       addErrorListener: false,
       setAddErrorListener: (addErrorListener) => set({ addErrorListener }),
       hivePartitioning: false,

@@ -1,6 +1,10 @@
 import { type BBox2D, useStore } from "@/store";
 import type { StacCollections } from "@/types/stac";
 import {
+  collectionMatchesFilter,
+  getCollectionsDatetimeExtent,
+} from "@/utils/datetime";
+import {
   fetchStacValue,
   getLinkHref,
   getSelfHref,
@@ -128,6 +132,15 @@ export function Collections({
   const lineColor = useStore((store) => store.lineColor);
   const setLayer = useStore((store) => store.setLayer);
   const mapBbox = useStore((store) => store.mapBbox);
+  const datetimeFilter = useStore((store) =>
+    store.href ? store.datetimeFilters[store.href] : undefined
+  );
+  const setDatetimeExtent = useStore((store) => store.setDatetimeExtent);
+
+  useEffect(() => {
+    setDatetimeExtent("collections", getCollectionsDatetimeExtent(collections));
+    return () => setDatetimeExtent("collections", null);
+  }, [collections, setDatetimeExtent]);
 
   const filteredCollections = useMemo(() => {
     const needle = filterText.trim().toLowerCase();
@@ -139,6 +152,12 @@ export function Collections({
       ) {
         return false;
       }
+      if (
+        datetimeFilter &&
+        !collectionMatchesFilter(collection, datetimeFilter)
+      ) {
+        return false;
+      }
       if (needle) {
         const id = collection.id?.toLowerCase() ?? "";
         const title = collection.title?.toLowerCase() ?? "";
@@ -146,7 +165,14 @@ export function Collections({
       }
       return true;
     });
-  }, [collections, includeGlobal, filterByMapBbox, mapBbox, filterText]);
+  }, [
+    collections,
+    includeGlobal,
+    filterByMapBbox,
+    mapBbox,
+    filterText,
+    datetimeFilter,
+  ]);
 
   const bounds = useMemo(() => {
     return filteredCollections

@@ -33,15 +33,17 @@ export function useStacGeoparquetValue({
 export function useStacGeoparquetTable({
   href,
   connection,
+  where,
 }: {
   href: string;
   connection: AsyncDuckDBConnection;
+  where?: string;
 }) {
   const hivePartitioning = useStore((store) => store.hivePartitioning);
   return useQuery({
-    queryKey: ["stac-geoparquet-table", href],
+    queryKey: ["stac-geoparquet-table", href, where ?? null],
     queryFn: async () =>
-      fetchStacGeoparquetTable({ href, connection, hivePartitioning }),
+      fetchStacGeoparquetTable({ href, connection, hivePartitioning, where }),
   });
 }
 

@@ -1,4 +1,5 @@
 import { Container, GridItem, SimpleGrid } from "@chakra-ui/react";
+import DatetimeFilter from "./datetime-filter";
 import Header from "./header";
 import Panel from "./panel";
 
@@ -22,6 +23,7 @@ export default function Overlay() {
           <Header />
         </GridItem>
       </SimpleGrid>
+      <DatetimeFilter />
     </Container>
   );
 }

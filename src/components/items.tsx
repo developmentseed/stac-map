@@ -1,4 +1,5 @@
 import { type BBox2D, useStore } from "@/store";
+import { getItemsDatetimeExtent, itemMatchesFilter } from "@/utils/datetime";
 import { fitBoundsToBbox } from "@/utils/map";
 import { fetchStacValue, getSelfHref } from "@/utils/stac";
 import {
@@ -33,12 +34,24 @@ export function Items({ items }: { items: StacItem[] }) {
   const fillColor = useStore((store) => store.fillColor);
   const lineColor = useStore((store) => store.lineColor);
   const mapBbox = useStore((store) => store.mapBbox);
+  const datetimeFilter = useStore((store) =>
+    store.href ? store.datetimeFilters[store.href] : undefined
+  );
+  const setDatetimeExtent = useStore((store) => store.setDatetimeExtent);
   const { map } = useMap();
+
+  useEffect(() => {
+    setDatetimeExtent("items", getItemsDatetimeExtent(items));
+    return () => setDatetimeExtent("items", null);
+  }, [items, setDatetimeExtent]);
 
   const filteredItems = useMemo(() => {
     const needle = filterText.trim().toLowerCase();
     return items.filter((item) => {
       if (filterByMapBbox && mapBbox && !isItemInBbox(item, mapBbox)) {
+        return false;
+      }
+      if (datetimeFilter && !itemMatchesFilter(item, datetimeFilter)) {
         return false;
       }
       if (needle) {
@@ -49,7 +62,7 @@ export function Items({ items }: { items: StacItem[] }) {
       }
       return true;
     });
-  }, [items, filterByMapBbox, mapBbox, filterText]);
+  }, [items, filterByMapBbox, mapBbox, filterText, datetimeFilter]);
 
   const itemsBbox = useMemo(() => getItemsBbox(filteredItems), [filteredItems]);
 

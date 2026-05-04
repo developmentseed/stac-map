@@ -1,4 +1,4 @@
-import { useStacGeoparquetTable } from "@/hooks/stac";
+import { useStacGeoparquetTable, useStacGeoparquetValue } from "@/hooks/stac";
 import { useStore } from "@/store";
 import type { SupportedGeometryType } from "@/utils/stac-geoparquet";
 import type { Color } from "@deck.gl/core";
@@ -19,7 +19,27 @@ export default function StacGeoparquet({
   href: string;
   connection: AsyncDuckDBConnection;
 }) {
-  const result = useStacGeoparquetTable({ href, connection });
+  const datetimeFilter = useStore((store) => store.datetimeFilters[href]);
+  const setDatetimeExtent = useStore((store) => store.setDatetimeExtent);
+  const summary = useStacGeoparquetValue({ href, connection });
+  const datetimeExtent = summary.data?.datetimeExtent as
+    | [number, number]
+    | null
+    | undefined;
+
+  useEffect(() => {
+    setDatetimeExtent("geoparquet", datetimeExtent ?? null);
+    return () => setDatetimeExtent("geoparquet", null);
+  }, [datetimeExtent, setDatetimeExtent]);
+
+  const where = useMemo(() => {
+    if (!datetimeFilter) return undefined;
+    const start = new Date(datetimeFilter[0]).toISOString();
+    const end = new Date(datetimeFilter[1]).toISOString();
+    return `datetime BETWEEN TIMESTAMP '${start}' AND TIMESTAMP '${end}'`;
+  }, [datetimeFilter]);
+
+  const result = useStacGeoparquetTable({ href, connection, where });
   if (result.error)
     return <ErrorAlert title="stac-geoparquet" error={result.error} />;
   if (!result.data?.table || !result.data.geometryType) return null;

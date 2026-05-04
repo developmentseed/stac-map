@@ -1,5 +1,11 @@
 import { type BBox2D, type Color, useStore } from "@/store";
 import type { StacAssets, StacItemCollection } from "@/types/stac";
+import {
+  datetimeInputToMs,
+  msToDatetimeInputValue,
+  toDatetimeInputValue,
+  toMs,
+} from "@/utils/datetime";
 import { getPaddedViewportBbox } from "@/utils/map";
 import {
   fetchStacValue,
@@ -23,7 +29,6 @@ import {
   Portal,
   Select,
   SkeletonText,
-  Slider,
   Stack,
 } from "@chakra-ui/react";
 import { GeoJsonLayer } from "@deck.gl/layers";
@@ -46,6 +51,7 @@ import {
 import { useMap } from "react-map-gl/maplibre";
 import type { StacCollection, StacItem, StacLink } from "stac-ts";
 import { Items } from "./items";
+import DatetimeSlider from "./ui/datetime-slider";
 import PaginationBar from "./ui/pagination-bar";
 import Section from "./ui/section";
 
@@ -178,10 +184,14 @@ export default function Search({
                   <DatetimeSlider
                     startBoundMs={startBoundMs}
                     endBoundMs={endBoundMs}
-                    startDatetime={startDatetime}
-                    endDatetime={endDatetime}
-                    setStartDatetime={setStartDatetime}
-                    setEndDatetime={setEndDatetime}
+                    value={[
+                      datetimeInputToMs(startDatetime) ?? startBoundMs,
+                      datetimeInputToMs(endDatetime) ?? endBoundMs,
+                    ]}
+                    onChangeEnd={(v) => {
+                      setStartDatetime(msToDatetimeInputValue(v[0]));
+                      setEndDatetime(msToDatetimeInputValue(v[1]));
+                    }}
                   />
                 )}
                 <Field.Root>
@@ -255,51 +265,6 @@ function BboxLayer({ bbox }: { bbox: BBox2D }) {
   }, [bbox, lineColor, setLayer]);
 
   return null;
-}
-
-function DatetimeSlider({
-  startBoundMs,
-  endBoundMs,
-  startDatetime,
-  endDatetime,
-  setStartDatetime,
-  setEndDatetime,
-}: {
-  startBoundMs: number;
-  endBoundMs: number;
-  startDatetime: string;
-  endDatetime: string;
-  setStartDatetime: (value: string) => void;
-  setEndDatetime: (value: string) => void;
-}) {
-  const startMs = datetimeInputToMs(startDatetime) ?? startBoundMs;
-  const endMs = datetimeInputToMs(endDatetime) ?? endBoundMs;
-  const [value, setValue] = useState([startMs, endMs]);
-  const [lastExternal, setLastExternal] = useState([startMs, endMs]);
-  if (lastExternal[0] !== startMs || lastExternal[1] !== endMs) {
-    setLastExternal([startMs, endMs]);
-    setValue([startMs, endMs]);
-  }
-  return (
-    <Slider.Root
-      size={"sm"}
-      min={startBoundMs}
-      max={endBoundMs}
-      value={value}
-      onValueChange={(e) => setValue(e.value)}
-      onValueChangeEnd={(e) => {
-        setStartDatetime(msToDatetimeInputValue(e.value[0]));
-        setEndDatetime(msToDatetimeInputValue(e.value[1]));
-      }}
-    >
-      <Slider.Control>
-        <Slider.Track>
-          <Slider.Range />
-        </Slider.Track>
-        <Slider.Thumbs />
-      </Slider.Control>
-    </Slider.Root>
-  );
 }
 
 function AdvancedSettings({
@@ -559,28 +524,6 @@ function pickBestKeyForItems(items: StacItem[]): string | undefined {
     }
   }
   return best;
-}
-
-function toDatetimeInputValue(datetime: string | null | undefined): string {
-  if (!datetime) return "";
-  const date = new Date(datetime);
-  return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 19);
-}
-
-function toMs(datetime: string | null | undefined): number | undefined {
-  if (!datetime) return undefined;
-  const ms = new Date(datetime).getTime();
-  return Number.isNaN(ms) ? undefined : ms;
-}
-
-function datetimeInputToMs(value: string): number | undefined {
-  if (!value) return undefined;
-  const ms = new Date(`${value}Z`).getTime();
-  return Number.isNaN(ms) ? undefined : ms;
-}
-
-function msToDatetimeInputValue(ms: number): string {
-  return new Date(ms).toISOString().slice(0, 19);
 }
 
 function Error({ error }: { error: Error | null }) {
