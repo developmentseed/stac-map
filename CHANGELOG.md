@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.0.0-alpha.3](https://github.com/developmentseed/stac-map/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2026-05-04)
+
+
+### Features
+
+* add API documentation ([#429](https://github.com/developmentseed/stac-map/issues/429)) ([779fea7](https://github.com/developmentseed/stac-map/commit/779fea7649cccc567da154149dc90e0d99786eaf))
+* buildAuth helper function ([#424](https://github.com/developmentseed/stac-map/issues/424)) ([53d1d4e](https://github.com/developmentseed/stac-map/commit/53d1d4eb3ef40090fb9f9b3e9fff87d0b9b579fd))
+
+
+### Bug Fixes
+
+* permissive geoparquet extent reading ([#431](https://github.com/developmentseed/stac-map/issues/431)) ([81b4f1b](https://github.com/developmentseed/stac-map/commit/81b4f1be65a24e54419af954ca986605b4a901a1))
+
 ## [2.0.0-alpha.2](https://github.com/developmentseed/stac-map/compare/v2.0.0-alpha.1...v2.0.0-alpha.2) (2026-04-30)
 
 
