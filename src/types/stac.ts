@@ -29,35 +29,4 @@ export interface StacCollections {
   numberMatched?: number;
 }
 
-export interface NaturalLanguageCollectionSearchResult {
-  collection_id: string;
-  explanation: string;
-}
-
 export type StacAssets = { [k: string]: StacAsset };
-
-export interface StacSearch {
-  collections: string[];
-  bbox?: [number, number, number, number];
-  datetime?: string;
-  limit?: number;
-}
-
-export type DatetimeBounds = { start: Date | null; end: Date | null };
-
-export interface AlternateAsset {
-  href: string;
-  title?: string;
-}
-
-export interface Band {
-  name?: string;
-  common_name?: string;
-  description?: string;
-}
-
-export interface AssetWithAlternates extends StacAsset {
-  alternate?: { [key: string]: AlternateAsset };
-  bands?: Band[];
-  "eo:bands"?: Band[];
-}

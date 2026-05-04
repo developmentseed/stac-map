@@ -11,7 +11,7 @@ import {
 import * as stacWasm from "stac-wasm";
 import type { StacItemCollection } from "../types/stac";
 
-export const SUPPORTED_GEOMETRY_TYPES = [
+const SUPPORTED_GEOMETRY_TYPES = [
   "point",
   "polygon",
   "linestring",
@@ -67,35 +67,6 @@ export async function fetchStacGeoparquetValue({
         type: "application/vnd.apache.parquet",
       },
     },
-  };
-}
-
-export async function fetchStacGeoparquetDatetimeBounds({
-  href,
-  connection,
-  hivePartitioning,
-}: {
-  href: string;
-  connection: AsyncDuckDBConnection;
-  hivePartitioning: boolean;
-}): Promise<{ start: Date; end: Date } | null> {
-  const { startDatetimeColumnName, endDatetimeColumnName } =
-    await fetchStacGeoparquetDatetimeColumns(
-      href,
-      connection,
-      hivePartitioning
-    );
-  if (!startDatetimeColumnName || !endDatetimeColumnName) return null;
-  const result = await executeDuckdbQuery({
-    connection,
-    href,
-    hivePartitioning,
-    select: `MIN(${startDatetimeColumnName}) as start, MAX(${endDatetimeColumnName}) as end`,
-  });
-  const row = result.toArray().map((row) => row.toJSON())[0];
-  return {
-    start: new Date(row.start),
-    end: new Date(row.end),
   };
 }
 
@@ -205,33 +176,4 @@ export async function fetchStacGeoparquetItem({
   const item = stacWasm.arrowToStacJson(result)[0];
   item.geometry = JSON.parse(item.geometry);
   return item;
-}
-
-async function fetchStacGeoparquetDatetimeColumns(
-  href: string,
-  connection: AsyncDuckDBConnection,
-  hivePartitioning: boolean
-) {
-  const describeResult = await connection.query(
-    `DESCRIBE SELECT * FROM read_parquet('${href}', hive_partitioning = ${hivePartitioning})`
-  );
-  const describe = describeResult.toArray().map((row) => row.toJSON());
-  const columnNames = describe.map((row) => row.column_name);
-  const containsDates: boolean = columnNames.some((columnName: string) => {
-    return columnName.includes("date");
-  });
-
-  if (!containsDates)
-    return {
-      startDatetimeColumnName: null,
-      endDatetimeColumnName: null,
-    };
-
-  const startDatetimeColumnName = columnNames.includes("start_datetime")
-    ? "start_datetime"
-    : "datetime";
-  const endDatetimeColumnName = columnNames.includes("end_datetime")
-    ? "start_datetime"
-    : "datetime";
-  return { startDatetimeColumnName, endDatetimeColumnName };
 }
