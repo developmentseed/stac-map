@@ -13,7 +13,7 @@ import { Badge, Box, Heading, HStack, Stack } from "@chakra-ui/react";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import bbox from "@turf/bbox";
 import bboxPolygon from "@turf/bbox-polygon";
-import type { Feature, FeatureCollection } from "geojson";
+import type { Feature, FeatureCollection, GeoJsonProperties } from "geojson";
 import { useEffect, useMemo } from "react";
 import type { StacCollection, StacLink } from "stac-ts";
 import Assets from "./assets";
@@ -21,6 +21,7 @@ import Breadcrumbs from "./breadcrumbs";
 import Buttons from "./buttons";
 import Collections from "./collections";
 import Links from "./links";
+import Properties from "./properties";
 import Search from "./search";
 import Description from "./ui/description";
 import Thumbnail from "./ui/thumbnail";
@@ -34,6 +35,7 @@ export default function Value({ value }: { value: StacValue }) {
   const description = value.description as string;
   const collectionsLink = getLink(value, "data");
   const rootLink = getLink(value, "root");
+  const properties = value.properties as GeoJsonProperties | undefined;
   const assets = value.assets as StacAssets | undefined;
 
   useEffect(() => {
@@ -71,16 +73,18 @@ export default function Value({ value }: { value: StacValue }) {
 
   return (
     <Stack>
-      <Heading>
-        <HStack gap={4}>
-          {getStacTitle(value)}
-          {version && <Badge variant={"surface"}>{version}</Badge>}
-        </HStack>
-      </Heading>
-      <Breadcrumbs value={value} />
-      {thumbnailAsset && <Thumbnail asset={thumbnailAsset} />}
-      {description && <Description description={description} />}
-      <Buttons value={value} />
+      <Stack gap={4}>
+        <Heading>
+          <HStack gap={4}>
+            {getStacTitle(value)}
+            {version && <Badge variant={"surface"}>{version}</Badge>}
+          </HStack>
+        </Heading>
+        <Breadcrumbs value={value} />
+        {thumbnailAsset && <Thumbnail asset={thumbnailAsset} />}
+        {description && <Description description={description} />}
+        <Buttons value={value} />
+      </Stack>
 
       <Box my={2} />
 
@@ -91,6 +95,7 @@ export default function Value({ value }: { value: StacValue }) {
         />
       )}
       {rootLink && <Root link={rootLink} value={value} />}
+      {properties && <Properties properties={properties} />}
       {assets && <Assets assets={assets} />}
       {value.links && <Links links={value.links} />}
     </Stack>

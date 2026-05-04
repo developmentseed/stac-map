@@ -138,17 +138,27 @@ export function getSpatialExtent(collection: StacCollection): SpatialExtent {
     : (spatialExtent?.bbox as unknown as SpatialExtent);
 }
 
+export function getBandCount(asset: StacAsset): number | undefined {
+  const extra = asset as {
+    bands?: unknown[];
+    "eo:bands"?: unknown[];
+    "raster:bands"?: unknown[];
+  };
+  for (const bands of [extra.bands, extra["eo:bands"], extra["raster:bands"]]) {
+    if (bands) return bands.length;
+  }
+  return undefined;
+}
+
 export function getCogHref(asset: StacAsset): string | undefined {
   if (!asset.type?.startsWith("image/tiff; application=geotiff"))
     return undefined;
+  const bandCount = getBandCount(asset);
+  if (bandCount !== undefined && bandCount !== 3 && bandCount !== 4)
+    return undefined;
   const extra = asset as {
-    "eo:bands"?: unknown[];
-    bands?: unknown[];
     alternate?: Record<string, { href?: string }>;
   };
-  for (const bands of [extra["eo:bands"], extra.bands]) {
-    if (bands && bands.length !== 3 && bands.length !== 4) return undefined;
-  }
   if (asset.href.startsWith("http")) return asset.href;
   if (extra.alternate) {
     for (const alt of Object.values(extra.alternate)) {
