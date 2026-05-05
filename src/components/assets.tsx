@@ -103,9 +103,8 @@ function AssetCard({
           )}
         </HStack>
         <Card.Description>
-          {asset.roles?.map((role) => (
-            <Badge key={role}>{role}</Badge>
-          ))}
+          {Array.isArray(asset.roles) &&
+            asset.roles.map((role) => <Badge key={role}>{role}</Badge>)}
           {asset.type && <Badge>{asset.type}</Badge>}
         </Card.Description>
         <Card.Footer>
