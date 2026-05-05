@@ -29,7 +29,7 @@ import Search from "./search";
 import StacGeoparquet from "./stac-geoparquet";
 import Description from "./ui/description";
 import Thumbnail from "./ui/thumbnail";
-import WebMapLinks from "./web-map-links";
+import Visualization from "./visualization";
 
 export default function Value({
   href,
@@ -51,8 +51,6 @@ export default function Value({
   const childLinks = value.links?.filter((link) => link.rel === "child");
   const itemLinks = value.links?.filter((link) => link.rel === "item");
   const rootLink = getLink(value, "root");
-  const tilejsonLink = getLink(value, "tilejson");
-  const wmtsLink = getLink(value, "wmts");
   const properties = value.properties as GeoJsonProperties | undefined;
   const assets = value.assets as StacAssets | undefined;
 
@@ -105,9 +103,12 @@ export default function Value({
       </Stack>
 
       <Stack>
-        {(tilejsonLink || wmtsLink) && (
-          <WebMapLinks tilejsonLink={tilejsonLink} wmtsLink={wmtsLink} />
-        )}
+        {
+          <Visualization
+            links={value.links || []}
+            assets={(value.assets as StacAssets) || ({} as StacAssets)}
+          />
+        }
         {collectionsLink && (
           <CollectionsEndpoint
             link={collectionsLink}
