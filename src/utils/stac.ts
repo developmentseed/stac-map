@@ -93,14 +93,17 @@ function makeHrefsAbsolute<T extends StacValue>(value: T, baseUrl: string): T {
   const baseUrlObj = new URL(baseUrl);
 
   if (value.links != null) {
-    let hasSelf = false;
+    let hasSelfHref = false;
     for (const link of value.links) {
-      if (link.rel === "self") hasSelf = true;
+      if (link.rel === "self") {
+        hasSelfHref = true;
+        link.href = baseUrl;
+      }
       if (link.href) {
         link.href = toAbsoluteUrl(link.href, baseUrlObj);
       }
     }
-    if (hasSelf === false) {
+    if (!hasSelfHref) {
       value.links.push({ href: baseUrl, rel: "self" });
     }
   } else {
