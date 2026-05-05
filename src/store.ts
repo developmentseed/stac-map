@@ -10,6 +10,19 @@ export type BBox2D = [number, number, number, number];
 
 export type DatetimeExtentSource = "items" | "collections" | "geoparquet";
 
+function setEntry<T>(
+  record: Record<string, T>,
+  key: string,
+  value: T | undefined
+): Record<string, T> {
+  if (value === undefined) {
+    const next = { ...record };
+    delete next[key];
+    return next;
+  }
+  return { ...record, [key]: value };
+}
+
 export interface SearchParams {
   startDatetime: string;
   endDatetime: string;
@@ -96,25 +109,11 @@ export const useStore = create<State>()(
       fillColor: [207, 63, 2, 50],
       lineColor: [207, 63, 2, 100],
       layers: {},
-      setLayer: (id, layer) => {
-        if (layer) {
-          set({ layers: { ...get().layers, [id]: layer } });
-        } else {
-          const layers = { ...get().layers };
-          delete layers[id];
-          set({ layers });
-        }
-      },
+      setLayer: (id, layer) =>
+        set({ layers: setEntry(get().layers, id, layer) }),
       maplibreLayers: {},
-      setMaplibreLayer: (id, layer) => {
-        if (layer) {
-          set({ maplibreLayers: { ...get().maplibreLayers, [id]: layer } });
-        } else {
-          const maplibreLayers = { ...get().maplibreLayers };
-          delete maplibreLayers[id];
-          set({ maplibreLayers });
-        }
-      },
+      setMaplibreLayer: (id, layer) =>
+        set({ maplibreLayers: setEntry(get().maplibreLayers, id, layer) }),
       projection: "mercator",
       setProjection: (projection) => set({ projection }),
       toggleProjection: () =>
@@ -124,37 +123,23 @@ export const useStore = create<State>()(
       oidcAccessToken: null,
       setOidcAccessToken: (oidcAccessToken) => set({ oidcAccessToken }),
       tokens: {},
-      setToken: (uri, token) =>
-        set({ tokens: { ...get().tokens, [uri]: token } }),
-      removeToken: (uri) => {
-        const tokens = { ...get().tokens };
-        delete tokens[uri];
-        set({ tokens });
-      },
+      setToken: (uri, token) => set({ tokens: setEntry(get().tokens, uri, token) }),
+      removeToken: (uri) => set({ tokens: setEntry(get().tokens, uri, undefined) }),
       valueBbox: null,
       setValueBbox: (valueBbox) => set({ valueBbox }),
       mapBbox: null,
       setMapBbox: (mapBbox) => set({ mapBbox }),
       searchParams: {},
       setSearchParams: (key, params) =>
-        set({
-          searchParams: { ...get().searchParams, [key]: params },
-        }),
+        set({ searchParams: setEntry(get().searchParams, key, params) }),
       datetimeExtents: { items: null, collections: null, geoparquet: null },
       setDatetimeExtent: (source, extent) =>
         set({
           datetimeExtents: { ...get().datetimeExtents, [source]: extent },
         }),
       datetimeFilters: {},
-      setDatetimeFilter: (href, filter) => {
-        const next = { ...get().datetimeFilters };
-        if (filter === undefined) {
-          delete next[href];
-        } else {
-          next[href] = filter;
-        }
-        set({ datetimeFilters: next });
-      },
+      setDatetimeFilter: (href, filter) =>
+        set({ datetimeFilters: setEntry(get().datetimeFilters, href, filter) }),
       addErrorListener: false,
       setAddErrorListener: (addErrorListener) => set({ addErrorListener }),
       hivePartitioning: false,
