@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.0-beta.0](https://github.com/developmentseed/stac-map/compare/v2.0.0-alpha.3...v2.0.0-beta.0) (2026-05-05)
+
+
+### Bug Fixes
+
+* don't set uploaded file until registered ([#437](https://github.com/developmentseed/stac-map/issues/437)) ([d85fc92](https://github.com/developmentseed/stac-map/commit/d85fc926ab69dd7a3412de308da0ba2ccbe42b7d))
+
 ## [2.0.0-alpha.3](https://github.com/developmentseed/stac-map/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2026-05-04)
 
 
