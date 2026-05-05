@@ -123,8 +123,10 @@ export const useStore = create<State>()(
       oidcAccessToken: null,
       setOidcAccessToken: (oidcAccessToken) => set({ oidcAccessToken }),
       tokens: {},
-      setToken: (uri, token) => set({ tokens: setEntry(get().tokens, uri, token) }),
-      removeToken: (uri) => set({ tokens: setEntry(get().tokens, uri, undefined) }),
+      setToken: (uri, token) =>
+        set({ tokens: setEntry(get().tokens, uri, token) }),
+      removeToken: (uri) =>
+        set({ tokens: setEntry(get().tokens, uri, undefined) }),
       valueBbox: null,
       setValueBbox: (valueBbox) => set({ valueBbox }),
       mapBbox: null,
