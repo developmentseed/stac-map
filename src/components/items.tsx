@@ -206,14 +206,21 @@ export function ItemLinks({ links }: { links: StacLink[] }) {
   return items.length > 0 ? <Items items={items} /> : null;
 }
 
+function toBbox2D(bbox: number[] | undefined): BBox2D | undefined {
+  if (!bbox) return undefined;
+  if (bbox.length === 4) return [bbox[0], bbox[1], bbox[2], bbox[3]];
+  if (bbox.length === 6) return [bbox[0], bbox[1], bbox[3], bbox[4]];
+  return undefined;
+}
+
 function getItemsBbox(items: StacItem[]): BBox2D | undefined {
   let west = Infinity;
   let south = Infinity;
   let east = -Infinity;
   let north = -Infinity;
   for (const item of items) {
-    const b = item.bbox;
-    if (!b || b.length < 4) continue;
+    const b = toBbox2D(item.bbox);
+    if (!b) continue;
     if (b[0] < west) west = b[0];
     if (b[1] < south) south = b[1];
     if (b[2] > east) east = b[2];
@@ -224,7 +231,7 @@ function getItemsBbox(items: StacItem[]): BBox2D | undefined {
 }
 
 function isItemInBbox(item: StacItem, bbox: BBox2D): boolean {
-  const itemBbox = item.bbox as BBox2D | undefined;
+  const itemBbox = toBbox2D(item.bbox);
   if (!itemBbox) return false;
   if (bbox[2] - bbox[0] >= 360) return true;
   return !(
