@@ -19,7 +19,6 @@ import { ExamplesProvider } from "../contexts/examples";
 import { StacBrowserUrlProvider } from "../contexts/stac-browser";
 import App from "./app";
 import ErrorListener from "./error-listener";
-import HrefBootstrap from "./href-bootstrap";
 import { OidcTokenSync } from "./oidc-token-sync";
 import { LoginSplash } from "./ui/auth";
 import {
@@ -27,6 +26,7 @@ import {
   type ColorModeProviderProps,
 } from "./ui/color-mode";
 import { Toaster } from "./ui/toaster";
+import UrlBootstrap from "./url-bootstrap";
 
 export interface ExtraLayerProps {
   source: SourceProps;
@@ -110,7 +110,7 @@ export function StacMap({
         <StacBrowserUrlProvider url={stacBrowserUrl}>
           <ExamplesProvider examples={examples}>
             <MapProvider>
-              <HrefBootstrap defaultHref={defaultHref} />
+              <UrlBootstrap defaultHref={defaultHref} />
               <App footer={footer} extraLayers={extraLayers} />
             </MapProvider>
           </ExamplesProvider>
