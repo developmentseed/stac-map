@@ -1,24 +1,24 @@
 import { useStore } from "@/store";
 import { resolveInitialHref } from "@/utils/href";
 import { resolveInitialProjection } from "@/utils/projection";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function UrlBootstrap({
   defaultHref,
 }: {
   defaultHref?: string;
 }) {
+  useState(() => {
+    if (useStore.getState().href !== null) return null;
+    const initial = resolveInitialHref(defaultHref);
+    if (initial) useStore.getState().setHref(initial);
+    const projection = resolveInitialProjection();
+    if (projection) useStore.getState().setProjection(projection);
+    return null;
+  });
+
   const href = useStore((store) => store.href);
   const setHref = useStore((store) => store.setHref);
-  const setProjection = useStore((store) => store.setProjection);
-
-  useEffect(() => {
-    if (useStore.getState().href !== null) return;
-    const initial = resolveInitialHref(defaultHref);
-    if (initial) setHref(initial);
-    const projection = resolveInitialProjection();
-    if (projection) setProjection(projection);
-  }, [defaultHref, setHref, setProjection]);
 
   useEffect(() => {
     if (href && new URLSearchParams(location.search).get("href") !== href)
