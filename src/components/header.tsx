@@ -40,6 +40,7 @@ export default function Header() {
 
 function ShareButton() {
   const { map } = useMap();
+  const visualization = useStore((store) => store.visualization);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -51,6 +52,7 @@ function ShareButton() {
   async function copyShareUrl() {
     const url = new URL(window.location.href);
     if (map) url.searchParams.set("bbox", getPaddedViewportBbox(map).join(","));
+    if (visualization) url.searchParams.set("viz", visualization);
     await navigator.clipboard.writeText(url.toString());
     setCopied(true);
   }

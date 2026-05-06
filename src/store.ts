@@ -77,6 +77,8 @@ export interface State {
   setAddErrorListener: (addErrorListener: boolean) => void;
   hivePartitioning: boolean;
   setHivePartitioning: (hivePartitioning: boolean) => void;
+  visualization: string | null;
+  setVisualization: (visualization: string | null) => void;
 }
 
 /**
@@ -146,6 +148,8 @@ export const useStore = create<State>()(
       setAddErrorListener: (addErrorListener) => set({ addErrorListener }),
       hivePartitioning: false,
       setHivePartitioning: (hivePartitioning) => set({ hivePartitioning }),
+      visualization: null,
+      setVisualization: (visualization) => set({ visualization }),
     }),
     {
       name: "stac-map-settings",

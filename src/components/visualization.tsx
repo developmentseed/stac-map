@@ -72,13 +72,30 @@ export default function Visualization({
     return createListCollection({ items });
   }, [cogAssets, tilejsonLink, wmtsLink, itemAssetKeys]);
 
-  const [selected, setSelected] = useState<string | undefined>(() => {
+  const visualization = useStore((store) => store.visualization);
+  const setVisualization = useStore((store) => store.setVisualization);
+
+  const validValues = useMemo(
+    () => new Set(collection.items.map((item) => item.value)),
+    [collection]
+  );
+
+  const fallback = useMemo(() => {
     const bestItemKey = pickBestKeyForItems(allItems);
     if (bestItemKey && cogAssets.length === 0 && !tilejsonLink && !wmtsLink) {
       return `items:${bestItemKey}`;
     }
     return collection.items[0]?.value;
-  });
+  }, [allItems, cogAssets, tilejsonLink, wmtsLink, collection]);
+
+  const selected =
+    visualization && validValues.has(visualization) ? visualization : fallback;
+
+  useEffect(() => {
+    if (visualization && validValues.has(visualization)) return;
+    if (fallback && fallback !== visualization) setVisualization(fallback);
+  }, [visualization, validValues, fallback, setVisualization]);
+
   const [enabled, setEnabled] = useState(true);
 
   const firstPage = itemPages[0];
@@ -86,7 +103,7 @@ export default function Visualization({
   if (lastFirstPage !== firstPage) {
     setLastFirstPage(firstPage);
     const bestItemKey = pickBestKeyForItems(allItems);
-    if (bestItemKey) setSelected(`items:${bestItemKey}`);
+    if (bestItemKey) setVisualization(`items:${bestItemKey}`);
   }
 
   const setLayer = useStore((store) => store.setLayer);
@@ -181,7 +198,7 @@ export default function Visualization({
             size={"sm"}
             collection={collection}
             value={selected ? [selected] : []}
-            onValueChange={(e) => setSelected(e.value[0])}
+            onValueChange={(e) => setVisualization(e.value[0] ?? null)}
             disabled={!enabled}
           >
             <Select.HiddenSelect />
