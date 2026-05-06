@@ -14,6 +14,8 @@ export default function UrlBootstrap({
     if (initial) useStore.getState().setHref(initial);
     const projection = resolveInitialProjection();
     if (projection) useStore.getState().setProjection(projection);
+    const viz = new URLSearchParams(location.search).get("viz");
+    if (viz) useStore.getState().setVisualization(viz);
     return null;
   });
 

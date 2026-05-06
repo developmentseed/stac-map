@@ -92,8 +92,8 @@ export default function Value({
     <Stack gap={4}>
       <Stack gap={4}>
         <Stack gap={2}>
-          <Heading>
-            <HStack gap={4}>
+          <Heading lineHeight={"shorter"}>
+            <HStack gap={4} wrap={"wrap"}>
               {getStacTitle(value)}
               {version && <Badge variant={"surface"}>{version}</Badge>}
             </HStack>
