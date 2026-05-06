@@ -21,25 +21,4 @@ The `value` could be:
 - A GeoJSON [FeatureCollection](https://datatracker.ietf.org/doc/html/rfc7946#section-3.3) with STAC Items as its `features` (commonly referred to as an `ItemCollection`, though no such term exists in the STAC specification)
 - A [stac-geoparquet](https://github.com/stac-utils/stac-geoparquet) file, which is treated as an `ItemCollection`.
 
-The behaviors of the app are then driven by the attributes of the `value`.
-
-## Concept diagram
-
-Any values that don't have a parent are set by the user, either directly (e.g. `href`) or by interacting with the app (e.g. `bbox`).
-
-```mermaid
-flowchart TD
-    h[href] --> value;
-    value --> catalogs;
-    value --> collections;
-    collections --> filteredCollections;
-    bbox --> filteredCollections;
-    datetimeBounds --> filteredCollections;
-    value --> linkedItems;
-    linkedItems -- if no user items --> items;
-    search --> userItems;
-    userItems --> items;
-    items --> filteredItems;
-    bbox --> filteredItems;
-    datetimeBounds --> filteredItems;
-```
+The behaviors of the app are then driven by the attributes of the `value`, especially via [value.tsx](../../src/components/value.tsx).
