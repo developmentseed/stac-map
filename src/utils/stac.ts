@@ -10,23 +10,41 @@ import type { StacAssets, StacValue } from "../types/stac";
 import { getAccessToken } from "./auth";
 import { toAbsoluteUrl } from "./href";
 
-export async function fetchStacValue({ href }: { href: string }) {
-  const headers: Record<string, string> = { Accept: "application/json" };
-  const token = getAccessToken(href);
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+export async function fetchStacValue({
+  href,
+  uploadedFile,
+}: {
+  href: string;
+  uploadedFile?: File | null;
+}) {
+  if (href.startsWith("http")) {
+    const headers: Record<string, string> = { Accept: "application/json" };
+    const token = getAccessToken(href);
+    if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  return await fetch(href, {
-    method: "GET",
-    headers,
-  }).then(async (response) => {
-    if (response.ok) {
-      return response
-        .json()
-        .then((json) => makeHrefsAbsolute(json, href.toString()));
-    } else {
-      throw new Error(`GET ${href}: ${response.statusText}`);
-    }
-  });
+    return await fetch(href, {
+      method: "GET",
+      headers,
+    }).then(async (response) => {
+      if (response.ok) {
+        return response
+          .json()
+          .then((json) => makeHrefsAbsolute(json, href.toString()));
+      } else {
+        throw new Error(`GET ${href}: ${response.statusText}`);
+      }
+    });
+  } else if (uploadedFile) {
+    const value = JSON.parse(await uploadedFile.text()) as StacValue;
+    const selfHref = getSelfHref(value);
+    return selfHref
+      ? makeHrefsAbsolute(value, selfHref)
+      : removeRelativeHrefs(value);
+  } else {
+    throw new Error(
+      `Not a http(s) URL, and no file has been uploaded: ${href}`
+    );
+  }
 }
 
 export function getStacTitle(value: StacValue) {
@@ -122,6 +140,22 @@ function makeHrefsAbsolute<T extends StacValue>(value: T, baseUrl: string): T {
       }
     }
   }
+  return value;
+}
+
+function removeRelativeHrefs<T extends StacValue>(value: T): T {
+  if (value.links != null) {
+    value.links = value.links.filter((link) => link.href?.startsWith("http"));
+  }
+
+  if (value.assets != null) {
+    value.assets = Object.fromEntries(
+      Object.entries(value.assets).filter(
+        ([, asset]) => asset.href && URL.canParse(asset.href)
+      )
+    );
+  }
+
   return value;
 }
 
