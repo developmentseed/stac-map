@@ -81,10 +81,15 @@ export function getThumbnailAsset(value: StacValue) {
     const assets = value.assets as StacAssets;
     const asset =
       assets["thumbnail"] ||
-      Object.values(assets).find((asset) =>
-        asset.roles?.includes("thumbnail")
+      Object.values(assets).find(
+        (asset) =>
+          asset.roles?.includes("thumbnail") && asset.href.startsWith("http")
       ) ||
-      assets["thumbnails"];
+      assets["thumbnails"] ||
+      Object.values(assets).find(
+        (asset) =>
+          asset.roles?.includes("overview") && asset.href.startsWith("http")
+      );
     return asset?.href.startsWith("http") && asset;
   }
 }
