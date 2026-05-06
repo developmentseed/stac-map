@@ -5,7 +5,7 @@ There's two ways to deploy your own version of **stac-map**:
 - [Build-time configuration](#build-time-configuration)
 - [React component](#react-component)
 
-### Build-time configuration
+## Build-time configuration
 
 If you only need to customize a few things, you can clone this repository and configure a build of the app with environment variables.
 See [deploy.yaml](./.github/workflows/deploy.yaml) for a (drop-dead simple) example of deploying this application as a static site via Github Pages.
@@ -34,7 +34,7 @@ VITE_DEFAULT_HREF=https://my-stac-api.com
 
 Then run `yarn build` and deploy the `dist/` directory to your static hosting provider.
 
-### React component
+## React component
 
 For more flexible configuration, we provide a `StacMap` React component via [@developmentseed/stac-map](https://www.npmjs.com/package/@developmentseed/stac-map).
 To use it:
