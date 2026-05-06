@@ -1,5 +1,5 @@
 import { type BBox2D, type Color, useStore } from "@/store";
-import type { StacAssets, StacItemCollection } from "@/types/stac";
+import type { StacItemCollection } from "@/types/stac";
 import {
   datetimeInputToMs,
   msToDatetimeInputValue,
@@ -7,53 +7,32 @@ import {
   toMs,
 } from "@/utils/datetime";
 import { getPaddedViewportBbox } from "@/utils/map";
+import { fetchStacValue, getLinkHref } from "@/utils/stac";
 import {
-  fetchStacValue,
-  getCogHref,
-  getLinkHref,
-  sanitizeBbox,
-} from "@/utils/stac";
-import {
-  Alert,
   Button,
   ButtonGroup,
-  Center,
-  Checkbox,
   CloseButton,
-  createListCollection,
   Dialog,
   Field,
   Fieldset,
   IconButton,
   Input,
   Portal,
-  Select,
   SkeletonText,
-  Stack,
 } from "@chakra-ui/react";
 import { GeoJsonLayer } from "@deck.gl/layers";
-import {
-  COGLayer,
-  MosaicLayer,
-  type MosaicSource,
-} from "@developmentseed/deck.gl-geotiff";
-import { epsgResolver } from "@developmentseed/proj";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import bboxPolygon from "@turf/bbox-polygon";
 import { useEffect, useMemo, useState } from "react";
-import {
-  LuFileSearch2,
-  LuFrame,
-  LuSettings2,
-  LuView,
-  LuX,
-} from "react-icons/lu";
+import { LuFileSearch2, LuFrame, LuSettings2, LuX } from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
-import type { StacCollection, StacItem, StacLink } from "stac-ts";
+import type { StacCollection, StacLink } from "stac-ts";
 import { Items } from "./items";
 import DatetimeSlider from "./ui/datetime-slider";
+import { ErrorAlert } from "./ui/error-alert";
 import PaginationBar from "./ui/pagination-bar";
 import Section from "./ui/section";
+import Visualization from "./visualization";
 
 export default function Search({
   link,
@@ -140,12 +119,15 @@ export default function Search({
     <Items items={items} />
   ) : result.isLoading ? (
     <SkeletonText h={3} />
-  ) : (
-    <Error error={result.error} />
-  );
+  ) : result.error ? (
+    <ErrorAlert title="Search error" error={result.error} />
+  ) : null;
 
   return (
     <>
+      {result.data?.pages && result.data.pages.length > 0 && (
+        <Visualization itemPages={result.data.pages} />
+      )}
       <Section icon={<LuFileSearch2 />} title="Search">
         <Fieldset.Root size={"sm"}>
           <Fieldset.Content>
@@ -220,9 +202,6 @@ export default function Search({
         <AdvancedSettings limit={limit} setLimit={setLimit} />
       </Section>
       {bbox && <BboxLayer bbox={bbox} />}
-      {result.data?.pages && result.data.pages.length > 0 && (
-        <Visualization pages={result.data.pages} />
-      )}
       {body}
       {items && items.length > 0 && (
         <PaginationBar
@@ -337,204 +316,6 @@ function AdvancedSettings({
         </Dialog.Positioner>
       </Portal>
     </Dialog.Root>
-  );
-}
-
-function Visualization({ pages }: { pages: StacItemCollection[] }) {
-  const items = useMemo(
-    () =>
-      pages.flatMap((page) => page?.features ?? []).filter((item) => !!item),
-    [pages]
-  );
-  const validKeys = useMemo(() => getValidAssetKeys(items), [items]);
-  const [selectedKey, setSelectedKey] = useState<string | undefined>(() =>
-    pickBestKeyForItems(items)
-  );
-  const [enabled, setEnabled] = useState(true);
-  const firstPage = pages[0];
-  const [lastFirstPage, setLastFirstPage] = useState(firstPage);
-  if (lastFirstPage !== firstPage) {
-    setLastFirstPage(firstPage);
-    setSelectedKey(pickBestKeyForItems(items));
-  }
-
-  const collection = useMemo(
-    () =>
-      createListCollection({
-        items: validKeys.map((key) => ({ label: key, value: key })),
-      }),
-    [validKeys]
-  );
-
-  if (validKeys.length === 0) return null;
-
-  return (
-    <>
-      {enabled &&
-        selectedKey &&
-        pages.map((page, index) => (
-          <PageLayer
-            key={index}
-            page={page}
-            pageIndex={index}
-            assetKey={selectedKey}
-          />
-        ))}
-      <Section icon={<LuView />} title="Visualization">
-        <Stack gap={4}>
-          <Field.Root>
-            <Field.Label>Asset key</Field.Label>
-            <Select.Root
-              size={"sm"}
-              collection={collection}
-              value={selectedKey ? [selectedKey] : []}
-              onValueChange={(e) => setSelectedKey(e.value[0])}
-              disabled={!enabled}
-            >
-              <Select.HiddenSelect />
-              <Select.Control>
-                <Select.Trigger>
-                  <Select.ValueText placeholder={"Select an asset"} />
-                </Select.Trigger>
-                <Select.IndicatorGroup>
-                  <Select.Indicator />
-                </Select.IndicatorGroup>
-              </Select.Control>
-              <Portal>
-                <Select.Positioner>
-                  <Select.Content>
-                    {collection.items.map((item) => (
-                      <Select.Item key={item.value} item={item}>
-                        <Select.ItemText>{item.label}</Select.ItemText>
-                        <Select.ItemIndicator />
-                      </Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Positioner>
-              </Portal>
-            </Select.Root>
-          </Field.Root>
-          <Center>
-            <Checkbox.Root
-              checked={enabled}
-              onCheckedChange={(e) => setEnabled(!!e.checked)}
-            >
-              <Checkbox.HiddenInput />
-              <Checkbox.Control />
-              <Checkbox.Label>Enabled</Checkbox.Label>
-            </Checkbox.Root>
-          </Center>
-        </Stack>
-      </Section>
-    </>
-  );
-}
-
-function PageLayer({
-  page,
-  pageIndex,
-  assetKey,
-}: {
-  page: StacItemCollection;
-  pageIndex: number;
-  assetKey: string;
-}) {
-  const setLayer = useStore((store) => store.setLayer);
-  const sources = useMemo(() => {
-    return (page?.features ?? [])
-      .map((item) => {
-        item.bbox = item.bbox && (sanitizeBbox(item.bbox) as number[]);
-        const asset = item.assets[assetKey];
-        const cogHref = asset && getCogHref(asset);
-        if (cogHref) item.assets.cog = { href: cogHref };
-        return item;
-      })
-      .filter(
-        (item): item is StacItem & MosaicSource =>
-          !!item.bbox && !!item.assets.cog
-      );
-  }, [page, assetKey]);
-
-  useEffect(() => {
-    const id = `search-visualization-page-${pageIndex}-${assetKey}`;
-    if (sources.length === 0) {
-      setLayer(id, undefined);
-      return;
-    }
-    setLayer(
-      id,
-      new MosaicLayer({
-        id,
-        sources,
-        getSource: async (source) => source.assets.cog.href,
-        renderSource: (source, { data, signal }) => {
-          const href = source.assets.cog.href;
-          return new COGLayer({
-            id: `cog-${href}`,
-            epsgResolver,
-            geotiff: data,
-            signal,
-          });
-        },
-      })
-    );
-    return () => setLayer(id, undefined);
-  }, [sources, pageIndex, assetKey, setLayer]);
-
-  return null;
-}
-
-function getValidAssetKeys(items: StacItem[]): string[] {
-  const keys = new Set<string>();
-  for (const item of items) {
-    const assets = item.assets as StacAssets | undefined;
-    if (!assets) continue;
-    for (const [key, asset] of Object.entries(assets)) {
-      if (getCogHref(asset)) keys.add(key);
-    }
-  }
-  return [...keys].sort();
-}
-
-function pickBestKeyForItems(items: StacItem[]): string | undefined {
-  if (items.length === 0) return undefined;
-  const counts = new Map<string, number>();
-  const hasVisualRole = new Set<string>();
-  for (const item of items) {
-    const assets = item.assets as StacAssets | undefined;
-    if (!assets) continue;
-    for (const [key, asset] of Object.entries(assets)) {
-      if (!getCogHref(asset)) continue;
-      counts.set(key, (counts.get(key) ?? 0) + 1);
-      if (asset.roles?.includes("visual")) hasVisualRole.add(key);
-    }
-  }
-  if (counts.size === 0) return undefined;
-  const score = (key: string) =>
-    (key === "visual" ? 2 : 0) +
-    (hasVisualRole.has(key) ? 1 : 0) +
-    (counts.get(key) ?? 0) / items.length;
-  let best: string | undefined;
-  let bestScore = -Infinity;
-  for (const key of counts.keys()) {
-    const s = score(key);
-    if (s > bestScore) {
-      bestScore = s;
-      best = key;
-    }
-  }
-  return best;
-}
-
-function Error({ error }: { error: Error | null }) {
-  return (
-    <Alert.Root status={"error"}>
-      <Alert.Indicator />
-      <Alert.Content>
-        <Alert.Title>{error ? error.name : "Unknown error"}</Alert.Title>
-        {error && <Alert.Description>{error.message}</Alert.Description>}
-      </Alert.Content>
-    </Alert.Root>
   );
 }
 
