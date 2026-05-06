@@ -128,7 +128,7 @@ export default function Value({
         {rootLink && <Root link={rootLink} value={value} />}
         {properties && <Properties properties={properties} />}
         {assets && <Assets assets={assets} />}
-        {value.links && <Links links={value.links} />}
+        {value.links && value.links.length > 0 && <Links links={value.links} />}
       </Stack>
 
       {hrefIsParquet && connection && (
