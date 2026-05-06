@@ -1,6 +1,7 @@
 import { useStacValue } from "@/hooks/stac";
 import { useStore } from "@/store";
 import type { StacAssets, StacValue } from "@/types/stac";
+import { exceedsMercatorBounds } from "@/utils/projection";
 import {
   conformsToFreeTextCollectionSearch,
   getLink,
@@ -45,6 +46,7 @@ export default function Value({
   const setValueBbox = useStore((store) => store.setValueBbox);
   const setLayer = useStore((store) => store.setLayer);
   const hrefIsParquet = useStore((store) => store.hrefIsParquet);
+  const setProjection = useStore((store) => store.setProjection);
   const version = value.stac_version as string;
   const thumbnailAsset = getThumbnailAsset(value);
   const description = value.description as string;
@@ -63,11 +65,16 @@ export default function Value({
       case "Feature":
         setValueBbox((value.bbox && sanitizeBbox(value.bbox)) || null);
         break;
-      case "FeatureCollection":
-        setValueBbox(sanitizeBbox(bbox(value as FeatureCollection)));
+      case "FeatureCollection": {
+        const fcBbox = sanitizeBbox(bbox(value as FeatureCollection));
+        setValueBbox(fcBbox);
+        if (fcBbox && exceedsMercatorBounds(fcBbox)) {
+          setProjection("globe");
+        }
         break;
+      }
     }
-  }, [value, setValueBbox]);
+  }, [value, setValueBbox, hrefIsParquet, setProjection]);
 
   useEffect(() => {
     setLayer(
