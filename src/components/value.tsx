@@ -22,6 +22,7 @@ import Breadcrumbs from "./breadcrumbs";
 import Buttons from "./buttons";
 import Children from "./children";
 import { CollectionsEndpoint } from "./collections";
+import Extensions from "./extensions";
 import { ItemLinks } from "./items";
 import Links from "./links";
 import Properties from "./properties";
@@ -90,12 +91,17 @@ export default function Value({
   return (
     <Stack gap={4}>
       <Stack gap={4}>
-        <Heading>
-          <HStack gap={4}>
-            {getStacTitle(value)}
-            {version && <Badge variant={"surface"}>{version}</Badge>}
-          </HStack>
-        </Heading>
+        <Stack gap={2}>
+          <Heading>
+            <HStack gap={4}>
+              {getStacTitle(value)}
+              {version && <Badge variant={"surface"}>{version}</Badge>}
+            </HStack>
+          </Heading>
+          {Array.isArray(value.stac_extensions) && (
+            <Extensions extensions={value.stac_extensions as string[]} />
+          )}
+        </Stack>
         <Breadcrumbs value={value} />
         {thumbnailAsset && <Thumbnail asset={thumbnailAsset} />}
         {description && <Description description={description} />}
