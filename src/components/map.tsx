@@ -1,8 +1,9 @@
-import { useStore } from "@/store";
+import { useStore, type BBox2D } from "@/store";
+import { resolveInitialBbox } from "@/utils/bbox";
 import { fitBoundsToBbox } from "@/utils/map";
 import { type DeckProps } from "@deck.gl/core";
 import { MapboxOverlay } from "@deck.gl/mapbox";
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import type { MapRef } from "react-map-gl/maplibre";
 import {
   Layer as MaplibreLayer,
@@ -24,13 +25,31 @@ export default function Map({
   const valueBbox = useStore((store) => store.valueBbox);
   const setMapBbox = useStore((store) => store.setMapBbox);
   const mapRef = useRef<MapRef>(null);
+  const [initialBbox, setInitialBbox] = useState<BBox2D | null>(() =>
+    resolveInitialBbox()
+  );
+  const skipNextValueBboxRef = useRef<boolean>(
+    initialBbox !== null && useStore.getState().href !== null
+  );
   const mapStyle = useColorModeValue(
     "positron-gl-style",
     "dark-matter-gl-style"
   );
 
   useEffect(() => {
-    if (mapRef.current && valueBbox) fitBoundsToBbox(mapRef.current, valueBbox);
+    if (!initialBbox) return;
+    const url = new URL(location.href);
+    url.searchParams.delete("bbox");
+    history.replaceState(null, "", url.pathname + url.search);
+  }, [initialBbox]);
+
+  useEffect(() => {
+    if (!valueBbox) return;
+    if (skipNextValueBboxRef.current) {
+      skipNextValueBboxRef.current = false;
+      return;
+    }
+    if (mapRef.current) fitBoundsToBbox(mapRef.current, valueBbox);
   }, [valueBbox]);
 
   return (
@@ -48,6 +67,10 @@ export default function Map({
       onLoad={(e) => {
         const b = e.target.getBounds();
         setMapBbox([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()]);
+        if (initialBbox && mapRef.current) {
+          fitBoundsToBbox(mapRef.current, initialBbox);
+          setInitialBbox(null);
+        }
       }}
       onMoveEnd={(e) => {
         const b = e.target.getBounds();
