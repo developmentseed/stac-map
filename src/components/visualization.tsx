@@ -1,6 +1,6 @@
 import { useStore } from "@/store";
-import type { StacAssets } from "@/types/stac";
-import { getCogHref } from "@/utils/stac";
+import type { StacAssets, StacItemCollection } from "@/types/stac";
+import { getCogHref, sanitizeBbox } from "@/utils/stac";
 import {
   Checkbox,
   HStack,
@@ -8,18 +8,25 @@ import {
   Select,
   createListCollection,
 } from "@chakra-ui/react";
-import { COGLayer } from "@developmentseed/deck.gl-geotiff";
+import {
+  COGLayer,
+  MosaicLayer,
+  type MosaicSource,
+} from "@developmentseed/deck.gl-geotiff";
+import { epsgResolver } from "@developmentseed/proj";
 import { useEffect, useMemo, useState } from "react";
 import { LuEye, LuEyeOff } from "react-icons/lu";
-import type { StacAsset, StacLink } from "stac-ts";
+import type { StacAsset, StacItem, StacLink } from "stac-ts";
 import Section from "./ui/section";
 
 export default function Visualization({
-  links,
-  assets,
+  links = [],
+  assets = {},
+  itemPages = [],
 }: {
-  links: StacLink[];
-  assets: StacAssets;
+  links?: StacLink[];
+  assets?: StacAssets;
+  itemPages?: StacItemCollection[];
 }) {
   const tilejsonLink = links.find((link) => link.rel === "tilejson");
   const wmtsLink = links.find((link) => link.rel === "wmts");
@@ -37,6 +44,15 @@ export default function Visualization({
     [assets]
   );
 
+  const allItems = useMemo(
+    () =>
+      itemPages
+        .flatMap((page) => page?.features ?? [])
+        .filter((item) => !!item),
+    [itemPages]
+  );
+  const itemAssetKeys = useMemo(() => getValidAssetKeys(allItems), [allItems]);
+
   const collection = useMemo(() => {
     const items: { label: string; value: string }[] = cogAssets.map(
       (asset) => ({
@@ -50,19 +66,35 @@ export default function Visualization({
     if (wmtsLink) {
       items.push({ label: "wmts", value: "wmts" });
     }
+    for (const key of itemAssetKeys) {
+      items.push({ label: key, value: `items:${key}` });
+    }
     return createListCollection({ items });
-  }, [cogAssets, tilejsonLink, wmtsLink]);
+  }, [cogAssets, tilejsonLink, wmtsLink, itemAssetKeys]);
 
-  const [selected, setSelected] = useState<string | undefined>(
-    () => collection.items[0]?.value
-  );
+  const [selected, setSelected] = useState<string | undefined>(() => {
+    const bestItemKey = pickBestKeyForItems(allItems);
+    if (bestItemKey && cogAssets.length === 0 && !tilejsonLink && !wmtsLink) {
+      return `items:${bestItemKey}`;
+    }
+    return collection.items[0]?.value;
+  });
   const [enabled, setEnabled] = useState(true);
+
+  const firstPage = itemPages[0];
+  const [lastFirstPage, setLastFirstPage] = useState(firstPage);
+  if (lastFirstPage !== firstPage) {
+    setLastFirstPage(firstPage);
+    const bestItemKey = pickBestKeyForItems(allItems);
+    if (bestItemKey) setSelected(`items:${bestItemKey}`);
+  }
 
   const setLayer = useStore((store) => store.setLayer);
   const setMaplibreLayer = useStore((store) => store.setMaplibreLayer);
 
   useEffect(() => {
     if (!enabled || !selected) return;
+    if (selected.startsWith("items:")) return;
 
     if (selected.startsWith("asset:")) {
       const assetKey = selected.slice("asset:".length);
@@ -124,48 +156,156 @@ export default function Visualization({
   if (collection.items.length === 0) return null;
 
   return (
-    <Section icon={enabled ? <LuEye /> : <LuEyeOff />} title="Visualization">
-      <HStack gap={4}>
-        <Checkbox.Root
-          checked={enabled}
-          onCheckedChange={(e) => setEnabled(!!e.checked)}
-          size={"sm"}
-        >
-          <Checkbox.HiddenInput />
-          <Checkbox.Control />
-        </Checkbox.Root>
-        <Select.Root
-          size={"sm"}
-          collection={collection}
-          value={selected ? [selected] : []}
-          onValueChange={(e) => setSelected(e.value[0])}
-          disabled={!enabled}
-        >
-          <Select.HiddenSelect />
-          <Select.Control>
-            <Select.Trigger>
-              <Select.ValueText placeholder={"Select a visualization"} />
-            </Select.Trigger>
-            <Select.IndicatorGroup>
-              <Select.Indicator />
-            </Select.IndicatorGroup>
-          </Select.Control>
-          <Portal>
-            <Select.Positioner>
-              <Select.Content>
-                {collection.items.map((item) => (
-                  <Select.Item key={item.value} item={item}>
-                    <Select.ItemText>{item.label}</Select.ItemText>
-                    <Select.ItemIndicator />
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Positioner>
-          </Portal>
-        </Select.Root>
-      </HStack>
-    </Section>
+    <>
+      {enabled &&
+        selected?.startsWith("items:") &&
+        itemPages.map((page, index) => (
+          <PageLayer
+            key={index}
+            page={page}
+            pageIndex={index}
+            assetKey={selected.slice("items:".length)}
+          />
+        ))}
+      <Section icon={enabled ? <LuEye /> : <LuEyeOff />} title="Visualization">
+        <HStack gap={4}>
+          <Checkbox.Root
+            checked={enabled}
+            onCheckedChange={(e) => setEnabled(!!e.checked)}
+            size={"sm"}
+          >
+            <Checkbox.HiddenInput />
+            <Checkbox.Control />
+          </Checkbox.Root>
+          <Select.Root
+            size={"sm"}
+            collection={collection}
+            value={selected ? [selected] : []}
+            onValueChange={(e) => setSelected(e.value[0])}
+            disabled={!enabled}
+          >
+            <Select.HiddenSelect />
+            <Select.Control>
+              <Select.Trigger>
+                <Select.ValueText placeholder={"Select a visualization"} />
+              </Select.Trigger>
+              <Select.IndicatorGroup>
+                <Select.Indicator />
+              </Select.IndicatorGroup>
+            </Select.Control>
+            <Portal>
+              <Select.Positioner>
+                <Select.Content>
+                  {collection.items.map((item) => (
+                    <Select.Item key={item.value} item={item}>
+                      <Select.ItemText>{item.label}</Select.ItemText>
+                      <Select.ItemIndicator />
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Positioner>
+            </Portal>
+          </Select.Root>
+        </HStack>
+      </Section>
+    </>
   );
+}
+
+function PageLayer({
+  page,
+  pageIndex,
+  assetKey,
+}: {
+  page: StacItemCollection;
+  pageIndex: number;
+  assetKey: string;
+}) {
+  const setLayer = useStore((store) => store.setLayer);
+  const sources = useMemo(() => {
+    return (page?.features ?? [])
+      .map((item) => {
+        item.bbox = item.bbox && (sanitizeBbox(item.bbox) as number[]);
+        const asset = item.assets[assetKey];
+        const cogHref = asset && getCogHref(asset);
+        if (cogHref) item.assets.cog = { href: cogHref };
+        return item;
+      })
+      .filter(
+        (item): item is StacItem & MosaicSource =>
+          !!item.bbox && !!item.assets.cog
+      );
+  }, [page, assetKey]);
+
+  useEffect(() => {
+    const id = `visualization-page-${pageIndex}-${assetKey}`;
+    if (sources.length === 0) {
+      setLayer(id, undefined);
+      return;
+    }
+    setLayer(
+      id,
+      new MosaicLayer({
+        id,
+        sources,
+        getSource: async (source) => source.assets.cog.href,
+        renderSource: (source, { data, signal }) => {
+          const href = source.assets.cog.href;
+          return new COGLayer({
+            id: `cog-${href}`,
+            epsgResolver,
+            geotiff: data,
+            signal,
+          });
+        },
+      })
+    );
+    return () => setLayer(id, undefined);
+  }, [sources, pageIndex, assetKey, setLayer]);
+
+  return null;
+}
+
+function getValidAssetKeys(items: StacItem[]): string[] {
+  const keys = new Set<string>();
+  for (const item of items) {
+    const assets = item.assets as StacAssets | undefined;
+    if (!assets) continue;
+    for (const [key, asset] of Object.entries(assets)) {
+      if (getCogHref(asset)) keys.add(key);
+    }
+  }
+  return [...keys].sort();
+}
+
+function pickBestKeyForItems(items: StacItem[]): string | undefined {
+  if (items.length === 0) return undefined;
+  const counts = new Map<string, number>();
+  const hasVisualRole = new Set<string>();
+  for (const item of items) {
+    const assets = item.assets as StacAssets | undefined;
+    if (!assets) continue;
+    for (const [key, asset] of Object.entries(assets)) {
+      if (!getCogHref(asset)) continue;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+      if (asset.roles?.includes("visual")) hasVisualRole.add(key);
+    }
+  }
+  if (counts.size === 0) return undefined;
+  const score = (key: string) =>
+    (key === "visual" ? 2 : 0) +
+    (hasVisualRole.has(key) ? 1 : 0) +
+    (counts.get(key) ?? 0) / items.length;
+  let best: string | undefined;
+  let bestScore = -Infinity;
+  for (const key of counts.keys()) {
+    const s = score(key);
+    if (s > bestScore) {
+      bestScore = s;
+      best = key;
+    }
+  }
+  return best;
 }
 
 function getScore([key, asset]: [string, StacAsset]) {
