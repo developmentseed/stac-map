@@ -66,7 +66,9 @@ export default function Visualization({
 
     if (selected.startsWith("asset:")) {
       const assetKey = selected.slice("asset:".length);
-      const cogHref = getCogHref(assets[assetKey]);
+      const asset = assets[assetKey];
+      if (!asset) return;
+      const cogHref = getCogHref(asset);
       if (!cogHref) return;
       const layerId = "visualization";
       setLayer(
