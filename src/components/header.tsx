@@ -21,12 +21,14 @@ export default function Header() {
     <HStack pointerEvents={"auto"}>
       <HrefInput />
       {href?.startsWith("http") && <ShareButton />}
+      {examples.length > 0 && (
+        <Examples>
+          <Button bg={"bg.muted/90"} variant={"surface"}>
+            Examples
+          </Button>
+        </Examples>
+      )}
       <ButtonGroup variant={"surface"} attached>
-        {examples.length > 0 && (
-          <Examples>
-            <Button bg={"bg.muted/90"}>Examples</Button>
-          </Examples>
-        )}
         <ProjectionButton />
         <ColorModeButton />
         <SettingsButton />
@@ -54,7 +56,7 @@ function ShareButton() {
   }
 
   return (
-    <IconButton variant={"surface"} onClick={copyShareUrl}>
+    <IconButton variant={"surface"} bg={"bg.muted/90"} onClick={copyShareUrl}>
       {copied ? <LuCheck /> : <LuShare2 />}
     </IconButton>
   );
