@@ -2,7 +2,7 @@ import { Badge, Flex } from "@chakra-ui/react";
 
 export default function Extensions({ extensions }: { extensions: string[] }) {
   return (
-    <Flex gap={2}>
+    <Flex gap={2} wrap="wrap">
       {extensions.map((extension) => (
         <Extension key={extension} extension={extension} />
       ))}
