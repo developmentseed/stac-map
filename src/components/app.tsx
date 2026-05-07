@@ -3,6 +3,7 @@ import { useDuckDb } from "duckdb-wasm-kit";
 import { type ReactNode, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useStore } from "../store";
+import { warmStacWasm } from "../utils/stac-wasm";
 import { uploadFile } from "../utils/upload";
 import Map from "./map";
 import Overlay from "./overlay";
@@ -49,6 +50,10 @@ export default function App({
       })();
     }
   }, [db, setConnection]);
+
+  useEffect(() => {
+    warmStacWasm();
+  }, []);
 
   return (
     <>
