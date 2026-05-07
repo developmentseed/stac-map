@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.1](https://github.com/developmentseed/stac-map/compare/v2.0.0...v2.0.1) (2026-05-07)
+
+
+### Bug Fixes
+
+* delay loading stac-wasm ([#454](https://github.com/developmentseed/stac-map/issues/454)) ([e88375f](https://github.com/developmentseed/stac-map/commit/e88375f3e88e135fde15f65e15c87967f0ed25f7))
+* wrap extensions ([#456](https://github.com/developmentseed/stac-map/issues/456)) ([3d4e7c3](https://github.com/developmentseed/stac-map/commit/3d4e7c361b5f5e3f8c61af75001f9ea0e5d5255a))
+
 ## [2.0.0](https://github.com/developmentseed/stac-map/compare/v2.0.0-beta.0...v2.0.0) (2026-05-07)
 
 
