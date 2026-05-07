@@ -4,7 +4,8 @@
       "changelog-path": "CHANGELOG.md",
       "release-type": "node",
       "include-component-in-tag": false,
-      "versioning": "default"
+      "versioning": "default",
+      "release-as": "2.0.0"
     }
   },
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
