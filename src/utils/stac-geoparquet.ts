@@ -8,9 +8,9 @@ import {
   Table,
   vectorFromArray,
 } from "apache-arrow";
-import * as stacWasm from "stac-wasm";
 import { toaster } from "../components/ui/toaster";
 import type { StacItemCollection } from "../types/stac";
+import { loadStacWasm } from "./stac-wasm";
 
 const SUPPORTED_GEOMETRY_TYPES = ["point", "polygon", "linestring"] as const;
 
@@ -294,6 +294,7 @@ export async function fetchStacGeoparquetItem({
     select: "* REPLACE ST_AsGeoJSON(geometry) as geometry",
     where: `id = '${id}'`,
   });
+  const stacWasm = await loadStacWasm();
   const item = stacWasm.arrowToStacJson(result)[0];
   item.geometry = JSON.parse(item.geometry);
   return item;
