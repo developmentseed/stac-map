@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.0.0](https://github.com/developmentseed/stac-map/compare/v2.0.0-beta.0...v2.0.0) (2026-05-07)
+
+
+### Features
+
+* add a simple share link ([#449](https://github.com/developmentseed/stac-map/issues/449)) ([f6d6384](https://github.com/developmentseed/stac-map/commit/f6d638411b95eafc204e3c39901c3e503a4340e9))
+* add a single visualization section ([#442](https://github.com/developmentseed/stac-map/issues/442)) ([6045f47](https://github.com/developmentseed/stac-map/commit/6045f476cc893963af20e695522aaa7b445b1500))
+* add extension badges ([#447](https://github.com/developmentseed/stac-map/issues/447)) ([dbc6102](https://github.com/developmentseed/stac-map/commit/dbc61022cde1be377814566b7340c687576dab92))
+* display overview assets if no thumbnail ([#446](https://github.com/developmentseed/stac-map/issues/446)) ([380c02f](https://github.com/developmentseed/stac-map/commit/380c02f961bdfb25ab735d3593ecc133986ae964))
+* set projection via url ([#441](https://github.com/developmentseed/stac-map/issues/441)) ([5261763](https://github.com/developmentseed/stac-map/commit/52617635f76ea7bb22383e44fb55bd1fb94693f3)), closes [#333](https://github.com/developmentseed/stac-map/issues/333)
+* share current viz key ([#451](https://github.com/developmentseed/stac-map/issues/451)) ([62f2dc4](https://github.com/developmentseed/stac-map/commit/62f2dc4d2a9366afc167134af5d55f318533d0f4))
+* zoom to bbox on load via url param ([#444](https://github.com/developmentseed/stac-map/issues/444)) ([274e564](https://github.com/developmentseed/stac-map/commit/274e56486d907e8a25de0777310fe1ad5e8dea64))
+
+
+### Bug Fixes
+
+* default versioning ([c22bbd4](https://github.com/developmentseed/stac-map/commit/c22bbd47a22fceb6c26fd80b19e636b3c099d99a))
+* move search viz to the visualization component ([#450](https://github.com/developmentseed/stac-map/issues/450)) ([31cddc9](https://github.com/developmentseed/stac-map/commit/31cddc955bd3989e4a97f7ef4d3eccf6a5af1394))
+* self hrefs and 3d bounding boxes ([#439](https://github.com/developmentseed/stac-map/issues/439)) ([b93a025](https://github.com/developmentseed/stac-map/commit/b93a0250fafc8f81fabed58ebd0b0b4374909458))
+* switch to globe on high-latitude feature collections ([#452](https://github.com/developmentseed/stac-map/issues/452)) ([8d0d472](https://github.com/developmentseed/stac-map/commit/8d0d472437396f76dc87fcf700548a62a5ff93e2))
+* uploading json files ([#448](https://github.com/developmentseed/stac-map/issues/448)) ([c832e4c](https://github.com/developmentseed/stac-map/commit/c832e4c2e0e56a2b982e33dc3c722ed27d22f8a9))
+
 ## [2.0.0-beta.0](https://github.com/developmentseed/stac-map/compare/v2.0.0-alpha.3...v2.0.0-beta.0) (2026-05-05)
 
 
