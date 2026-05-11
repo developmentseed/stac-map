@@ -1,4 +1,5 @@
 import { useStore } from "@/store";
+import { loadGeoTIFF } from "@/utils/geotiff";
 import {
   fetchStacGeoparquetItem,
   fetchStacGeoparquetTable,
@@ -62,5 +63,15 @@ export function useStacGeoparquetItem({
     queryKey: ["stac-geoparquet-item", href, id],
     queryFn: async () =>
       fetchStacGeoparquetItem({ href, connection, hivePartitioning, id }),
+  });
+}
+
+export function useGeoTIFF(href: string | undefined) {
+  return useQuery({
+    queryKey: ["geotiff", href],
+    queryFn: async () => loadGeoTIFF(href!),
+    enabled: !!href,
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
 }

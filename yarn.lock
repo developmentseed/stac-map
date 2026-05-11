@@ -250,14 +250,14 @@
     "@pandacss/is-valid-prop" "^1.4.2"
     csstype "^3.2.3"
 
-"@chunkd/middleware@^11.2.0":
+"@chunkd/middleware@^11.2.0", "@chunkd/middleware@^11.3.0":
   version "11.3.0"
   resolved "https://registry.yarnpkg.com/@chunkd/middleware/-/middleware-11.3.0.tgz#4d79324a77e4b0c8437f4db3b34ead20aa08346a"
   integrity sha512-9AzKHP4zX3DUawwJY4wOCCNSPJTmGQc6y1rABsLmoUQ6F5lN73/1u2FkQB0ihNIzzLYz2j86nwvdJSA6GArrtQ==
   dependencies:
     "@chunkd/source" "^11.4.0"
 
-"@chunkd/source-http@^11.2.0":
+"@chunkd/source-http@^11.2.0", "@chunkd/source-http@^11.4.0":
   version "11.4.0"
   resolved "https://registry.yarnpkg.com/@chunkd/source-http/-/source-http-11.4.0.tgz#29e9995ee363f44b430b220bfa70a20af0724d75"
   integrity sha512-ZkekctSU+7m8SNWxvZNBJA4Uw+eOqhaQq9Sy6gYLMeoZCTWDleID21zjWSbh/4tuSoTN/jiA/U1N9uljWjEY/g==
