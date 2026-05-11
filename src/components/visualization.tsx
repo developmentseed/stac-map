@@ -1,5 +1,7 @@
+import { useGeoTIFF } from "@/hooks/stac";
 import { useStore } from "@/store";
 import type { StacAssets, StacItemCollection } from "@/types/stac";
+import { loadGeoTIFF } from "@/utils/geotiff";
 import { getCogHref, sanitizeBbox } from "@/utils/stac";
 import {
   Checkbox,
@@ -109,22 +111,26 @@ export default function Visualization({
   const setLayer = useStore((store) => store.setLayer);
   const setMaplibreLayer = useStore((store) => store.setMaplibreLayer);
 
+  const selectedCogHref = useMemo(() => {
+    if (!selected?.startsWith("asset:")) return undefined;
+    const asset = assets[selected.slice("asset:".length)];
+    return asset && getCogHref(asset);
+  }, [selected, assets]);
+
+  const { data: selectedCogGeotiff } = useGeoTIFF(selectedCogHref);
+
   useEffect(() => {
     if (!enabled || !selected) return;
     if (selected.startsWith("items:")) return;
 
     if (selected.startsWith("asset:")) {
-      const assetKey = selected.slice("asset:".length);
-      const asset = assets[assetKey];
-      if (!asset) return;
-      const cogHref = getCogHref(asset);
-      if (!cogHref) return;
+      if (!selectedCogGeotiff) return;
       const layerId = "visualization";
       setLayer(
         layerId,
         new COGLayer({
           id: layerId,
-          geotiff: cogHref,
+          geotiff: selectedCogGeotiff,
         })
       );
       return () => setLayer(layerId, undefined);
@@ -163,7 +169,7 @@ export default function Visualization({
   }, [
     enabled,
     selected,
-    assets,
+    selectedCogGeotiff,
     tilejsonLink,
     wmtsLink,
     setLayer,
@@ -265,8 +271,9 @@ function PageLayer({
       new MosaicLayer({
         id,
         sources,
-        getSource: async (source) => source.assets.cog.href,
+        getSource: async (source) => loadGeoTIFF(source.assets.cog.href),
         renderSource: (source, { data, signal }) => {
+          if (!data) return null;
           const href = source.assets.cog.href;
           return new COGLayer({
             id: `cog-${href}`,
