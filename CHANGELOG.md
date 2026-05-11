@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.2](https://github.com/developmentseed/stac-map/compare/v2.0.1...v2.0.2) (2026-05-11)
+
+
+### Bug Fixes
+
+* work around chunkd bug ([#460](https://github.com/developmentseed/stac-map/issues/460)) ([e88130e](https://github.com/developmentseed/stac-map/commit/e88130e9d01f6a8922fce649ced349efea574c17))
+
 ## [2.0.1](https://github.com/developmentseed/stac-map/compare/v2.0.0...v2.0.1) (2026-05-07)
 
 
