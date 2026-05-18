@@ -1,14 +1,18 @@
 import { AbsoluteCenter, Box, Center, FileUpload } from "@chakra-ui/react";
-import { useDuckDb } from "duckdb-wasm-kit";
-import { type ReactNode, useEffect } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { useStacGeoparquet } from "../contexts/stac-geoparquet";
 import { useStore } from "../store";
-import { warmStacWasm } from "../utils/stac-wasm";
 import { uploadFile } from "../utils/upload";
 import Map from "./map";
 import Overlay from "./overlay";
 import type { ExtraLayerProps } from "./stac-map";
 import { ErrorBoundaryAlert } from "./ui/error-alert";
+
+const StacGeoparquetFeature =
+  import.meta.env.VITE_STAC_GEOPARQUET === "false"
+    ? null
+    : lazy(() => import("./stac-geoparquet"));
 
 function MapFallback({ error }: { error: unknown }) {
   return (
@@ -28,6 +32,34 @@ function OverlayFallback({ error }: { error: unknown }) {
   );
 }
 
+function AppContents({ extraLayers }: { extraLayers?: ExtraLayerProps[] }) {
+  const setUploadedFile = useStore((state) => state.setUploadedFile);
+  const parquetCtx = useStacGeoparquet();
+  return (
+    <Box h={"100%"} w={"100%"}>
+      <FileUpload.Root
+        unstyled={true}
+        onFileAccept={(details) => {
+          void uploadFile({
+            file: details.files[0],
+            setUploadedFile,
+            registerParquet: parquetCtx?.registerParquet,
+          });
+        }}
+        h={"100%"}
+        w={"100%"}
+      >
+        <FileUpload.HiddenInput />
+        <FileUpload.Dropzone disableClick={true} h={"100%"} w={"100%"}>
+          <ErrorBoundary FallbackComponent={MapFallback}>
+            <Map extraLayers={extraLayers} />
+          </ErrorBoundary>
+        </FileUpload.Dropzone>
+      </FileUpload.Root>
+    </Box>
+  );
+}
+
 export default function App({
   footer,
   extraLayers,
@@ -35,54 +67,22 @@ export default function App({
   footer?: ReactNode;
   extraLayers?: ExtraLayerProps[];
 }) {
-  const setUploadedFile = useStore((state) => state.setUploadedFile);
-  const setConnection = useStore((state) => state.setConnection);
-  const { db } = useDuckDb();
-
-  useEffect(() => {
-    if (db) {
-      (async () => {
-        const connection = await db.connect();
-        await connection.query("LOAD spatial;");
-        await connection.query("LOAD icu;");
-        await connection.query("LOAD httpfs;");
-        setConnection(connection);
-      })();
-    }
-  }, [db, setConnection]);
-
-  useEffect(() => {
-    warmStacWasm();
-  }, []);
-
-  return (
+  const inner = (
     <>
-      <Box h={"100%"} w={"100%"}>
-        <FileUpload.Root
-          unstyled={true}
-          onFileAccept={(details) => {
-            uploadFile({
-              file: details.files[0],
-              setUploadedFile,
-              db,
-            });
-          }}
-          disabled={!db}
-          h={"100%"}
-          w={"100%"}
-        >
-          <FileUpload.HiddenInput />
-          <FileUpload.Dropzone disableClick={true} h={"100%"} w={"100%"}>
-            <ErrorBoundary FallbackComponent={MapFallback}>
-              <Map extraLayers={extraLayers} />
-            </ErrorBoundary>
-          </FileUpload.Dropzone>
-        </FileUpload.Root>
-      </Box>
+      <AppContents extraLayers={extraLayers} />
       <ErrorBoundary FallbackComponent={OverlayFallback}>
         <Overlay />
       </ErrorBoundary>
       {footer}
     </>
   );
+
+  if (StacGeoparquetFeature) {
+    return (
+      <Suspense fallback={inner}>
+        <StacGeoparquetFeature>{inner}</StacGeoparquetFeature>
+      </Suspense>
+    );
+  }
+  return inner;
 }

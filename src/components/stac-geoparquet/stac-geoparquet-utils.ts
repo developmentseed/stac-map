@@ -1,4 +1,4 @@
-import { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
+import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { data, io } from "@geoarrow/geoarrow-js";
 import {
   Binary,
@@ -8,9 +8,9 @@ import {
   Table,
   vectorFromArray,
 } from "apache-arrow";
-import { toaster } from "../components/ui/toaster";
-import type { StacItemCollection } from "../types/stac";
-import { loadStacWasm } from "./stac-wasm";
+import { toaster } from "../ui/toaster";
+import type { StacItemCollection } from "../../types/stac";
+import { loadStacWasm } from "./stac-wasm-loader";
 
 const SUPPORTED_GEOMETRY_TYPES = ["point", "polygon", "linestring"] as const;
 

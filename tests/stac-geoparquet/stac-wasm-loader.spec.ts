@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { loadStacWasm, warmStacWasm } from "../../src/utils/stac-wasm";
+import {
+  loadStacWasm,
+  warmStacWasm,
+} from "../../src/components/stac-geoparquet/stac-wasm-loader";
 
 describe("loadStacWasm", () => {
   it("returns the same promise on repeated calls", () => {
