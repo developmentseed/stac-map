@@ -250,28 +250,28 @@
     "@pandacss/is-valid-prop" "^1.4.2"
     csstype "^3.2.3"
 
-"@chunkd/middleware@^11.2.0", "@chunkd/middleware@^11.3.0":
+"@chunkd/middleware@^11.3.0":
   version "11.3.0"
   resolved "https://registry.yarnpkg.com/@chunkd/middleware/-/middleware-11.3.0.tgz#4d79324a77e4b0c8437f4db3b34ead20aa08346a"
   integrity sha512-9AzKHP4zX3DUawwJY4wOCCNSPJTmGQc6y1rABsLmoUQ6F5lN73/1u2FkQB0ihNIzzLYz2j86nwvdJSA6GArrtQ==
   dependencies:
     "@chunkd/source" "^11.4.0"
 
-"@chunkd/source-http@^11.2.0", "@chunkd/source-http@^11.4.0":
+"@chunkd/source-http@^11.4.0":
   version "11.4.0"
   resolved "https://registry.yarnpkg.com/@chunkd/source-http/-/source-http-11.4.0.tgz#29e9995ee363f44b430b220bfa70a20af0724d75"
   integrity sha512-ZkekctSU+7m8SNWxvZNBJA4Uw+eOqhaQq9Sy6gYLMeoZCTWDleID21zjWSbh/4tuSoTN/jiA/U1N9uljWjEY/g==
   dependencies:
     "@chunkd/source" "^11.4.0"
 
-"@chunkd/source-memory@^11.0.3":
+"@chunkd/source-memory@^11.2.0":
   version "11.2.0"
   resolved "https://registry.yarnpkg.com/@chunkd/source-memory/-/source-memory-11.2.0.tgz#1865300615b833a35fc206fb7d13e9bbd22b11b2"
   integrity sha512-a+wc2Twk6w+rqp37EPml0frScLT41jOrtsO+21Nm0Nl4r3UAvenl7fsED4V0EWqE7hr7gcF+TEZt+4NNsdrnow==
   dependencies:
     "@chunkd/source" "^11.4.0"
 
-"@chunkd/source@^11.2.0", "@chunkd/source@^11.4.0":
+"@chunkd/source@^11.4.0":
   version "11.4.0"
   resolved "https://registry.yarnpkg.com/@chunkd/source/-/source-11.4.0.tgz#1a4b96f9aba04a7707ff581b4560b569284b4ff2"
   integrity sha512-UVvihfAoGXYqH8sLJBHL7w3sKphIQpzoldfutZa7Y8UvaMqKxsIxOp8FbmxfCA2gd6EDLwBJaDA6HfkTIu1jmA==
@@ -441,52 +441,52 @@
     "@floating-ui/dom" "^1.7.5"
     preact "^10.17.0"
 
-"@developmentseed/affine@^0.6.1":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@developmentseed/affine/-/affine-0.6.1.tgz#64e3dcee797d896a3f64c2fc45fc51f3ce24dca4"
-  integrity sha512-RSywOfmKAUxib61vXOYFoobIZS/vZWvaAHgUlTTwejlgAU7tK9VvViz0xTqwHF9K3BLDD12EdNB1yS/ZDpBlWQ==
+"@developmentseed/affine@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@developmentseed/affine/-/affine-0.7.0.tgz#a05eb622469a4e5ac82a2c10d6fb4d3043f3119f"
+  integrity sha512-O00T3nLFY8DiEqTIpKzEDc6wyVLth4DoFc0gPE6EiaEdFM4lQsQnH8x5mrknDB7jeLyKW2aPnNyBxoPqS7JKHA==
 
-"@developmentseed/deck.gl-geotiff@^0.6.0":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@developmentseed/deck.gl-geotiff/-/deck.gl-geotiff-0.6.1.tgz#c29be6e8ff2a65c9784182927e8fbb8337560491"
-  integrity sha512-xPK/ZIf332xCOn9U+Of7CxW1+VKKi6DSSAao6oXRIRk7E82oeJAInWHnnpPmIkKYykdkog0pgQhymNb+MbAYhg==
+"@developmentseed/deck.gl-geotiff@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@developmentseed/deck.gl-geotiff/-/deck.gl-geotiff-0.7.0.tgz#a364be19a7840c7d90ac172b35a010225bc562c5"
+  integrity sha512-HfeXC14btr1P0SsN9yFhNKCA4j9ZDNfSUa6LaZKFeTQB739C6t1Bxn1OM5wDHrHv6wdcq4CcdYPI0ZiClI9bSA==
   dependencies:
     "@cogeotiff/core" "^9.5.0"
-    "@developmentseed/affine" "^0.6.1"
-    "@developmentseed/deck.gl-raster" "^0.6.1"
-    "@developmentseed/geotiff" "^0.6.1"
-    "@developmentseed/morecantile" "^0.6.1"
-    "@developmentseed/proj" "^0.6.1"
-    "@developmentseed/raster-reproject" "^0.6.1"
-    flatbush "^4.5.0"
-    proj4 "^2.20.4"
+    "@developmentseed/affine" "^0.7.0"
+    "@developmentseed/deck.gl-raster" "^0.7.0"
+    "@developmentseed/geotiff" "^0.7.0"
+    "@developmentseed/morecantile" "^0.7.0"
+    "@developmentseed/proj" "^0.7.0"
+    "@developmentseed/raster-reproject" "^0.7.0"
+    flatbush "^4.5.1"
+    proj4 "^2.20.8"
 
-"@developmentseed/deck.gl-raster@^0.6.1":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@developmentseed/deck.gl-raster/-/deck.gl-raster-0.6.1.tgz#53b486e224740aac5361066d23c2ff0550a73243"
-  integrity sha512-0ODeinL6G7awL8l3wa3tzdgX+CvzELaxG67qIrj6wZRIMea8qRCvXgpmhSeB41VBqbAayH8Jbl6nRYziFwbgPQ==
+"@developmentseed/deck.gl-raster@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@developmentseed/deck.gl-raster/-/deck.gl-raster-0.7.0.tgz#dcdff4423711cf55c6f6f3efeaa23c353f478e6e"
+  integrity sha512-I9X81fus7r9MoOZUwMj6GAR24diPGlMT2ep3N5vQOnmfntT+kGSLYX1EEkO6jwKBO0roOMrqb/8U2JkPhtT/gQ==
   dependencies:
-    "@developmentseed/affine" "^0.6.1"
-    "@developmentseed/proj" "^0.6.1"
-    "@developmentseed/raster-reproject" "^0.6.1"
+    "@developmentseed/affine" "^0.7.0"
+    "@developmentseed/proj" "^0.7.0"
+    "@developmentseed/raster-reproject" "^0.7.0"
     "@math.gl/core" "^4.1.0"
     "@math.gl/culling" "^4.1.0"
     "@math.gl/web-mercator" "^4.1.0"
 
-"@developmentseed/geotiff@^0.6.1":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@developmentseed/geotiff/-/geotiff-0.6.1.tgz#b50f082489927581b7145d5ad8268dd197d5577d"
-  integrity sha512-gAqVglVP+2w7LMODaKNXMbWEyOQjaBwVibLzog1EY+N2S9r7eh1KT27k/VLS3ksf+Rqn3PZnUkJ/cGHumSHFEg==
+"@developmentseed/geotiff@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@developmentseed/geotiff/-/geotiff-0.7.0.tgz#fdbceac432bb5312b1358c86e98463ff6dfdecc5"
+  integrity sha512-KnTJ7ZRzg7laiNRlfuslNN4EmM8lvOp4h7Y/RTyojCmiDycJxT0tbo7gMDjFPSvys5tWxoR/9WGPLKyipkzRiQ==
   dependencies:
-    "@chunkd/middleware" "^11.2.0"
-    "@chunkd/source" "^11.2.0"
-    "@chunkd/source-http" "^11.2.0"
-    "@chunkd/source-memory" "^11.0.3"
+    "@chunkd/middleware" "^11.3.0"
+    "@chunkd/source" "^11.4.0"
+    "@chunkd/source-http" "^11.4.0"
+    "@chunkd/source-memory" "^11.2.0"
     "@cogeotiff/core" "^9.5.0"
-    "@developmentseed/affine" "^0.6.1"
+    "@developmentseed/affine" "^0.7.0"
     "@developmentseed/lzw-tiff-decoder" "^0.2.2"
-    "@developmentseed/morecantile" "^0.6.1"
-    "@developmentseed/proj" "^0.6.1"
+    "@developmentseed/morecantile" "^0.7.0"
+    "@developmentseed/proj" "^0.7.0"
     fzstd "^0.1.1"
     lerc "^4.1.1"
     uuid "^14.0.0"
@@ -496,24 +496,24 @@
   resolved "https://registry.yarnpkg.com/@developmentseed/lzw-tiff-decoder/-/lzw-tiff-decoder-0.2.2.tgz#398fda6f03a82bd4132f63fafce141651006b136"
   integrity sha512-bsBIdV1LyqcrtnYtIYu3C/297X2wxeYkmmhHzR02OOX823sGxT8GLGdenTmwoXvNWkozk3b+ptXtJeSUmNPaTA==
 
-"@developmentseed/morecantile@^0.6.1":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@developmentseed/morecantile/-/morecantile-0.6.1.tgz#4dc6d6787a8aa4727d3aaccdabffc3983489a33c"
-  integrity sha512-65icLFsLYThYIINsii95g0gnL4enmBstTdHxmAue66UBtrOXBGm6+PccbRLhGSyrYQHXTg4YZNl7zCetdh6PYg==
+"@developmentseed/morecantile@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@developmentseed/morecantile/-/morecantile-0.7.0.tgz#8c256df259a89b7b6e91b222fa6de2316e22c69f"
+  integrity sha512-m9tWDase9COlP/EZ2KK/ydraRU/5yfwvmF/y/2g/iFMFW1vYHQTW/8JYjmo84SiJXUifDDY2xoA3ErYlcWJctg==
   dependencies:
-    "@developmentseed/affine" "^0.6.1"
+    "@developmentseed/affine" "^0.7.0"
 
-"@developmentseed/proj@^0.6.1":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@developmentseed/proj/-/proj-0.6.1.tgz#a9cbf934b61537e59284887bb6582b83de164f96"
-  integrity sha512-2FjoFt06pcvQrgZeXbK68mixIpiUrnnGwasQqJGCzTnnATWx3f5clhGqJEpP0MPx36g1oyZLaA7qoTryx5Ggow==
+"@developmentseed/proj@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@developmentseed/proj/-/proj-0.7.0.tgz#d885cd974b5d9b19d80f4ae7c7ad974119954f30"
+  integrity sha512-3EPvX29sM3iCn+avpGKz18ZzlRJdn53SbkmFWJXDWh/fNreP3RjcDJGBbvfwnZnVtiLUqnTzM8V4fLKnYHKj0A==
   dependencies:
     wkt-parser "1.5.5"
 
-"@developmentseed/raster-reproject@^0.6.1":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@developmentseed/raster-reproject/-/raster-reproject-0.6.1.tgz#14f938dbbd58e102e613eb68b62cc08898b828e8"
-  integrity sha512-1/xyCW5dpfsoiphCto7UVoV1k4Br9XOYU1K5gGtJy50gbmyjag7sOpFHrtc/Cjn/ZMKSe9DJT2XF8J25N+MDbw==
+"@developmentseed/raster-reproject@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@developmentseed/raster-reproject/-/raster-reproject-0.7.0.tgz#c21ff950e542036487276f829e1582b3f8a79cae"
+  integrity sha512-2tZzANK0nZIV3Y5E2qYhbNtdjN04LKQYECPZsGii1r5ylGySoKjh3oJzVBCKfRq/PTEZTtVol0r7krmT6Ry8fQ==
 
 "@devseed-ui/collecticons-chakra@^4.0.0":
   version "4.0.0"
@@ -4001,7 +4001,7 @@ flatbuffers@^25.1.24:
   resolved "https://registry.yarnpkg.com/flatbuffers/-/flatbuffers-25.9.23.tgz#346811557fe9312ab5647535e793c761e9c81eb1"
   integrity sha512-MI1qs7Lo4Syw0EOzUl0xjs2lsoeqFku44KpngfIduHBYvzm8h2+7K8YMQh1JtVVVrUvhLpNwqVi4DERegUJhPQ==
 
-flatbush@^4.5.0:
+flatbush@^4.5.1:
   version "4.5.1"
   resolved "https://registry.yarnpkg.com/flatbush/-/flatbush-4.5.1.tgz#a8848f331259383e01d6fff52cd620cdfc53bc03"
   integrity sha512-5tpuZV/26A5gRYfqyof3/ZTWeARKgZgd9aBrJLGNSGeasdO2PRb/2lIwDHBIuvPhKK2Y4ELuHbRGtegOwH3Lqg==
@@ -5242,7 +5242,7 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-proj4@^2.20.4, proj4@^2.9.2:
+proj4@^2.20.8, proj4@^2.9.2:
   version "2.20.8"
   resolved "https://registry.yarnpkg.com/proj4/-/proj4-2.20.8.tgz#95e37268c3c98f21f4eda8309b1c372e411e6915"
   integrity sha512-1C8sfT4xY4PAPwk0MroFBTGF4R4bzDXdmPQTGYVLsoNssrZ9odzObxS2dTeGBty8jW8KO7h16C1Hs2JP+ctfFw==
