@@ -2,7 +2,6 @@ import { type BBox2D, useStore } from "@/store";
 import { getItemsDatetimeExtent, itemMatchesFilter } from "@/utils/datetime";
 import { fitBoundsToBbox } from "@/utils/map";
 import { fetchStacValue, getSelfHref } from "@/utils/stac";
-import { useStacGeoparquet } from "../contexts/stac-geoparquet";
 import {
   Button,
   ButtonGroup,
@@ -20,6 +19,7 @@ import { useEffect, useMemo, useState } from "react";
 import { LuDownload, LuFiles, LuLocate, LuSearch } from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
 import type { StacItem, StacLink } from "stac-ts";
+import { useStacGeoparquet } from "../contexts/stac-geoparquet";
 import ItemCard from "./cards/item";
 import ItemListItem from "./list-items/item";
 import EntityList from "./ui/entity-list";

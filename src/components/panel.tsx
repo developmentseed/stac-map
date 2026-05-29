@@ -63,7 +63,9 @@ function ValuePanel({ href, value }: { href: string; value: StacValue }) {
 
 function LoadingPanel({ href }: { href: string }) {
   return (
-    <BasePanel header={<PanelHeader icon={<LuLoader />}>Loading {href}</PanelHeader>}>
+    <BasePanel
+      header={<PanelHeader icon={<LuLoader />}>Loading {href}</PanelHeader>}
+    >
       <SkeletonText h={3} />
     </BasePanel>
   );

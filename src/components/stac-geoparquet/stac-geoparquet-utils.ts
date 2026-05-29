@@ -8,8 +8,8 @@ import {
   Table,
   vectorFromArray,
 } from "apache-arrow";
-import { toaster } from "../ui/toaster";
 import type { StacItemCollection } from "../../types/stac";
+import { toaster } from "../ui/toaster";
 import { loadStacWasm } from "./stac-wasm-loader";
 
 const SUPPORTED_GEOMETRY_TYPES = ["point", "polygon", "linestring"] as const;

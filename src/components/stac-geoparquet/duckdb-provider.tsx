@@ -6,12 +6,7 @@ import {
 import { useStore } from "@/store";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { useDuckDb } from "duckdb-wasm-kit";
-import {
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import ParquetExportButton from "./parquet-export-button";
 import ParquetPanel from "./parquet-panel";
 import ParquetView from "./parquet-view";

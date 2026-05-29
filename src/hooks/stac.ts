@@ -1,5 +1,5 @@
-import { loadGeoTIFF } from "@/utils/geotiff";
 import { useStore } from "@/store";
+import { loadGeoTIFF } from "@/utils/geotiff";
 import { useQuery } from "@tanstack/react-query";
 import { fetchStacValue } from "../utils/stac";
 

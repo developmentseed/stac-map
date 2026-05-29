@@ -1,9 +1,9 @@
-import { useStore } from "@/store";
 import {
   fetchStacGeoparquetItem,
   fetchStacGeoparquetTable,
   fetchStacGeoparquetValue,
 } from "@/components/stac-geoparquet/stac-geoparquet-utils";
+import { useStore } from "@/store";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { useQuery } from "@tanstack/react-query";
 
