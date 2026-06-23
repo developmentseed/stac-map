@@ -17,6 +17,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { LuPlus, LuSettings, LuTrash2 } from "react-icons/lu";
+import { useStacGeoparquet } from "../../contexts/stac-geoparquet";
 import { useStore } from "../../store";
 
 export function SettingsButton() {
@@ -24,6 +25,7 @@ export function SettingsButton() {
   const setHivePartitioning = useStore((store) => store.setHivePartitioning);
   const addErrorListener = useStore((store) => store.addErrorListener);
   const setAddErrorListener = useStore((store) => store.setAddErrorListener);
+  const parquetCtx = useStacGeoparquet();
 
   return (
     <Dialog.Root size={"lg"}>
@@ -43,19 +45,23 @@ export function SettingsButton() {
               <Stack gap={4}>
                 <Fieldset.Root size={"sm"}>
                   <Fieldset.Content gap={2}>
-                    <Checkbox.Root
-                      checked={hivePartitioning}
-                      onCheckedChange={(e) => setHivePartitioning(!!e.checked)}
-                      alignItems={"flex-start"}
-                    >
-                      <Checkbox.HiddenInput />
-                      <Checkbox.Control />
-                      <Stack>
-                        <Checkbox.Label>
-                          Use hive partitioning for stac-geoparquet queries
-                        </Checkbox.Label>
-                      </Stack>
-                    </Checkbox.Root>
+                    {parquetCtx && (
+                      <Checkbox.Root
+                        checked={hivePartitioning}
+                        onCheckedChange={(e) =>
+                          setHivePartitioning(!!e.checked)
+                        }
+                        alignItems={"flex-start"}
+                      >
+                        <Checkbox.HiddenInput />
+                        <Checkbox.Control />
+                        <Stack>
+                          <Checkbox.Label>
+                            Use hive partitioning for stac-geoparquet queries
+                          </Checkbox.Label>
+                        </Stack>
+                      </Checkbox.Root>
+                    )}
                     <Checkbox.Root
                       checked={addErrorListener}
                       onCheckedChange={(e) => setAddErrorListener(!!e.checked)}

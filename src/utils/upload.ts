@@ -1,15 +1,14 @@
-import type { AsyncDuckDB } from "duckdb-wasm-kit";
-
 export async function uploadFile({
   file,
   setUploadedFile,
-  db,
+  registerParquet,
 }: {
   file: File;
   setUploadedFile: (file: File) => void;
-  db: AsyncDuckDB | undefined;
+  registerParquet?: (file: File) => Promise<void>;
 }) {
-  if (db && file.name.endsWith(".parquet"))
-    db.registerFileBuffer(file.name, new Uint8Array(await file.arrayBuffer()));
+  if (registerParquet && file.name.endsWith(".parquet")) {
+    await registerParquet(file);
+  }
   setUploadedFile(file);
 }

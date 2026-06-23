@@ -2,7 +2,6 @@ import { type BBox2D, useStore } from "@/store";
 import { getItemsDatetimeExtent, itemMatchesFilter } from "@/utils/datetime";
 import { fitBoundsToBbox } from "@/utils/map";
 import { fetchStacValue, getSelfHref } from "@/utils/stac";
-import { loadStacWasm } from "@/utils/stac-wasm";
 import {
   Button,
   ButtonGroup,
@@ -11,7 +10,6 @@ import {
   DownloadTrigger,
   Input,
   InputGroup,
-  Spinner,
   Stack,
 } from "@chakra-ui/react";
 import { GeoJsonLayer } from "@deck.gl/layers";
@@ -21,6 +19,7 @@ import { useEffect, useMemo, useState } from "react";
 import { LuDownload, LuFiles, LuLocate, LuSearch } from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
 import type { StacItem, StacLink } from "stac-ts";
+import { useStacGeoparquet } from "../contexts/stac-geoparquet";
 import ItemCard from "./cards/item";
 import ItemListItem from "./list-items/item";
 import EntityList from "./ui/entity-list";
@@ -30,7 +29,7 @@ export function Items({ items }: { items: StacItem[] }) {
   const [filterByMapBbox, setFilterByMapBbox] = useState(true);
   const [filterText, setFilterText] = useState("");
   const [hovered, setHovered] = useState<StacItem>();
-  const [isExporting, setIsExporting] = useState(false);
+  const parquetCtx = useStacGeoparquet();
   const setHref = useStore((store) => store.setHref);
   const setLayer = useStore((store) => store.setLayer);
   const fillColor = useStore((store) => store.fillColor);
@@ -159,27 +158,7 @@ export function Items({ items }: { items: StacItem[] }) {
               <LuDownload /> JSON
             </Button>
           </DownloadTrigger>
-          <DownloadTrigger
-            fileName="items.parquet"
-            mimeType="application/vnd.apache.parquet"
-            data={async () => {
-              try {
-                setIsExporting(true);
-                const stacWasm = await loadStacWasm();
-                return new Blob([
-                  stacWasm.stacJsonToParquet(items) as BlobPart,
-                ]);
-              } finally {
-                setIsExporting(false);
-              }
-            }}
-            asChild
-          >
-            <Button disabled={isExporting}>
-              {isExporting ? <Spinner size="xs" /> : <LuDownload />}{" "}
-              stac-geoparquet
-            </Button>
-          </DownloadTrigger>
+          {parquetCtx && <parquetCtx.ParquetExportButton items={items} />}
         </ButtonGroup>
         <EntityList
           items={filteredItems}

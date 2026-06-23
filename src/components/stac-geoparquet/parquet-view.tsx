@@ -1,6 +1,4 @@
-import { useStacGeoparquetTable, useStacGeoparquetValue } from "@/hooks/stac";
 import { useStore } from "@/store";
-import type { SupportedGeometryType } from "@/utils/stac-geoparquet";
 import type { Color } from "@deck.gl/core";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import {
@@ -10,9 +8,11 @@ import {
 } from "@geoarrow/deck.gl-layers";
 import type { Table } from "apache-arrow";
 import { useEffect, useMemo, useState } from "react";
-import { ErrorAlert } from "./ui/error-alert";
+import { ErrorAlert } from "../ui/error-alert";
+import { useStacGeoparquetTable, useStacGeoparquetValue } from "./hooks";
+import type { SupportedGeometryType } from "./stac-geoparquet-utils";
 
-export default function StacGeoparquet({
+export default function ParquetView({
   href,
   connection,
 }: {
@@ -44,14 +44,14 @@ export default function StacGeoparquet({
     return <ErrorAlert title="stac-geoparquet" error={result.error} />;
   if (!result.data?.table || !result.data.geometryType) return null;
   return (
-    <StacGeoparquetTable
+    <ParquetViewTable
       table={result.data.table}
       geometryType={result.data.geometryType}
     />
   );
 }
 
-function StacGeoparquetTable({
+function ParquetViewTable({
   table,
   geometryType,
 }: {
