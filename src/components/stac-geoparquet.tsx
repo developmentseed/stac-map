@@ -23,9 +23,7 @@ export default function StacGeoparquet({
   const setDatetimeExtent = useStore((store) => store.setDatetimeExtent);
   const summary = useStacGeoparquetValue({ href, connection });
   const datetimeExtent = summary.data?.datetimeExtent as
-    | [number, number]
-    | null
-    | undefined;
+    [number, number] | null | undefined;
 
   useEffect(() => {
     setDatetimeExtent("geoparquet", datetimeExtent ?? null);

@@ -19,8 +19,7 @@ const auth = buildAuth({
 
 const defaultHref = import.meta.env.VITE_DEFAULT_HREF as string | undefined;
 const stacBrowserUrl = import.meta.env.VITE_STAC_BROWSER_URL as
-  | string
-  | undefined;
+  string | undefined;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
