@@ -27,10 +27,7 @@ export interface StacItemCollection {
  * STAC Catalog, Collection, Item, or {@link StacItemCollection}.
  */
 export type StacValue =
-  | StacCatalog
-  | StacCollection
-  | StacItem
-  | StacItemCollection;
+  StacCatalog | StacCollection | StacItem | StacItemCollection;
 
 export interface StacCollections {
   collections: StacCollection[];

@@ -209,8 +209,7 @@ export async function fetchStacGeoparquetTable({
   });
   const geometry: Uint8Array[] = result.getChildAt(0)?.toArray();
   const geometryType = result.getChildAt(1)?.toArray()[0]?.toLowerCase() as
-    | string
-    | undefined;
+    string | undefined;
   if (
     !geometryType ||
     !SUPPORTED_GEOMETRY_TYPES.includes(geometryType as SupportedGeometryType)
