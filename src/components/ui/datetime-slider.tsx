@@ -23,13 +23,19 @@ export default function DatetimeSlider({
     setLastExternal([value[0], value[1]]);
     setInternal([value[0], value[1]]);
   }
+  const min = startBoundMs;
+  const max = endBoundMs > startBoundMs ? endBoundMs : startBoundMs + 1;
+  const clamped = [
+    Math.min(Math.max(internal[0], min), max),
+    Math.min(Math.max(internal[1], min), max),
+  ];
   return (
     <Slider.Root
       size={"sm"}
       orientation={orientation}
-      min={startBoundMs}
-      max={endBoundMs}
-      value={internal}
+      min={min}
+      max={max}
+      value={clamped}
       onValueChange={(e) => setInternal(e.value)}
       onValueChangeEnd={(e) => onChangeEnd([e.value[0], e.value[1]])}
       h={orientation === "vertical" ? "100%" : undefined}
