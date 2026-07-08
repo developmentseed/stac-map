@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.3](https://github.com/developmentseed/stac-map/compare/v2.0.2...v2.0.3) (2026-07-08)
+
+
+### Bug Fixes
+
+* transient slider error ([#489](https://github.com/developmentseed/stac-map/issues/489)) ([90519a6](https://github.com/developmentseed/stac-map/commit/90519a600cc4387a76a11bc44726316c8a8c9b12))
+
 ## [2.0.2](https://github.com/developmentseed/stac-map/compare/v2.0.1...v2.0.2) (2026-05-11)
 
 
