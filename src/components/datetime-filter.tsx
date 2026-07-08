@@ -19,7 +19,7 @@ export default function DatetimeFilter() {
     return [Math.min(...xs.map((x) => x[0])), Math.max(...xs.map((x) => x[1]))];
   }, [extents]);
 
-  if (!href || !extent) return null;
+  if (!href || !extent || extent[1] <= extent[0]) return null;
   const filter: [number, number] = filters[href] ?? extent;
   const isDirty = filter[0] !== extent[0] || filter[1] !== extent[1];
 
