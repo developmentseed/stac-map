@@ -196,7 +196,12 @@ export function getCogHref(asset: StacAsset): string | undefined {
   if (!asset.type?.startsWith("image/tiff; application=geotiff"))
     return undefined;
   const bandCount = getBandCount(asset);
-  if (bandCount !== undefined && bandCount !== 3 && bandCount !== 4)
+  if (
+    bandCount !== undefined &&
+    bandCount !== 1 &&
+    bandCount !== 3 &&
+    bandCount !== 4
+  )
     return undefined;
   const extra = asset as {
     alternate?: Record<string, { href?: string }>;

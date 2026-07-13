@@ -1,12 +1,21 @@
 import { useStore } from "@/store";
 import { loadGeoTIFF } from "@/utils/geotiff";
 import {
+  computeBandRangeFromOverview,
+  isSingleBandGreyscale,
+  resolveBandRange,
+  type BandRange,
+} from "@/utils/single-band";
+import {
   fetchStacGeoparquetItem,
   fetchStacGeoparquetTable,
   fetchStacGeoparquetValue,
 } from "@/utils/stac-geoparquet";
+import type { GeoTIFF } from "@developmentseed/geotiff";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import type { StacAsset } from "stac-ts";
 import { fetchStacValue } from "../utils/stac";
 
 export function useStacValue({ href }: { href: string }) {
@@ -74,4 +83,33 @@ export function useGeoTIFF(href: string | undefined) {
     staleTime: Infinity,
     gcTime: Infinity,
   });
+}
+
+export function useGeoTIFFBandRange({
+  href,
+  geotiff,
+  asset,
+}: {
+  href: string | undefined;
+  geotiff: GeoTIFF | undefined;
+  asset: StacAsset | undefined;
+}): BandRange | undefined {
+  const sync = geotiff ? resolveBandRange(asset, geotiff) : undefined;
+  const query = useQuery({
+    queryKey: ["geotiff-band-range", href],
+    queryFn: async ({ signal }) =>
+      (await computeBandRangeFromOverview(geotiff!, signal)) ?? null,
+    enabled: !!geotiff && !!href && !sync && isSingleBandGreyscale(geotiff),
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+  const raw = sync ?? query.data ?? undefined;
+  return useMemo(
+    () => (raw ? { min: raw.min, max: raw.max } : undefined),
+    // Key on the primitive min/max so an unchanged range keeps a stable object
+    // reference; `raw` itself churns because `resolveBandRange` returns a fresh
+    // object each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [raw?.min, raw?.max]
+  );
 }

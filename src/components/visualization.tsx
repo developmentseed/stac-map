@@ -1,7 +1,12 @@
-import { useGeoTIFF } from "@/hooks/stac";
+import { useGeoTIFF, useGeoTIFFBandRange } from "@/hooks/stac";
 import { useStore } from "@/store";
 import type { StacAssets, StacItemCollection } from "@/types/stac";
 import { loadGeoTIFF } from "@/utils/geotiff";
+import {
+  resolveBandRange,
+  singleBandPipeline,
+  type SingleBandTileData,
+} from "@/utils/single-band";
 import { getCogHref, sanitizeBbox } from "@/utils/stac";
 import {
   Checkbox,
@@ -119,6 +124,17 @@ export default function Visualization({
 
   const { data: selectedCogGeotiff } = useGeoTIFF(selectedCogHref);
 
+  const selectedAsset = useMemo(() => {
+    if (!selected?.startsWith("asset:")) return undefined;
+    return assets[selected.slice("asset:".length)];
+  }, [selected, assets]);
+
+  const bandRange = useGeoTIFFBandRange({
+    href: selectedCogHref,
+    geotiff: selectedCogGeotiff,
+    asset: selectedAsset,
+  });
+
   useEffect(() => {
     if (!enabled || !selected) return;
     if (selected.startsWith("items:")) return;
@@ -126,12 +142,19 @@ export default function Visualization({
     if (selected.startsWith("asset:")) {
       if (!selectedCogGeotiff) return;
       const layerId = "visualization";
+      const pipeline = singleBandPipeline(selectedCogGeotiff, bandRange);
       setLayer(
         layerId,
-        new COGLayer({
-          id: layerId,
-          geotiff: selectedCogGeotiff,
-        })
+        pipeline
+          ? new COGLayer<SingleBandTileData>({
+              id: layerId,
+              geotiff: selectedCogGeotiff,
+              ...pipeline,
+            })
+          : new COGLayer({
+              id: layerId,
+              geotiff: selectedCogGeotiff,
+            })
       );
       return () => setLayer(layerId, undefined);
     }
@@ -170,6 +193,7 @@ export default function Visualization({
     enabled,
     selected,
     selectedCogGeotiff,
+    bandRange,
     tilejsonLink,
     wmtsLink,
     setLayer,
@@ -275,12 +299,22 @@ function PageLayer({
         renderSource: (source, { data, signal }) => {
           if (!data) return null;
           const href = source.assets.cog.href;
-          return new COGLayer({
-            id: `cog-${href}`,
-            epsgResolver,
-            geotiff: data,
-            signal,
-          });
+          const range = resolveBandRange(source.assets[assetKey], data);
+          const pipeline = singleBandPipeline(data, range);
+          return pipeline
+            ? new COGLayer<SingleBandTileData>({
+                id: `cog-${href}`,
+                epsgResolver,
+                geotiff: data,
+                signal,
+                ...pipeline,
+              })
+            : new COGLayer({
+                id: `cog-${href}`,
+                epsgResolver,
+                geotiff: data,
+                signal,
+              });
         },
       })
     );
