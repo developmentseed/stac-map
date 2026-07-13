@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/developmentseed/stac-map/compare/v2.0.3...v2.1.0) (2026-07-13)
+
+
+### Features
+
+* single-band rasters ([#492](https://github.com/developmentseed/stac-map/issues/492)) ([bc5eb83](https://github.com/developmentseed/stac-map/commit/bc5eb8383101c3061940fc8976f8c6d4a8b824c8))
+
 ## [2.0.3](https://github.com/developmentseed/stac-map/compare/v2.0.2...v2.0.3) (2026-07-08)
 
 
