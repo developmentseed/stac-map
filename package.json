@@ -40,6 +40,7 @@
     "@chunkd/middleware": "^11.3.0",
     "@chunkd/source": "^11.4.0",
     "@chunkd/source-http": "^11.4.0",
+    "@cogeotiff/core": "^9.5.0",
     "@deck.gl/core": "^9.3.1",
     "@deck.gl/layers": "^9.3.1",
     "@deck.gl/mapbox": "^9.3.1",
