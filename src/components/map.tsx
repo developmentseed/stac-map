@@ -3,6 +3,8 @@ import { resolveInitialBbox } from "@/utils/bbox";
 import { fitBoundsToBbox } from "@/utils/map";
 import { type DeckProps } from "@deck.gl/core";
 import { MapboxOverlay } from "@deck.gl/mapbox";
+import { setWorkerUrl } from "maplibre-gl";
+import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import type { MapRef } from "react-map-gl/maplibre";
 import {
@@ -11,10 +13,8 @@ import {
   Source,
   useControl,
 } from "react-map-gl/maplibre";
-import { setWorkerUrl } from "maplibre-gl";
 import { useColorModeValue } from "../components/ui/color-mode";
 import type { ExtraLayerProps } from "./stac-map";
-import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 
 setWorkerUrl(workerUrl);
 
