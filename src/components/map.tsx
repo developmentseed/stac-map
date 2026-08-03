@@ -11,8 +11,12 @@ import {
   Source,
   useControl,
 } from "react-map-gl/maplibre";
+import { setWorkerUrl } from "maplibre-gl";
 import { useColorModeValue } from "../components/ui/color-mode";
 import type { ExtraLayerProps } from "./stac-map";
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+
+setWorkerUrl(workerUrl);
 
 export default function Map({
   extraLayers,
