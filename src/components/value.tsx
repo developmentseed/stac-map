@@ -30,6 +30,7 @@ import Properties from "./properties";
 import Search from "./search";
 import StacGeoparquet from "./stac-geoparquet";
 import Description from "./ui/description";
+import { WarningAlert } from "./ui/error-alert";
 import Thumbnail from "./ui/thumbnail";
 import Visualization from "./visualization";
 
@@ -95,8 +96,17 @@ export default function Value({
     };
   }, [value, setLayer, lineColor]);
 
+  const typeGuessed = (value as { _typeGuessed?: boolean })._typeGuessed;
+
   return (
     <Stack gap={4}>
+      {typeGuessed && (
+        <WarningAlert
+          key={href}
+          title="Invalid STAC"
+          description={`This object is missing a valid "type" field. stac-map guessed "${value.type}" based on its other fields, but the data are not valid STAC.`}
+        />
+      )}
       <Stack gap={4}>
         <Stack gap={2}>
           <Heading lineHeight={"shorter"}>

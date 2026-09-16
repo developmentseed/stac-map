@@ -29,13 +29,17 @@ export async function fetchStacValue({
       if (response.ok) {
         return response
           .json()
-          .then((json) => makeHrefsAbsolute(json, href.toString()));
+          .then((json) =>
+            makeHrefsAbsolute(applyGuessedType(json), href.toString())
+          );
       } else {
         throw new Error(`GET ${href}: ${response.statusText}`);
       }
     });
   } else if (uploadedFile) {
-    const value = JSON.parse(await uploadedFile.text()) as StacValue;
+    const value = applyGuessedType(
+      JSON.parse(await uploadedFile.text()) as StacValue
+    );
     const selfHref = getSelfHref(value);
     return selfHref
       ? makeHrefsAbsolute(value, selfHref)
@@ -45,6 +49,43 @@ export async function fetchStacValue({
       `Not a http(s) URL, and no file has been uploaded: ${href}`
     );
   }
+}
+
+const STAC_TYPES = ["Catalog", "Collection", "Feature", "FeatureCollection"];
+
+/**
+ * Guesses the STAC type of a value that's missing a valid `type` field, based
+ * on the other fields present. Returns `undefined` if no guess can be made.
+ */
+export function guessStacType(
+  value: Record<string, unknown>
+): StacValue["type"] | undefined {
+  if (Array.isArray(value.features)) {
+    return "FeatureCollection";
+  } else if ("properties" in value && "geometry" in value) {
+    return "Feature";
+  } else if ("extent" in value || "summaries" in value) {
+    return "Collection";
+  } else if (Array.isArray(value.links)) {
+    return "Catalog";
+  }
+  return undefined;
+}
+
+/**
+ * If `value` is missing a valid `type` field, guesses one and stamps
+ * `_typeGuessed` so the UI can warn that the STAC is invalid.
+ */
+function applyGuessedType<T extends StacValue>(value: T): T {
+  if (typeof value.type === "string" && STAC_TYPES.includes(value.type)) {
+    return value;
+  }
+  const guess = guessStacType(value);
+  if (guess) {
+    (value as StacValue).type = guess;
+    (value as Record<string, unknown>)._typeGuessed = true;
+  }
+  return value;
 }
 
 export function getStacTitle(value: StacValue) {
