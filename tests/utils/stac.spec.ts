@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { StacItemCollection } from "../../src/types/stac";
 import {
   conformsToFreeTextCollectionSearch,
+  fetchStacValue,
   getBandCount,
   getCogHref,
   getLink,
@@ -13,6 +14,7 @@ import {
   getStacTitle,
   getStacType,
   getThumbnailAsset,
+  guessStacType,
   sanitizeBbox,
 } from "../../src/utils/stac";
 
@@ -61,6 +63,58 @@ describe("getStacType", () => {
       features: [],
     };
     expect(getStacType(value)).toBe("Item collection");
+  });
+});
+
+describe("guessStacType", () => {
+  it("guesses FeatureCollection from a features array", () => {
+    expect(guessStacType({ features: [] })).toBe("FeatureCollection");
+  });
+
+  it("guesses Feature from properties and geometry", () => {
+    expect(guessStacType({ properties: {}, geometry: null })).toBe("Feature");
+  });
+
+  it("guesses Collection from an extent field", () => {
+    expect(guessStacType({ extent: {} })).toBe("Collection");
+  });
+
+  it("guesses Collection from a summaries field", () => {
+    expect(guessStacType({ summaries: {} })).toBe("Collection");
+  });
+
+  it("falls back to Catalog when only links are present", () => {
+    expect(guessStacType({ links: [] })).toBe("Catalog");
+  });
+
+  it("returns undefined when no heuristic matches", () => {
+    expect(guessStacType({ foo: "bar" })).toBeUndefined();
+  });
+});
+
+describe("fetchStacValue", () => {
+  it("guesses and stamps a missing type from an uploaded file", async () => {
+    const uploadedFile = new File(
+      [JSON.stringify({ id: "planet", extent: {}, links: [] })],
+      "planet.json"
+    );
+    const value = await fetchStacValue({ href: "planet.json", uploadedFile });
+    expect(value.type).toBe("Collection");
+    expect((value as unknown as { _typeGuessed?: boolean })._typeGuessed).toBe(
+      true
+    );
+  });
+
+  it("leaves a valid type untouched and unstamped", async () => {
+    const uploadedFile = new File(
+      [JSON.stringify(makeCatalog())],
+      "catalog.json"
+    );
+    const value = await fetchStacValue({ href: "catalog.json", uploadedFile });
+    expect(value.type).toBe("Catalog");
+    expect((value as unknown as { _typeGuessed?: boolean })._typeGuessed).toBe(
+      undefined
+    );
   });
 });
 
