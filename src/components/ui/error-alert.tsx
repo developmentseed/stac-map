@@ -1,4 +1,5 @@
-import { Alert, HStack, Link } from "@chakra-ui/react";
+import { Alert, CloseButton, HStack, Link } from "@chakra-ui/react";
+import { useState } from "react";
 import { LuGithub } from "react-icons/lu";
 
 export function ErrorAlert({ title, error }: { title: string; error: Error }) {
@@ -9,6 +10,35 @@ export function ErrorAlert({ title, error }: { title: string; error: Error }) {
         <Alert.Title>{title}</Alert.Title>
         <Alert.Description>{error.message}</Alert.Description>
       </Alert.Content>
+    </Alert.Root>
+  );
+}
+
+export function WarningAlert({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  const [dismissed, setDismissed] = useState(false);
+
+  if (dismissed) return null;
+
+  return (
+    <Alert.Root status="warning">
+      <Alert.Indicator />
+      <Alert.Content>
+        <Alert.Title>{title}</Alert.Title>
+        <Alert.Description>{description}</Alert.Description>
+      </Alert.Content>
+      <CloseButton
+        size="sm"
+        pos="relative"
+        top="-2"
+        insetEnd="-2"
+        onClick={() => setDismissed(true)}
+      />
     </Alert.Root>
   );
 }
