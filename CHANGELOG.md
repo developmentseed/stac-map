@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/developmentseed/stac-map/compare/v2.1.0...v2.1.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* handle stac values with missing type fields ([#523](https://github.com/developmentseed/stac-map/issues/523)) ([14a7d61](https://github.com/developmentseed/stac-map/commit/14a7d615c0fe832f5a15e4f92911990b21ed4daa))
+
 ## [2.1.0](https://github.com/developmentseed/stac-map/compare/v2.0.3...v2.1.0) (2026-07-13)
 
 
