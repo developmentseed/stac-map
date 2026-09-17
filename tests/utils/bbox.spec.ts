@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveInitialBbox } from "../../src/utils/bbox";
+import { clampToGlobalExtents, resolveInitialBbox } from "../../src/utils/bbox";
 
 describe("resolveInitialBbox", () => {
   it("returns the parsed bbox for a valid bbox param", () => {
@@ -38,5 +38,43 @@ describe("resolveInitialBbox", () => {
     expect(
       resolveInitialBbox("?href=https://example.com/c.json&bbox=-10,-20,10,20")
     ).toEqual([-10, -20, 10, 20]);
+  });
+});
+
+describe("clampToGlobalExtents", () => {
+  it("leaves a bbox within global extents unchanged", () => {
+    expect(clampToGlobalExtents([-10, -20, 10, 20])).toEqual([
+      -10, -20, 10, 20,
+    ]);
+  });
+
+  it("clamps a west edge beyond -180", () => {
+    expect(clampToGlobalExtents([-300, -20, 10, 20])).toEqual([
+      -180, -20, 10, 20,
+    ]);
+  });
+
+  it("clamps an east edge beyond 180", () => {
+    expect(clampToGlobalExtents([-10, -20, 400, 20])).toEqual([
+      -10, -20, 180, 20,
+    ]);
+  });
+
+  it("clamps a south edge beyond -90", () => {
+    expect(clampToGlobalExtents([-10, -150, 10, 20])).toEqual([
+      -10, -90, 10, 20,
+    ]);
+  });
+
+  it("clamps a north edge beyond 90", () => {
+    expect(clampToGlobalExtents([-10, -20, 10, 150])).toEqual([
+      -10, -20, 10, 90,
+    ]);
+  });
+
+  it("clamps all four edges at once", () => {
+    expect(clampToGlobalExtents([-300, -150, 400, 150])).toEqual([
+      -180, -90, 180, 90,
+    ]);
   });
 });

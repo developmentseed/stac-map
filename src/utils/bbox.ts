@@ -14,3 +14,12 @@ export function roundBbox(bbox: BBox2D, precision: number = 5): BBox2D {
   const factor = 10 ** precision;
   return bbox.map((n) => Math.round(n * factor) / factor) as BBox2D;
 }
+
+export function clampToGlobalExtents(bbox: BBox2D): BBox2D {
+  return [
+    Math.max(bbox[0], -180),
+    Math.max(bbox[1], -90),
+    Math.min(bbox[2], 180),
+    Math.min(bbox[3], 90),
+  ];
+}

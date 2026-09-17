@@ -10,8 +10,10 @@ import {
   itemMatchesFilter,
   msToDatetimeInputValue,
   msToIsoLabel,
+  parseStacDatetimeRange,
   toDatetimeInputValue,
   toMs,
+  toStacDatetimeRange,
 } from "../../src/utils/datetime";
 
 function makeItem(properties: Record<string, unknown>): StacItem {
@@ -101,6 +103,62 @@ describe("toDatetimeInputValue", () => {
 
   it("returns empty string for invalid input", () => {
     expect(toDatetimeInputValue("not-a-date")).toBe("");
+  });
+});
+
+describe("toStacDatetimeRange", () => {
+  it("joins a start and end datetime with a slash", () => {
+    expect(
+      toStacDatetimeRange("2024-01-01T00:00:00", "2024-06-15T12:00:00")
+    ).toBe("2024-01-01T00:00:00.000Z/2024-06-15T12:00:00.000Z");
+  });
+
+  it("uses .. for an open start", () => {
+    expect(toStacDatetimeRange("", "2024-06-15T12:00:00")).toBe(
+      "../2024-06-15T12:00:00.000Z"
+    );
+  });
+
+  it("uses .. for an open end", () => {
+    expect(toStacDatetimeRange("2024-01-01T00:00:00", "")).toBe(
+      "2024-01-01T00:00:00.000Z/.."
+    );
+  });
+
+  it("returns undefined when both are empty", () => {
+    expect(toStacDatetimeRange("", "")).toBeUndefined();
+  });
+});
+
+describe("parseStacDatetimeRange", () => {
+  it("splits start and end on a slash", () => {
+    expect(
+      parseStacDatetimeRange("2024-01-01T00:00:00Z/2024-06-15T12:00:00Z")
+    ).toEqual({
+      startDatetime: "2024-01-01T00:00:00",
+      endDatetime: "2024-06-15T12:00:00",
+    });
+  });
+
+  it("treats .. as an open start", () => {
+    expect(parseStacDatetimeRange("../2024-06-15T12:00:00Z")).toEqual({
+      startDatetime: "",
+      endDatetime: "2024-06-15T12:00:00",
+    });
+  });
+
+  it("treats .. as an open end", () => {
+    expect(parseStacDatetimeRange("2024-01-01T00:00:00Z/..")).toEqual({
+      startDatetime: "2024-01-01T00:00:00",
+      endDatetime: "",
+    });
+  });
+
+  it("treats a bare datetime as an instant", () => {
+    expect(parseStacDatetimeRange("2024-01-01T00:00:00Z")).toEqual({
+      startDatetime: "2024-01-01T00:00:00",
+      endDatetime: "2024-01-01T00:00:00",
+    });
   });
 });
 
