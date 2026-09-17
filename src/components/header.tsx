@@ -7,6 +7,7 @@ import { LuCheck, LuShare2 } from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
 import { useAuthEnabled } from "../contexts/auth-enabled";
 import { useExamples } from "../contexts/examples";
+import { Bookmarks } from "./bookmarks";
 import { Examples } from "./examples";
 import HrefInput from "./href-input";
 import { UserButton } from "./ui/auth";
@@ -29,6 +30,7 @@ export default function Header() {
           </Button>
         </Examples>
       )}
+      <Bookmarks />
       <ButtonGroup variant={"surface"} attached>
         <ProjectionButton />
         <ColorModeButton />
