@@ -11,7 +11,7 @@ function typedocPlugin(): Plugin {
     apply: "build",
     async closeBundle() {
       const app = await TypeDoc.Application.bootstrapWithPlugins({
-        out: path.resolve(__dirname, "dist/docs"),
+        out: path.resolve(import.meta.dirname, "dist/docs"),
       });
       const project = await app.convert();
       if (!project) {
