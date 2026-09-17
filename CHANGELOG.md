@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.2.0](https://github.com/developmentseed/stac-map/compare/v2.1.1...v2.2.0) (2026-09-17)
+
+
+### Features
+
+* add bookmarks ([#529](https://github.com/developmentseed/stac-map/issues/529)) ([c17878f](https://github.com/developmentseed/stac-map/commit/c17878fb66fe2fa245affc5383580e5244775e83)), closes [#398](https://github.com/developmentseed/stac-map/issues/398)
+* queryable filtering ([#527](https://github.com/developmentseed/stac-map/issues/527)) ([ea318a5](https://github.com/developmentseed/stac-map/commit/ea318a53105d3fc568e93f336cd41e95cf604da0))
+* share search in query parameters ([#531](https://github.com/developmentseed/stac-map/issues/531)) ([f9afac3](https://github.com/developmentseed/stac-map/commit/f9afac36392bb5a868f5b312b258c2f429ba6bcf)), closes [#256](https://github.com/developmentseed/stac-map/issues/256)
+
+
+### Bug Fixes
+
+* hide collection in search section ([#525](https://github.com/developmentseed/stac-map/issues/525)) ([b37d0ca](https://github.com/developmentseed/stac-map/commit/b37d0ca2491f81b9d619f207507c926b943ebd70))
+* round share bbox coordinates ([#528](https://github.com/developmentseed/stac-map/issues/528)) ([c865c7a](https://github.com/developmentseed/stac-map/commit/c865c7a85697bd681de7a6380239011c94866014))
+
 ## [2.1.1](https://github.com/developmentseed/stac-map/compare/v2.1.0...v2.1.1) (2026-09-16)
 
 
