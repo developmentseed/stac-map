@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/developmentseed/stac-map/compare/v2.2.0...v2.2.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* releasing ([#532](https://github.com/developmentseed/stac-map/issues/532)) ([b8b769f](https://github.com/developmentseed/stac-map/commit/b8b769f84eb3ef0fd0b76c6288f63312f6f5b79c))
+
 ## [2.2.0](https://github.com/developmentseed/stac-map/compare/v2.1.1...v2.2.0) (2026-09-17)
 
 
