@@ -19,6 +19,7 @@ import {
   Input,
   Portal,
   SkeletonText,
+  Stack,
 } from "@chakra-ui/react";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -131,51 +132,49 @@ export default function Search({
       <Section icon={<LuFileSearch2 />} title="Search">
         <Fieldset.Root size={"sm"}>
           <Fieldset.Content>
-            <Field.Root>
-              <Field.Label>Collection</Field.Label>
-              <Input value={collection.id} disabled />
-            </Field.Root>
             <Fieldset.Root size={"sm"}>
               <Fieldset.Legend>Datetime</Fieldset.Legend>
-              <Fieldset.Content>
-                <Field.Root orientation={"horizontal"}>
-                  <Field.Label color={"fg.muted"} fontWeight={"normal"}>
-                    Start
-                  </Field.Label>
-                  <Input
-                    size={"sm"}
-                    type={"datetime-local"}
-                    step={1}
-                    value={startDatetime}
-                    onChange={(e) => setStartDatetime(e.target.value)}
-                  />
-                </Field.Root>
-                <Field.Root orientation={"horizontal"}>
-                  <Field.Label color={"fg.muted"} fontWeight={"normal"}>
-                    End
-                  </Field.Label>
-                  <Input
-                    size={"sm"}
-                    type={"datetime-local"}
-                    step={1}
-                    value={endDatetime}
-                    onChange={(e) => setEndDatetime(e.target.value)}
-                  />
-                </Field.Root>
-                {startBoundMs !== undefined && endBoundMs !== undefined && (
-                  <DatetimeSlider
-                    startBoundMs={startBoundMs}
-                    endBoundMs={endBoundMs}
-                    value={[
-                      datetimeInputToMs(startDatetime) ?? startBoundMs,
-                      datetimeInputToMs(endDatetime) ?? endBoundMs,
-                    ]}
-                    onChangeEnd={(v) => {
-                      setStartDatetime(msToDatetimeInputValue(v[0]));
-                      setEndDatetime(msToDatetimeInputValue(v[1]));
-                    }}
-                  />
-                )}
+              <Fieldset.Content gap={4}>
+                <Stack>
+                  <Field.Root orientation={"horizontal"}>
+                    <Field.Label color={"fg.muted"} fontWeight={"normal"}>
+                      Start
+                    </Field.Label>
+                    <Input
+                      size={"sm"}
+                      type={"datetime-local"}
+                      step={1}
+                      value={startDatetime}
+                      onChange={(e) => setStartDatetime(e.target.value)}
+                    />
+                  </Field.Root>
+                  <Field.Root orientation={"horizontal"}>
+                    <Field.Label color={"fg.muted"} fontWeight={"normal"}>
+                      End
+                    </Field.Label>
+                    <Input
+                      size={"sm"}
+                      type={"datetime-local"}
+                      step={1}
+                      value={endDatetime}
+                      onChange={(e) => setEndDatetime(e.target.value)}
+                    />
+                  </Field.Root>
+                  {startBoundMs !== undefined && endBoundMs !== undefined && (
+                    <DatetimeSlider
+                      startBoundMs={startBoundMs}
+                      endBoundMs={endBoundMs}
+                      value={[
+                        datetimeInputToMs(startDatetime) ?? startBoundMs,
+                        datetimeInputToMs(endDatetime) ?? endBoundMs,
+                      ]}
+                      onChangeEnd={(v) => {
+                        setStartDatetime(msToDatetimeInputValue(v[0]));
+                        setEndDatetime(msToDatetimeInputValue(v[1]));
+                      }}
+                    />
+                  )}
+                </Stack>
                 <Field.Root>
                   <Field.Label>Bounding box</Field.Label>
                   <ButtonGroup size={"sm"} variant={"surface"} attached>
