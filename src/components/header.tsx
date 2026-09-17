@@ -1,4 +1,5 @@
 import { useStore } from "@/store";
+import { roundBbox } from "@/utils/bbox";
 import { getPaddedViewportBbox } from "@/utils/map";
 import { Button, ButtonGroup, HStack, IconButton } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
@@ -51,7 +52,11 @@ function ShareButton() {
 
   async function copyShareUrl() {
     const url = new URL(window.location.href);
-    if (map) url.searchParams.set("bbox", getPaddedViewportBbox(map).join(","));
+    if (map)
+      url.searchParams.set(
+        "bbox",
+        roundBbox(getPaddedViewportBbox(map)).join(",")
+      );
     if (visualization) url.searchParams.set("viz", visualization);
     await navigator.clipboard.writeText(url.toString());
     setCopied(true);
