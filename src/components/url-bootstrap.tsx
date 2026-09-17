@@ -1,6 +1,7 @@
 import { useStore } from "@/store";
 import { resolveInitialHref } from "@/utils/href";
 import { resolveInitialProjection } from "@/utils/projection";
+import { resolveInitialSearchParams } from "@/utils/search-params";
 import { useEffect, useState } from "react";
 
 export default function UrlBootstrap({
@@ -16,6 +17,9 @@ export default function UrlBootstrap({
     if (projection) useStore.getState().setProjection(projection);
     const viz = new URLSearchParams(location.search).get("viz");
     if (viz) useStore.getState().setVisualization(viz);
+    const initialSearchParams = resolveInitialSearchParams();
+    if (initialSearchParams)
+      useStore.getState().setInitialSearchParams(initialSearchParams);
     return null;
   });
 

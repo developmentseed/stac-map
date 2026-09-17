@@ -69,6 +69,10 @@ export interface State {
   setMapBbox: (bbox: BBox2D | null) => void;
   searchParams: Record<string, SearchParams>;
   setSearchParams: (key: string, params: SearchParams) => void;
+  initialSearchParams: Partial<SearchParams> | null;
+  setInitialSearchParams: (params: Partial<SearchParams> | null) => void;
+  activeSearchHref: string | null;
+  setActiveSearchHref: (href: string | null) => void;
   datetimeExtents: Record<DatetimeExtentSource, [number, number] | null>;
   setDatetimeExtent: (
     source: DatetimeExtentSource,
@@ -145,6 +149,11 @@ export const useStore = create<State>()(
       searchParams: {},
       setSearchParams: (key, params) =>
         set({ searchParams: setEntry(get().searchParams, key, params) }),
+      initialSearchParams: null,
+      setInitialSearchParams: (initialSearchParams) =>
+        set({ initialSearchParams }),
+      activeSearchHref: null,
+      setActiveSearchHref: (activeSearchHref) => set({ activeSearchHref }),
       datetimeExtents: { items: null, collections: null, geoparquet: null },
       setDatetimeExtent: (source, extent) =>
         set({

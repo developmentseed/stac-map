@@ -1,5 +1,6 @@
 import { useStore } from "@/store";
-import { roundBbox } from "@/utils/bbox";
+import { clampToGlobalExtents, roundBbox } from "@/utils/bbox";
+import { toStacDatetimeRange } from "@/utils/datetime";
 import { getPaddedViewportBbox } from "@/utils/map";
 import { Button, ButtonGroup, HStack, IconButton } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
@@ -44,6 +45,8 @@ export default function Header() {
 function ShareButton() {
   const { map } = useMap();
   const visualization = useStore((store) => store.visualization);
+  const activeSearchHref = useStore((store) => store.activeSearchHref);
+  const searchParamsByHref = useStore((store) => store.searchParams);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -54,10 +57,24 @@ function ShareButton() {
 
   async function copyShareUrl() {
     const url = new URL(window.location.href);
-    if (map)
+    const searchParams = activeSearchHref
+      ? searchParamsByHref[activeSearchHref]
+      : undefined;
+    const bbox = searchParams?.bbox ?? (map && getPaddedViewportBbox(map));
+    if (bbox)
       url.searchParams.set(
         "bbox",
-        roundBbox(getPaddedViewportBbox(map)).join(",")
+        roundBbox(clampToGlobalExtents(bbox)).join(",")
+      );
+    const datetimeRange =
+      searchParams &&
+      toStacDatetimeRange(searchParams.startDatetime, searchParams.endDatetime);
+    if (datetimeRange) url.searchParams.set("datetime", datetimeRange);
+    if (searchParams?.limit) url.searchParams.set("limit", searchParams.limit);
+    if (searchParams?.queryables && Object.keys(searchParams.queryables).length)
+      url.searchParams.set(
+        "queryables",
+        JSON.stringify(searchParams.queryables)
       );
     if (visualization) url.searchParams.set("viz", visualization);
     await navigator.clipboard.writeText(url.toString());

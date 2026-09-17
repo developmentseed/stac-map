@@ -24,6 +24,36 @@ export function toDatetimeInputValue(
   return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 19);
 }
 
+export function toStacDatetimeRange(
+  startDatetime: string,
+  endDatetime: string
+): string | undefined {
+  if (!startDatetime && !endDatetime) return undefined;
+  return `${toStacDatetime(startDatetime)}/${toStacDatetime(endDatetime)}`;
+}
+
+function toStacDatetime(datetime: string): string {
+  return datetime ? new Date(`${datetime}Z`).toISOString() : "..";
+}
+
+export function parseStacDatetimeRange(datetime: string): {
+  startDatetime: string;
+  endDatetime: string;
+} {
+  const [start, end] = datetime.includes("/")
+    ? datetime.split("/")
+    : [datetime, datetime];
+  return {
+    startDatetime: fromStacDatetime(start),
+    endDatetime: fromStacDatetime(end),
+  };
+}
+
+function fromStacDatetime(value: string | undefined): string {
+  if (!value || value === "..") return "";
+  return toDatetimeInputValue(value);
+}
+
 export function msToIsoLabel(ms: number): string {
   return new Date(ms).toISOString().slice(0, 10);
 }

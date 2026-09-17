@@ -7,6 +7,7 @@ import {
   msToDatetimeInputValue,
   toDatetimeInputValue,
   toMs,
+  toStacDatetimeRange,
 } from "@/utils/datetime";
 import { getPaddedViewportBbox } from "@/utils/map";
 import { fetchStacValue, getLinkHref, getQueryablesHref } from "@/utils/stac";
@@ -46,25 +47,39 @@ export default function Search({
   collection: StacCollection;
 }) {
   const setSearchParams = useStore((store) => store.setSearchParams);
+  const setInitialSearchParams = useStore(
+    (store) => store.setInitialSearchParams
+  );
+  const setActiveSearchHref = useStore((store) => store.setActiveSearchHref);
   const [isFetchingAll, setIsFetchingAll] = useState(false);
   const [startDatetime, setStartDatetime] = useState(
     () =>
       useStore.getState().searchParams[link.href]?.startDatetime ??
+      useStore.getState().initialSearchParams?.startDatetime ??
       toDatetimeInputValue(collection.extent?.temporal?.interval?.[0]?.[0])
   );
   const [endDatetime, setEndDatetime] = useState(
     () =>
       useStore.getState().searchParams[link.href]?.endDatetime ??
+      useStore.getState().initialSearchParams?.endDatetime ??
       toDatetimeInputValue(collection.extent?.temporal?.interval?.[0]?.[1])
   );
   const [limit, setLimit] = useState(
-    () => useStore.getState().searchParams[link.href]?.limit ?? ""
+    () =>
+      useStore.getState().searchParams[link.href]?.limit ??
+      useStore.getState().initialSearchParams?.limit ??
+      ""
   );
   const [bbox, setBbox] = useState<BBox2D | undefined>(
-    () => useStore.getState().searchParams[link.href]?.bbox
+    () =>
+      useStore.getState().searchParams[link.href]?.bbox ??
+      useStore.getState().initialSearchParams?.bbox
   );
   const [queryables, setQueryables] = useState<Record<string, QueryableFilter>>(
-    () => useStore.getState().searchParams[link.href]?.queryables ?? {}
+    () =>
+      useStore.getState().searchParams[link.href]?.queryables ??
+      useStore.getState().initialSearchParams?.queryables ??
+      {}
   );
   const { map } = useMap();
 
@@ -86,6 +101,12 @@ export default function Search({
     setSearchParams,
   ]);
 
+  useEffect(() => {
+    if (useStore.getState().initialSearchParams) setInitialSearchParams(null);
+    setActiveSearchHref(link.href);
+    return () => setActiveSearchHref(null);
+  }, [link.href, setInitialSearchParams, setActiveSearchHref]);
+
   const startBoundMs = useMemo(
     () => toMs(collection.extent?.temporal?.interval?.[0]?.[0]),
     [collection]
@@ -104,11 +125,8 @@ export default function Search({
   const href = useMemo(() => {
     const url = new URL(link.href);
     url.searchParams.set("collections", collection.id);
-    if (startDatetime || endDatetime)
-      url.searchParams.set(
-        "datetime",
-        `${toStacDatetime(startDatetime)}/${toStacDatetime(endDatetime)}`
-      );
+    const datetimeRange = toStacDatetimeRange(startDatetime, endDatetime);
+    if (datetimeRange) url.searchParams.set("datetime", datetimeRange);
     if (limit) url.searchParams.set("limit", limit);
     if (bbox) url.searchParams.set("bbox", bbox.join(","));
     const cql2Json = buildCql2Json(queryables);
@@ -376,8 +394,4 @@ function AdvancedSettings({
       </Portal>
     </Dialog.Root>
   );
-}
-
-function toStacDatetime(datetime: string | null): string {
-  return datetime ? new Date(`${datetime}Z`).toISOString() : "..";
 }
