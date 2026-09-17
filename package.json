@@ -54,6 +54,7 @@
     "@turf/bbox": "^7.3.5",
     "@turf/bbox-polygon": "^7.3.5",
     "apache-arrow": "^21.1.0",
+    "cql2-wasm": "^0.5.6",
     "deck.gl": "^9.3.1",
     "duckdb-wasm-kit": "^0.1.38",
     "next-themes": "^0.4.3",

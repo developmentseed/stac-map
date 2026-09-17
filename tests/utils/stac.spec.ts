@@ -8,6 +8,7 @@ import {
   getCogHref,
   getLink,
   getLinkHref,
+  getQueryablesHref,
   getSelfHref,
   getSpatialExtent,
   getStacId,
@@ -169,6 +170,35 @@ describe("getLink / getLinkHref / getSelfHref", () => {
   it("handles missing links arrays gracefully", () => {
     expect(getLink({}, "self")).toBeUndefined();
     expect(getLinkHref({}, "self")).toBeUndefined();
+  });
+});
+
+describe("getQueryablesHref", () => {
+  it("finds the OGC queryables rel", () => {
+    const collection = makeCatalog({
+      links: [
+        {
+          rel: "http://www.opengis.net/def/rel/ogc/1.0/queryables",
+          href: "https://example.com/queryables",
+        },
+      ],
+    });
+    expect(getQueryablesHref(collection)).toBe(
+      "https://example.com/queryables"
+    );
+  });
+
+  it("falls back to a plain 'queryables' rel", () => {
+    const collection = makeCatalog({
+      links: [{ rel: "queryables", href: "https://example.com/queryables" }],
+    });
+    expect(getQueryablesHref(collection)).toBe(
+      "https://example.com/queryables"
+    );
+  });
+
+  it("returns undefined when no queryables link exists", () => {
+    expect(getQueryablesHref(makeCatalog())).toBeUndefined();
   });
 });
 

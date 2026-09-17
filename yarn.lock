@@ -3608,6 +3608,11 @@ cosmiconfig@^7.0.0:
     path-type "^4.0.0"
     yaml "^1.10.0"
 
+cql2-wasm@^0.5.6:
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/cql2-wasm/-/cql2-wasm-0.5.6.tgz#7ab9ae987c69ace3479248723451c6dff9b08685"
+  integrity sha512-bVWQ7wDz105vMaW+nYCMG4cy6svOpQ5IjNCjRlEVWjPeT723KZpSPc4CzwXnLKE/lB5KXr3jddrQTe/Cne3xcw==
+
 cross-spawn@^7.0.6:
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.6.tgz#8a58fe78f00dcd70c370451759dfbfaf03e8ee9f"

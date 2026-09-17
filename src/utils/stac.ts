@@ -10,6 +10,13 @@ import type { StacAssets, StacValue } from "../types/stac";
 import { getAccessToken } from "./auth";
 import { toAbsoluteUrl } from "./href";
 
+function buildAuthHeaders(href: string): Record<string, string> {
+  const headers: Record<string, string> = { Accept: "application/json" };
+  const token = getAccessToken(href);
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return headers;
+}
+
 export async function fetchStacValue({
   href,
   uploadedFile,
@@ -18,13 +25,9 @@ export async function fetchStacValue({
   uploadedFile?: File | null;
 }) {
   if (href.startsWith("http")) {
-    const headers: Record<string, string> = { Accept: "application/json" };
-    const token = getAccessToken(href);
-    if (token) headers["Authorization"] = `Bearer ${token}`;
-
     return await fetch(href, {
       method: "GET",
-      headers,
+      headers: buildAuthHeaders(href),
     }).then(async (response) => {
       if (response.ok) {
         return response
@@ -133,6 +136,39 @@ export function getLinkHref(
 
 export function getSelfHref(value: StacValue) {
   return getLinkHref(value, "self");
+}
+
+export function getQueryablesHref(value: { links?: Array<StacLink> }) {
+  return (
+    getLinkHref(value, "http://www.opengis.net/def/rel/ogc/1.0/queryables") ??
+    getLinkHref(value, "queryables")
+  );
+}
+
+export interface QueryableProperty {
+  type?: string;
+  enum?: (string | number)[];
+  minimum?: number;
+  maximum?: number;
+  title?: string;
+  description?: string;
+}
+
+export interface QueryablesSchema {
+  properties?: Record<string, QueryableProperty>;
+}
+
+export async function fetchQueryablesSchema(
+  href: string
+): Promise<QueryablesSchema> {
+  const response = await fetch(href, {
+    method: "GET",
+    headers: buildAuthHeaders(href),
+  });
+  if (!response.ok) {
+    throw new Error(`GET ${href}: ${response.statusText}`);
+  }
+  return response.json();
 }
 
 export function getThumbnailAsset(value: StacValue) {

@@ -1,5 +1,7 @@
+import { useCql2Wasm } from "@/hooks/stac";
 import { type BBox2D, type Color, useStore } from "@/store";
 import type { StacItemCollection } from "@/types/stac";
+import { buildCql2Json, type QueryableFilter } from "@/utils/cql2";
 import {
   datetimeInputToMs,
   msToDatetimeInputValue,
@@ -7,7 +9,7 @@ import {
   toMs,
 } from "@/utils/datetime";
 import { getPaddedViewportBbox } from "@/utils/map";
-import { fetchStacValue, getLinkHref } from "@/utils/stac";
+import { fetchStacValue, getLinkHref, getQueryablesHref } from "@/utils/stac";
 import {
   Button,
   ButtonGroup,
@@ -29,6 +31,7 @@ import { LuFileSearch2, LuFrame, LuSettings2, LuX } from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
 import type { StacCollection, StacLink } from "stac-ts";
 import { Items } from "./items";
+import Queryables from "./queryables";
 import DatetimeSlider from "./ui/datetime-slider";
 import { ErrorAlert } from "./ui/error-alert";
 import PaginationBar from "./ui/pagination-bar";
@@ -60,6 +63,9 @@ export default function Search({
   const [bbox, setBbox] = useState<BBox2D | undefined>(
     () => useStore.getState().searchParams[link.href]?.bbox
   );
+  const [queryables, setQueryables] = useState<Record<string, QueryableFilter>>(
+    () => useStore.getState().searchParams[link.href]?.queryables ?? {}
+  );
   const { map } = useMap();
 
   useEffect(() => {
@@ -68,8 +74,17 @@ export default function Search({
       endDatetime,
       limit,
       bbox,
+      queryables,
     });
-  }, [link.href, startDatetime, endDatetime, limit, bbox, setSearchParams]);
+  }, [
+    link.href,
+    startDatetime,
+    endDatetime,
+    limit,
+    bbox,
+    queryables,
+    setSearchParams,
+  ]);
 
   const startBoundMs = useMemo(
     () => toMs(collection.extent?.temporal?.interval?.[0]?.[0]),
@@ -79,6 +94,12 @@ export default function Search({
     () => toMs(collection.extent?.temporal?.interval?.[0]?.[1]),
     [collection]
   );
+
+  const queryablesHref = useMemo(
+    () => getQueryablesHref(collection),
+    [collection]
+  );
+  const cql2Wasm = useCql2Wasm({ enabled: !!queryablesHref });
 
   const href = useMemo(() => {
     const url = new URL(link.href);
@@ -90,8 +111,25 @@ export default function Search({
       );
     if (limit) url.searchParams.set("limit", limit);
     if (bbox) url.searchParams.set("bbox", bbox.join(","));
+    const cql2Json = buildCql2Json(queryables);
+    if (cql2Json && cql2Wasm.data) {
+      const filterText = cql2Wasm.data
+        .parseJson(JSON.stringify(cql2Json))
+        .to_text();
+      url.searchParams.set("filter-lang", "cql2-text");
+      url.searchParams.set("filter", filterText);
+    }
     return url.toString();
-  }, [link, collection, startDatetime, endDatetime, limit, bbox]);
+  }, [
+    link,
+    collection,
+    startDatetime,
+    endDatetime,
+    limit,
+    bbox,
+    queryables,
+    cql2Wasm.data,
+  ]);
 
   const result = useInfiniteQuery({
     queryKey: ["search", href],
@@ -198,7 +236,13 @@ export default function Search({
             </Fieldset.Root>
           </Fieldset.Content>
         </Fieldset.Root>
-        <AdvancedSettings limit={limit} setLimit={setLimit} />
+        <AdvancedSettings
+          limit={limit}
+          setLimit={setLimit}
+          queryablesHref={queryablesHref}
+          queryables={queryables}
+          setQueryables={setQueryables}
+        />
       </Section>
       {bbox && <BboxLayer bbox={bbox} />}
       {body}
@@ -248,21 +292,32 @@ function BboxLayer({ bbox }: { bbox: BBox2D }) {
 function AdvancedSettings({
   limit,
   setLimit,
+  queryablesHref,
+  queryables,
+  setQueryables,
 }: {
   limit: string;
   setLimit: (value: string) => void;
+  queryablesHref: string | undefined;
+  queryables: Record<string, QueryableFilter>;
+  setQueryables: (value: Record<string, QueryableFilter>) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [draftLimit, setDraftLimit] = useState(limit);
+  const [draftQueryables, setDraftQueryables] = useState(queryables);
   const save = () => {
     setLimit(draftLimit);
+    setQueryables(draftQueryables);
     setOpen(false);
   };
   return (
     <Dialog.Root
       open={open}
       onOpenChange={(e) => {
-        if (e.open) setDraftLimit(limit);
+        if (e.open) {
+          setDraftLimit(limit);
+          setDraftQueryables(queryables);
+        }
         setOpen(e.open);
       }}
     >
@@ -300,6 +355,11 @@ function AdvancedSettings({
                     </Field.Root>
                   </Fieldset.Content>
                 </Fieldset.Root>
+                <Queryables
+                  href={queryablesHref}
+                  value={draftQueryables}
+                  onChange={setDraftQueryables}
+                />
               </Dialog.Body>
               <Dialog.Footer>
                 <Dialog.ActionTrigger asChild>
