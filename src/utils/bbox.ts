@@ -9,3 +9,8 @@ export function resolveInitialBbox(
   if (parts.length !== 4 || parts.some(Number.isNaN)) return null;
   return [parts[0], parts[1], parts[2], parts[3]];
 }
+
+export function roundBbox(bbox: BBox2D, precision: number = 5): BBox2D {
+  const factor = 10 ** precision;
+  return bbox.map((n) => Math.round(n * factor) / factor) as BBox2D;
+}
