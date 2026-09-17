@@ -1,4 +1,5 @@
 import { useStore } from "@/store";
+import { loadCql2Wasm } from "@/utils/cql2-wasm";
 import { loadGeoTIFF } from "@/utils/geotiff";
 import {
   computeBandRangeFromOverview,
@@ -16,13 +17,31 @@ import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import type { StacAsset } from "stac-ts";
-import { fetchStacValue } from "../utils/stac";
+import { fetchQueryablesSchema, fetchStacValue } from "../utils/stac";
 
 export function useStacValue({ href }: { href: string }) {
   const uploadedFile = useStore((store) => store.uploadedFile);
   return useQuery({
     queryKey: ["stac-value", href],
     queryFn: async () => fetchStacValue({ href, uploadedFile }),
+  });
+}
+
+export function useQueryables(href: string | undefined) {
+  return useQuery({
+    queryKey: ["queryables", href],
+    queryFn: async () => fetchQueryablesSchema(href!),
+    enabled: !!href,
+  });
+}
+
+export function useCql2Wasm({ enabled }: { enabled: boolean }) {
+  return useQuery({
+    queryKey: ["cql2-wasm"],
+    queryFn: loadCql2Wasm,
+    enabled,
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
 }
 

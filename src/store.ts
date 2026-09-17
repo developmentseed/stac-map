@@ -3,6 +3,7 @@ import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ExtraLayerProps } from "./components/stac-map";
+import type { QueryableFilter } from "./utils/cql2";
 
 export type Color = [number, number, number, number];
 export type Projection = "mercator" | "globe";
@@ -28,6 +29,7 @@ export interface SearchParams {
   endDatetime: string;
   limit: string;
   bbox?: BBox2D;
+  queryables?: Record<string, QueryableFilter>;
 }
 
 /**
