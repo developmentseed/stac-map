@@ -24,6 +24,10 @@ function setEntry<T>(
   return { ...record, [key]: value };
 }
 
+export interface Bookmark {
+  href: string;
+}
+
 export interface SearchParams {
   startDatetime: string;
   endDatetime: string;
@@ -81,6 +85,9 @@ export interface State {
   setHivePartitioning: (hivePartitioning: boolean) => void;
   visualization: string | null;
   setVisualization: (visualization: string | null) => void;
+  bookmarks: Bookmark[];
+  addBookmark: (href: string) => void;
+  removeBookmark: (href: string) => void;
 }
 
 /**
@@ -152,6 +159,17 @@ export const useStore = create<State>()(
       setHivePartitioning: (hivePartitioning) => set({ hivePartitioning }),
       visualization: null,
       setVisualization: (visualization) => set({ visualization }),
+      bookmarks: [],
+      addBookmark: (href) => {
+        if (get().bookmarks.some((bookmark) => bookmark.href === href)) return;
+        set({ bookmarks: [...get().bookmarks, { href }] });
+      },
+      removeBookmark: (href) =>
+        set({
+          bookmarks: get().bookmarks.filter(
+            (bookmark) => bookmark.href !== href
+          ),
+        }),
     }),
     {
       name: "stac-map-settings",
@@ -162,6 +180,7 @@ export const useStore = create<State>()(
         tokens: state.tokens,
         addErrorListener: state.addErrorListener,
         hivePartitioning: state.hivePartitioning,
+        bookmarks: state.bookmarks,
       }),
     }
   )
