@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/developmentseed/stac-map/compare/v2.2.1...v2.3.0) (2026-10-28)
+
+
+### Features
+
+* support multipolygon geometries ([#553](https://github.com/developmentseed/stac-map/issues/553)) ([a05bf0a](https://github.com/developmentseed/stac-map/commit/a05bf0ab2d8aa70549ff02465294c48dac6b8d68))
+
 ## [2.2.1](https://github.com/developmentseed/stac-map/compare/v2.2.0...v2.2.1) (2026-09-17)
 
 
