@@ -1,5 +1,4 @@
 import { makeData, Field, FixedSizeList, Float64, List, Data, Float, Binary } from "apache-arrow";
-import { WKBLoader } from "@loaders.gl/wkt";
 import type {
   BinaryGeometry,
   BinaryPolygonGeometry,
