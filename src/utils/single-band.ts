@@ -62,7 +62,7 @@ export type SingleBandPipeline = Pick<
 >;
 
 export function isSingleBandGreyscale(geotiff: GeoTIFF): boolean {
-  const { samplesPerPixel, photometric } = geotiff.cachedTags;
+  const { samplesPerPixel, photometric } = geotiff.cachedPrimaryImageTags;
   return samplesPerPixel === 1 && photometric !== Photometric.Palette;
 }
 
@@ -73,7 +73,7 @@ export function singleBandPipeline(
   if (!isSingleBandGreyscale(geotiff)) {
     return undefined;
   }
-  const { photometric, nodata } = geotiff.cachedTags;
+  const { photometric, nodata } = geotiff.cachedPrimaryImageTags;
 
   const getTileData: SingleBandPipeline["getTileData"] = async (
     image: GeoTIFF | Overview,
@@ -165,7 +165,7 @@ export async function computeBandRangeFromOverview(
 ): Promise<BandRange | undefined> {
   const overview = geotiff.overviews.at(-1);
   if (!overview) return undefined;
-  const { nodata } = geotiff.cachedTags;
+  const { nodata } = geotiff.cachedPrimaryImageTags;
   const { x: nx, y: ny } = overview.tileCount;
   const coords: [number, number][] = [];
   for (let ty = 0; ty < ny; ty++) {
