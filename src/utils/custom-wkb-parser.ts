@@ -105,8 +105,7 @@ function repackMultiPolygons(
     if (!(geom.positions.value instanceof Float64Array)) throw new Error("geometry is not type Float64Array")
     const numCoords = geom.positions.value.length / geom.positions.size;
 
-    // coords.set(geom.positions.value, coordOffset * dim);
-    copyCoords(coords, coordOffset, dim, geom.positions);
+    coords.set(geom.positions.value, coordOffset * dim);
     coordOffset += numCoords;
 
     const ringIndices = geom.primitivePolygonIndices.value;
@@ -178,50 +177,16 @@ function inferMultiPolygonCapacity(
   };
 
   for (const geom of geoms) {
-    capacity.geomCapacity= 1;
+    capacity.geomCapacity += 1;
     if (!(geom.primitivePolygonIndices.value.length >= 1)) throw new Error("Expected primitivePolygonIndices to always have length at least 1")
     if (!(geom.polygonIndices.value.length >= 2)) throw new Error("Expected polygonIndices to always have length at least 2")
-    capacity.ringCapacity= geom.primitivePolygonIndices.value.length - 1;
-    capacity.polygonCapacity= geom.polygonIndices.value.length - 1;
-    capacity.coordCapacty= geom.positions.value.length / geom.positions.size;
+    capacity.ringCapacity += geom.primitivePolygonIndices.value.length - 1;
+    capacity.polygonCapacity += geom.polygonIndices.value.length - 1;
+    capacity.coordCapacty += geom.positions.value.length / geom.positions.size;
   }
 
      return capacity;
 }
-
-/**
- * Copy loaders.gl positions into the output coords buffer at vertex
- * `coordOffset`.
- *
- * loaders.gl's `positions.size` comes from the WKB itself (2 for XY, 3 for
- * XYZ/XYM, 4 for XYZM), which can differ from the requested output `dim`.
- * A plain `coords.set(positions.value, ...)` then writes `size` values per
- * vertex into a buffer sized for `dim` values per vertex and throws
- * `RangeError: offset is out of bounds`. Extra dimensions are dropped, and
- * missing ones are left as 0.
- */
-function copyCoords(
-  coords: Float64Array,
-  coordOffset: number,
-  dim: number,
-  positions: { value: ArrayLike<number>; size: number },
-): void {
-  const { value, size } = positions;
-  if (size === dim) {
-    coords.set(value, coordOffset * dim);
-    return;
-  }
- 
-  const numCoords = value.length / size;
-  const copyDim = Math.min(size, dim);
-  for (let i = 0; i < numCoords; i++) {
-    for (let d = 0; d < copyDim; d++) {
-      coords[(coordOffset + i) * dim + d] = value[i * size + d];
-    }
-  }
-}
- 
-
 
 function coordFieldName(dim: number): "xy" | "xyz" {
   if (dim === 2) {

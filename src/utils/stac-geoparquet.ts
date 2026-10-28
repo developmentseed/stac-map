@@ -251,8 +251,7 @@ export async function fetchStacGeoparquetTable({
     const multipolygons = parseMultiPolygonWkb(
       wkbData,
       "MultiPolygon",
-      // 2
-      3
+      2
     ) as MultiPolygonData;
     table = new Table({
       geometry: makeVector(multipolygons),
