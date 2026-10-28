@@ -1,9 +1,15 @@
-import { makeData, Field, FixedSizeList, Float64, List, Data, Float, Binary } from "apache-arrow";
-import type {
-  BinaryGeometry,
-  BinaryPolygonGeometry,
-} from "@loaders.gl/schema";
 import { convertWKBToBinaryGeometry } from "@loaders.gl/gis";
+import type { BinaryGeometry, BinaryPolygonGeometry } from "@loaders.gl/schema";
+import {
+  Binary,
+  Data,
+  Field,
+  FixedSizeList,
+  Float,
+  Float64,
+  List,
+  makeData,
+} from "apache-arrow";
 
 /**
 @NOTE: Currently we have use a custom fork of @geoarrow/geoarrow-js because geoarrow doesn't have its own WKB parsing.
@@ -13,16 +19,16 @@ This copy and pastes https://github.com/geoarrow/geoarrow-js/compare/geoarrow:b2
 and extends to support Multipolygons
 */
 
-type InterleavedCoord = FixedSizeList<Float>;   // [x, y] or [x, y, z]
+type InterleavedCoord = FixedSizeList<Float>; // [x, y] or [x, y, z]
 type Coord = InterleavedCoord;
-type MultiPolygon = List<List<List<Coord>>>
+type MultiPolygon = List<List<List<Coord>>>;
 export type MultiPolygonData = Data<MultiPolygon>;
-type WKBData = Data<Binary>
+type WKBData = Data<Binary>;
 
 export function parseMultiPolygonWkb(
   data: WKBData,
-  type: 'MultiPolygon',
-  dim: number,
+  type: "MultiPolygon",
+  dim: number
 ): MultiPolygonData {
   const parsedGeometries: BinaryGeometry[] = [];
 
@@ -38,10 +44,13 @@ export function parseMultiPolygonWkb(
     parsedGeometries.push(parsed);
   }
 
-  if (type == 'MultiPolygon') {
-    return repackMultiPolygons(parsedGeometries as BinaryPolygonGeometry[], dim);
+  if (type == "MultiPolygon") {
+    return repackMultiPolygons(
+      parsedGeometries as BinaryPolygonGeometry[],
+      dim
+    );
   }
-  throw new Error("Geometry type is not MultiPolygon and cannot be parsed")
+  throw new Error("Geometry type is not MultiPolygon and cannot be parsed");
 }
 
 function* iterBinary(data: WKBData): IterableIterator<Uint8Array | null> {
@@ -86,8 +95,8 @@ type MultiPolygonCapacity = {
  * A Polygon is handled as a MultiPolygon with one part.
  */
 function repackMultiPolygons(
-    geoms: BinaryPolygonGeometry[],
-    dim: number,
+  geoms: BinaryPolygonGeometry[],
+  dim: number
 ): MultiPolygonData {
   const capacity = inferMultiPolygonCapacity(geoms);
   const coords = new Float64Array(capacity.coordCapacty * dim);
@@ -101,7 +110,8 @@ function repackMultiPolygons(
   let polygonOffset = 0;
 
   for (const geom of geoms) {
-    if (!(geom.positions.value instanceof Float64Array)) throw new Error("geometry is not type Float64Array")
+    if (!(geom.positions.value instanceof Float64Array))
+      throw new Error("geometry is not type Float64Array");
     const numCoords = geom.positions.value.length / geom.positions.size;
 
     coords.set(geom.positions.value, coordOffset * dim);
@@ -141,7 +151,7 @@ function repackMultiPolygons(
   const verticesData = makeData({
     type: new FixedSizeList(
       dim,
-      new Field(coordFieldName(dim), coordsData.type, false),
+      new Field(coordFieldName(dim), coordsData.type, false)
     ),
     child: coordsData,
   });
@@ -166,7 +176,7 @@ function repackMultiPolygons(
 }
 
 function inferMultiPolygonCapacity(
-  geoms: BinaryPolygonGeometry[],
+  geoms: BinaryPolygonGeometry[]
 ): MultiPolygonCapacity {
   const capacity: MultiPolygonCapacity = {
     coordCapacty: 0,
@@ -177,14 +187,20 @@ function inferMultiPolygonCapacity(
 
   for (const geom of geoms) {
     capacity.geomCapacity += 1;
-    if (!(geom.primitivePolygonIndices.value.length >= 1)) throw new Error("Expected primitivePolygonIndices to always have length at least 1")
-    if (!(geom.polygonIndices.value.length >= 2)) throw new Error("Expected polygonIndices to always have length at least 2")
+    if (!(geom.primitivePolygonIndices.value.length >= 1))
+      throw new Error(
+        "Expected primitivePolygonIndices to always have length at least 1"
+      );
+    if (!(geom.polygonIndices.value.length >= 2))
+      throw new Error(
+        "Expected polygonIndices to always have length at least 2"
+      );
     capacity.ringCapacity += geom.primitivePolygonIndices.value.length - 1;
     capacity.polygonCapacity += geom.polygonIndices.value.length - 1;
     capacity.coordCapacty += geom.positions.value.length / geom.positions.size;
   }
 
-     return capacity;
+  return capacity;
 }
 
 function coordFieldName(dim: number): "xy" | "xyz" {

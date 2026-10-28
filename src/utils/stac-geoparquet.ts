@@ -10,10 +10,18 @@ import {
 } from "apache-arrow";
 import { toaster } from "../components/ui/toaster";
 import type { StacItemCollection } from "../types/stac";
+import {
+  parseMultiPolygonWkb,
+  type MultiPolygonData,
+} from "./custom-wkb-parser";
 import { loadStacWasm } from "./stac-wasm";
-import { parseMultiPolygonWkb, type MultiPolygonData } from "./custom-wkb-parser";
 
-const SUPPORTED_GEOMETRY_TYPES = ["point", "polygon", "linestring", "multipolygon"] as const;
+const SUPPORTED_GEOMETRY_TYPES = [
+  "point",
+  "polygon",
+  "linestring",
+  "multipolygon",
+] as const;
 
 async function executeDuckdbQuery({
   connection,
@@ -246,8 +254,7 @@ export async function fetchStacGeoparquetTable({
       "ARROW:extension:name",
       "geoarrow.polygon"
     );
-  } 
-  else if (geometryType === "multipolygon") {
+  } else if (geometryType === "multipolygon") {
     const multipolygons = parseMultiPolygonWkb(
       wkbData,
       "MultiPolygon",
