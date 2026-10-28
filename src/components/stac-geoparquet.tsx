@@ -82,6 +82,7 @@ function StacGeoparquetTable({
           },
         });
       case "polygon":
+      case "multipolygon":
         return new GeoArrowPolygonLayer({
           id,
           data: table,

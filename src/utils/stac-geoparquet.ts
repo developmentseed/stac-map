@@ -10,9 +10,18 @@ import {
 } from "apache-arrow";
 import { toaster } from "../components/ui/toaster";
 import type { StacItemCollection } from "../types/stac";
+import {
+  parseMultiPolygonWkb,
+  type MultiPolygonData,
+} from "./custom-wkb-parser";
 import { loadStacWasm } from "./stac-wasm";
 
-const SUPPORTED_GEOMETRY_TYPES = ["point", "polygon", "linestring"] as const;
+const SUPPORTED_GEOMETRY_TYPES = [
+  "point",
+  "polygon",
+  "linestring",
+  "multipolygon",
+] as const;
 
 async function executeDuckdbQuery({
   connection,
@@ -218,6 +227,7 @@ export async function fetchStacGeoparquetTable({
       `Unsupported geometry type: ${geometryType}. Supported types: ${SUPPORTED_GEOMETRY_TYPES.join(", ")}`
     );
   }
+
   const wkb = new Uint8Array(geometry?.flatMap((array) => [...array]));
   const valueOffsets = new Int32Array(geometry.length + 1);
   for (let i = 0, len = geometry.length; i < len; i++) {
@@ -243,6 +253,20 @@ export async function fetchStacGeoparquetTable({
     table.schema.fields[0].metadata.set(
       "ARROW:extension:name",
       "geoarrow.polygon"
+    );
+  } else if (geometryType === "multipolygon") {
+    const multipolygons = parseMultiPolygonWkb(
+      wkbData,
+      "MultiPolygon",
+      2
+    ) as MultiPolygonData;
+    table = new Table({
+      geometry: makeVector(multipolygons),
+      id: vectorFromArray(result.getChild("id")?.toArray()),
+    });
+    table.schema.fields[0].metadata.set(
+      "ARROW:extension:name",
+      "geoarrow.multipolygon"
     );
   } else if (geometryType === "point") {
     const points = io.parseWkb(wkbData, io.WKBType.Point, 2) as data.PointData;
