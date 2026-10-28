@@ -37,9 +37,6 @@ export function parseMultiPolygonWkb(
       throw new Error("Null entries are not currently supported");
     }
     const arrayBuffer = copyViewToArrayBuffer(item);
-    // const parsed = WKBLoader.parseSync(arrayBuffer, {
-    //   wkb: { shape: "binary-geometry" },
-    // })as unknown as BinaryGeometry;
     const parsed = convertWKBToBinaryGeometry(arrayBuffer);
     parsedGeometries.push(parsed);
   }
