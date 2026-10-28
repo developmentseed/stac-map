@@ -104,8 +104,8 @@ describe("resolveBandRange", () => {
   });
 });
 
-function tiff(cachedTags: Record<string, unknown>): GeoTIFF {
-  return { cachedTags } as unknown as GeoTIFF;
+function tiff(cachedPrimaryImageTags: Record<string, unknown>): GeoTIFF {
+  return { cachedPrimaryImageTags } as unknown as GeoTIFF;
 }
 
 describe("singleBandPipeline", () => {
