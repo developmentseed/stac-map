@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.1](https://github.com/developmentseed/stac-map/compare/v2.3.0...v2.3.1) (2026-10-30)
+
+
+### Bug Fixes
+
+* npm releasing ([#556](https://github.com/developmentseed/stac-map/issues/556)) ([8a51c54](https://github.com/developmentseed/stac-map/commit/8a51c5487c3616a53bddf13f6547d5171e048eaa))
+
 ## [2.3.0](https://github.com/developmentseed/stac-map/compare/v2.2.1...v2.3.0) (2026-10-28)
 
 
