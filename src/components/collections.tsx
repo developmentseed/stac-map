@@ -33,6 +33,7 @@ import CollectionListItem from "./list-items/collection";
 import EntityList from "./ui/entity-list";
 import PaginationBar from "./ui/pagination-bar";
 import Section from "./ui/section";
+import { ErrorAlert } from "./ui/error-alert";
 
 export function CollectionsEndpoint({
   link,
@@ -70,7 +71,7 @@ export function CollectionsEndpoint({
       .flatMap((page) => page?.collections)
       .filter((collection) => !!collection);
   }, [result.data]);
-
+  
   useEffect(() => {
     if (collections) {
       setValueBbox(getCollectionsBbox(collections));
@@ -81,7 +82,7 @@ export function CollectionsEndpoint({
   const numberMatched = useMemo(() => {
     return result.data?.pages[0]?.numberMatched;
   }, [result.data]);
-
+  
   const body = collections ? (
     collections.length > 0 ? (
       <Collections collections={collections} />
@@ -98,8 +99,9 @@ export function CollectionsEndpoint({
   ) : result.isLoading ? (
     <SkeletonText h={3} />
   ) : (
-    <Error error={result.error} />
+    <ErrorAlert error={result.error} />
   );
+
   return (
     <>
       {hasCollectionSearch && <Search setSearch={setSearch} />}
@@ -295,17 +297,17 @@ export function Collections({
   );
 }
 
-function Error({ error }: { error: Error | null }) {
-  return (
-    <Alert.Root status={"error"}>
-      <Alert.Indicator />
-      <Alert.Content>
-        <Alert.Title>{error ? error.name : "Unknown error"}</Alert.Title>
-        {error && <Alert.Description>{error.message}</Alert.Description>}
-      </Alert.Content>
-    </Alert.Root>
-  );
-}
+// function Error({ error }: { error: Error | null }) {
+//   return (
+//     <Alert.Root status={"error"}>
+//       <Alert.Indicator />
+//       <Alert.Content>
+//         <Alert.Title>{error ? error.name : "Unknown error"}</Alert.Title>
+//         {error && <Alert.Description>{error.message}</Alert.Description>}
+//       </Alert.Content>
+//     </Alert.Root>
+//   );
+// }
 
 function isGlobalBbox(bbox: BBox2D | SpatialExtent) {
   const sanitizedBbox = sanitizeBbox(bbox);

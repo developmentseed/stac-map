@@ -23,6 +23,7 @@ import { type ReactNode } from "react";
 import { LuBird, LuLoader, LuX } from "react-icons/lu";
 import { StacIcon } from "./ui/stac";
 import Value from "./value";
+import { ErrorAlert } from "./ui/error-alert";
 
 export default function Panel() {
   const href = useStore((store) => store.href);
@@ -162,13 +163,7 @@ function LoadingDuckdbPanel() {
 function ErrorPanel({ error, href }: { error: Error | null; href: string }) {
   return (
     <BasePanel header={"Error loading " + href}>
-      <Alert.Root status={"error"}>
-        <Alert.Indicator />
-        <Alert.Content>
-          <Alert.Title>{error ? error.name : "Unknown error"}</Alert.Title>
-          {error && <Alert.Description>{error.message}</Alert.Description>}
-        </Alert.Content>
-      </Alert.Root>
+      <ErrorAlert error={error}/>
     </BasePanel>
   );
 }
