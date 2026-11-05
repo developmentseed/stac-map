@@ -297,18 +297,6 @@ export function Collections({
   );
 }
 
-// function Error({ error }: { error: Error | null }) {
-//   return (
-//     <Alert.Root status={"error"}>
-//       <Alert.Indicator />
-//       <Alert.Content>
-//         <Alert.Title>{error ? error.name : "Unknown error"}</Alert.Title>
-//         {error && <Alert.Description>{error.message}</Alert.Description>}
-//       </Alert.Content>
-//     </Alert.Root>
-//   );
-// }
-
 function isGlobalBbox(bbox: BBox2D | SpatialExtent) {
   const sanitizedBbox = sanitizeBbox(bbox);
   return (
