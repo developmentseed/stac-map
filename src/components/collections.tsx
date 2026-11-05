@@ -31,9 +31,9 @@ import type { SpatialExtent, StacCollection, StacLink } from "stac-ts";
 import CollectionCard from "./cards/collection";
 import CollectionListItem from "./list-items/collection";
 import EntityList from "./ui/entity-list";
+import { ErrorAlert } from "./ui/error-alert";
 import PaginationBar from "./ui/pagination-bar";
 import Section from "./ui/section";
-import { ErrorAlert } from "./ui/error-alert";
 
 export function CollectionsEndpoint({
   link,
@@ -71,7 +71,7 @@ export function CollectionsEndpoint({
       .flatMap((page) => page?.collections)
       .filter((collection) => !!collection);
   }, [result.data]);
-  
+
   useEffect(() => {
     if (collections) {
       setValueBbox(getCollectionsBbox(collections));
@@ -82,7 +82,7 @@ export function CollectionsEndpoint({
   const numberMatched = useMemo(() => {
     return result.data?.pages[0]?.numberMatched;
   }, [result.data]);
-  
+
   const body = collections ? (
     collections.length > 0 ? (
       <Collections collections={collections} />

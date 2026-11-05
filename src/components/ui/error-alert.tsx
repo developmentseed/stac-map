@@ -1,9 +1,15 @@
-import { Alert, CloseButton, HStack, Link } from "@chakra-ui/react";
+import { Alert, Box, CloseButton, HStack, Link } from "@chakra-ui/react";
 import { useState } from "react";
 import { LuGithub } from "react-icons/lu";
 
-export function ErrorAlert({ title, error }: { title?: string; error: Error | null }) {
-  const alertTitle = title ? title : (error?.name || "Unknown error");
+export function ErrorAlert({
+  title,
+  error,
+}: {
+  title?: string;
+  error: Error | null;
+}) {
+  const alertTitle = title ? title : error?.name || "Unknown error";
   return (
     <Alert.Root status="error">
       <Alert.Indicator />
@@ -44,12 +50,36 @@ export function WarningAlert({
   );
 }
 
+interface BoundaryErrorFallback {
+  error: unknown;
+  context: string;
+  customMessage?: string;
+}
+
+export function FallbackError({
+  error,
+  context,
+  customMessage,
+}: BoundaryErrorFallback) {
+  return (
+    <Box position="absolute" top={4} left={4} maxW={"30%"}>
+      <ErrorBoundaryAlert
+        context={context}
+        error={error}
+        customMessage={customMessage}
+      />
+    </Box>
+  );
+}
+
 export function ErrorBoundaryAlert({
   context,
   error,
+  customMessage,
 }: {
   context: string;
   error: unknown;
+  customMessage?: string;
 }) {
   const message = error instanceof Error ? error.message : String(error);
   return (
@@ -59,14 +89,27 @@ export function ErrorBoundaryAlert({
         <Alert.Title>
           <HStack>We're really sorry!</HStack>
         </Alert.Title>
-        <Alert.Description>
-          Something went wrong in the {context}. The error message is "{message}
-          ". Please{" "}
-          <Link href="https://github.com/developmentseed/stac-map/issues/new?template=bug_report.md">
-            open an issue <LuGithub />
-          </Link>{" "}
-          so we can fix it!
-        </Alert.Description>
+        {customMessage ? (
+          <Alert.Description>
+            Something went wrong in the {context}. <br /> {customMessage} The
+            error message is "{message}
+            ". Please{" "}
+            <Link href="https://github.com/developmentseed/stac-map/issues/new?template=bug_report.md">
+              open an issue <LuGithub />
+            </Link>{" "}
+            so we can fix it!
+          </Alert.Description>
+        ) : (
+          <Alert.Description>
+            Something went wrong in the {context}. The error message is "
+            {message}
+            ". Please{" "}
+            <Link href="https://github.com/developmentseed/stac-map/issues/new?template=bug_report.md">
+              open an issue <LuGithub />
+            </Link>{" "}
+            so we can fix it!
+          </Alert.Description>
+        )}
       </Alert.Content>
     </Alert.Root>
   );
