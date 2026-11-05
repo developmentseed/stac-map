@@ -8,7 +8,6 @@ import type { StacValue } from "@/types/stac";
 import { getStacId } from "@/utils/stac";
 import {
   ActionBar,
-  Alert,
   Box,
   Button,
   HStack,
@@ -20,7 +19,9 @@ import {
 } from "@chakra-ui/react";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { type ReactNode } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { LuBird, LuLoader, LuX } from "react-icons/lu";
+import { ErrorAlert, FallbackError } from "./ui/error-alert";
 import { StacIcon } from "./ui/stac";
 import Value from "./value";
 
@@ -94,24 +95,36 @@ function StacGeoparquetItemPanel({
   const setStacGeoparquetId = useStore((store) => store.setStacGeoparquetId);
   return result.data ? (
     <>
-      <ValuePanel href={href} value={result.data} />
-      <ActionBar.Root open>
-        <Portal>
-          <ActionBar.Positioner>
-            <ActionBar.Content>
-              <ActionBar.SelectionTrigger>{id}</ActionBar.SelectionTrigger>
-              <ActionBar.Separator />
-              <Button
-                variant={"outline"}
-                size={"sm"}
-                onClick={() => setStacGeoparquetId(null)}
-              >
-                <LuX /> Clear selection
-              </Button>
-            </ActionBar.Content>
-          </ActionBar.Positioner>
-        </Portal>
-      </ActionBar.Root>
+      <ErrorBoundary
+        fallbackRender={(props) => (
+          <FallbackError
+            {...props}
+            context={"StacGeoparquetItemPanel"}
+            customMessage={
+              "We are unable to get your items from the stac-geoparquet file as it might be invalid."
+            }
+          />
+        )}
+      >
+        <ValuePanel href={href} value={result.data} />
+        <ActionBar.Root open>
+          <Portal>
+            <ActionBar.Positioner>
+              <ActionBar.Content>
+                <ActionBar.SelectionTrigger>{id}</ActionBar.SelectionTrigger>
+                <ActionBar.Separator />
+                <Button
+                  variant={"outline"}
+                  size={"sm"}
+                  onClick={() => setStacGeoparquetId(null)}
+                >
+                  <LuX /> Clear selection
+                </Button>
+              </ActionBar.Content>
+            </ActionBar.Positioner>
+          </Portal>
+        </ActionBar.Root>
+      </ErrorBoundary>
     </>
   ) : result.isLoading ? (
     <LoadingPanel href={href} />
@@ -162,13 +175,7 @@ function LoadingDuckdbPanel() {
 function ErrorPanel({ error, href }: { error: Error | null; href: string }) {
   return (
     <BasePanel header={"Error loading " + href}>
-      <Alert.Root status={"error"}>
-        <Alert.Indicator />
-        <Alert.Content>
-          <Alert.Title>{error ? error.name : "Unknown error"}</Alert.Title>
-          {error && <Alert.Description>{error.message}</Alert.Description>}
-        </Alert.Content>
-      </Alert.Root>
+      <ErrorAlert error={error} />
     </BasePanel>
   );
 }
