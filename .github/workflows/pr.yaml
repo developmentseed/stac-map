@@ -13,8 +13,11 @@ permissions: {}
 jobs:
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write # create a missing type label, e.g. perf
+      pull-requests: write # add and remove the type label
     steps:
       - uses: ytanikin/pr-conventional-commits@639145d78959c53c43112365837e3abd21ed67c1 # 1.5.2
         with:
           task_types: '["feat","fix","docs","test","ci","refactor","perf","chore","revert"]'
-          add_label: 'false' # labels need a writable token; permissions: {} and fork PRs have none
+          add_label: ${{ github.event.pull_request.head.repo.full_name == github.repository }} # fork PRs get a read-only token
