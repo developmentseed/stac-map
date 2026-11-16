@@ -122,6 +122,9 @@ export default function Value({
         <Breadcrumbs value={value} />
         {thumbnailAsset && <Thumbnail asset={thumbnailAsset} />}
         {description && <Description description={description} />}
+        {Array.isArray(value.keywords) && (
+          <Keywords keywords={value.keywords} />
+        )}
         <Buttons value={value} />
       </Stack>
 
@@ -165,6 +168,18 @@ function Root({ value, link }: { value: StacValue; link: StacLink }) {
   return searchLink && value.type === "Collection" ? (
     <Search link={searchLink} collection={value} />
   ) : null;
+}
+
+function Keywords({ keywords }: { keywords: string[] }) {
+  return (
+    <HStack wrap={"wrap"}>
+      {keywords.map((keyword) => (
+        <Badge key={keyword} variant={"outline"}>
+          {keyword}
+        </Badge>
+      ))}
+    </HStack>
+  );
 }
 
 function toGeoJson(value: StacValue) {

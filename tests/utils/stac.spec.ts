@@ -1,6 +1,6 @@
 import type { StacAsset, StacCatalog, StacCollection, StacItem } from "stac-ts";
 import { describe, expect, it } from "vitest";
-import type { StacItemCollection } from "../../src/types/stac";
+import type { StacAssets, StacItemCollection } from "../../src/types/stac";
 import {
   conformsToFreeTextCollectionSearch,
   fetchStacValue,
@@ -115,6 +115,27 @@ describe("fetchStacValue", () => {
     expect(value.type).toBe("Catalog");
     expect((value as unknown as { _typeGuessed?: boolean })._typeGuessed).toBe(
       undefined
+    );
+  });
+
+  it("drops assets without an href", async () => {
+    const uploadedFile = new File(
+      [
+        JSON.stringify({
+          ...makeItem(),
+          links: [{ rel: "self", href: "https://example.com/item.json" }],
+          assets: {
+            data: { href: "./data.tif" },
+            json: { title: "No href" },
+          },
+        }),
+      ],
+      "item.json"
+    );
+    const value = await fetchStacValue({ href: "item.json", uploadedFile });
+    expect(Object.keys(value.assets ?? {})).toEqual(["data"]);
+    expect((value.assets as StacAssets).data.href).toBe(
+      "https://example.com/data.tif"
     );
   });
 });

@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.4.1](https://github.com/developmentseed/stac-map/compare/v2.4.0...v2.4.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* missing href on asset ([#568](https://github.com/developmentseed/stac-map/issues/568)) ([d1f840c](https://github.com/developmentseed/stac-map/commit/d1f840c6447356b3f7abb9bc5777d3b49d5b33c6))
+
+## [2.4.0](https://github.com/developmentseed/stac-map/compare/v2.3.1...v2.4.0) (2026-11-12)
+
+
+### Features
+
+* add keywords ([#566](https://github.com/developmentseed/stac-map/issues/566)) ([5a6942f](https://github.com/developmentseed/stac-map/commit/5a6942fd8d989615656b6ba90c9648dd2bd21376)), closes [#564](https://github.com/developmentseed/stac-map/issues/564)
+
+## [2.3.1](https://github.com/developmentseed/stac-map/compare/v2.3.0...v2.3.1) (2026-11-12)
+
+
+### Bug Fixes
+
+* npm releasing ([#556](https://github.com/developmentseed/stac-map/issues/556)) ([8a51c54](https://github.com/developmentseed/stac-map/commit/8a51c5487c3616a53bddf13f6547d5171e048eaa))
+
 ## [2.3.0](https://github.com/developmentseed/stac-map/compare/v2.2.1...v2.3.0) (2026-10-28)
 
 

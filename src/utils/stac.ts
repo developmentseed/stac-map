@@ -211,11 +211,14 @@ function makeHrefsAbsolute<T extends StacValue>(value: T, baseUrl: string): T {
   }
 
   if (value.assets != null) {
-    for (const asset of Object.values(value.assets)) {
-      if (asset.href) {
-        asset.href = toAbsoluteUrl(asset.href, baseUrlObj);
-      }
-    }
+    value.assets = Object.fromEntries(
+      Object.entries(value.assets)
+        .filter(([, asset]) => typeof asset.href === "string")
+        .map(([key, asset]) => [
+          key,
+          { ...asset, href: toAbsoluteUrl(asset.href, baseUrlObj) },
+        ])
+    );
   }
   return value;
 }
