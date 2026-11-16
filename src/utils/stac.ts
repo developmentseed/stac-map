@@ -95,6 +95,9 @@ export function getStacTitle(value: StacValue) {
   if ("title" in value && value.title) {
     return value.title as string;
   }
+  if (value.type === "Feature" && value.properties?.title) {
+    return value.properties.title as string;
+  }
   return getStacId(value);
 }
 
