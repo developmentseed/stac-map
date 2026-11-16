@@ -99,9 +99,9 @@ function StacGeoparquetItemPanel({
         fallbackRender={(props) => (
           <FallbackError
             {...props}
-            context={"StacGeoparquetItemPanel"}
+            context={"stac-geoparquet item panel"}
             customMessage={
-              "We are unable to get your items from the stac-geoparquet file as it might be invalid."
+              <><br/>Your stac-geoparquet file might be invalid. Try validating the file with <Link variant={"underline"} href="https://validate.stac-geoparquet.org/" target="_blank">stac-geoparquet validator.</Link> <br/><br/></>
             }
           />
         )}

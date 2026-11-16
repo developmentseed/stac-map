@@ -53,7 +53,7 @@ export function WarningAlert({
 interface BoundaryErrorFallback {
   error: unknown;
   context: string;
-  customMessage?: string;
+  customMessage?: string | React.ReactElement;
 }
 
 export function FallbackError({
@@ -62,7 +62,7 @@ export function FallbackError({
   customMessage,
 }: BoundaryErrorFallback) {
   return (
-    <Box position="absolute" top={4} left={4} maxW={"30%"}>
+    <Box position="absolute" pointerEvents="auto" top={4} left={4} maxW={"30%"}>
       <ErrorBoundaryAlert
         context={context}
         error={error}
@@ -79,7 +79,7 @@ export function ErrorBoundaryAlert({
 }: {
   context: string;
   error: unknown;
-  customMessage?: string;
+  customMessage?: string | React.ReactElement;
 }) {
   const message = error instanceof Error ? error.message : String(error);
   return (
@@ -94,7 +94,7 @@ export function ErrorBoundaryAlert({
             Something went wrong in the {context}. <br /> {customMessage} The
             error message is "{message}
             ". Please{" "}
-            <Link href="https://github.com/developmentseed/stac-map/issues/new?template=bug_report.md">
+            <Link variant={"underline"} href="https://github.com/developmentseed/stac-map/issues/new?template=bug_report.md">
               open an issue <LuGithub />
             </Link>{" "}
             so we can fix it!
