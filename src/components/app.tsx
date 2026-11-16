@@ -8,7 +8,7 @@ import { uploadFile } from "../utils/upload";
 import Map from "./map";
 import Overlay from "./overlay";
 import type { ExtraLayerProps } from "./stac-map";
-import { ErrorBoundaryAlert } from "./ui/error-alert";
+import { ErrorBoundaryAlert, FallbackError } from "./ui/error-alert";
 
 function MapFallback({ error }: { error: unknown }) {
   return (
@@ -17,14 +17,6 @@ function MapFallback({ error }: { error: unknown }) {
         <ErrorBoundaryAlert context="map component" error={error} />
       </Center>
     </AbsoluteCenter>
-  );
-}
-
-function OverlayFallback({ error }: { error: unknown }) {
-  return (
-    <Box position="absolute" top={4} left={4} maxW={"30%"}>
-      <ErrorBoundaryAlert context="overlay" error={error} />
-    </Box>
   );
 }
 
@@ -79,7 +71,11 @@ export default function App({
           </FileUpload.Dropzone>
         </FileUpload.Root>
       </Box>
-      <ErrorBoundary FallbackComponent={OverlayFallback}>
+      <ErrorBoundary
+        fallbackRender={(props) => (
+          <FallbackError {...props} context="overlay" />
+        )}
+      >
         <Overlay />
       </ErrorBoundary>
       {footer}
