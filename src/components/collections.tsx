@@ -31,6 +31,7 @@ import type { SpatialExtent, StacCollection, StacLink } from "stac-ts";
 import CollectionCard from "./cards/collection";
 import CollectionListItem from "./list-items/collection";
 import EntityList from "./ui/entity-list";
+import { ErrorAlert } from "./ui/error-alert";
 import PaginationBar from "./ui/pagination-bar";
 import Section from "./ui/section";
 
@@ -98,8 +99,9 @@ export function CollectionsEndpoint({
   ) : result.isLoading ? (
     <SkeletonText h={3} />
   ) : (
-    <Error error={result.error} />
+    <ErrorAlert error={result.error} />
   );
+
   return (
     <>
       {hasCollectionSearch && <Search setSearch={setSearch} />}
@@ -292,18 +294,6 @@ export function Collections({
         defaultView={"card"}
       />
     </Section>
-  );
-}
-
-function Error({ error }: { error: Error | null }) {
-  return (
-    <Alert.Root status={"error"}>
-      <Alert.Indicator />
-      <Alert.Content>
-        <Alert.Title>{error ? error.name : "Unknown error"}</Alert.Title>
-        {error && <Alert.Description>{error.message}</Alert.Description>}
-      </Alert.Content>
-    </Alert.Root>
   );
 }
 
