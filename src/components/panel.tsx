@@ -101,7 +101,20 @@ function StacGeoparquetItemPanel({
             {...props}
             context={"stac-geoparquet item panel"}
             customMessage={
-              <><br/>Your stac-geoparquet file might be invalid. Try validating the file with <Link variant={"underline"} href="https://validate.stac-geoparquet.org/" target="_blank">stac-geoparquet validator.</Link> <br/><br/></>
+              <>
+                <br />
+                Your stac-geoparquet file might be invalid. Try validating the
+                file with{" "}
+                <Link
+                  variant={"underline"}
+                  href="https://validate.stac-geoparquet.org/"
+                  target="_blank"
+                >
+                  stac-geoparquet validator.
+                </Link>{" "}
+                <br />
+                <br />
+              </>
             }
           />
         )}

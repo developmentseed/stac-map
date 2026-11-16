@@ -94,7 +94,10 @@ export function ErrorBoundaryAlert({
             Something went wrong in the {context}. <br /> {customMessage} The
             error message is "{message}
             ". Please{" "}
-            <Link variant={"underline"} href="https://github.com/developmentseed/stac-map/issues/new?template=bug_report.md">
+            <Link
+              variant={"underline"}
+              href="https://github.com/developmentseed/stac-map/issues/new?template=bug_report.md"
+            >
               open an issue <LuGithub />
             </Link>{" "}
             so we can fix it!
