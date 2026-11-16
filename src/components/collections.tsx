@@ -177,6 +177,7 @@ export function Collections({
   ]);
 
   const bounds = useMemo(() => {
+    // Largest first, so the smallest footprint is drawn on top and picked first
     return filteredCollections
       ?.map((collection) => ({
         id: collection.id,
@@ -186,6 +187,7 @@ export function Collections({
         (entry): entry is { id: string; bbox: BBox2D } =>
           !!entry.bbox && !isGlobalBbox(entry.bbox)
       )
+      .sort((a, b) => bboxArea(b.bbox) - bboxArea(a.bbox))
       .map(({ id, bbox }) => bboxPolygon(bbox, { id }));
   }, [filteredCollections]);
 
@@ -308,6 +310,10 @@ function isGlobalBbox(bbox: BBox2D | SpatialExtent) {
   );
 }
 
+function bboxArea(bbox: BBox2D) {
+  return (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]);
+}
+
 function isCollectionInBbox(
   collection: StacCollection,
   bbox: BBox2D,
@@ -316,25 +322,17 @@ function isCollectionInBbox(
   if (bbox[2] - bbox[0] >= 360) {
     // A global bbox always contains every collection
     return true;
-  } else if (includeGlobalCollections && isGlobalCollection(collection)) {
-    // A global collection is always there
-    return true;
+  } else if (isGlobalCollection(collection)) {
+    // A global collection is only there if asked for
+    return includeGlobalCollections;
   }
   const collectionBbox = collection?.extent?.spatial?.bbox?.[0];
   if (collectionBbox) {
-    return (
-      !(
-        collectionBbox[0] < bbox[0] &&
-        collectionBbox[1] < bbox[1] &&
-        collectionBbox[2] > bbox[2] &&
-        collectionBbox[3] > bbox[3]
-      ) &&
-      !(
-        collectionBbox[0] > bbox[2] ||
-        collectionBbox[1] > bbox[3] ||
-        collectionBbox[2] < bbox[0] ||
-        collectionBbox[3] < bbox[1]
-      )
+    return !(
+      collectionBbox[0] > bbox[2] ||
+      collectionBbox[1] > bbox[3] ||
+      collectionBbox[2] < bbox[0] ||
+      collectionBbox[3] < bbox[1]
     );
   } else {
     return false;
