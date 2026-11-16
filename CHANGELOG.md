@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.2](https://github.com/developmentseed/stac-map/compare/v2.4.1...v2.4.2) (2026-11-16)
+
+
+### Bug Fixes
+
+* add generic FallbackError for invalid stac-geoparquet items ([#560](https://github.com/developmentseed/stac-map/issues/560)) ([861603f](https://github.com/developmentseed/stac-map/commit/861603f914f975adbee23ad82f1f46ab06d9bdff))
+
 ## [2.4.1](https://github.com/developmentseed/stac-map/compare/v2.4.0...v2.4.1) (2026-11-13)
 
 
