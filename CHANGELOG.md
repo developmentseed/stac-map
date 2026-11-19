@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.3](https://github.com/developmentseed/stac-map/compare/v2.4.2...v2.4.3) (2026-11-19)
+
+
+### Bug Fixes
+
+* load large stac-geoparquet files better ([#581](https://github.com/developmentseed/stac-map/issues/581)) ([4072bcc](https://github.com/developmentseed/stac-map/commit/4072bcc966f58baad7f373933254352bd9aa2c84))
+
 ## [2.4.2](https://github.com/developmentseed/stac-map/compare/v2.4.1...v2.4.2) (2026-11-16)
 
 
