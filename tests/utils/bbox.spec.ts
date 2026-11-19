@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { clampToGlobalExtents, resolveInitialBbox } from "../../src/utils/bbox";
+import {
+  clampToGlobalExtents,
+  normalizeViewport,
+  resolveInitialBbox,
+} from "../../src/utils/bbox";
 
 describe("resolveInitialBbox", () => {
   it("returns the parsed bbox for a valid bbox param", () => {
@@ -75,6 +79,37 @@ describe("clampToGlobalExtents", () => {
   it("clamps all four edges at once", () => {
     expect(clampToGlobalExtents([-300, -150, 400, 150])).toEqual([
       -180, -90, 180, 90,
+    ]);
+  });
+});
+
+describe("normalizeViewport", () => {
+  it("returns a viewport within bounds unchanged", () => {
+    expect(normalizeViewport([-10, -5, 10, 5])).toEqual([[-10, -5, 10, 5]]);
+  });
+
+  it("returns null when the viewport spans every longitude", () => {
+    expect(normalizeViewport([-200, -80, 200, 80])).toBeNull();
+  });
+
+  it("clamps latitudes", () => {
+    expect(normalizeViewport([-10, -100, 10, 100])).toEqual([
+      [-10, -90, 10, 90],
+    ]);
+  });
+
+  it("shifts a wrapped viewport back into bounds", () => {
+    expect(normalizeViewport([190, 0, 200, 10])).toEqual([[-170, 0, -160, 10]]);
+  });
+
+  it("splits a viewport crossing the antimeridian", () => {
+    expect(normalizeViewport([170, 0, 190, 10])).toEqual([
+      [170, 0, 180, 10],
+      [-180, 0, -170, 10],
+    ]);
+    expect(normalizeViewport([-190, 0, -170, 10])).toEqual([
+      [170, 0, 180, 10],
+      [-180, 0, -170, 10],
     ]);
   });
 });

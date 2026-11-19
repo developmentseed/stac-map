@@ -9,6 +9,8 @@ export type Color = [number, number, number, number];
 export type Projection = "mercator" | "globe";
 export type BBox2D = [number, number, number, number];
 
+export const DEFAULT_STAC_GEOPARQUET_LIMIT = 10_000;
+
 export type DatetimeExtentSource = "items" | "collections" | "geoparquet";
 
 function setEntry<T>(
@@ -87,6 +89,10 @@ export interface State {
   setAddErrorListener: (addErrorListener: boolean) => void;
   hivePartitioning: boolean;
   setHivePartitioning: (hivePartitioning: boolean) => void;
+  stacGeoparquetLimit: number;
+  setStacGeoparquetLimit: (stacGeoparquetLimit: number) => void;
+  stacGeoparquetBbox: BBox2D | null;
+  setStacGeoparquetBbox: (stacGeoparquetBbox: BBox2D | null) => void;
   visualization: string | null;
   setVisualization: (visualization: string | null) => void;
   bookmarks: Bookmark[];
@@ -105,9 +111,12 @@ export const useStore = create<State>()(
       href: null,
       hrefIsParquet: false,
       setHref: (href) => {
+        if (href === get().href) return;
         set({
           href,
           hrefIsParquet: !!href?.endsWith(".parquet"),
+          stacGeoparquetId: null,
+          stacGeoparquetBbox: null,
         });
       },
       uploadedFile: null,
@@ -166,6 +175,12 @@ export const useStore = create<State>()(
       setAddErrorListener: (addErrorListener) => set({ addErrorListener }),
       hivePartitioning: false,
       setHivePartitioning: (hivePartitioning) => set({ hivePartitioning }),
+      stacGeoparquetLimit: DEFAULT_STAC_GEOPARQUET_LIMIT,
+      setStacGeoparquetLimit: (stacGeoparquetLimit) =>
+        set({ stacGeoparquetLimit }),
+      stacGeoparquetBbox: null,
+      setStacGeoparquetBbox: (stacGeoparquetBbox) =>
+        set({ stacGeoparquetBbox }),
       visualization: null,
       setVisualization: (visualization) => set({ visualization }),
       bookmarks: [],
@@ -189,6 +204,7 @@ export const useStore = create<State>()(
         tokens: state.tokens,
         addErrorListener: state.addErrorListener,
         hivePartitioning: state.hivePartitioning,
+        stacGeoparquetLimit: state.stacGeoparquetLimit,
         bookmarks: state.bookmarks,
       }),
     }

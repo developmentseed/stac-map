@@ -1,5 +1,5 @@
 import { useStore } from "@/store";
-import { resolveInitialHref } from "@/utils/href";
+import { idFromFragment, idToFragment, resolveInitialHref } from "@/utils/href";
 import { resolveInitialProjection } from "@/utils/projection";
 import { resolveInitialSearchParams } from "@/utils/search-params";
 import { useEffect, useState } from "react";
@@ -13,6 +13,8 @@ export default function UrlBootstrap({
     if (useStore.getState().href !== null) return null;
     const initial = resolveInitialHref(defaultHref);
     if (initial) useStore.getState().setHref(initial);
+    if (useStore.getState().hrefIsParquet)
+      useStore.getState().setStacGeoparquetId(idFromFragment());
     const projection = resolveInitialProjection();
     if (projection) useStore.getState().setProjection(projection);
     const viz = new URLSearchParams(location.search).get("viz");
@@ -25,6 +27,8 @@ export default function UrlBootstrap({
 
   const href = useStore((store) => store.href);
   const setHref = useStore((store) => store.setHref);
+  const stacGeoparquetId = useStore((store) => store.stacGeoparquetId);
+  const setStacGeoparquetId = useStore((store) => store.setStacGeoparquetId);
 
   useEffect(() => {
     if (href && new URLSearchParams(location.search).get("href") !== href)
@@ -33,12 +37,23 @@ export default function UrlBootstrap({
   }, [href]);
 
   useEffect(() => {
+    if (!href || idFromFragment() === stacGeoparquetId) return;
+    history.pushState(
+      null,
+      "",
+      location.pathname + location.search + idToFragment(stacGeoparquetId)
+    );
+  }, [href, stacGeoparquetId]);
+
+  useEffect(() => {
     function handlePopState() {
       setHref(new URLSearchParams(location.search).get("href"));
+      if (useStore.getState().hrefIsParquet)
+        setStacGeoparquetId(idFromFragment());
     }
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [setHref]);
+  }, [setHref, setStacGeoparquetId]);
 
   return null;
 }

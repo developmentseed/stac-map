@@ -44,7 +44,7 @@ export default function Map({
     if (!initialBbox) return;
     const url = new URL(location.href);
     url.searchParams.delete("bbox");
-    history.replaceState(null, "", url.pathname + url.search);
+    history.replaceState(null, "", url.pathname + url.search + url.hash);
   }, [initialBbox]);
 
   useEffect(() => {

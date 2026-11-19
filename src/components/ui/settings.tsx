@@ -3,6 +3,7 @@ import {
   Checkbox,
   CloseButton,
   Dialog,
+  Field,
   Fieldset,
   Flex,
   Heading,
@@ -18,10 +19,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { LuPlus, LuSettings, LuTrash2 } from "react-icons/lu";
 import { useStore } from "../../store";
+import { StacGeoparquetLimitInput } from "./stac-geoparquet-limit-input";
 
 export function SettingsButton() {
-  const hivePartitioning = useStore((store) => store.hivePartitioning);
-  const setHivePartitioning = useStore((store) => store.setHivePartitioning);
   const addErrorListener = useStore((store) => store.addErrorListener);
   const setAddErrorListener = useStore((store) => store.setAddErrorListener);
 
@@ -44,19 +44,6 @@ export function SettingsButton() {
                 <Fieldset.Root size={"sm"}>
                   <Fieldset.Content gap={2}>
                     <Checkbox.Root
-                      checked={hivePartitioning}
-                      onCheckedChange={(e) => setHivePartitioning(!!e.checked)}
-                      alignItems={"flex-start"}
-                    >
-                      <Checkbox.HiddenInput />
-                      <Checkbox.Control />
-                      <Stack>
-                        <Checkbox.Label>
-                          Use hive partitioning for stac-geoparquet queries
-                        </Checkbox.Label>
-                      </Stack>
-                    </Checkbox.Root>
-                    <Checkbox.Root
                       checked={addErrorListener}
                       onCheckedChange={(e) => setAddErrorListener(!!e.checked)}
                       alignItems={"flex-start"}
@@ -74,6 +61,8 @@ export function SettingsButton() {
                   </Fieldset.Content>
                 </Fieldset.Root>
                 <Separator />
+                <StacGeoparquetSettings />
+                <Separator />
                 <Tokens />
               </Stack>
             </Dialog.Body>
@@ -84,6 +73,43 @@ export function SettingsButton() {
         </Dialog.Positioner>
       </Portal>
     </Dialog.Root>
+  );
+}
+
+function StacGeoparquetSettings() {
+  const hivePartitioning = useStore((store) => store.hivePartitioning);
+  const setHivePartitioning = useStore((store) => store.setHivePartitioning);
+
+  return (
+    <Stack>
+      <Heading size={"md"}>stac-geoparquet</Heading>
+      <Text fontSize="sm" color="fg.muted">
+        Control how stac-geoparquet files are queried and loaded onto the map
+      </Text>
+      <Fieldset.Root size={"sm"}>
+        <Fieldset.Content gap={4}>
+          <Checkbox.Root
+            checked={hivePartitioning}
+            onCheckedChange={(e) => setHivePartitioning(!!e.checked)}
+            alignItems={"flex-start"}
+          >
+            <Checkbox.HiddenInput />
+            <Checkbox.Control />
+            <Stack>
+              <Checkbox.Label>Use hive partitioning</Checkbox.Label>
+            </Stack>
+          </Checkbox.Root>
+          <Field.Root>
+            <Field.Label>Item limit</Field.Label>
+            <StacGeoparquetLimitInput />
+            <Field.HelperText>
+              Maximum number of items to load onto the map. Large values can be
+              slow.
+            </Field.HelperText>
+          </Field.Root>
+        </Fieldset.Content>
+      </Fieldset.Root>
+    </Stack>
   );
 }
 
