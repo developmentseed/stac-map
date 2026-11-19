@@ -1,5 +1,5 @@
 import { useCql2Wasm } from "@/hooks/stac";
-import { type BBox2D, type Color, useStore } from "@/store";
+import { type BBox2D, useStore } from "@/store";
 import type { StacItemCollection } from "@/types/stac";
 import { buildCql2Json, type QueryableFilter } from "@/utils/cql2";
 import {
@@ -24,13 +24,12 @@ import {
   SkeletonText,
   Stack,
 } from "@chakra-ui/react";
-import { GeoJsonLayer } from "@deck.gl/layers";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import bboxPolygon from "@turf/bbox-polygon";
 import { useEffect, useMemo, useState } from "react";
 import { LuFileSearch2, LuFrame, LuSettings2, LuX } from "react-icons/lu";
 import { useMap } from "react-map-gl/maplibre";
 import type { StacCollection, StacLink } from "stac-ts";
+import { BboxLayer } from "./bbox-layer";
 import { Items } from "./items";
 import Queryables from "./queryables";
 import DatetimeSlider from "./ui/datetime-slider";
@@ -262,7 +261,7 @@ export default function Search({
           setQueryables={setQueryables}
         />
       </Section>
-      {bbox && <BboxLayer bbox={bbox} />}
+      {bbox && <BboxLayer id="search-bbox" bbox={bbox} />}
       {body}
       {items && items.length > 0 && (
         <PaginationBar
@@ -276,35 +275,6 @@ export default function Search({
       )}
     </>
   );
-}
-
-function BboxLayer({ bbox }: { bbox: BBox2D }) {
-  const setLayer = useStore((store) => store.setLayer);
-  const lineColor = useStore((store) => store.lineColor);
-
-  useEffect(() => {
-    const id = "search-bbox";
-    const inverted: Color = [
-      255 - lineColor[0],
-      255 - lineColor[1],
-      255 - lineColor[2],
-      lineColor[3],
-    ];
-    setLayer(
-      id,
-      new GeoJsonLayer({
-        id,
-        data: [bboxPolygon(bbox)],
-        filled: false,
-        getLineColor: inverted,
-        getLineWidth: 2,
-        lineWidthUnits: "pixels",
-      })
-    );
-    return () => setLayer(id, undefined);
-  }, [bbox, lineColor, setLayer]);
-
-  return null;
 }
 
 function AdvancedSettings({

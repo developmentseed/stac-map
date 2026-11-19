@@ -8,6 +8,7 @@ import {
   type BandRange,
 } from "@/utils/single-band";
 import {
+  fetchStacGeoparquetBboxType,
   fetchStacGeoparquetItem,
   fetchStacGeoparquetTable,
   fetchStacGeoparquetValue,
@@ -60,20 +61,48 @@ export function useStacGeoparquetValue({
   });
 }
 
+export function useStacGeoparquetBboxType({
+  href,
+  connection,
+}: {
+  href: string;
+  connection: AsyncDuckDBConnection;
+}) {
+  const hivePartitioning = useStore((store) => store.hivePartitioning);
+  return useQuery({
+    queryKey: ["stac-geoparquet-bbox-type", href, hivePartitioning],
+    queryFn: async () =>
+      fetchStacGeoparquetBboxType({ href, connection, hivePartitioning }),
+    staleTime: Infinity,
+  });
+}
+
 export function useStacGeoparquetTable({
   href,
   connection,
   where,
+  enabled = true,
 }: {
   href: string;
   connection: AsyncDuckDBConnection;
   where?: string;
+  enabled?: boolean;
 }) {
   const hivePartitioning = useStore((store) => store.hivePartitioning);
+  const limit = useStore((store) => store.stacGeoparquetLimit);
   return useQuery({
-    queryKey: ["stac-geoparquet-table", href, where ?? null],
+    queryKey: ["stac-geoparquet-table", href, where ?? null, limit],
     queryFn: async () =>
-      fetchStacGeoparquetTable({ href, connection, hivePartitioning, where }),
+      fetchStacGeoparquetTable({
+        href,
+        connection,
+        hivePartitioning,
+        where,
+        limit,
+      }),
+    enabled,
+    placeholderData: (previousData, previousQuery) =>
+      previousQuery?.queryKey[1] === href ? previousData : undefined,
   });
 }
 
