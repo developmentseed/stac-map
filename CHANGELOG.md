@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.4.4](https://github.com/developmentseed/stac-map/compare/v2.4.3...v2.4.4) (2026-11-20)
+
+
+### Bug Fixes
+
+* keep collection footprints that contain the view ([#579](https://github.com/developmentseed/stac-map/issues/579)) ([d8d3ecf](https://github.com/developmentseed/stac-map/commit/d8d3ecf1a8a764d574124a9a44f91e84d8229b1f))
+* show an item's properties.title instead of its id ([#578](https://github.com/developmentseed/stac-map/issues/578)) ([e12de3c](https://github.com/developmentseed/stac-map/commit/e12de3c2afeea1d35333b5f7d48ed4cc52df671b))
+
 ## [2.4.3](https://github.com/developmentseed/stac-map/compare/v2.4.2...v2.4.3) (2026-11-19)
 
 
