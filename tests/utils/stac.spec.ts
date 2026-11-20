@@ -160,6 +160,18 @@ describe("getStacTitle", () => {
   it("falls back to the id when title is missing", () => {
     expect(getStacTitle(makeCatalog({ id: "fallback" }))).toBe("fallback");
   });
+
+  it("returns an item's properties.title", () => {
+    expect(
+      getStacTitle(
+        makeItem({ properties: { title: "My item", datetime: null } })
+      )
+    ).toBe("My item");
+  });
+
+  it("falls back to the item id when properties.title is missing", () => {
+    expect(getStacTitle(makeItem())).toBe("item-id");
+  });
 });
 
 describe("getLink / getLinkHref / getSelfHref", () => {
