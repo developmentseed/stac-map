@@ -9,6 +9,15 @@ import {
 } from "@/utils/single-band";
 import { getCogHref, sanitizeBbox } from "@/utils/stac";
 import {
+  defaultVectorLayers,
+  fetchJson,
+  getStylesheetLayers,
+  getVectorLayerIds,
+  getWmsTileUrl,
+  getXyzTiles,
+  type TileJson,
+} from "@/utils/web-map-links";
+import {
   Checkbox,
   HStack,
   Portal,
@@ -21,6 +30,7 @@ import {
   type MosaicSource,
 } from "@developmentseed/deck.gl-geotiff";
 import { epsgResolver } from "@developmentseed/proj";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { LuEye, LuEyeOff } from "react-icons/lu";
 import type { StacAsset, StacItem, StacLink } from "stac-ts";
@@ -37,6 +47,45 @@ export default function Visualization({
 }) {
   const tilejsonLink = links.find((link) => link.rel === "tilejson");
   const wmtsLink = links.find((link) => link.rel === "wmts");
+  const wmsLink = links.find((link) => link.rel === "wms");
+  const xyzLink = links.find((link) => link.rel === "xyz");
+  const hasWebMapLink = !!(tilejsonLink || wmtsLink || wmsLink || xyzLink);
+
+  // A TileJSON may describe vector tiles, which need a vector source
+  const tilejson = useQuery({
+    queryKey: ["tilejson", tilejsonLink?.href],
+    queryFn: () => fetchJson<TileJson>(tilejsonLink!.href),
+    enabled: !!tilejsonLink,
+  });
+  const vectorLayerIds = useMemo(
+    () => getVectorLayerIds(tilejson.data),
+    [tilejson.data]
+  );
+  const stylesheets = useQueries({
+    queries: links
+      .filter((link) => link.rel === "stylesheet")
+      .map((link) => ({
+        queryKey: ["stylesheet", link.href],
+        queryFn: () => fetchJson<unknown>(link.href),
+        enabled: vectorLayerIds.length > 0,
+      })),
+    combine: (results) => ({
+      data: results.map((result) => result.data),
+      pending: results.some((result) => result.isLoading),
+    }),
+  });
+  const lineColor = useStore((store) => store.lineColor);
+  const vectorLayers = useMemo(() => {
+    if (vectorLayerIds.length === 0) return undefined;
+    // The first stylesheet that draws these vector layers, if any
+    for (const style of stylesheets.data) {
+      const layers = getStylesheetLayers(style, vectorLayerIds);
+      if (layers.length > 0) return layers;
+    }
+    const [r, g, b] = lineColor;
+    return defaultVectorLayers(vectorLayerIds, `rgb(${r}, ${g}, ${b})`);
+  }, [vectorLayerIds, stylesheets.data, lineColor]);
+  const tilejsonPending = tilejson.isLoading || stylesheets.pending;
   const cogAssets = useMemo(
     () =>
       Object.entries(assets)
@@ -73,11 +122,17 @@ export default function Visualization({
     if (wmtsLink) {
       items.push({ label: "wmts", value: "wmts" });
     }
+    if (wmsLink) {
+      items.push({ label: "wms", value: "wms" });
+    }
+    if (xyzLink) {
+      items.push({ label: "xyz", value: "xyz" });
+    }
     for (const key of itemAssetKeys) {
       items.push({ label: key, value: `items:${key}` });
     }
     return createListCollection({ items });
-  }, [cogAssets, tilejsonLink, wmtsLink, itemAssetKeys]);
+  }, [cogAssets, tilejsonLink, wmtsLink, wmsLink, xyzLink, itemAssetKeys]);
 
   const visualization = useStore((store) => store.visualization);
   const setVisualization = useStore((store) => store.setVisualization);
@@ -89,11 +144,11 @@ export default function Visualization({
 
   const fallback = useMemo(() => {
     const bestItemKey = pickBestKeyForItems(allItems);
-    if (bestItemKey && cogAssets.length === 0 && !tilejsonLink && !wmtsLink) {
+    if (bestItemKey && cogAssets.length === 0 && !hasWebMapLink) {
       return `items:${bestItemKey}`;
     }
     return collection.items[0]?.value;
-  }, [allItems, cogAssets, tilejsonLink, wmtsLink, collection]);
+  }, [allItems, cogAssets, hasWebMapLink, collection]);
 
   const selected =
     visualization && validValues.has(visualization) ? visualization : fallback;
@@ -160,11 +215,56 @@ export default function Visualization({
     }
 
     if (selected === "tilejson" && tilejsonLink) {
+      if (tilejsonPending) return;
+      if (vectorLayers) {
+        setMaplibreLayer("visualization", {
+          source: {
+            id: "visualization",
+            type: "vector",
+            url: tilejsonLink.href,
+          },
+          layer: vectorLayers[0],
+          layers: vectorLayers.slice(1),
+        });
+        return () => setMaplibreLayer("visualization", undefined);
+      }
       setMaplibreLayer("visualization", {
         source: {
           id: "visualization",
           type: "raster",
           url: tilejsonLink.href,
+        },
+        layer: {
+          id: "visualization",
+          type: "raster",
+        },
+      });
+      return () => setMaplibreLayer("visualization", undefined);
+    }
+
+    if (selected === "wms" && wmsLink) {
+      setMaplibreLayer("visualization", {
+        source: {
+          id: "visualization",
+          type: "raster",
+          tiles: [getWmsTileUrl(wmsLink)],
+          tileSize: 256,
+        },
+        layer: {
+          id: "visualization",
+          type: "raster",
+        },
+      });
+      return () => setMaplibreLayer("visualization", undefined);
+    }
+
+    if (selected === "xyz" && xyzLink) {
+      setMaplibreLayer("visualization", {
+        source: {
+          id: "visualization",
+          type: "raster",
+          tiles: getXyzTiles(xyzLink),
+          tileSize: 256,
         },
         layer: {
           id: "visualization",
@@ -195,7 +295,11 @@ export default function Visualization({
     selectedCogGeotiff,
     bandRange,
     tilejsonLink,
+    tilejsonPending,
+    vectorLayers,
     wmtsLink,
+    wmsLink,
+    xyzLink,
     setLayer,
     setMaplibreLayer,
   ]);

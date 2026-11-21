@@ -88,6 +88,9 @@ export default function Map({
       {Object.values(maplibreLayers).map((layer, i) => (
         <Source key={"maplibre-layer-" + i} {...layer.source}>
           <MaplibreLayer {...layer.layer} />
+          {layer.layers?.map((extra) => (
+            <MaplibreLayer key={extra.id} {...extra} />
+          ))}
         </Source>
       ))}
       {extraLayers &&

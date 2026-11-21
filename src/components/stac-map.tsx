@@ -31,6 +31,8 @@ import UrlBootstrap from "./url-bootstrap";
 export interface ExtraLayerProps {
   source: SourceProps;
   layer: LayerProps;
+  /** More layers drawn from the same source, above `layer`. */
+  layers?: LayerProps[];
 }
 
 export interface StacMapProps {
