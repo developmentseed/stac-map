@@ -149,8 +149,8 @@ export function getQueryablesHref(value: { links?: Array<StacLink> }) {
 }
 
 export interface QueryableProperty {
-  type?: string;
-  enum?: (string | number)[];
+  type?: string | string[];
+  enum?: (string | number | boolean)[];
   minimum?: number;
   maximum?: number;
   title?: string;

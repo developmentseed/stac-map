@@ -2,6 +2,15 @@ import { describe, expect, it } from "vitest";
 import { buildCql2Json } from "../../src/utils/cql2";
 import { loadCql2Wasm } from "../../src/utils/cql2-wasm";
 
+describe("buildCql2Json with a boolean", () => {
+  it("keeps the boolean as a boolean", () => {
+    expect(buildCql2Json({ "ogdc:usable": { eq: true } })).toEqual({
+      op: "=",
+      args: [{ property: "ogdc:usable" }, true],
+    });
+  });
+});
+
 describe("buildCql2Json", () => {
   it("returns undefined for an empty queryables map", () => {
     expect(buildCql2Json({})).toBeUndefined();
