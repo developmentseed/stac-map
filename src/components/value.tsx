@@ -50,12 +50,14 @@ export default function Value({
   const setProjection = useStore((store) => store.setProjection);
   const version = value.stac_version as string;
   const thumbnailAsset = getThumbnailAsset(value);
-  const description = value.description as string;
+  const properties = value.properties as GeoJsonProperties | undefined;
+  // An Item keeps its description in its properties
+  const description = (value.description ?? properties?.description) as
+    string | undefined;
   const collectionsLink = getLink(value, "data");
   const childLinks = value.links?.filter((link) => link.rel === "child");
   const itemLinks = value.links?.filter((link) => link.rel === "item");
   const rootLink = getLink(value, "root");
-  const properties = value.properties as GeoJsonProperties | undefined;
   const assets = value.assets as StacAssets | undefined;
 
   useEffect(() => {
