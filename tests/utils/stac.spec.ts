@@ -16,6 +16,7 @@ import {
   getStacType,
   getThumbnailAsset,
   guessStacType,
+  responseError,
   sanitizeBbox,
 } from "../../src/utils/stac";
 
@@ -136,6 +137,25 @@ describe("fetchStacValue", () => {
     expect(Object.keys(value.assets ?? {})).toEqual(["data"]);
     expect((value.assets as StacAssets).data.href).toBe(
       "https://example.com/data.tif"
+    );
+  });
+});
+
+describe("responseError", () => {
+  it("gives the status code when there is no status text", async () => {
+    const response = new Response("not json", { status: 404 });
+    const error = await responseError("https://example.com/x", response);
+    expect(error.message).toBe("GET https://example.com/x: 404");
+  });
+
+  it("adds the status text and a STAC API error description", async () => {
+    const response = new Response(
+      JSON.stringify({ code: "NotFoundError", description: "No such catalog" }),
+      { status: 404, statusText: "Not Found" }
+    );
+    const error = await responseError("https://example.com/x", response);
+    expect(error.message).toBe(
+      "GET https://example.com/x: 404 Not Found (No such catalog)"
     );
   });
 });

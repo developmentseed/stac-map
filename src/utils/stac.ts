@@ -17,6 +17,23 @@ function buildAuthHeaders(href: string): Record<string, string> {
   return headers;
 }
 
+/**
+ * An error for a failed request: the status code, the status text when there
+ * is one (HTTP/2 and HTTP/3 have none) and the `description` of a STAC API
+ * error body.
+ */
+export async function responseError(href: string, response: Response) {
+  let description: unknown;
+  try {
+    description = (await response.json())?.description;
+  } catch {
+    // Not JSON: the status says enough
+  }
+  const parts = [`GET ${href}: ${response.status}`, response.statusText];
+  if (typeof description === "string") parts.push(`(${description})`);
+  return new Error(parts.filter(Boolean).join(" "));
+}
+
 export async function fetchStacValue({
   href,
   uploadedFile,
@@ -36,7 +53,7 @@ export async function fetchStacValue({
             makeHrefsAbsolute(applyGuessedType(json), href.toString())
           );
       } else {
-        throw new Error(`GET ${href}: ${response.statusText}`);
+        throw await responseError(href, response);
       }
     });
   } else if (uploadedFile) {
@@ -169,7 +186,7 @@ export async function fetchQueryablesSchema(
     headers: buildAuthHeaders(href),
   });
   if (!response.ok) {
-    throw new Error(`GET ${href}: ${response.statusText}`);
+    throw await responseError(href, response);
   }
   return response.json();
 }
