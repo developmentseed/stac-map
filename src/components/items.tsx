@@ -1,4 +1,5 @@
 import { type BBox2D, useStore } from "@/store";
+import { bboxIntersectsViewport } from "@/utils/bbox";
 import { getItemsDatetimeExtent, itemMatchesFilter } from "@/utils/datetime";
 import { fitBoundsToBbox } from "@/utils/map";
 import { fetchStacValue, getSelfHref } from "@/utils/stac";
@@ -244,11 +245,5 @@ function getItemsBbox(items: StacItem[]): BBox2D | undefined {
 function isItemInBbox(item: StacItem, bbox: BBox2D): boolean {
   const itemBbox = toBbox2D(item.bbox);
   if (!itemBbox) return false;
-  if (bbox[2] - bbox[0] >= 360) return true;
-  return !(
-    itemBbox[0] > bbox[2] ||
-    itemBbox[1] > bbox[3] ||
-    itemBbox[2] < bbox[0] ||
-    itemBbox[3] < bbox[1]
-  );
+  return bboxIntersectsViewport(itemBbox, bbox);
 }
