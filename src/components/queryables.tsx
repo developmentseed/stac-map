@@ -87,7 +87,6 @@ function QueryableField({
           <NativeSelect.Field
             value={value?.eq === undefined ? "" : String(value.eq)}
             onChange={(e) => {
-              // Keep the option's own type: a boolean or number stays one
               const option = property.enum?.find(
                 (option) => String(option) === e.target.value
               );
@@ -107,7 +106,6 @@ function QueryableField({
     );
   }
 
-  // A nullable number is typed ["integer", "null"]
   const types = [property.type].flat();
   if (types.includes("number") || types.includes("integer")) {
     return (

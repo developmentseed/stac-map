@@ -51,7 +51,6 @@ export default function Value({
   const version = value.stac_version as string;
   const thumbnailAsset = getThumbnailAsset(value);
   const properties = value.properties as GeoJsonProperties | undefined;
-  // An Item keeps its description in its properties
   const description = (value.description ?? properties?.description) as
     string | undefined;
   const collectionsLink = getLink(value, "data");
