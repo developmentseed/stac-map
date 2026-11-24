@@ -23,7 +23,9 @@ export default function ValueCard({
   const setHref = useStore((store) => store.setHref);
   const selfHref = getSelfHref(value);
   const thumbnailAsset = getThumbnailAsset(value);
-  const description = value.description as string | undefined;
+  const description = (value.description ??
+    (value.properties as { description?: string } | undefined)?.description) as
+    string | undefined;
 
   return (
     <Card.Root

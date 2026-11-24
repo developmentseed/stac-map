@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  bboxIntersectsViewport,
   clampToGlobalExtents,
   normalizeViewport,
   resolveInitialBbox,
@@ -111,5 +112,41 @@ describe("normalizeViewport", () => {
       [170, 0, 180, 10],
       [-180, 0, -170, 10],
     ]);
+  });
+});
+
+describe("bboxIntersectsViewport", () => {
+  const samoa = [-172.8, -14.1, -171.4, -13.4];
+  const fiji = [177, -19, -178, -16];
+
+  it("matches a plain overlap and rejects a plain miss", () => {
+    expect(bboxIntersectsViewport(samoa, [-180, -20, -160, -10])).toBe(true);
+    expect(bboxIntersectsViewport(samoa, [0, 40, 10, 50])).toBe(false);
+  });
+
+  it("matches a bbox on the far side of a viewport panned past 180", () => {
+    expect(bboxIntersectsViewport(samoa, [150, -30, 200, 0])).toBe(true);
+  });
+
+  it("matches a bbox on the far side of a viewport panned past -180", () => {
+    expect(
+      bboxIntersectsViewport([170, -20, 179, -10], [-200, -30, -150, 0])
+    ).toBe(true);
+  });
+
+  it("handles a bbox that itself crosses the antimeridian", () => {
+    expect(bboxIntersectsViewport(fiji, [-179, -20, -170, -10])).toBe(true);
+    expect(bboxIntersectsViewport(fiji, [178, -20, 179, -10])).toBe(true);
+    expect(bboxIntersectsViewport(fiji, [0, -20, 10, -10])).toBe(false);
+  });
+
+  it("reads the horizontal extent of a 3D bbox", () => {
+    expect(
+      bboxIntersectsViewport([10, 40, 0, 11, 41, 100], [10.5, 40.5, 12, 42])
+    ).toBe(true);
+  });
+
+  it("matches everything when the viewport spans every longitude", () => {
+    expect(bboxIntersectsViewport(samoa, [-300, -80, 300, 80])).toBe(true);
   });
 });

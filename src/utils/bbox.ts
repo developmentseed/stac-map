@@ -44,3 +44,37 @@ export function normalizeViewport(bbox: BBox2D): BBox2D[] | null {
     [-180, s, e - 360, n],
   ];
 }
+
+/**
+ * Whether a STAC bbox (2D or 3D) intersects a map viewport.
+ *
+ * The viewport may run past ±180 when the map is panned across the
+ * antimeridian, and the bbox may cross it too (west greater than east).
+ */
+export function bboxIntersectsViewport(
+  bbox: number[],
+  viewport: BBox2D
+): boolean {
+  const views = normalizeViewport(viewport);
+  if (!views) return true;
+  const [west, south, east, north] =
+    bbox.length === 6 ? [bbox[0], bbox[1], bbox[3], bbox[4]] : bbox;
+  const boxes =
+    west > east
+      ? [
+          [west, south, 180, north],
+          [-180, south, east, north],
+        ]
+      : [[west, south, east, north]];
+  return views.some((view) =>
+    boxes.some(
+      (box) =>
+        !(
+          box[0] > view[2] ||
+          box[1] > view[3] ||
+          box[2] < view[0] ||
+          box[3] < view[1]
+        )
+    )
+  );
+}

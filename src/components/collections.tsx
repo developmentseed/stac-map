@@ -1,5 +1,6 @@
 import { type BBox2D, useStore } from "@/store";
 import type { StacCollections } from "@/types/stac";
+import { bboxIntersectsViewport } from "@/utils/bbox";
 import {
   collectionMatchesFilter,
   getCollectionsDatetimeExtent,
@@ -327,16 +328,7 @@ function isCollectionInBbox(
     return includeGlobalCollections;
   }
   const collectionBbox = collection?.extent?.spatial?.bbox?.[0];
-  if (collectionBbox) {
-    return !(
-      collectionBbox[0] > bbox[2] ||
-      collectionBbox[1] > bbox[3] ||
-      collectionBbox[2] < bbox[0] ||
-      collectionBbox[3] < bbox[1]
-    );
-  } else {
-    return false;
-  }
+  return collectionBbox ? bboxIntersectsViewport(collectionBbox, bbox) : false;
 }
 
 function isGlobalCollection(collection: StacCollection) {

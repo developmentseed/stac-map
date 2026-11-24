@@ -1,11 +1,11 @@
 export interface QueryableFilter {
-  eq?: string;
+  eq?: string | number | boolean;
   gte?: number;
   lte?: number;
 }
 
 export type Cql2Expression =
-  | { op: "="; args: [{ property: string }, string] }
+  | { op: "="; args: [{ property: string }, string | number | boolean] }
   | { op: ">=" | "<="; args: [{ property: string }, number] }
   | { op: "and"; args: Cql2Expression[] };
 

@@ -85,15 +85,18 @@ function QueryableField({
         </Field.Label>
         <NativeSelect.Root size={"sm"}>
           <NativeSelect.Field
-            value={value?.eq ?? ""}
-            onChange={(e) =>
-              onChange(e.target.value ? { eq: e.target.value } : undefined)
-            }
+            value={value?.eq === undefined ? "" : String(value.eq)}
+            onChange={(e) => {
+              const option = property.enum?.find(
+                (option) => String(option) === e.target.value
+              );
+              onChange(option === undefined ? undefined : { eq: option });
+            }}
           >
             <option value="">Any</option>
             {property.enum.map((option) => (
-              <option key={option} value={option}>
-                {option}
+              <option key={String(option)} value={String(option)}>
+                {String(option)}
               </option>
             ))}
           </NativeSelect.Field>
@@ -103,7 +106,8 @@ function QueryableField({
     );
   }
 
-  if (property.type === "number" || property.type === "integer") {
+  const types = [property.type].flat();
+  if (types.includes("number") || types.includes("integer")) {
     return (
       <Field.Root orientation={"horizontal"}>
         <Field.Label color={"fg.muted"} fontWeight={"normal"}>
@@ -148,7 +152,7 @@ function QueryableField({
       </Field.Label>
       <Input
         size={"sm"}
-        value={value?.eq ?? ""}
+        value={value?.eq === undefined ? "" : String(value.eq)}
         onChange={(e) =>
           onChange(e.target.value ? { eq: e.target.value } : undefined)
         }
