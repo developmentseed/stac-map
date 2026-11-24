@@ -166,7 +166,7 @@ function Root({ value, link }: { value: StacValue; link: StacLink }) {
   }, [result]);
 
   return searchLink && value.type === "Collection" ? (
-    <Search link={searchLink} collection={value} />
+    <Search link={searchLink} collection={value} key={value.id} />
   ) : null;
 }
 

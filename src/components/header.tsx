@@ -45,8 +45,8 @@ export default function Header() {
 function ShareButton() {
   const { map } = useMap();
   const visualization = useStore((store) => store.visualization);
-  const activeSearchHref = useStore((store) => store.activeSearchHref);
-  const searchParamsByHref = useStore((store) => store.searchParams);
+  const activeSearchKey = useStore((store) => store.activeSearchKey);
+  const searchParamsByKey = useStore((store) => store.searchParams);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -57,8 +57,8 @@ function ShareButton() {
 
   async function copyShareUrl() {
     const url = new URL(window.location.href);
-    const searchParams = activeSearchHref
-      ? searchParamsByHref[activeSearchHref]
+    const searchParams = activeSearchKey
+      ? searchParamsByKey[activeSearchKey]
       : undefined;
     const bbox = searchParams?.bbox ?? (map && getPaddedViewportBbox(map));
     if (bbox)

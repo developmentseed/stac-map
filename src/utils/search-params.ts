@@ -3,6 +3,10 @@ import { resolveInitialBbox } from "./bbox";
 import type { QueryableFilter } from "./cql2";
 import { parseStacDatetimeRange } from "./datetime";
 
+export function getSearchKey(searchHref: string, collectionId: string) {
+  return `${searchHref}#${collectionId}`;
+}
+
 export function resolveInitialSearchParams(
   search: string = location.search
 ): Partial<SearchParams> | null {

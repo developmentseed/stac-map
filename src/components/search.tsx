@@ -10,6 +10,7 @@ import {
   toStacDatetimeRange,
 } from "@/utils/datetime";
 import { getPaddedViewportBbox } from "@/utils/map";
+import { getSearchKey } from "@/utils/search-params";
 import { fetchStacValue, getLinkHref, getQueryablesHref } from "@/utils/stac";
 import {
   Button,
@@ -45,45 +46,46 @@ export default function Search({
   link: StacLink;
   collection: StacCollection;
 }) {
+  const searchKey = getSearchKey(link.href, collection.id);
   const setSearchParams = useStore((store) => store.setSearchParams);
   const setInitialSearchParams = useStore(
     (store) => store.setInitialSearchParams
   );
-  const setActiveSearchHref = useStore((store) => store.setActiveSearchHref);
+  const setActiveSearchKey = useStore((store) => store.setActiveSearchKey);
   const [isFetchingAll, setIsFetchingAll] = useState(false);
   const [startDatetime, setStartDatetime] = useState(
     () =>
-      useStore.getState().searchParams[link.href]?.startDatetime ??
+      useStore.getState().searchParams[searchKey]?.startDatetime ??
       useStore.getState().initialSearchParams?.startDatetime ??
       toDatetimeInputValue(collection.extent?.temporal?.interval?.[0]?.[0])
   );
   const [endDatetime, setEndDatetime] = useState(
     () =>
-      useStore.getState().searchParams[link.href]?.endDatetime ??
+      useStore.getState().searchParams[searchKey]?.endDatetime ??
       useStore.getState().initialSearchParams?.endDatetime ??
       toDatetimeInputValue(collection.extent?.temporal?.interval?.[0]?.[1])
   );
   const [limit, setLimit] = useState(
     () =>
-      useStore.getState().searchParams[link.href]?.limit ??
+      useStore.getState().searchParams[searchKey]?.limit ??
       useStore.getState().initialSearchParams?.limit ??
       ""
   );
   const [bbox, setBbox] = useState<BBox2D | undefined>(
     () =>
-      useStore.getState().searchParams[link.href]?.bbox ??
+      useStore.getState().searchParams[searchKey]?.bbox ??
       useStore.getState().initialSearchParams?.bbox
   );
   const [queryables, setQueryables] = useState<Record<string, QueryableFilter>>(
     () =>
-      useStore.getState().searchParams[link.href]?.queryables ??
+      useStore.getState().searchParams[searchKey]?.queryables ??
       useStore.getState().initialSearchParams?.queryables ??
       {}
   );
   const { map } = useMap();
 
   useEffect(() => {
-    setSearchParams(link.href, {
+    setSearchParams(searchKey, {
       startDatetime,
       endDatetime,
       limit,
@@ -91,7 +93,7 @@ export default function Search({
       queryables,
     });
   }, [
-    link.href,
+    searchKey,
     startDatetime,
     endDatetime,
     limit,
@@ -102,9 +104,9 @@ export default function Search({
 
   useEffect(() => {
     if (useStore.getState().initialSearchParams) setInitialSearchParams(null);
-    setActiveSearchHref(link.href);
-    return () => setActiveSearchHref(null);
-  }, [link.href, setInitialSearchParams, setActiveSearchHref]);
+    setActiveSearchKey(searchKey);
+    return () => setActiveSearchKey(null);
+  }, [searchKey, setInitialSearchParams, setActiveSearchKey]);
 
   const startBoundMs = useMemo(
     () => toMs(collection.extent?.temporal?.interval?.[0]?.[0]),
