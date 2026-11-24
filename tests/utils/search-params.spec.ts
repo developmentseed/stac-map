@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { resolveInitialSearchParams } from "../../src/utils/search-params";
+import {
+  getSearchKey,
+  resolveInitialSearchParams,
+} from "../../src/utils/search-params";
+
+describe("getSearchKey", () => {
+  it("differs for collections that share a search endpoint", () => {
+    const search = "https://example.com/stac/search";
+    expect(getSearchKey(search, "mycollection")).not.toBe(
+      getSearchKey(search, "notmycollection")
+    );
+  });
+});
 
 describe("resolveInitialSearchParams", () => {
   it("returns null when no relevant params are present", () => {

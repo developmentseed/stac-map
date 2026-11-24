@@ -73,8 +73,8 @@ export interface State {
   setSearchParams: (key: string, params: SearchParams) => void;
   initialSearchParams: Partial<SearchParams> | null;
   setInitialSearchParams: (params: Partial<SearchParams> | null) => void;
-  activeSearchHref: string | null;
-  setActiveSearchHref: (href: string | null) => void;
+  activeSearchKey: string | null;
+  setActiveSearchKey: (key: string | null) => void;
   datetimeExtents: Record<DatetimeExtentSource, [number, number] | null>;
   setDatetimeExtent: (
     source: DatetimeExtentSource,
@@ -161,8 +161,8 @@ export const useStore = create<State>()(
       initialSearchParams: null,
       setInitialSearchParams: (initialSearchParams) =>
         set({ initialSearchParams }),
-      activeSearchHref: null,
-      setActiveSearchHref: (activeSearchHref) => set({ activeSearchHref }),
+      activeSearchKey: null,
+      setActiveSearchKey: (activeSearchKey) => set({ activeSearchKey }),
       datetimeExtents: { items: null, collections: null, geoparquet: null },
       setDatetimeExtent: (source, extent) =>
         set({
