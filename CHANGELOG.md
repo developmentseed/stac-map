@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.5.0](https://github.com/developmentseed/stac-map/compare/v2.4.4...v2.5.0) (2026-11-24)
+
+
+### Features
+
+* sort Item properties ([#593](https://github.com/developmentseed/stac-map/issues/593)) ([981e7e7](https://github.com/developmentseed/stac-map/commit/981e7e7e8a357e5ab6c420a9059729d89970572e))
+
+
+### Bug Fixes
+
+* store search params per collection so filters don't leak between collections ([#592](https://github.com/developmentseed/stac-map/issues/592)) ([dc0ce70](https://github.com/developmentseed/stac-map/commit/dc0ce7012b3deff82e5974c757e3fd4296245dee))
+
 ## [2.4.4](https://github.com/developmentseed/stac-map/compare/v2.4.3...v2.4.4) (2026-11-20)
 
 
