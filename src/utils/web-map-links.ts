@@ -1,7 +1,6 @@
 import type { LayerProps } from "react-map-gl/maplibre";
 import type { StacLink } from "stac-ts";
 
-/** The parts of a TileJSON document that we read. */
 export interface TileJson {
   tiles?: string[];
   vector_layers?: { id: string }[];
@@ -22,12 +21,6 @@ export async function fetchJson<T>(href: string): Promise<T> {
   return response.json();
 }
 
-/**
- * The ids of a TileJSON's vector layers.
- *
- * TileJSON 3.0.0 requires `vector_layers` for vector tiles, so an empty list
- * means raster tiles.
- */
 export function getVectorLayerIds(tilejson: TileJson | undefined): string[] {
   if (!Array.isArray(tilejson?.vector_layers)) return [];
   return tilejson.vector_layers
@@ -35,7 +28,6 @@ export function getVectorLayerIds(tilejson: TileJson | undefined): string[] {
     .filter((id): id is string => typeof id === "string");
 }
 
-/** A fill, a line and a circle layer for each vector layer. */
 export function defaultVectorLayers(
   sourceLayers: string[],
   color: string
@@ -70,12 +62,6 @@ export function defaultVectorLayers(
   ]);
 }
 
-/**
- * The fill, line and circle layers of a MapLibre style that draw one of the
- * given vector layers, to be added to our own source.
- *
- * Symbol layers are left out: they need the style's own glyphs and sprite.
- */
 export function getStylesheetLayers(
   style: unknown,
   sourceLayers: string[]
@@ -95,10 +81,6 @@ export function getStylesheetLayers(
     });
 }
 
-/**
- * A MapLibre raster tile URL for a `rel: wms` link of the web-map-links
- * extension.
- */
 export function getWmsTileUrl(link: StacLink): string {
   const url = new URL(link.href);
   const layers = [link["wms:layers"]].flat().filter(Boolean) as string[];
@@ -124,10 +106,6 @@ export function getWmsTileUrl(link: StacLink): string {
   return `${url}&BBOX={bbox-epsg-3857}`;
 }
 
-/**
- * The tile URL templates of a `rel: xyz` link of the web-map-links extension,
- * one for each of its `href:servers` when the href has an `{s}` placeholder.
- */
 export function getXyzTiles(link: StacLink): string[] {
   const servers = link["href:servers"] as string[] | undefined;
   if (!link.href.includes("{s}") || !servers?.length) return [link.href];

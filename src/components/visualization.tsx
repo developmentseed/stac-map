@@ -51,7 +51,6 @@ export default function Visualization({
   const xyzLink = links.find((link) => link.rel === "xyz");
   const hasWebMapLink = !!(tilejsonLink || wmtsLink || wmsLink || xyzLink);
 
-  // A TileJSON may describe vector tiles, which need a vector source
   const tilejson = useQuery({
     queryKey: ["tilejson", tilejsonLink?.href],
     queryFn: () => fetchJson<TileJson>(tilejsonLink!.href),
@@ -77,7 +76,6 @@ export default function Visualization({
   const lineColor = useStore((store) => store.lineColor);
   const vectorLayers = useMemo(() => {
     if (vectorLayerIds.length === 0) return undefined;
-    // The first stylesheet that draws these vector layers, if any
     for (const style of stylesheets.data) {
       const layers = getStylesheetLayers(style, vectorLayerIds);
       if (layers.length > 0) return layers;
